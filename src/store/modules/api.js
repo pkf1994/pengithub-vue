@@ -1,0 +1,1 @@
+export const API_TRENDING = (language,since) => `https://github-trending-api.now.sh/repositories?language=${language}&since=${since}`
