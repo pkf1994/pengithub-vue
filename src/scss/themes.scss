@@ -1,0 +1,21 @@
+@import "./variables";
+
+$themes: (
+  dark-theme: (
+      color: $dark-theme-font-color,
+      background: $dark-theme-background
+  ),
+  light-theme: (
+      color: $light-theme-font-color,
+      background: $light-theme-background
+  )
+);
+
+@mixin with-theme() {
+  @each $theme-name, $theme in $themes {
+      [theme = '#{$theme-name}'] {
+          color:  map-get($map: $theme, $key: color);
+          background:  map-get($map: $theme, $key: background)
+      }
+  }
+}
