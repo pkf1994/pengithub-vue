@@ -1,15 +1,19 @@
 <template>
-    <div>
+    <Container >
         <Header/>
-        <div style="height: 1000px;width:100%;background: #42b983"></div>
-    </div>
+        <Main>
+
+        </Main>
+    </Container>
 </template>
 
 <script>
     import {Header} from '../../components'
+    import {Container,Main} from './style'
     export default {
-
-        components:{
+        components: {
+            Container,
+            Main,
             Header
         }
     }

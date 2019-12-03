@@ -1,0 +1,39 @@
+.flex{
+  display:flex;
+}
+
+.flex-column{
+  display:flex;
+  flex-direction: column;
+}
+
+
+.flex-wrap{
+  display:flex;
+  flex-wrap: wrap;
+}
+
+.flex-row-center{
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-column-center{
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.block{
+  display: block !important;
+}
+
+.width-fit{
+  max-width: 100% !important;
+}
+
+.height-fit{
+  max-height: 100% !important;
+}

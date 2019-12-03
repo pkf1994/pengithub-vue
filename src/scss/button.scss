@@ -1,0 +1,21 @@
+@import './variables';
+
+.btn-primary-green{
+  background: $primary-btn-green-color;
+  color: white;
+  border-radius: 3px;
+}
+
+.btn-primary-blue{
+  background: $primary-btn-blue-color;
+  color: white;
+  border-radius: 3px;
+}
+
+.btn-primary-blue-outline{
+  background: white;
+  border-color: rgba(16,116,231,.5);
+  border-width: 1px;
+  color: $primary-btn-blue-color;
+  border-radius: 3px;
+}

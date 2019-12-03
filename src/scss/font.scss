@@ -1,0 +1,7 @@
+@import './variables';
+
+.link{
+  color: $primary-link-color;
+  text-decoration: none;
+  border-bottom: 1px solid $primary-link-color;
+}

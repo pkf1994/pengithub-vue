@@ -3,11 +3,46 @@
 $themes: (
   dark-theme: (
       color: $dark-theme-font-color,
-      background: $dark-theme-background
+      background: $dark-theme-background,
+  ),
+  dark-theme-button: (
+      color: $light-theme-font-color,
+      background: $dark-theme-button-background,
+  ),
+  dark-theme-button-outline: (
+      color: $dark-theme-font-color,
+      background: $dark-theme-background,
+      border-color: $dark-theme-borderColor
   ),
   light-theme: (
       color: $light-theme-font-color,
+      background: $light-theme-background,
+  ),
+  light-theme-button: (
+      color: $dark-theme-font-color,
+      background: $light-theme-button-background,
+  ),
+  light-theme-button-outline: (
+      color:  $light-theme-font-color,
+      background: $light-theme-background,
+      border-color: $light-theme-borderColor
+  ),
+  light-theme-primary: (
+      color: $dark-theme-font-color,
+      background: $primary-color,
+  ),
+  dark-theme-primary: (
+      color: $dark-theme-font-color,
+      background: $primary-color,
+      border-color: $primary-border-color
+  ),
+  light-theme-primary-outline: (
+      color: $primary-color,
       background: $light-theme-background
+  ),
+  dark-theme-primary-outline: (
+      color: $primary-color,
+      background: $dark-theme-background
   )
 );
 
@@ -15,7 +50,8 @@ $themes: (
   @each $theme-name, $theme in $themes {
       [theme = '#{$theme-name}'] {
           color:  map-get($map: $theme, $key: color);
-          background:  map-get($map: $theme, $key: background)
+          background:  map-get($map: $theme, $key: background);
+          border-color: map-get($map: $theme, $key: border-color);
       }
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <Home/>
+  <router-view/>
 </template>
 
 <script>
@@ -9,12 +9,11 @@ export default {
   data: () => ({
 
   }),
-  components: {
-   Home
-  }
+
 }
 </script>
 
 <style lang="scss">
-
+  @import "./scss/index";
+  @include with-theme();
 </style>

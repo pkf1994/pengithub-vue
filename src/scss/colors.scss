@@ -1,0 +1,42 @@
+@import './variables';
+
+.text-white{
+  color: white !important;
+}
+
+.text-gray{
+  color: #586069!important;
+}
+
+.text-gray-light{
+  color: #6a737d!important;
+}
+
+.text-blue{
+  color: #0366d6!important;
+  fill: #0366d6!important;
+}
+
+.text-hsla-pale{
+  color: hsla(0,0%,100%,.6) !important;
+}
+
+.bg-primary{
+  background: $primary-color !important;
+}
+
+.bg-sub-primary{
+  background: $primary-sub-color !important;
+}
+
+.bg-btn-primary-green{
+  background: $primary-btn-green-color !important;
+}
+
+.bg-btn-primary-blue{
+  background: $primary-btn-blue-color !important;
+}
+
+.bg-white{
+  background: white;
+}
