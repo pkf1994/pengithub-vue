@@ -1,3 +1,4 @@
 import AdvantageItem from './AdvantageItem'
 import CaseItem from './CaseItem'
-export {AdvantageItem,CaseItem}
+import SellingPoint from './SellingPoint'
+export {AdvantageItem,CaseItem,SellingPoint}

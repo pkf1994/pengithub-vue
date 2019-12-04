@@ -13,3 +13,10 @@ $primary-border-color: #3367d6;
 $primary-btn-green-color: #2ebc4f;
 $primary-btn-blue-color: #1074e7;
 $primary-link-color: #1074e7;
+
+$padding-value-mapping: (1:4,2:8,3:16,4:24,5:32,6:40,7:48);
+$margin-value-mapping: (1:4,2:8,3:16,4:24,5:32,6:40,7:48);
+$titleFontSize-value-mapping: (0:48,1:40,2:26,3:18,4:16);
+$paragraphFontSize-value-mapping: (0:32,2:20,3:18,4:16,5:14,6:12);
+$fontWeight-value-mapping: (400:400,500:500,600:600,'normal':'normal');
+$lineHeight-value-mapping: (125:1.25,1:1,15:1.5);

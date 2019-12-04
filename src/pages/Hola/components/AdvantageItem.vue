@@ -1,15 +1,15 @@
 <template>
-    <Container class="container flex">
-        <Column class="column">
+    <Container class="container flex" :style="containerStyle">
+        <Column :class="{column:!simple}">
             <Title  class="h3 font-inter title mb-1 w-400">
                 {{title}}
             </Title>
-            <Paragraph class="f5">
+            <Paragraph class="f5 text-gray">
                 {{paragraph}}
-                <TheLink class="link">{{theLink}}</TheLink>
+                <TheLink v-if="!simple" class="link">{{theLink}}</TheLink>
             </Paragraph>
         </Column>
-        <svg class="text-blue" viewBox="0 0 6 16" version="1.1" width="6" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M0 14l6-6-6-6v12z"></path></svg>
+        <svg v-if="!simple" class="text-blue" viewBox="0 0 6 16" version="1.1" width="6" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M0 14l6-6-6-6v12z"></path></svg>
     </Container>
 </template>
 
@@ -29,6 +29,17 @@
             theLink: {
                 type:String,
                 required: true
+            },
+            simple: {
+                type: Boolean,
+                default:false
+            }
+        },
+        data(){
+            return {
+                containerStyle: {
+                    borderWidth: this.simple ? '0px' : '1px'
+                }
             }
         },
         components: {

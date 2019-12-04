@@ -5,3 +5,52 @@
   text-decoration: none;
   border-bottom: 1px solid $primary-link-color;
 }
+
+.font-inter{
+  font-family: Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
+}
+
+.font-mono{
+  font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace!important;
+}
+
+@mixin init-titleFontSize() {
+  @each $index, $value in $titleFontSize-value-mapping{
+    .h#{$index}{
+      font-size: #{$value}px !important;
+      font-weight: 500;
+    }
+  }
+}
+
+@mixin init-paragraphFontSize() {
+  @each $index, $value in $paragraphFontSize-value-mapping{
+    .f#{$index}{
+      font-size: #{$value}px !important;
+    }
+    .f#{$index}-light{
+      font-size: #{$value}px !important;
+      font-weight: 300 !important;
+    }
+  }
+}
+
+@mixin init-fontWeight() {
+  @each $index, $value in $fontWeight-value-mapping{
+    .w-#{$index}{
+      font-weight: #{$value} !important;
+    }
+  }
+}
+
+@mixin init-lineHeight() {
+  @each $index, $value in $lineHeight-value-mapping{
+    .lh-#{$index}{
+      line-height: #{$value} !important;
+    }
+  }
+}
+
+.text-center{
+  text-align: center !important;
+}

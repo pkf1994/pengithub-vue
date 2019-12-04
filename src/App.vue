@@ -21,6 +21,12 @@ export default {
 <style lang="scss">
   @import "./scss/index";
   @include with-theme();
+  @include init-padding();
+  @include init-margin();
+  @include init-titleFontSize();
+  @include init-paragraphFontSize();
+  @include init-fontWeight();
+  @include init-lineHeight();
 
   .router-view{
     max-width: 600px;

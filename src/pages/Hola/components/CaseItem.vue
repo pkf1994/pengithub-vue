@@ -1,10 +1,13 @@
 <template>
     <Container class="pv-2">
-        <Inner class="flex-column ph-3 pt-3">
+        <Inner class="inner round-1 flex-column ph-3 pt-3 ">
             <img :src="img" class="image round-1">
-            <Title>{{title}}</Title>
-            <SubTitle>{{subTitle}}</SubTitle>
-            <ReadMore>Read more →</ReadMore>
+            <Title class="h4 pt-3 mb-1 font-inter">{{title}}</Title>
+            <SubTitle class="sub-title f6 text-gray">{{subTitle}}</SubTitle>
+            <ReadMore class="read-more border-top pv-3 text-blue f5">
+                Read more
+                <span> →</span>
+            </ReadMore>
         </Inner>
     </Container>
 </template>
@@ -27,7 +30,7 @@
             }
         },
         components: {
-            Container: styled.a``,
+            Container: styled.div``,
             Title: styled.h1``,
             SubTitle: styled.p``,
             ReadMore: styled.div``,
@@ -42,5 +45,18 @@
     height: 200px;
     object-fit: cover;
     box-sizing: border-box;
+}
+
+.inner{
+    box-shadow: 0 2px 4px rgba(27,31,35,.15);
+}
+
+.sub-title{
+    margin-bottom: 18px;
+}
+
+.read-more{
+    display: flex;
+    justify-content: space-between;
 }
 </style>
