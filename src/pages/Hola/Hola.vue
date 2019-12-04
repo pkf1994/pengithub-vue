@@ -149,6 +149,16 @@
                 </AdvantageList>
             </Advantage>
 
+            <Case class="mt-6 mh-3 font-inter">
+                <CaseTitle class="text-gray lh-15 w-normal text-center">
+                    See how the world's leading companies use GitHub Enterprise.
+                </CaseTitle>
+
+                <CaseItem v-for="item in caseList"
+                          :img="item.img"
+                          :title="item.title"
+                          :subTitle="item.subTitle"/>
+            </Case>
 
         </Main>
     </Container>
@@ -157,7 +167,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {LogoutedHeader,Button} from '../../components'
-    import {AdvantageItem} from './components'
+    import {AdvantageItem,CaseItem} from './components'
 
     export default {
         data() {
@@ -232,6 +242,13 @@
                         paragraph: "Browse and buy apps from GitHub Marketplace with your GitHub account. Find the tools you like or discover new favorites—then start using them in minutes. ",
                         theLink: "Learn about integrations."
                     }
+                ],
+                caseList: [
+                    {
+                        img: "https://customer-stories-feed.github.com/customer_stories/mgm-resorts/hero.jpg",
+                        title: "MGM Resorts International",
+                        subTitle: "Hospitality"
+                    }
                 ]
             }
         },
@@ -239,7 +256,7 @@
             LogoutedHeader,
             Button,
             AdvantageItem,
-
+            CaseItem,
             Container: styled.div``,
             Main: styled.div``,
             HolaJumbotron: styled.div``,
@@ -283,6 +300,8 @@
             Advantage: styled.div``,
             AdvantageIllustration: styled.div``,
             AdvantageList: styled.div``,
+            Case: styled.div``,
+            CaseTitle: styled.h3``
         }
     }
 </script>
