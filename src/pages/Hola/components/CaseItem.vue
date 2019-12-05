@@ -1,10 +1,10 @@
 <template>
-    <Container class="pv-2">
-        <Inner class="inner round-1 flex-column ph-3 pt-3 ">
+    <Container class="py-2">
+        <Inner class="inner round-1 flex-column px-3 pt-3 ">
             <img :src="img" class="image round-1">
-            <Title class="h4 pt-3 mb-1 font-inter">{{title}}</Title>
+            <Title class="h4-mktg pt-3 mb-1 font-inter">{{title}}</Title>
             <SubTitle class="sub-title f6 text-gray">{{subTitle}}</SubTitle>
-            <ReadMore class="read-more border-top pv-3 text-blue f5">
+            <ReadMore class="read-more border-top py-3 text-blue f5-mktg">
                 Read more
                 <span> →</span>
             </ReadMore>

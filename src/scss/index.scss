@@ -1,13 +1,22 @@
+@import '../../node_modules/@primer/css/utilities/index.scss';
+@import '../../node_modules/@primer/css/layout/index.scss';
 @import './themes';
 @import "./mixins";
-@import "./padding";
-@import "./margin";
 @import "./button";
 @import "./colors";
 @import "./border";
-@import "./shadow";
-@import "display";
+@import "./display";
 @import "./filter";
 @import "./font";
 @import "./other";
 @import "./forms";
+@import "./margin";
+@import "./padding";
+
+@include with-theme();
+@include init-titleFontSize();
+@include init-paragraphFontSize();
+@include init-fontWeight();
+@include init-lineHeight();
+@include init-margin();
+@include init-padding();

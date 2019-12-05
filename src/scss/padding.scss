@@ -4,11 +4,11 @@
     .p-#{$index}{
       padding: #{$value}px !important;
     }
-    .pv-#{$index}{
+    .py-#{$index}{
       padding-top: #{$value}px !important;
       padding-bottom: #{$value}px !important;
     }
-    .ph-#{$index}{
+    .px-#{$index}{
       padding-right: #{$value}px !important;
       padding-left: #{$value}px !important;
     }

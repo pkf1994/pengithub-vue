@@ -16,7 +16,7 @@
 
 @mixin init-titleFontSize() {
   @each $index, $value in $titleFontSize-value-mapping{
-    .h#{$index}{
+    .h#{$index}-mktg{
       font-size: #{$value}px !important;
       font-weight: 500;
     }
@@ -25,10 +25,10 @@
 
 @mixin init-paragraphFontSize() {
   @each $index, $value in $paragraphFontSize-value-mapping{
-    .f#{$index}{
+    .f#{$index}-mktg{
       font-size: #{$value}px !important;
     }
-    .f#{$index}-light{
+    .f#{$index}-mktg-light{
       font-size: #{$value}px !important;
       font-weight: 300 !important;
     }

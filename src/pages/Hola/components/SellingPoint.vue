@@ -1,19 +1,19 @@
 <template>
-    <SellingPoint class="pv-7">
-        <Main class="pb-6 ph-3 flex-column-center">
-            <SellingPointTitle class="text-gray h4 text-center font-mono lh-15">
+    <SellingPoint class="py-7">
+        <Main class="pb-6 px-3 flex-column-center">
+            <SellingPointTitle class="text-gray h4-mktg text-center font-mono lh-15">
                 {{title}}
             </SellingPointTitle>
 
-            <SellingPointSubTitle class="h1 text-center font-inter lh-125 mt-3 mb-2">
+            <SellingPointSubTitle class="h1-mktg text-center font-inter lh-125 mt-3 mb-2">
                 {{subTitle}}
             </SellingPointSubTitle>
 
-            <SellingPointParagraph class="f2 text-center font-inter text-gray lh-15 mb-4">
+            <SellingPointParagraph class="f2-mktg text-center font-inter text-gray lh-15 mb-4">
                 {{paragraph}}
             </SellingPointParagraph>
 
-            <Button v-if="btnTitle" inline :style="btnStyle" class="btn-primary-blue-outline ph-5 w-500 " >
+            <Button v-if="btnTitle" inline :style="btnStyle" class="btn-primary-blue-outline px-5 w-500 " >
                 {{btnTitle}}
             </Button>
         </Main>

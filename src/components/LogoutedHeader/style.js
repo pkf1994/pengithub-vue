@@ -28,7 +28,6 @@ export const Menu = styled.button`
     outline: none;
     background: transparent;
     border-width: 0;
-    margin-top: 4px;
     padding-right: 0;
     padding-left: 0;
 `

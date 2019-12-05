@@ -1,33 +1,5 @@
 @import './variables';
 
-.text-white{
-  color: white !important;
-}
-
-.text-gray{
-  color: #586069!important;
-}
-
-.text-gray-light{
-  color: #6a737d!important;
-}
-
-.text-orange {
-  color: #fb8532!important;
-}
-
-.text-orange-light {
-  color: #e36209!important;
-}
-
-.text-purple {
-  color: #6f42c1!important;
-}
-
-.text-blue{
-  color: #0366d6!important;
-  fill: #0366d6!important;
-}
 
 .text-hsla-pale{
   color: hsla(0,0%,100%,.6) !important;
@@ -49,23 +21,5 @@
   background: $primary-btn-blue-color !important;
 }
 
-.bg-white{
-  background: white!important;
-}
-
-.bg-blue{
-  background-color: #0366d6!important;
-}
-
-.bg-orange {
-  background: #fb8532!important;
-}
-
-.bg-purple {
-  background-color: #6f42c1!important;
-}
-.bg-gray-dark {
-  background-color: #24292e!important;
-}
 
 

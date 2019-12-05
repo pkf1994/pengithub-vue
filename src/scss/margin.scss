@@ -4,11 +4,11 @@
     .m-#{$index} {
       margin: #{$value}px !important;
     }
-    .mv-#{$index} {
+    .my-#{$index} {
       margin-top: #{$value}px !important;
       margin-bottom: #{$value}px !important;
     }
-    .mh-#{$index} {
+    .mx-#{$index} {
       margin-right: #{$value}px !important;
       margin-left: #{$value}px !important;
     }

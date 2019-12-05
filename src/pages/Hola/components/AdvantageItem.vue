@@ -1,15 +1,15 @@
 <template>
     <Container class="container flex" :style="containerStyle">
         <Column :class="{column:!simple}">
-            <Title  class="h3 font-inter title mb-1 w-400">
+            <Title  class="h3-mktg font-inter title mb-1 w-400">
                 {{title}}
             </Title>
-            <Paragraph class="f5 text-gray">
+            <Paragraph class="f5-mktg text-gray">
                 {{paragraph}}
                 <TheLink v-if="!simple" class="link">{{theLink}}</TheLink>
             </Paragraph>
         </Column>
-        <svg v-if="!simple" class="text-blue" viewBox="0 0 6 16" version="1.1" width="6" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M0 14l6-6-6-6v12z"></path></svg>
+        <svg v-if="!simple" fill="currentColor" class="text-blue" viewBox="0 0 6 16" version="1.1" width="6" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M0 14l6-6-6-6v12z"></path></svg>
     </Container>
 </template>
 
