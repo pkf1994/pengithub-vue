@@ -1,21 +1,72 @@
 @import './variables';
 
-.btn-primary-green{
+.btn-primary-mktg-green{
   background: $primary-btn-green-color;
   color: white;
   border-radius: 3px;
 }
 
-.btn-primary-blue{
+.btn-primary-mktg-blue{
   background: $primary-btn-blue-color;
   color: white;
   border-radius: 3px;
 }
 
-.btn-primary-blue-outline{
+.btn-primary-mktg-blue-outline{
   background: white;
   border-color: rgba(16,116,231,.5);
   border-width: 1px;
   color: $primary-btn-blue-color;
   border-radius: 3px;
+}
+
+.raw-button{
+  border-width: 0;
+  background: transparent;
+  outline: none;
+  padding: 0
+}
+
+.btn-primary.disabled, .btn-primary:disabled {
+  color: hsla(0,0%,100%,.75);
+  background-color: #94d3a2;
+  background-image: none;
+  border-color: rgba(27,31,35,.2);
+  box-shadow: none;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #28a745;
+  background-image: linear-gradient(-180deg,#34d058,#28a745 90%);
+}
+
+.btn{
+  color: #24292e;
+  background-color: #eff3f6;
+  background-image: linear-gradient(-180deg,#fafbfc,#eff3f6 90%);
+}
+
+.btn {
+  position: relative;
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-repeat: repeat-x;
+  background-position: -1px -1px;
+  background-size: 110% 110%;
+  border: 1px solid rgba(27,31,35,.2);
+  border-radius: .25em;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }

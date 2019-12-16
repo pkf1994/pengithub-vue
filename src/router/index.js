@@ -4,6 +4,17 @@ Vue.use(Router)
 
 import routes from './routeRule'
 
-export default new Router({
-    routes: routes
+const routerCreator = () => new Router({
+    mode: 'history',
+    routes: routes,
 })
+
+const router = routerCreator()
+
+export default router
+
+//重新实例化一个新的路由表
+export function resetRouter() {
+    const newRouter = routerCreator()
+    router.matcher = newRouter.matcher
+}

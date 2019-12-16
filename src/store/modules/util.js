@@ -1,19 +1,27 @@
-import {COMMON_MUATION_RESOLVE_DATA, COMMON_MUTATION_TRIGGER_LOADING} from "./commonMutation";
+import {CROSS_MUTATION_RESOLVE_DATA,CROSS_MUTATION_TRIGGER_FLAG, CROSS_MUTATION_TRIGGER_LOADING} from "./crossMutation";
 
-export function triggerLoading(context,storeId,loading) {
+export function commitTriggerLoadingMutation(context, storeId, loading) {
     const payload = {
         storeId: storeId,
         loading: loading
     }
-    context.commit(COMMON_MUTATION_TRIGGER_LOADING, payload)
+    context.commit(CROSS_MUTATION_TRIGGER_LOADING, payload)
 }
 
-export function resolveData(context,storeId,data) {
+export function commitResolveDataMutation(context, storeId, data) {
     const payload = {
         storeId: storeId,
         data: data
     }
-    context.commit(COMMON_MUATION_RESOLVE_DATA, payload)
+    context.commit(CROSS_MUTATION_RESOLVE_DATA, payload)
+}
+
+export function commitTriggerFlagMutation(context,storeId,flag) {
+    const payload = {
+        storeId: storeId,
+        flag: flag
+    }
+    context.commit(CROSS_MUTATION_TRIGGER_FLAG, payload)
 }
 
 export function handleException(e) {

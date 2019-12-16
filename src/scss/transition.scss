@@ -1,0 +1,36 @@
+@import "./variables";
+.fade-enter-active,
+.fade-leave-active{
+  transition: opacity $transition-duration
+}
+
+.fade-enter,
+.fade-leave-to{
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active{
+  transition: all $transition-duration
+}
+
+.slide-up-enter,
+.slide-up-leave-to{
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.transition-all {
+  transition: all $transition-duration
+}
+
+.zoom-enter-active,
+.zoom-leave-active{
+  transition: all $transition-duration
+}
+
+.zoom-enter,
+.zoom-leave-to{
+  transform: scale(.7);
+  opacity: 0;
+}

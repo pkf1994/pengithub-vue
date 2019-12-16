@@ -1,23 +1,35 @@
 const Home = () => import('../pages/Home/Home.vue')
-const TrendingPage = () => import('../pages/TrendingPage/TrendingPage.vue')
-const Hola = () => import('../pages/Hola/Hola.vue')
+const OauthRedirectPage = () => import('../pages/OauthRedirectPage/OauthRedirectPage.vue')
+const PullRequests = () => import('../pages/Home/components/LoginedHome/components/PullRequests.vue')
+const Dashboard = () => import('../pages/Home/components/LoginedHome/components/Dashboard.vue')
+const Issues = () => import('../pages/Home/components/LoginedHome/components/Issues.vue')
 
 export const ROUTE_HOME = 'route-home'
-export const ROUTE_TRENDING = 'route-trendingPage'
+export const ROUTE_OAUTH_REDIRECT = 'route-oauthRedirect'
 
 export default [
     {
         path: '/',
-        redirect: 'home'
-    },
-    {
-        path: '/home',
         name: ROUTE_HOME,
-        component: Hola
+        component: Home,
+        children: [
+            {
+                path: 'pulls',
+                component: PullRequests
+            },
+            {
+                path: 'issues',
+                component: Issues
+            },
+            {
+                path: '/',
+                component: Dashboard
+            }
+        ]
     },
     {
-        path: '/trending',
-        name: ROUTE_TRENDING,
-        component: TrendingPage
+        path: '/oauth_redirect',
+        name: ROUTE_OAUTH_REDIRECT,
+        component: OauthRedirectPage
     }
 ]

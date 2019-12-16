@@ -1,5 +1,5 @@
 <template>
-    <Container :inline="inline" :theme="buttonTheme">
+    <Container :inline="inline" >
         <slot></slot>
         <i v-if="showIcon" class="iconfont" :class="iconClass"/>
         <Title v-if="showTitle" :inline="inline"  :style="titleStyle">
@@ -10,7 +10,6 @@
 
 <script>
     import {Container,Title} from './style'
-    import {mapState} from "vuex";
     export default {
         props: {
             iconClass: {
@@ -37,9 +36,6 @@
         data: () =>　({
         }),
         computed: {
-            ...mapState({
-                theme: state => state.ui.theme
-            }),
             buttonTheme() {
                 return this.theme + "-button" + (this.outline ? '-outline' : '')
             },

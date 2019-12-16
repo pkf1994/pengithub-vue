@@ -31,7 +31,10 @@ footer, header, hgroup, menu, nav, section {
 }
 body {
     color: #24292e;
+    background-color: #fafbfc;
     line-height: 1.5;
+    font-size: 14px;
+    word-break:break-word;
     font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
 }
 ol, ul {
@@ -51,8 +54,10 @@ table {
 }
 button{
     font: inherit;
+    color: inherit;
 }
 a{
+    color: #0366d6;
     text-decoration: none;
 }
 
@@ -60,4 +65,15 @@ sup{
     top: -.5em;
     vertical-align: initial;
     line-height: 0;
+}
+img{
+    border-style: none
+}
+
+input{
+    font-family: inherit;
+}
+
+strong {
+    font-weight: 600;
 }

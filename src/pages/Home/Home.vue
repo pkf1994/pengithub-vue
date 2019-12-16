@@ -1,53 +1,29 @@
 <template>
-    <Container :theme="theme">
-        <Header alwaysShowLogo/>
-        <Main>
-            <ButtonArea>
-                <Button @click.native="routeToTrending" title="Go To Trending"/>
-            </ButtonArea>
-        </Main>
-    </Container>
+   <component v-bind:is="currentComponent"></component>
 </template>
 
 <script>
-
+    import styled from 'vue-styled-components'
     import {
-        Header,
-        Button,
-        SearchInput
-    } from '../../components'
-
-    import {
-        Container,
-        Main,
         Hola,
-        SubDesc,
-        ButtonArea
-    } from './style'
+        LoginedHome
+    } from './components'
 
     import {mapState} from "vuex";
-    import {ROUTE_TRENDING} from "../../router/routeRule";
+    const LOGINED_HOME = "LoginedHome"
+    const HOLA = "Hola"
     export default {
+
         computed: {
             ...mapState({
-                theme: state => state.ui.theme
+                currentComponent: function(state) {
+                    return state.oauth.authenticated ? LOGINED_HOME : HOLA
+                }
             })
         },
-        methods: {
-            routeToTrending() {
-                console.log('routeToTrending')
-                this.$router.push({name:ROUTE_TRENDING})
-            }
-        },
         components:{
-            Header,
-            Container,
-            Main,
-            Button,
             Hola,
-            SearchInput,
-            SubDesc,
-            ButtonArea
+            LoginedHome
         }
     }
 </script>

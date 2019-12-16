@@ -9,3 +9,37 @@
 .relative{
   position: relative;
 }
+
+.box{
+  background-color: #fff;
+  border: 1px solid #d1d5da;
+  border-radius: 3px;
+}
+
+.box-footer{
+  padding: 16px;
+  margin-top: -1px;
+  border-top: 1px solid #e1e4e8;
+}
+
+.bubble {
+  padding: 0;
+  margin: 0 15px 15px;
+  overflow: hidden;
+  word-break: break-word;
+  word-wrap: break-word;
+  white-space: normal;
+  background: #fff;
+  border: 1px solid #d1d5da;
+  border-radius: 3px;
+}
+
+.bubble-title {
+  display: block;
+  padding: 10px 15px;
+  margin: 0;
+  font-size: 14px;
+  color: #2f363d;
+  border-bottom: 1px solid #d1d5da;
+}
+

@@ -1,4 +1,5 @@
 import trendingStore from './trending'
-import uiStore from './ui'
+import oauthStore from './oauth'
+import userStore from './user'
 
-export {trendingStore,uiStore}
+export {trendingStore,oauthStore,userStore}
