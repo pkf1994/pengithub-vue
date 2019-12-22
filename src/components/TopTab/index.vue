@@ -3,7 +3,7 @@
             <nav class="text-center">
                 <router-link :to="tabItem.routerLink"
                              exact
-                             class="pt-1 px-2 pb-3 d-inline-block nav-item"
+                             class="pt-1 px-2 pb-3 d-inline-block nav-item to-adjust"
                              v-for="tabItem in tabs"
                              :key="tabItem.label" >
                     <span class="lh-15 ">
@@ -32,7 +32,7 @@
         },
         methods: {
             adjustStyle() {
-                let tabItemElList = document.querySelectorAll("nav .nav-item")
+                let tabItemElList = document.querySelectorAll("nav .to-adjust")
                 let parent = undefined
                 tabItemElList.forEach((item,index) => {
                     if(!parent)parent = item.parentNode

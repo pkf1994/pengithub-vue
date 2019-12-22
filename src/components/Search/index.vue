@@ -6,7 +6,8 @@
                spellcheck="false"
                @input="onInput"
                type="text"
-               class="input-contrast form-control width-full">
+               :style="inputStyle"
+               class="input-contrast form-control width-full" >
     </Container>
 </template>
 
@@ -21,6 +22,10 @@
             onInput: {
                 type: Function,
                 required: true
+            },
+            inputStyle: {
+                type: Object,
+                default: () => {}
             }
         },
         components: {

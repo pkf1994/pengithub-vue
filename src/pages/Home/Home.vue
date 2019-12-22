@@ -17,7 +17,7 @@
         computed: {
             ...mapState({
                 currentComponent: function(state) {
-                    return state.oauth.authenticated ? LOGINED_HOME : HOLA
+                    return state.oauth.accessToken.authenticated ? LOGINED_HOME : HOLA
                 }
             })
         },

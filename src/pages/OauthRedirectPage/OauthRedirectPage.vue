@@ -1,4 +1,3 @@
-<script src="../../store/modules/user/actions.js"></script>
 <template>
     <Container class="container position-fixed width-full bg-gray-light pt-4 px-3">
         <Illustration class="illustration mx-auto">
@@ -52,16 +51,18 @@
     import styled from "vue-styled-components"
     import {LoadingIcon} from '../../components'
     import {mapActions, mapMutations, mapState} from "vuex";
-    import {ACTION_OAUTH_REQUEST_ACCESS_TOKEN} from "../../store/modules/oauth/actionTypes";
-    import {CROSS_MUTATION_RESOLVE_DATA} from "../../store/modules/crossMutation";
+    import {
+        ACTION_OAUTH_REQUEST_ACCESS_TOKEN,
+        ACTION_OAUTH_REQUEST_VIEWER_INFO
+    } from "../../store/modules/oauth/actionTypes";
     export default {
         created() {
             this.receiveCodeAndRequestAccessToken()
         },
         computed: {
             ...mapState({
-                exceptionOccurred: state => state.oauth.exceptionOccurred,
-                authenticated: state => state.oauth.authenticated,
+                exceptionOccurred: state => state.oauth.accessToken.exceptionOccurred,
+                authenticated: state => state.oauth.accessToken.authenticated,
                 exception: state => {
                     return state.oauth.exception || {
 
@@ -70,20 +71,12 @@
             })
         },
         watch: {
-            authenticated(newValue,oldValue) {
-                if(newValue) {
-                    this.$router.replace({
-                        path:'/'
-                    })
-                }
-            }
+
         },
         methods: {
             ...mapActions({
-                action_oauth_requestAccessToken: ACTION_OAUTH_REQUEST_ACCESS_TOKEN
-            }),
-            ...mapMutations({
-                common_mutation_resolveData: CROSS_MUTATION_RESOLVE_DATA
+                action_oauth_requestAccessToken: ACTION_OAUTH_REQUEST_ACCESS_TOKEN,
+                action_oauth_requestViewerInfo: ACTION_OAUTH_REQUEST_VIEWER_INFO
             }),
             retry() {
                 this.receiveCodeAndRequestAccessToken()
@@ -91,7 +84,7 @@
             cancel() {
                 location.href = process.env.VUE_APP_HOST
             },
-            receiveCodeAndRequestAccessToken() {
+            async receiveCodeAndRequestAccessToken() {
                 if(this.authenticated) {
                     this.$router.replace({
                         path: '/'
@@ -99,7 +92,8 @@
                     return
                 }
                 const code = this.$router.currentRoute.query.code
-                this.action_oauth_requestAccessToken({code: code})
+                await this.action_oauth_requestAccessToken({code: code})
+                this.action_oauth_requestViewerInfo()
             }
         },
         components: {

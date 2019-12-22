@@ -3,9 +3,11 @@ const OauthRedirectPage = () => import('../pages/OauthRedirectPage/OauthRedirect
 const PullRequests = () => import('../pages/Home/components/LoginedHome/components/PullRequests.vue')
 const Dashboard = () => import('../pages/Home/components/LoginedHome/components/Dashboard.vue')
 const Issues = () => import('../pages/Home/components/LoginedHome/components/Issues.vue')
+const Logout = () => import('../pages/Logout/Logout.vue')
 
 export const ROUTE_HOME = 'route-home'
 export const ROUTE_OAUTH_REDIRECT = 'route-oauthRedirect'
+export const ROUTE_LOGOUT = 'route-logout'
 
 export default [
     {
@@ -31,5 +33,9 @@ export default [
         path: '/oauth_redirect',
         name: ROUTE_OAUTH_REDIRECT,
         component: OauthRedirectPage
+    },
+    {
+        path: '/logout',
+        component: Logout
     }
 ]

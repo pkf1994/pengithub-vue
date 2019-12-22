@@ -24,13 +24,50 @@
   transition: all $transition-duration
 }
 
-.zoom-enter-active,
-.zoom-leave-active{
-  transition: all $transition-duration
+.zoom-enter-active {
+  animation: zoom-in .5s;
+}
+.zoom-leave-active {
+  animation: zoom-in .5s reverse;
+}
+@keyframes zoom-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
-.zoom-enter,
-.zoom-leave-to{
-  transform: scale(.7);
-  opacity: 0;
+.slide-up-right-alias-enter-active {
+  animation: slide-up-right-alias-in .5s;
+}
+.slide-up-right-alias-leave-active {
+  animation: slide-up-right-alias-in .5s reverse;
+}
+@keyframes slide-up-right-alias-in {
+  0% {
+    transform: translateY(100%) rotate(30deg);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+.slide-up-gentle-enter-active {
+  animation: slide-up-gentle-in .5s;
+}
+.slide-up-gentle-leave-active {
+  animation: slide-up-gentle-in .5s reverse;
+}
+@keyframes slide-up-gentle-in {
+  0% {
+    transform: translateY(10px);
+  }
+  100% {
+    transform: translateY(0%);
+  }
 }

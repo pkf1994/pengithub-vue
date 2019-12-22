@@ -5,9 +5,9 @@ import {API_GRAPHQL_ENDPOINT} from "./api";
 const authRequiredAxios = axios.create()
 authRequiredAxios.interceptors.request.use(
     config => {
-        if(store.state.oauth.accessToken) {
+        if(store.state.oauth.accessToken.accessToken) {
             config.auth = {
-                username: store.state.oauth.accessToken
+                username: store.state.oauth.accessToken.accessToken
             }
         }
         return config
@@ -15,6 +15,12 @@ authRequiredAxios.interceptors.request.use(
 
 export const commonGet = (url, config = {}) => {
     return axios.get(url,config).then(res => {
+        return res
+    })
+}
+
+export const authRequiredGet = (url, config = {}) => {
+    return authRequiredAxios.get(url,config).then(res => {
         return res
     })
 }

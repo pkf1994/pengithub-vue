@@ -27,3 +27,4 @@ export function commitTriggerFlagMutation(context,storeId,flag) {
 export function handleException(e) {
     console.log(e)
 }
+

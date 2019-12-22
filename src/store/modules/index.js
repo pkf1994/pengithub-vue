@@ -1,5 +1,5 @@
 import trendingStore from './trending'
 import oauthStore from './oauth'
-import userStore from './user'
+import homeStore from './home'
 
-export {trendingStore,oauthStore,userStore}
+export {trendingStore,oauthStore,homeStore}

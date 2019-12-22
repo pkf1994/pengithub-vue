@@ -1,17 +1,19 @@
 <template>
-    <Container class="col-12">
-        <Header></Header>
+    <Container class="fix-full-scrollable">
+        <LogoHeader></LogoHeader>
         <TopTab :tabs="tabs" :activeTab="activeTab"></TopTab>
         <router-view/>
+        <Footer class="footer"/>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
     import {
-        Header,
+        LogoHeader,
         Button,
-        TopTab
+        TopTab,
+        Footer
     } from '../../../../components'
     import {
         Dashboard,
@@ -19,7 +21,10 @@
         Issues
     } from './components'
     import {mapActions, mapState} from "vuex";
-    import {ACTION_USER_REQUEST_USER_INFO} from "../../../../store/modules/user/actionTypes";
+    import {
+        ACTION_HOME_REQUEST_DASHBOARD_DATA,
+        ACTION_HOME_REQUEST_NOTIFICATIONS_DATA
+    } from "../../../../store/modules/home/actionTypes";
     const TAB_DASHBOARD = "Dashboard"
     const TAB_PULL_REQUESTS = "Pull requests"
     const TAB_ISSUES = "Issues"
@@ -45,17 +50,16 @@
             }
         },
         created(){
-            this.action_user_requestUserInfo()
+            this.action_home_requestNotificationsData()
         },
         computed: {
-
             activeComponent() {
                 return this.activeTab === TAB_PULL_REQUESTS ? "PullRequests" : this.activeTab
             }
         },
         methods: {
             ...mapActions({
-                action_user_requestUserInfo: ACTION_USER_REQUEST_USER_INFO
+                action_home_requestNotificationsData: ACTION_HOME_REQUEST_NOTIFICATIONS_DATA
             }),
             switchTab(tabItem) {
                 this.activeTab = tabItem
@@ -65,18 +69,23 @@
             }
         },
         components:{
-            Header,
+            LogoHeader,
             Button,
             TopTab,
             Dashboard,
             PullRequests,
             Issues,
+            Footer,
             Container: styled.div``,
-            Main: styled.div``
+            Main: styled.div``,
+            FooterWrapper: styled.div``
         }
     }
 </script>
 
 <style scoped>
-
+.footer{
+    position: sticky;
+    top: 100%;
+}
 </style>

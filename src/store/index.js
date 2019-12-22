@@ -6,14 +6,14 @@ Vue.use(Vuex)
 import {
     trendingStore,
     oauthStore,
-    userStore,
+    homeStore,
 } from "./modules"
 
 export default new Vuex.Store ({
     modules: {
         trending: trendingStore,
         oauth: oauthStore,
-        user: userStore,
+        home: homeStore,
     },
     plugins: [
         createPersistedState({
