@@ -1,5 +1,6 @@
+import {GRAPHQL_FRAGMENT_PAGEINFO} from "../constant";
 
-export const GRAPH_QL_DASHBOARD = (login) => `
+export const GRAPHQL_DASHBOARD = (login) => `
     query {
     viewer {
         organizations(first:4){
@@ -36,10 +37,15 @@ export const GRAPH_QL_DASHBOARD = (login) => `
 }
 `
 
-export const GRAPH_QL_VIEWER_PULL_REQUEST_CREATED = `
+export const GRAPHQL_VIEWER_PULL_REQUEST_CREATED = (payload) => {
+    payload = {
+        perPage: 10,
+        ...payload
+    }
+    return `
     query {
     viewer {
-        pullRequests(first: 20,orderBy:{field:UPDATED_AT,direction:DESC},states:[OPEN]) {
+        pullRequests(${payload.before ? 'last' : 'first'}: ${payload.perPage},orderBy:{field:CREATED_AT,direction:DESC},states:[OPEN]${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
             totalCount
             nodes{
                 author{
@@ -47,14 +53,198 @@ export const GRAPH_QL_VIEWER_PULL_REQUEST_CREATED = `
                 }
                 title
                 url
+                number
+                createdAt
+                id
                 repository{
-                    owner{
-                        login
+                    nameWithOwner
+                }
+                labels(first: 20) {
+                    nodes {
+                        name
+                        color
+                        id
                     }
-                    name
+                }
+            }
+             ${GRAPHQL_FRAGMENT_PAGEINFO}
+        }
+    }
+}
+`}
+
+export const GRAPHQL_VIEWER_PR_ASSIGNED = (payload) => {
+    payload = {
+        perPage: 10,
+        ...payload
+    }
+    return `
+{
+  search(query: "assignee:${payload.login} type:pr", type: ISSUE, ${payload.before ? 'last' : 'first'}: ${payload.perPage}${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
+    ${GRAPHQL_FRAGMENT_PAGEINFO}
+    nodes {
+      ... on PullRequest {
+        id
+        url
+        number
+        author {
+          login
+        }
+        title
+        createdAt
+        repository {
+          nameWithOwner
+        }
+        labels(first: 20) {
+                    nodes {
+                        name
+                        color
+                        id
+                    }
+                }
+      }
+    }
+  }
+}
+`}
+
+export const GRAPHQL_VIEWER_PR_MENTIONED = (payload) => {
+    payload = {
+        perPage: 10,
+        ...payload
+    }
+    return `
+{
+  search(query: "mentions:${payload.login} type:pr", type: ISSUE, ${payload.before ? 'last' : 'first'}: ${payload.perPage}${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
+    ${GRAPHQL_FRAGMENT_PAGEINFO}
+    nodes {
+      ... on PullRequest {
+        id
+        url
+        number
+        createdAt
+        author {
+          login
+        }
+        title
+        repository {
+          nameWithOwner
+        }
+        labels(first: 20) {
+                    nodes {
+                        name
+                        color
+                        id
+                    }
+                }
+      }
+    }
+  }
+}
+`}
+
+export const GRAPHQL_VIEWER_ISSUES_CREATED = (payload) => {
+    payload = {
+        perPage: 10,
+        ...payload
+    }
+    return `
+    query {
+    viewer {
+        issues(${payload.before ? 'last' : 'first'}: ${payload.perPage},orderBy:{field:CREATED_AT,direction:DESC},states:[OPEN]${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
+            totalCount
+            ${GRAPHQL_FRAGMENT_PAGEINFO}
+            nodes{
+                author{
+                    login
+                }
+                title
+                url
+                number
+                createdAt
+                id
+                repository{
+                    nameWithOwner
+                }
+                labels(first: 20) {
+                    nodes {
+                        name
+                        color
+                        id
+                    }
                 }
             }
         }
     }
 }
-`
+`}
+
+export const GRAPHQL_VIEWER_ISSUES_ASSIGNED = (payload) => {
+    payload = {
+        perPage: 10,
+        ...payload
+    }
+    return `
+{
+  search(query: "assignee:${payload.login} type:issue", type: ISSUE, ${payload.before ? 'last' : 'first'}: ${payload.perPage}${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
+    ${GRAPHQL_FRAGMENT_PAGEINFO}
+    nodes {
+      ... on Issue {
+        id
+        url
+        number
+        author {
+          login
+        }
+        title
+        createdAt
+        repository {
+          nameWithOwner
+        }
+        labels(first: 20) {
+                    nodes {
+                        name
+                        color
+                        id
+                    }
+                }
+      }
+    }
+  }
+}
+`}
+
+export const GRAPHQL_VIEWER_ISSUES_MENTIONED = (payload) => {
+    payload = {
+        perPage: 10,
+        ...payload
+    }
+    return `
+{
+  search(query: "mentions:${payload.login} type:issue", type: ISSUE, ${payload.before ? 'last' : 'first'}: ${payload.perPage}${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
+    ${GRAPHQL_FRAGMENT_PAGEINFO}
+    nodes {
+      ... on Issue {
+        id
+        url
+        number
+        createdAt
+        author {
+          login
+        }
+        title
+        repository {
+          nameWithOwner
+        }
+        labels(first: 20) {
+                    nodes {
+                        name
+                        color
+                        id
+                    }
+                }
+      }
+    }
+  }
+}
+`}

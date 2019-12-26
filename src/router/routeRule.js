@@ -1,8 +1,19 @@
+import {SimpleFooter,LogoHeader,LabelsFooter} from '../components'
+
 const Home = () => import('../pages/Home/Home.vue')
 const OauthRedirectPage = () => import('../pages/OauthRedirectPage/OauthRedirectPage.vue')
-const PullRequests = () => import('../pages/Home/components/LoginedHome/components/PullRequests.vue')
-const Dashboard = () => import('../pages/Home/components/LoginedHome/components/Dashboard.vue')
-const Issues = () => import('../pages/Home/components/LoginedHome/components/Issues.vue')
+const Dashboard = () => import('../pages/Home/LoginedHome/Dashboard/index.vue')
+const HomePullRequests = () => import('../pages/Home/LoginedHome/PullRequests/index.vue')
+const HomePullRequestsCreated = () => import('../pages/Home/LoginedHome/PullRequests/Created.vue')
+const HomePullRequestsAssigned = () => import('../pages/Home/LoginedHome/PullRequests/Assigned.vue')
+const HomePullRequestsMentioned = () => import('../pages/Home/LoginedHome/PullRequests/Mentioned.vue')
+const HomeIssues = () => import('../pages/Home/LoginedHome/Issues/index.vue')
+const HomeIssuesCreated = () => import('../pages/Home/LoginedHome/Issues/Created.vue')
+const HomeIssuesAssigned = () => import('../pages/Home/LoginedHome/Issues/Assigned.vue')
+const HomeIssuesMentioned = () => import('../pages/Home/LoginedHome/Issues/Mentioned.vue')
+const Search = () => import('../pages/Search/SearchPage.vue')
+const SearchResult = () => import('../pages/Search/SearchResult/index.vue')
+const SearchResultRepositories = () => import('../pages/Search/SearchResult/Repositories.vue')
 const Logout = () => import('../pages/Logout/Logout.vue')
 
 export const ROUTE_HOME = 'route-home'
@@ -13,15 +24,47 @@ export default [
     {
         path: '/',
         name: ROUTE_HOME,
-        component: Home,
+        components: {
+            default: Home,
+            header: LogoHeader,
+            footer: SimpleFooter
+        },
         children: [
             {
                 path: 'pulls',
-                component: PullRequests
+                component: HomePullRequests,
+                children: [
+                    {
+                        path: '/',
+                        component: HomePullRequestsCreated
+                    },
+                    {
+                        path: 'assigned',
+                        component: HomePullRequestsAssigned
+                    },
+                    {
+                        path: 'mentioned',
+                        component: HomePullRequestsMentioned
+                    }
+                ]
             },
             {
                 path: 'issues',
-                component: Issues
+                component: HomeIssues,
+                children: [
+                    {
+                        path: '/',
+                        component: HomeIssuesCreated
+                    },
+                    {
+                        path: 'assigned',
+                        component: HomeIssuesAssigned
+                    },
+                    {
+                        path: 'mentioned',
+                        component: HomeIssuesMentioned
+                    }
+                ]
             },
             {
                 path: '/',
@@ -37,5 +80,19 @@ export default [
     {
         path: '/logout',
         component: Logout
+    },
+    {
+        path: '/search',
+        components: {
+            default: Search,
+            header: LogoHeader,
+            footer: LabelsFooter
+        },
+        children: [
+            {
+                path: '/',
+                component: SearchResultRepositories
+            }
+        ]
     }
 ]

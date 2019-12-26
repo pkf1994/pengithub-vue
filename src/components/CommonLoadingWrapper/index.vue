@@ -1,10 +1,6 @@
 <template>
     <Container>
-        <transition appear :name="transitionName">
-            <div  v-if="!loading">
-                <slot></slot>
-            </div>
-        </transition>
+        <slot></slot>
         <CommonLoading v-if="loading"/>
     </Container>
 </template>

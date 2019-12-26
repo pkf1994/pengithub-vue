@@ -9,6 +9,9 @@
         destroyed() {
             window.removeEventListener('scroll',this.recordScrollTop,false)
         },
+        created(){
+            this.action_getData()
+        },
         methods: {
             recordScrollTop(event) {
                 let scrollTop = document.documentElement.scrollTop || document.body.scrollTop

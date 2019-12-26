@@ -60,9 +60,9 @@
 .slide-up-gentle-enter-active {
   animation: slide-up-gentle-in .5s;
 }
-.slide-up-gentle-leave-active {
+/*.slide-up-gentle-leave-active {
   animation: slide-up-gentle-in .5s reverse;
-}
+}*/
 @keyframes slide-up-gentle-in {
   0% {
     transform: translateY(10px);

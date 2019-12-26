@@ -9,5 +9,8 @@ export default {
         Vue.prototype.$toast = (toastContent,option) => {
             toastComponent.showToast(toastContent,option)
         }
+        Vue.toast = (toastContent,option) => {
+            toastComponent.showToast(toastContent,option)
+        }
     }
 }

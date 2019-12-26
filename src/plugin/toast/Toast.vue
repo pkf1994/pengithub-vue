@@ -20,11 +20,11 @@
             }
         },
         methods: {
-            showToast(toastContent,option) {
+            showToast(toastContent,option = {type: "notice",duration: 2000}) {
                 const _this = this
                 this.toastContent = toastContent
-                this.type = option.type || "notice"
-                this.duration = option.duration || 2000
+                this.type = option.type
+                this.duration = option.duration
                 this.show = true
                 setTimeout(() => {
                     _this.show = false

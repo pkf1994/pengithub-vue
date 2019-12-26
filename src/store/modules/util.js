@@ -1,5 +1,9 @@
-import {CROSS_MUTATION_RESOLVE_DATA,CROSS_MUTATION_TRIGGER_FLAG, CROSS_MUTATION_TRIGGER_LOADING} from "./crossMutation";
-
+import {
+    CROSS_MUTATION_RESOLVE_DATA,
+    CROSS_MUTATION_TRIGGER_FLAG,
+    CROSS_MUTATION_TRIGGER_LOADING
+} from "./crossMutation";
+import Vue from 'vue'
 export function commitTriggerLoadingMutation(context, storeId, loading) {
     const payload = {
         storeId: storeId,
@@ -26,5 +30,6 @@ export function commitTriggerFlagMutation(context,storeId,flag) {
 
 export function handleException(e) {
     console.log(e)
+    Vue.toast(e,{type:"error"})
 }
 

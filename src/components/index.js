@@ -4,15 +4,13 @@ import ScrollTopListenerMixin from "./ScrollTopListenerMixin";
 import Button from './Button'
 import LogoutedHeader from './LogoutedHeader'
 import LoadingIcon from './LoadingIcon'
-import TopTab from './TopTab'
+import {HeaderDetachTopTab,PageTopTab,ComplexTopTab} from './TopTab'
 import Search from './Search'
-import InnerTopTab from './InnerTopTab'
-import RepoListItem from './RepoListItem'
 import CommonLoading from './CommonLoading'
 import CommonLoadingWrapper from './CommonLoadingWrapper'
-import Footer from './Footer'
+import {SimpleFooter,LabelsFooter} from './Footer'
 import Bubble from './Bubble'
-import ActivityListItem from './ActivityListItem'
+import Pagination from './Pagination'
 export {
     Button,
     AnimatedNumber,
@@ -20,13 +18,14 @@ export {
     ScrollTopListenerMixin,
     LogoutedHeader,
     LoadingIcon,
-    TopTab,
-    InnerTopTab,
+    HeaderDetachTopTab,
+    PageTopTab,
+    ComplexTopTab,
     Search,
-    RepoListItem,
     CommonLoading,
     CommonLoadingWrapper,
-    Footer,
+    SimpleFooter,
+    LabelsFooter,
     Bubble,
-    ActivityListItem
+    Pagination
 }
