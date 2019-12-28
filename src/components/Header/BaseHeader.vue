@@ -38,7 +38,6 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import Search from '../Search'
     import {mapState} from "vuex";
     export default {
         data() {
@@ -98,7 +97,6 @@
             }
         },
         components: {
-            Search,
             Container: styled.div``,
             MainRow: styled.div``,
             Menu: styled.button``,

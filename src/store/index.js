@@ -7,6 +7,7 @@ import {
     trendingStore,
     oauthStore,
     homeStore,
+    searchStore
 } from "./modules"
 
 export default new Vuex.Store ({
@@ -14,6 +15,7 @@ export default new Vuex.Store ({
         trending: trendingStore,
         oauth: oauthStore,
         home: homeStore,
+        search: searchStore
     },
     plugins: [
         createPersistedState({

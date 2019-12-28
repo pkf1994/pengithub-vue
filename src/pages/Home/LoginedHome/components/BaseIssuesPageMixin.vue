@@ -4,7 +4,7 @@
 <script>
     import BaseIssuesPageTemplate from './BaseIssuesPageTemplate.vue'
     import {mapActions, mapState} from "vuex";
-    import {Pagination} from '../../../../components'
+    import {IconPagination} from '../../../../components'
     import {ACTION_HOME_REQUEST_PULL_REQUESTS_CREATED} from "../../../../store/modules/home/actionTypes";
     export default {
         data() {
@@ -36,7 +36,7 @@
             this.action_getData()
         },
         components: {
-            Pagination,
+           IconPagination,
             BaseIssuesPageTemplate
         }
     }

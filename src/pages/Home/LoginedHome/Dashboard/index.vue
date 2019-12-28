@@ -3,7 +3,18 @@
         <PageTopTab :tabs="tabs" />
 
         <Main class="bg-white pb-3">
-            <Search :onInput="onSearchInput" placeholder="Search GitHub"/>
+            <SearchWrapper class="search-wrapper">
+                <input aria-label="Search GitHub"
+                       v-model="localSearchQuery"
+                       autocapitalize="off"
+                       autocomplete="off"
+                       autofocus=""
+                       ref="input"
+                       class="search-input form-control input-block"
+                       placeholder="Search GitHub"
+                       spellcheck="false"
+                       type="text"/>
+            </SearchWrapper>
             <CommonLoadingWrapper :loading="loading">
 
                 <Bubble v-if="events && events.length > 0"
@@ -33,10 +44,11 @@
     import styled from 'vue-styled-components'
     import {
         PageTopTab,
-        Search,
+        SearchInput,
         CommonLoading,
         CommonLoadingWrapper,
         Bubble,
+        WithSearchInputMixin,
     } from '../../../../components'
     import {
         ActivityListItem,
@@ -45,6 +57,7 @@
     import {mapActions, mapState} from "vuex";
     import {ACTION_HOME_REQUEST_DASHBOARD_DATA} from "../../../../store/modules/home/actionTypes";
     export default {
+        mixins: [WithSearchInputMixin],
         data() {
             return {
                 tabs: [
@@ -57,7 +70,6 @@
                         to: '/explore'
                     }
                 ],
-                search: ''
             }
         },
         computed: {
@@ -81,7 +93,7 @@
         },
         components: {
             PageTopTab,
-            Search,
+            SearchInput,
             RepositoryListItem,
             CommonLoading,
             CommonLoadingWrapper,
@@ -90,6 +102,7 @@
             Container: styled.div``,
             TopNav: styled.div``,
             Main: styled.div``,
+            SearchWrapper: styled.div``,
             ContributedRepo: styled.div``,
             BubbleTitle: styled.h3``,
             StarredRepo: styled.div``,
@@ -118,8 +131,9 @@
     }
 
 
-    .search{
+    .search-wrapper{
         padding: 15px;
     }
+
 
 </style>

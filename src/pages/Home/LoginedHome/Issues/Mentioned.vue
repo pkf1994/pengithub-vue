@@ -4,7 +4,7 @@
                             :noDataFlag="noData"
                             type="issue"
                             noDataMsg="No issue to show">
-        <Pagination v-if="showPagination"
+        <IconPagination v-if="showPagination"
                     :totalCount="totalCount"
                     :loading="loading"
                     :perPage="perPage"

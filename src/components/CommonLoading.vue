@@ -3,14 +3,14 @@
         <Inner :class="size">
             <img alt="loading"
                  class="width-fit height-fit"
-                 src="../../assets/image/octocat-spinner-128.gif"/>
+                 src="../assets/image/octocat-spinner-128.gif"/>
         </Inner>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import LoadingIcon from '../LoadingIcon'
+    import LoadingIcon from './LoadingIcon'
     export default {
         props: {
             size: {
@@ -27,22 +27,22 @@
 </script>
 
 <style scoped>
-.container{
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-}
-.small{
-    height: 20px;
-    width: 20px;
-}
-.middle{
-    height: 45px;
-    width: 45px;
-}
-.small{
-    height: 60px;
-    width: 60px;
-}
+    .container{
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+    .small{
+        height: 20px;
+        width: 20px;
+    }
+    .middle{
+        height: 45px;
+        width: 45px;
+    }
+    .small{
+        height: 60px;
+        width: 60px;
+    }
 </style>

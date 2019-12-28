@@ -74,22 +74,22 @@
 </script>
 
 <style scoped>
-.container{
-    z-index: 2;
-    padding: 0;
-    margin-top: 0;
-    margin-bottom: -1px;
-    background-color: #fafbfc;
-}
-.pagination div{
-    padding: 10px 15px;
-    color: #444d56;
-    text-align: center;
-    border: 1px solid #d1d5da;
-    border-left-color: #fff;
-    border-bottom: 0;
-}
-.disable{
-    color: #c6cbd1 !important;
-}
+    .container{
+        z-index: 2;
+        padding: 0;
+        margin-top: 0;
+        margin-bottom: -1px;
+        background-color: #fafbfc;
+    }
+    .pagination div{
+        padding: 10px 15px;
+        color: #444d56;
+        text-align: center;
+        border: 1px solid #d1d5da;
+        border-left-color: #fff;
+        border-bottom: 0;
+    }
+    .disable{
+        color: #c6cbd1 !important;
+    }
 </style>

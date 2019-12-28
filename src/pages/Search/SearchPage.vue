@@ -21,15 +21,17 @@
             <SearchPane class="my-3 flex-column flex-items-stretch">
                 <InputWrapper>
                     <input aria-label="Search GitHub"
+                           v-model="localSearchQuery"
                            autocapitalize="off"
                            autocomplete="off"
                            autofocus=""
+                           ref="input"
                            class="search-input form-control input-block"
                            placeholder="Search GitHub"
                            spellcheck="false"
                            type="text"/>
                     </InputWrapper>
-                    <button class="btn ml-sm-2 mt-2 mt-sm-0" type="submit">Search</button>
+                    <button class="btn mt-2" ref="searchButton" type="submit" @click="search">Search</button>
             </SearchPane>
 
             <ProTip>
@@ -46,7 +48,11 @@
     import styled from 'vue-styled-components'
     import Vue from 'vue/dist/vue.js';
     import {SEARCH_PAGE_MODAL_CONTENT} from './contant'
+    import {SearchInput, WithSearchInputMixin} from '../../components'
+    import {MUTATION_SEARCH_SYNC_SEARCH_QUERY} from '../../store/modules/search/mutationTypes'
+    import {mapMutations} from "vuex";
     export default {
+        mixins: [WithSearchInputMixin],
         data(){
             return {
                 modalContent: SEARCH_PAGE_MODAL_CONTENT,
@@ -59,16 +65,14 @@
             }
         },
         mounted() {
-            this.interval = setInterval(() => {
-                this.switchTitle()
-            },5000)
+            this.initInterval()
         },
         destroyed() {
             window.clearInterval(this.interval)
         },
         methods: {
             showModal() {
-                this.$modal("Search cheat sheet",this.modalContent)
+                this.$modal("SearchInput cheat sheet",this.modalContent)
             },
             switchTitle(e) {
                 e && e.stopPropagation()
@@ -77,9 +81,15 @@
                     return
                 }
                 this.titleIndex += 1
+            },
+            initInterval() {
+                this.interval = setInterval(() => {
+                    this.switchTitle()
+                },5000)
             }
         },
         components: {
+            SearchInput,
             Container: styled.div``,
             Inner: styled.div``,
             Title: styled.h2``,

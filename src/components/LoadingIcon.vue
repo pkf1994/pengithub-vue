@@ -28,29 +28,29 @@
 </script>
 
 <style scoped lang="scss">
-.container{
-    animation: rotate 2s linear infinite;
-    circle{
-        animation: animate 4s linear infinite;
+    .container{
+        animation: rotate 2s linear infinite;
+        circle{
+            animation: animate 4s linear infinite;
+        }
     }
-}
-@keyframes rotate {
-    0%{
-          transform: rotate(0deg);
-      }
-    100%{
-          transform: rotate(360deg);
-      }
-}
-@keyframes animate {
-    0%,100%{
-        stroke-dashoffset: 200%
+    @keyframes rotate {
+        0%{
+            transform: rotate(0deg);
+        }
+        100%{
+            transform: rotate(360deg);
+        }
     }
-    50%{
-        stroke-dashoffset: 0%
+    @keyframes animate {
+        0%,100%{
+            stroke-dashoffset: 200%
+        }
+        50%{
+            stroke-dashoffset: 0%
+        }
+        50.1%{
+            stroke-dashoffset: 400%
+        }
     }
-    50.1%{
-        stroke-dashoffset: 400%
-    }
-}
 </style>

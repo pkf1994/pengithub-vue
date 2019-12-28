@@ -1,3 +1,5 @@
+import {util_queryParse} from "../../util";
+
 const CLIENT_ID = "125cb651f63615c6d362"
 const SCOPE = "repo repo_deployment repo:invite admin:repo_hook home admin:org admin:public_key admin:org_hook gist notifications delete_repo write:discussion read:discussion write:packages read:packages delete:packages admin:gpg_key workflow"
 const GITHUB_REST_API_BASE = "https://api.github.com"
@@ -23,5 +25,12 @@ export const API_USER_RECEIVED_EVENTS = user => `${GITHUB_REST_API_BASE}/users/$
 export const API_USER_ORG_EVENTS = (user,org) => `${GITHUB_REST_API_BASE}/users/${user}/events/orgs/${org}`
 
 export const API_USER_NOTIFICATIONS = `${GITHUB_REST_API_BASE}/notifications?all=true`
+
+export const API_TOP_LANGUAGES = "https://api.github.com/repos/drujensen/fib/Hello-World/languages"
+
+export const API_SEARCH = (type,param) => {
+    let query = util_queryParse.querify(param)
+    return `${GITHUB_REST_API_BASE}/search/${type}?${query}`
+}
 
 

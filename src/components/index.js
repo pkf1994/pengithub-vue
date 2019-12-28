@@ -5,12 +5,13 @@ import Button from './Button'
 import LogoutedHeader from './LogoutedHeader'
 import LoadingIcon from './LoadingIcon'
 import {HeaderDetachTopTab,PageTopTab,ComplexTopTab} from './TopTab'
-import Search from './Search'
+import SearchInput from './SearchInput'
 import CommonLoading from './CommonLoading'
 import CommonLoadingWrapper from './CommonLoadingWrapper'
 import {SimpleFooter,LabelsFooter} from './Footer'
 import Bubble from './Bubble'
-import Pagination from './Pagination'
+import {IconPagination,SimplePagination} from './Pagination'
+import WithSearchInputMixin from './WithSearchInputMixin'
 export {
     Button,
     AnimatedNumber,
@@ -21,11 +22,13 @@ export {
     HeaderDetachTopTab,
     PageTopTab,
     ComplexTopTab,
-    Search,
+    SearchInput,
     CommonLoading,
     CommonLoadingWrapper,
     SimpleFooter,
     LabelsFooter,
     Bubble,
-    Pagination
+    IconPagination,
+    SimplePagination,
+    WithSearchInputMixin
 }

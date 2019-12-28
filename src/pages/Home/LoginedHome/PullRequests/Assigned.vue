@@ -4,7 +4,7 @@
                             :noDataFlag="noData"
                             type="pullRequest"
                             noDataMsg="No pull request to show">
-        <Pagination v-if="showPagination"
+        <IconPagination v-if="showPagination"
                     :totalCount="totalCount"
                     :loading="loading"
                     :perPage="perPage"

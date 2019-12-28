@@ -9,10 +9,16 @@ export const STORE_ID = {
     HOME_ISSUES_ASSIGNED: 'home_issuesAssigned',
     HOME_ISSUES_MENTIONED: 'home_issuesMentioned',
     HOME_ISSUES: 'home_issues',
-    HOME_NOTIFICATIONS: 'home_notifications'
+    HOME_NOTIFICATIONS: 'home_notifications',
+    SEARCH_REPOSITORIES: 'search_repositories',
+    SEARCH_CODE: 'search_code',
+    SEARCH_ISSUES: 'search_issues',
+    SEARCH_COMMITS: 'search_commits',
+    SEARCH_TOPICS: 'search_topics',
+    SEARCH_USERS: 'search_users',
 }
 
-export const DEFAULT_PAGINATIONAL_DATA_STATE = (payload) => {
+export const GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE = (payload) => {
     payload = {
         perPage: 8,
         ...payload
@@ -28,6 +34,26 @@ export const DEFAULT_PAGINATIONAL_DATA_STATE = (payload) => {
             hasPreviousPage: false,
             startCursor: undefined,
             endCursor: undefined
+        }
+    }
+}
+
+export const REST_DEFAULT_PAGINATIONAL_DATA_STATE = (payload) => {
+    payload = {
+        perPage: 8,
+        ...payload
+    }
+    return {
+        data: [],
+        totalCount: 0,
+        perPage: payload.perPage,
+        currentPage: 0,
+        loading: false,
+        pageInfo: {
+            next: undefined,
+            last: undefined,
+            first: undefined,
+            prev: undefined
         }
     }
 }
