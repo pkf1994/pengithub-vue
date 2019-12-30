@@ -4,5 +4,14 @@ import util_dateFormat from './dateFormat'
 import util_color from './colorUtil'
 import util_animatedScrollTo from './animatedScrollTo'
 import util_uniqueArray from './uniqueArray'
+import util_adjustStyle from './adjustStyle'
 import './protoExtend'
-export {util_queryParse,util_dateFormat,util_numberFormat,util_color,util_animatedScrollTo,util_uniqueArray}
+
+export {
+    util_queryParse,
+    util_dateFormat,
+    util_numberFormat,
+    util_color,
+    util_animatedScrollTo,
+    util_uniqueArray,
+    util_adjustStyle}

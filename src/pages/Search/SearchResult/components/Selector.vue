@@ -1,14 +1,20 @@
 <template>
     <Container class="px-2 pt-2 d-flex flex-items-center">
         <label for="codesearch_sort_repos" class="col-3 text-small px-2">{{label}}</label>
-        <select id="codesearch_sort_repos" v-model="selectedValue" class="col-9 form-select mr-2">
-            <slot></slot>
-        </select>
+        <SelectWrapper class="col-9 mr-2 relative">
+            <select id="codesearch_sort_repos"
+                    :disable="disable"
+                    v-model="selectedValue"
+                    class="form-select width-full">
+                <slot></slot>
+            </select>
+        </SelectWrapper>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
+    import {LoadingIcon} from '../../../../components'
     export default {
         props: {
             label: {
@@ -19,30 +25,48 @@
                 type: Function,
                 required: true
             },
-            options: {
-                type: Array,
-                default: () => []
+            initialValue: {
+                type: String,
+                default: ""
+            },
+            disable: {
+                type: Boolean,
+                default: false
             }
         },
         data() {
             return {
-                selectedValue: ""
+                selectedValue: this.initialValue
             }
         },
         watch: {
             selectedValue(newOne) {
                 this.syncSelectedValue(newOne)
             },
-            options(newOne) {
-                this.selectedValue = newOne[0].language
+            initialValue(newOne) {
+                this.selectedValue = newOne
             }
         },
         components: {
-            Container: styled.div``
+            LoadingIcon,
+            Container: styled.div``,
+            SelectWrapper: styled.div``,
+            LoadingWrapper: styled.div``,
+            Inner: styled.div``
         }
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.loading-wrapper{
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 8px;
+    .inner{
+        height: 20px;
+        width: 20px;
+    }
+}
 
 </style>

@@ -31,11 +31,11 @@ export const authRequiredPost = (url, config = {}) => {
     })
 }
 
-export const authRequiredGitHubGraphqlApiQuery = (query,variables = {}) => {
+export const authRequiredGitHubGraphqlApiQuery = (query,config = {}) => {
     return authRequiredPost(API_GRAPHQL_ENDPOINT,
         {
             query,
-            variables
+            ...config
         }
     )
 }

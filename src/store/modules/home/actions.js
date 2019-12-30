@@ -3,23 +3,13 @@ import {authRequiredGet, authRequiredGitHubGraphqlApiQuery, commonGet} from "../
 import {STORE_ID} from "../constant";
 import {
     ACTION_HOME_REQUEST_DASHBOARD_DATA,
-    ACTION_HOME_REQUEST_ISSUES_ASSIGNED,
-    ACTION_HOME_REQUEST_ISSUES_CREATED,
-    ACTION_HOME_REQUEST_ISSUES_MENTIONED,
-    ACTION_HOME_REQUEST_NOTIFICATIONS_DATA,
-    ACTION_HOME_REQUEST_PULL_REQUESTS_ASSIGNED,
-    ACTION_HOME_REQUEST_PULL_REQUESTS_CREATED,
-    ACTION_HOME_REQUEST_PULL_REQUESTS_MENTIONED
+    ACTION_HOME_REQUEST_ISSUES,
+    ACTION_HOME_REQUEST_NOTIFICATIONS_DATA
 } from "./actionTypes";
 import {
     MUTATION_HOME_RESOLVE_DASHBOARD_DATA,
-    MUTATION_HOME_RESOLVE_ISSUES_ASSIGNED,
-    MUTATION_HOME_RESOLVE_ISSUES_CREATED,
-    MUTATION_HOME_RESOLVE_ISSUES_MENTIONED,
+    MUTATION_HOME_RESOLVE_ISSUES,
     MUTATION_HOME_RESOLVE_NOTIFICATIONS_DATA,
-    MUTATION_HOME_RESOLVE_PR_ASSIGNED,
-    MUTATION_HOME_RESOLVE_PR_CREATED,
-    MUTATION_HOME_RESOLVE_PR_MENTIONED
 } from "./mutationTypes";
 import {
     GRAPHQL_DASHBOARD,
@@ -89,164 +79,75 @@ export const actions = {
         }
     },
 
-    async [ACTION_HOME_REQUEST_PULL_REQUESTS_CREATED] (context, payload) {
+    async [ACTION_HOME_REQUEST_ISSUES] (context,payload) {
         payload = {
+            changePage: false,
             forward: true,
-                ...payload
-        }
-        try{
-            commitTriggerLoadingMutation(context,STORE_ID.HOME_PULL_REQUESTS_CREATED,true)
-
-            const perPage = context.rootState.home.pullRequests.created.perPage
-            const after = context.rootState.home.pullRequests.created.pageInfo.endCursor
-            const before = context.rootState.home.pullRequests.created.pageInfo.startCursor
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_VIEWER_PULL_REQUEST_CREATED(payload.forward ? {perPage,after} : {perPage,before}))
-
-            context.commit({
-                type: MUTATION_HOME_RESOLVE_PR_CREATED,
-                ...payload,
-                ...res.data.data.viewer.pullRequests
-            })
-
-            commitTriggerLoadingMutation(context,STORE_ID.HOME_PULL_REQUESTS_CREATED,false)
-        }catch (e) {
-            handleException(e)
-            commitTriggerLoadingMutation(context,STORE_ID.HOME_PULL_REQUESTS_CREATED,false)
-        }
-    },
-
-    async [ACTION_HOME_REQUEST_PULL_REQUESTS_ASSIGNED] (context,payload) {
-        payload = {
-            forward: true,
+            issueType: "issue",
+            meta: "created",
             ...payload
         }
+        const storeId = 'home_' + payload.issueType + '_' + payload.meta
         try{
-            commitTriggerLoadingMutation(context, STORE_ID.HOME_PULL_REQUESTS_ASSIGNED,true)
-
-            const perPage = context.rootState.home.pullRequests.assigned.perPage
-            const after = context.rootState.home.pullRequests.assigned.pageInfo.endCursor
-            const before = context.rootState.home.pullRequests.assigned.pageInfo.startCursor
+            commitTriggerLoadingMutation(context,storeId,true)
+            const perPage = context.rootState.home[payload.issueType][payload.meta].perPage
+            const after = context.rootState.home[payload.issueType][payload.meta].pageInfo.endCursor
+            const before = context.rootState.home[payload.issueType][payload.meta].pageInfo.startCursor
             const login = context.rootState.oauth.viewerInfo.login
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_VIEWER_PR_ASSIGNED(payload.forward ? {perPage,login,after} : {perPage,login,before}))
+            let _payload
+            if(!payload.changePage) {
+                _payload = {
+                    perPage,login
+                }
+            }else{
+                _payload = payload.forward ? {perPage,login,after} : {perPage,login,before}
+            }
 
+            let url
+            if(payload.issueType === "pullRequest") {
+               switch (payload.meta) {
+                   case "created":
+                       url = GRAPHQL_VIEWER_PULL_REQUEST_CREATED(_payload)
+                       break
+                   case "assigned":
+                       url = GRAPHQL_VIEWER_PR_ASSIGNED(_payload)
+                       break
+                   default:
+                       url = GRAPHQL_VIEWER_PR_MENTIONED(_payload)
+               }
+            }else{
+                switch (payload.meta) {
+                    case "created":
+                        url = GRAPHQL_VIEWER_ISSUES_CREATED(_payload)
+                        break
+                    case "assigned":
+                        url = GRAPHQL_VIEWER_ISSUES_ASSIGNED(_payload)
+                        break
+                    default:
+                        url = GRAPHQL_VIEWER_ISSUES_MENTIONED(_payload)
+                }
+            }
+
+            const res = await authRequiredGitHubGraphqlApiQuery(url)
+            let data
+            if(payload.meta === "created") {
+                data = res.data.data.viewer[`${payload.issueType}s`]
+            }else{
+                data = res.data.data.search
+            }
             context.commit({
-                type: MUTATION_HOME_RESOLVE_PR_ASSIGNED,
-                ...res.data.data.search,
+                type: MUTATION_HOME_RESOLVE_ISSUES,
                 ...payload,
+                ...data
             })
 
-            commitTriggerLoadingMutation(context, STORE_ID.HOME_PULL_REQUESTS_ASSIGNED,false)
-        }catch (e) {
-            commitTriggerLoadingMutation(context, STORE_ID.HOME_PULL_REQUESTS_ASSIGNED,false)
-            handleException(e)
-        }
-    },
-
-    async [ACTION_HOME_REQUEST_PULL_REQUESTS_MENTIONED] (context,payload) {
-        payload = {
-            forward: true,
-            ...payload
-        }
-        try{
-            commitTriggerLoadingMutation(context, STORE_ID.HOME_PULL_REQUESTS_MENTIONED,true)
-
-            const perPage = context.rootState.home.pullRequests.mentioned.perPage
-            const after = context.rootState.home.pullRequests.mentioned.pageInfo.endCursor
-            const before = context.rootState.home.pullRequests.mentioned.pageInfo.startCursor
-            const login = context.rootState.oauth.viewerInfo.login
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_VIEWER_PR_MENTIONED(payload.forward ? {login,perPage,after} : {login,perPage,before}))
-
-            context.commit({
-                type: MUTATION_HOME_RESOLVE_PR_MENTIONED,
-                ...res.data.data.search,
-                ...payload,
-            })
-
-            commitTriggerLoadingMutation(context, STORE_ID.HOME_PULL_REQUESTS_MENTIONED,false)
-        }catch (e) {
-            commitTriggerLoadingMutation(context, STORE_ID.HOME_PULL_REQUESTS_MENTIONED,false)
-            handleException(e)
-        }
-    },
-
-    async [ACTION_HOME_REQUEST_ISSUES_CREATED] (context, payload) {
-        payload = {
-            forward: true,
-            ...payload
-        }
-        try{
-            commitTriggerLoadingMutation(context,STORE_ID.HOME_ISSUES_CREATED,true)
-
-            const perPage = context.rootState.home.issues.created.perPage
-            const after = context.rootState.home.issues.created.pageInfo.endCursor
-            const before = context.rootState.home.issues.created.pageInfo.startCursor
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_VIEWER_ISSUES_CREATED(payload.forward ? {perPage,after} : {perPage,before}))
-            context.commit({
-                type: MUTATION_HOME_RESOLVE_ISSUES_CREATED,
-                ...res.data.data.viewer.issues,
-                ...payload,
-            })
-
-            commitTriggerLoadingMutation(context,STORE_ID.HOME_ISSUES_CREATED,false)
+            commitTriggerLoadingMutation(context,storeId,false)
         }catch (e) {
             handleException(e)
-            commitTriggerLoadingMutation(context,STORE_ID.HOME_ISSUES_CREATED,false)
-        }
-    },
-
-    async [ACTION_HOME_REQUEST_ISSUES_ASSIGNED] (context,payload) {
-        payload = {
-            forward: true,
-            ...payload
-        }
-        try{
-            commitTriggerLoadingMutation(context, STORE_ID.HOME_ISSUES_ASSIGNED,true)
-
-            const perPage = context.rootState.home.issues.assigned.perPage
-            const after = context.rootState.home.issues.assigned.pageInfo.endCursor
-            const before = context.rootState.home.issues.assigned.pageInfo.startCursor
-            const login = context.rootState.oauth.viewerInfo.login
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_VIEWER_ISSUES_ASSIGNED(payload.forward ? {perPage,after,login} : {perPage,before,login}))
-
-            context.commit({
-                type: MUTATION_HOME_RESOLVE_ISSUES_ASSIGNED,
-                ...res.data.data.search,
-                ...payload,
-            })
-
-            commitTriggerLoadingMutation(context, STORE_ID.HOME_ISSUES_ASSIGNED,false)
-        }catch (e) {
-            commitTriggerLoadingMutation(context, STORE_ID.HOME_ISSUES_ASSIGNED,false)
-            handleException(e)
-        }
-    },
-
-    async [ACTION_HOME_REQUEST_ISSUES_MENTIONED] (context,payload) {
-        payload = {
-            forward: true,
-            ...payload
-        }
-        try{
-            commitTriggerLoadingMutation(context, STORE_ID.HOME_ISSUES_MENTIONED,true)
-
-            const perPage = context.rootState.home.issues.mentioned.perPage
-            const after = context.rootState.home.issues.mentioned.pageInfo.endCursor
-            const before = context.rootState.home.issues.mentioned.pageInfo.startCursor
-            const login = context.rootState.oauth.viewerInfo.login
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_VIEWER_ISSUES_MENTIONED(payload.forward ? {perPage,login,after} : {perPage,login,before}))
-
-            context.commit({
-                type: MUTATION_HOME_RESOLVE_ISSUES_MENTIONED,
-                ...res.data.data.search,
-                ...payload,
-            })
-
-            commitTriggerLoadingMutation(context, STORE_ID.HOME_ISSUES_MENTIONED,false)
-        }catch (e) {
-            commitTriggerLoadingMutation(context, STORE_ID.HOME_ISSUES_MENTIONED,false)
-            handleException(e)
+            commitTriggerLoadingMutation(context,storeId,false)
         }
     }
+
 }
 
 

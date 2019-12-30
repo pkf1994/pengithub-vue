@@ -12,6 +12,8 @@ import {SimpleFooter,LabelsFooter} from './Footer'
 import Bubble from './Bubble'
 import {IconPagination,SimplePagination} from './Pagination'
 import WithSearchInputMixin from './WithSearchInputMixin'
+import CancelNetworkOnDestroyMixin from './CancelNetworkOnDestroyMixin'
+import {AnimatedHeightLoadingWrapper,AnimatedHeightWrapper} from "./AnimatedHeightWrapper";
 export {
     Button,
     AnimatedNumber,
@@ -30,5 +32,8 @@ export {
     Bubble,
     IconPagination,
     SimplePagination,
-    WithSearchInputMixin
+    WithSearchInputMixin,
+    CancelNetworkOnDestroyMixin,
+    AnimatedHeightLoadingWrapper,
+    AnimatedHeightWrapper
 }

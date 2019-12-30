@@ -1,9 +1,10 @@
 <template>
-    <Container class="py-4 border-bottom flex flex-justify-start">
+    <Container class="py-4 flex flex-justify-start">
         <IconColumn class="flex-shrink-0 mr-2">
             <svg height="16"
                  style="color: #6a737d"
                  class="d-inline-block v-align-text-bottom"
+                 fill="currentColor"
                  viewBox="0 0 12 16"
                  version="1.1"
                  width="12"
@@ -13,17 +14,61 @@
 
         <Main class="mt-n1">
             <FullName class="f4 text-normal">
-                <router-link :to=`/${repository.full_name}`>{{repository.full_name}}</router-link>
+                <router-link to="/search" :meta="'c' + randomMeta + 'd'">{{repository.full_name}}</router-link>
             </FullName>
-            <Description class="mb-1">
+            <Description class="mb-1" :meta="'c' + randomMeta + 'd'">
                 {{repository.description}}
             </Description>
+            <Topics>
+                <AnimatedHeightWrapper>
+                    <router-link :meta="'a' + randomMeta + 'b'"
+                                 to="/search"
+                                 class="topic-item d-inline-block topic-tag f6 px-2 mx-0"
+                                 v-for="item in topics">
+                        {{item.topic.name}}
+                    </router-link>
+                </AnimatedHeightWrapper>
+            </Topics>
+
+            <MultiInfo class="d-flex flex-wrap text-small text-gray">
+                <Stargazers class="mr-3">
+                    <router-link class="muted-link"
+                                 to="/search">
+                        <svg aria-label="star" class="v-align-text-bottom d-inline-block" fill="currentColor" viewBox="0 0 14 16" version="1.1" width="14" height="16" role="img"><path fill-rule="evenodd" d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74L14 6z"></path></svg>
+                        {{stars}}
+                    </router-link>
+                </Stargazers>
+                <Language class="mr-3">
+                    <span>
+                        <span v-if="repository.languageColor" class="repo-language-color" :style="{backgroundColor: repository.languageColor}"></span>
+                        &nbsp;
+                        <span>{{repository.language}}</span>
+                    </span>
+                </Language>
+                <License class="mr-3" v-if="repository.license">
+                    {{repository.license.spdx_id}} license
+                </License>
+                <UpdateAt class="mr-3">
+                    Updated
+                    <span class="no-wrap">
+                        {{date}}
+                    </span>
+                </UpdateAt>
+                <HelpWantedIssues v-if="repository.helpWantedIssuesCount > 0">
+                    <router-link class="muted-link" to='/search'>
+                        {{repository.helpWantedIssuesCount}} {{repository.helpWantedIssuesCount > 1 ? "issues" : "issue"}} need help
+                    </router-link>
+                </HelpWantedIssues>
+            </MultiInfo>
         </Main>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
+    import {util_numberFormat, util_dateFormat, util_adjustStyle} from '../../../../util'
+    import {mapState} from "vuex";
+    import {AnimatedHeightWrapper} from '../../../../components'
     export default {
         props: {
             repository: {
@@ -31,16 +76,72 @@
                 required: true
             }
         },
+        data() {
+            return {
+                randomMeta: 1
+            }
+        },
+        computed: {
+            ...mapState({
+                searchQuery: state => state.search.searchQuery
+            }),
+            stars: function () {
+                return util_numberFormat.thousands2K2M(this.repository.stargazers_count)
+            },
+            date: function () {
+                return util_dateFormat.dateFormat("zzz dd, yyyy",new Date(this.repository.updated_at))
+            },
+            topics: function () {
+                return this.repository.topics
+            }
+        },
+        created(){
+            this.randomMeta = parseInt(Math.random() * 10000)
+        },
+        mounted() {
+            util_adjustStyle.highlightKeyword(`[meta=c${this.randomMeta}d]`,this.searchQuery)
+        },
+        watch: {
+            topics() {
+                this.$nextTick(() => {
+                    util_adjustStyle.adjustInlineBlockStyle(`.topic-item[meta=a${this.randomMeta}b]`)
+                })
+            }
+        },
         components: {
+            AnimatedHeightWrapper,
             Container: styled.div``,
             IconColumn: styled.div``,
             Main: styled.div``,
             FullName: styled.div``,
-            Description: styled.p``
+            Description: styled.p``,
+            Topics: styled.div``,
+            MultiInfo: styled.div``,
+            Stargazers: styled.div``,
+            Language: styled.div``,
+            License: styled.div``,
+            UpdateAt: styled.div``,
+            HelpWantedIssues: styled.div``,
+
         }
     }
 </script>
 
 <style scoped>
-
+.topic-tag{
+    display: inline-block;
+    padding: .3em .9em;
+    margin: 0 .5em .5em 0;
+    white-space: nowrap;
+    background-color: #f1f8ff;
+    border-radius: 3px
+}
+.repo-language-color{
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
 </style>

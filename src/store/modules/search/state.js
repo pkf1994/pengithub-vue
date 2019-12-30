@@ -1,33 +1,30 @@
 import {REST_DEFAULT_PAGINATIONAL_DATA_STATE} from "../constant";
-
 export default {
     searchQuery: "",
     searchResult: {
         repositories: {
             ...REST_DEFAULT_PAGINATIONAL_DATA_STATE(),
+            loadingCount: false,
+            loadingTopicsLanguageColorHelpWantedIssuesCount: false,
+            loadingFirstTopic: false,
+            firstTopic: {},
             counts: [],
             searchSuffix:{
                 language: "Any",
             },
-            query: {
-                sort: undefined
-            }
+            query: undefined
         },
         code: {
             ...REST_DEFAULT_PAGINATIONAL_DATA_STATE(),
             searchSuffix:{
                 language: "Any",
             },
-            query: {
-                sort: undefined
-            }
+            query: undefined
         },
         commits: {
             ...REST_DEFAULT_PAGINATIONAL_DATA_STATE(),
 
-            query: {
-                sort: undefined
-            }
+            query: undefined
         },
         issues: {
             ...REST_DEFAULT_PAGINATIONAL_DATA_STATE(),
@@ -35,27 +32,21 @@ export default {
                 language: "Any",
                 state: "Any",
             },
-            query: {
-                sort: undefined
-            }
+            query: undefined
         },
         users: {
             ...REST_DEFAULT_PAGINATIONAL_DATA_STATE(),
             searchSuffix:{
                 language: "Any",
             },
-            query: {
-                sort: undefined
-            }
+            query: undefined
         },
         topics: {
             ...REST_DEFAULT_PAGINATIONAL_DATA_STATE(),
             searchSuffix: {
 
             },
-            query: {
-                sort: undefined
-            }
+            query: undefined
         },
     }
 }

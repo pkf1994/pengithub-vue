@@ -57,11 +57,11 @@
         methods: {
             getPreviousPage: function() {
                 if(!this.pageInfo.hasPreviousPage || this.loading) return
-                this.dataGetter({forward:false})
+                this.dataGetter({forward:false,changePage: true})
             },
             getNextPage: function () {
                 if(!this.pageInfo.hasNextPage || this.loading) return
-                this.dataGetter({forward:true})
+                this.dataGetter({forward:true,changePage: true})
             }
         },
         components: {

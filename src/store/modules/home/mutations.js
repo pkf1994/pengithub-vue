@@ -2,13 +2,8 @@ import {CROSS_MUTATION_TRIGGER_LOADING} from "../crossMutation";
 import {STORE_ID} from "../constant";
 import {
     MUTATION_HOME_RESOLVE_DASHBOARD_DATA,
-    MUTATION_HOME_RESOLVE_ISSUES_ASSIGNED,
-    MUTATION_HOME_RESOLVE_ISSUES_CREATED,
-    MUTATION_HOME_RESOLVE_ISSUES_MENTIONED,
-    MUTATION_HOME_RESOLVE_NOTIFICATIONS_DATA,
-    MUTATION_HOME_RESOLVE_PR_ASSIGNED,
-    MUTATION_HOME_RESOLVE_PR_CREATED,
-    MUTATION_HOME_RESOLVE_PR_MENTIONED
+    MUTATION_HOME_RESOLVE_ISSUES,
+    MUTATION_HOME_RESOLVE_NOTIFICATIONS_DATA
 } from "./mutationTypes";
 
 
@@ -24,58 +19,13 @@ export default {
         state.notifications.data = payload.data
     },
 
-    [MUTATION_HOME_RESOLVE_PR_CREATED](state,payload) {
-        state.pullRequests.created = Object.assign(state.pullRequests.created,payload)
+    [MUTATION_HOME_RESOLVE_ISSUES](state,payload) {
+        state[payload.issueType][payload.meta] = Object.assign(state[payload.issueType][payload.meta],payload)
+        if(!payload.changePage) return
         if(payload.forward) {
-            state.pullRequests.created.currentPage += 1
+            state[payload.issueType][payload.meta].currentPage += 1
         } else {
-            state.pullRequests.created.currentPage += -1
-        }
-    },
-
-    [MUTATION_HOME_RESOLVE_PR_ASSIGNED](state,payload) {
-        state.pullRequests.assigned = Object.assign(state.pullRequests.assigned,payload)
-        if(payload.forward) {
-            state.pullRequests.assigned.currentPage += 1
-        } else {
-            state.pullRequests.assigned.currentPage += -1
-        }
-    },
-
-    [MUTATION_HOME_RESOLVE_PR_MENTIONED](state,payload) {
-        state.pullRequests.mentioned = Object.assign(state.pullRequests.mentioned,payload)
-        if(payload.forward) {
-            state.pullRequests.mentioned.currentPage += 1
-        } else {
-            state.pullRequests.mentioned.currentPage += -1
-        }
-    },
-
-    [MUTATION_HOME_RESOLVE_ISSUES_CREATED](state,payload) {
-        state.issues.created = Object.assign(state.issues.created,payload)
-        if(payload.forward) {
-            state.issues.created.currentPage += 1
-        } else {
-            state.issues.created.currentPage += -1
-        }
-    },
-
-    [MUTATION_HOME_RESOLVE_ISSUES_ASSIGNED](state,payload) {
-        state.issues.assigned = Object.assign(state.issues.assigned,payload)
-        if(payload.forward) {
-            state.issues.assigned.currentPage += 1
-        } else {
-            state.issues.assigned.currentPage += -1
-        }
-    },
-
-    [MUTATION_HOME_RESOLVE_ISSUES_MENTIONED](state,payload) {
-        state.issues.mentioned = Object.assign(state.issues.mentioned,payload)
-        state.issues.mentioned.currentPage += 1
-        if(payload.forward) {
-            state.issues.mentioned.currentPage += 1
-        } else {
-            state.issues.mentioned.currentPage += -1
+            state[payload.issueType][payload.meta].currentPage += -1
         }
     },
 
@@ -85,17 +35,17 @@ export default {
         }else if(payload.storeId === STORE_ID.HOME_NOTIFICATIONS) {
             state.notifications.loading = payload.loading
         }else if(payload.storeId === STORE_ID.HOME_PULL_REQUESTS_CREATED) {
-            state.pullRequests.created.loading = payload.loading
+            state.pullRequest.created.loading = payload.loading
         }else if(payload.storeId === STORE_ID.HOME_PULL_REQUESTS_ASSIGNED) {
-            state.pullRequests.assigned.loading = payload.loading
+            state.pullRequest.assigned.loading = payload.loading
         }else if(payload.storeId === STORE_ID.HOME_PULL_REQUESTS_MENTIONED) {
-            state.pullRequests.mentioned.loading = payload.loading
+            state.pullRequest.mentioned.loading = payload.loading
         }else if(payload.storeId === STORE_ID.HOME_ISSUES_CREATED) {
-            state.issues.created.loading = payload.loading
+            state.issue.created.loading = payload.loading
         }else if(payload.storeId === STORE_ID.HOME_ISSUES_ASSIGNED) {
-            state.issues.assigned.loading = payload.loading
+            state.issue.assigned.loading = payload.loading
         }else if(payload.storeId === STORE_ID.HOME_ISSUES_MENTIONED) {
-            state.issues.mentioned.loading = payload.loading
+            state.issue.mentioned.loading = payload.loading
         }
     }
 }

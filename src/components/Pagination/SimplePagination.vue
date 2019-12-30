@@ -1,13 +1,16 @@
 <template>
     <Container class="container pagination flex-row-center">
-        <Left class="flex-grow-1"
+        <Left class="flex-grow-1 flex-row-center width-full"
               :class="{disable: !pageInfo.prev}"
-              @click="getPreviousPage">Previous</Left>
-        <PageInfo >{{currentPage}} of {{pageInfo.last.page}}</PageInfo>
-        <Right class="flex-grow-1"
-               style="border-right: 0"
+              @click="prev">Previous</Left>
+        <PageInfo >
+            <strong style="color: #586069;">
+                {{currentPage}} of {{pageInfo.last.page}}
+            </strong>
+        </PageInfo>
+        <Right class="flex-grow-1 flex-row-center width-full"
                :class="{disable: !pageInfo.next}"
-               @click="getNextPage">Next</Right>
+               @click="next">Next</Right>
     </Container>
 </template>
 
@@ -24,29 +27,29 @@
                 type: Object,
                 required: true
             },
-            currentPage: {
-                type: Number,
-                required: true
-            },
-            totalCount: {
-                type: Number,
-                required: true
-            },
-            perPage: {
-                type: Number,
-                required: true
-            },
-            dataGetter: {
+            prev: {
                 type: Function,
                 required: true
+            },
+            next: {
+                type: Function,
+                required: true
+            },
+            scrollTargetSelector: {
+                type: String,
+                default: undefined
+            },
+            scrollElSelector: {
+                type: String,
+                default: undefined
             }
         },
         computed: {
             currentPage: function () {
                 if(this.pageInfo.prev) {
-                    return this.pageInfo.prev.page + 1
+                    return parseInt(this.pageInfo.prev.page) + 1
                 }else if(this.pageInfo.next) {
-                    return this.pageInfo.next.page - 1
+                    return parseInt(this.pageInfo.next.page) - 1
                 }
                 return 1
             }
@@ -54,20 +57,21 @@
         watch: {
             loading: function (newOne, oldOne) {
                 if(!newOne) {
-                    console.log("scroll")
-                    util_animatedScrollTo.scrollTo(document.getElementById("app-container"),0)
+                    if(this.scrollTargetSelector && this.scrollElSelector) {
+                        util_animatedScrollTo.scrollToEl(
+                            document.querySelector(this.scrollTargetSelector),
+                            document.querySelector(this.scrollElSelector),
+                            8)
+                        return
+                    }
+                    if(this.scrollElSelector) {
+                        util_animatedScrollTo.scrollTo(document.querySelector(this.scrollElSelector),0,8)
+                    }
                 }
             }
         },
         methods: {
-            getPreviousPage: function() {
-                if(!this.pageInfo.prev || this.loading) return
-                this.dataGetter({changePage:true,forward:false})
-            },
-            getNextPage: function () {
-                if(!this.pageInfo.next || this.loading) return
-                this.dataGetter({changePage:true,forward:true})
-            }
+
         },
         components: {
             Container:styled.div``,
@@ -87,16 +91,24 @@
         background-color: #fafbfc;
     }
     .pagination div{
-        padding: 10px 15px;
-        color: #444d56;
-        text-align: center;
-        border: 1px solid #d1d5da;
-        border-left-color: #fff;
-        border-bottom: 0;
+        position: relative;
+        float: left;
+        padding: 7px 12px;
+        margin-left: -1px;
+        font-size: 13px;
+        font-style: normal;
+        font-weight: 600;
+        color: #0366d6;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        user-select: none;
+        background: #fff;
+        border: 1px solid #e1e4e8;
     }
     .disable{
-        color: #d1d5da;
-        cursor: default;
-        background-color: #fafbfc;
+        color: #d1d5da !important;
+        cursor: default !important;
+        background-color: #fafbfc !important;
     }
 </style>

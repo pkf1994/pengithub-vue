@@ -9,7 +9,7 @@
                     :loading="loading"
                     :perPage="perPage"
                     :currentPage="currentPage"
-                    :dataGetter="action_getData"
+                    :dataGetter="pagination_getData"
                     :pageInfo="pageInfo"/>
     </BaseIssuesPageTemplate>
 </template>
@@ -22,18 +22,28 @@
         mixins: [BaseIssuesPageMixin],
         computed: {
             ...mapState({
-                loading: state => state.home.pullRequests.mentioned.loading,
-                data: state => state.home.pullRequests.mentioned.nodes,
-                pageInfo: state => state.home.pullRequests.mentioned.pageInfo,
-                totalCount: state => state.home.pullRequests.mentioned.totalCount,
-                currentPage: state => state.home.pullRequests.mentioned.currentPage,
-                perPage: state => state.home.pullRequests.mentioned.perPage
+                loading: state => state.home.pullRequest.mentioned.loading,
+                data: state => state.home.pullRequest.mentioned.nodes,
+                pageInfo: state => state.home.pullRequest.mentioned.pageInfo,
+                totalCount: state => state.home.pullRequest.mentioned.totalCount,
+                currentPage: state => state.home.pullRequest.mentioned.currentPage,
+                perPage: state => state.home.pullRequest.mentioned.perPage
+            })
+        },
+        created(){
+            this.action_getData({
+                issueType: "pullRequest",
+                meta: "mentioned"
             })
         },
         methods: {
-            ...mapActions({
-                action_getData: ACTION_HOME_REQUEST_PULL_REQUESTS_MENTIONED
-            })
+            pagination_getData(payload){
+                this.action_getData({
+                    issueType: "pullRequest",
+                    meta: "mentioned",
+                    ...payload
+                })
+            }
         }
     }
 </script>

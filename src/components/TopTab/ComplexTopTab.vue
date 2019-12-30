@@ -5,7 +5,7 @@
                      :key="tabItem.label"
                      :to="tabItem.to">
             <span>{{tabItem.label}}</span>
-            <span class="ml-1 mt-1 meta">
+            <span class="ml-1 mt-1 meta" v-if="tabItem.meta">
                 {{tabItem.meta}}
             </span>
         </router-link>

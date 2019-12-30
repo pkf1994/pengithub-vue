@@ -9,7 +9,7 @@
                     :loading="loading"
                     :perPage="perPage"
                     :currentPage="currentPage"
-                    :dataGetter="action_getData"
+                    :dataGetter="pagination_getData"
                     :pageInfo="pageInfo"/>
     </BaseIssuesPageTemplate>
 </template>
@@ -22,19 +22,29 @@
         mixins: [BaseIssuesPageMixin],
         computed: {
             ...mapState({
-                loading: state => state.home.pullRequests.assigned.loading,
-                data: state => state.home.pullRequests.assigned.nodes,
-                pageInfo: state => state.home.pullRequests.assigned.pageInfo,
-                totalCount: state => state.home.pullRequests.assigned.totalCount,
-                currentPage: state => state.home.pullRequests.assigned.currentPage,
-                perPage: state => state.home.pullRequests.assigned.perPage
+                loading: state => state.home.pullRequest.assigned.loading,
+                data: state => state.home.pullRequest.assigned.nodes,
+                pageInfo: state => state.home.pullRequest.assigned.pageInfo,
+                totalCount: state => state.home.pullRequest.assigned.totalCount,
+                currentPage: state => state.home.pullRequest.assigned.currentPage,
+                perPage: state => state.home.pullRequest.assigned.perPage
+            })
+        },
+        created(){
+            this.action_getData({
+                issueType: "pullRequest",
+                meta: "assigned"
             })
         },
         methods: {
-            ...mapActions({
-                action_getData: ACTION_HOME_REQUEST_PULL_REQUESTS_ASSIGNED
-            })
-        },
+            pagination_getData(payload){
+                this.action_getData({
+                    issueType: "pullRequest",
+                    meta: "assigned",
+                    ...payload
+                })
+            }
+        }
     }
 </script>
 

@@ -20,7 +20,12 @@
             }
         },
         methods: {
-            showToast(toastContent,option = {type: "notice",duration: 2000}) {
+            showToast(toastContent,option) {
+                option = {
+                    type: "notice",
+                    duration: 2000,
+                    ...option
+                }
                 const _this = this
                 this.toastContent = toastContent
                 this.type = option.type

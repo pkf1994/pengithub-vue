@@ -12,7 +12,7 @@ const HomeIssuesCreated = () => import('../pages/Home/LoginedHome/Issues/Created
 const HomeIssuesAssigned = () => import('../pages/Home/LoginedHome/Issues/Assigned.vue')
 const HomeIssuesMentioned = () => import('../pages/Home/LoginedHome/Issues/Mentioned.vue')
 const Search = () => import('../pages/Search/Search.vue')
-const SearchResultRepositories = () => import('../pages/Search/SearchResult/Repositories.vue')
+const SearchResultRepositories = () => import('../pages/Search/SearchResult/Repositorires/Repositories.vue')
 const Logout = () => import('../pages/Logout/Logout.vue')
 
 export const ROUTE_HOME = 'route-home'

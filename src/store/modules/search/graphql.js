@@ -111,18 +111,28 @@ export const GRAPHQL_COUNT_OF_REPOSITORIES_GROUP_BY_LANGUAGE = (query,languageLi
     return `{${ql}}`
 }
 
-export const GRAPHQL_TOPICS_OF_REPOSITORIES = repositories => {
+export const GRAPHQL_TOPICS_AND_LANGUAGE_COLOR_AND_HELP_WANTED_ISSUES_COUNT_OF_REPOSITORIES = repositories => {
     let ql = ""
     repositories.forEach((item,index) => {
         ql = `
             ${ql}
             repository${index}: repository(name:"${item.name}", owner: "${item.owner.login}") {
                nameWithOwner
-               repositoryTopics(first: 10) {
+               languages(first: 1) {
+                  nodes {
+                    name
+                    color
+                         }
+                    }
+                     issues(labels: ["help wanted"], states: OPEN) {
+                        totalCount
+                    }
+                  repositoryTopics(first: 10) {
                   nodes {
                     topic {
                       name
                     }
+                   
                   }
                 }
               }

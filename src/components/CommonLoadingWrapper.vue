@@ -1,7 +1,7 @@
 <template>
     <Container>
         <slot></slot>
-        <CommonLoading v-if="loading"/>
+        <CommonLoading :preventClickEvent="preventClickEvent" :position="position" v-if="loading"/>
     </Container>
 </template>
 
@@ -10,9 +10,17 @@
     import CommonLoading from './CommonLoading'
     export default {
         props: {
+            preventClickEvent: {
+                type: Boolean,
+                default: true
+            },
             loading: {
                 type: Boolean,
                 required: true
+            },
+            position: {
+                type: String,
+                default: 'center'
             },
             transitionName: {
                 type: String,

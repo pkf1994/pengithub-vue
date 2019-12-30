@@ -23,31 +23,50 @@
 <script>
     import styled from 'vue-styled-components'
     import {SearchInput, ComplexTopTab, WithSearchInputMixin} from '../../../components'
+    import {util_numberFormat} from '../../../util'
     import {mapState} from "vuex";
     export default {
         mixins: [WithSearchInputMixin],
         computed: {
+            ...mapState({
+                countOfRepository: state => state.search.searchResult.repositories.totalCount,
+                countOfCode: state => state.search.searchResult.code.totalCount,
+                countOfCommit: state => state.search.searchResult.commits.totalCount,
+                countOfUser : state => state.search.searchResult.users.totalCount,
+                countOfIssue : state => state.search.searchResult.issues.totalCount,
+                countOfTopic : state => state.search.searchResult.topics.totalCount,
+            }),
             tabs: function () {
                 return [
                     {
                         to: `/search?q=${this.searchQuery}`,
                         label: 'Repositories',
-                        meta: '337K'
+                        meta: this.countOfRepository === 0 ? undefined : util_numberFormat.thousands2K2M(this.countOfRepository,0)
                     },
                     {
                         to: `/search/code?q=${this.searchQuery}`,
                         label: 'Code',
-                        meta: '37M'
+                        meta: this.countOfCode === 0 ? undefined : util_numberFormat.thousands2K2M(this.countOfCode,0)
                     },
                     {
                         to: `/search/commits?q=${this.searchQuery}`,
                         label: 'Commits',
-                        meta: '27K'
+                        meta: this.countOfCommit === 0 ? undefined : util_numberFormat.thousands2K2M(this.countOfCommit,0)
                     },
                     {
                         to: `/search/issues?q=${this.searchQuery}`,
                         label: 'Issues',
-                        meta: '62k'
+                        meta: this.countOfIssue === 0 ? undefined : util_numberFormat.thousands2K2M(this.countOfIssue,0)
+                    },
+                    {
+                        to: `/search/users?q=${this.searchQuery}`,
+                        label: 'Users',
+                        meta: this.countOfUser === 0 ? undefined : util_numberFormat.thousands2K2M(this.countOfUser,0)
+                    },
+                    {
+                        to: `/search/topics?q=${this.searchQuery}`,
+                        label: 'Topics',
+                        meta: this.countOfTopic === 0 ? undefined : util_numberFormat.thousands2K2M(this.countOfTopic,0)
                     }
                 ]
             }

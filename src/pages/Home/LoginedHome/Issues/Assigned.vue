@@ -9,7 +9,7 @@
                     :loading="loading"
                     :perPage="perPage"
                     :currentPage="currentPage"
-                    :dataGetter="action_getData"
+                    :dataGetter="pagination_getData"
                     :pageInfo="pageInfo"/>
     </BaseIssuesPageTemplate>
 </template>
@@ -24,18 +24,28 @@
         mixins: [BaseIssuesPageMixin],
         computed: {
             ...mapState({
-                loading: state => state.home.issues.assigned.loading,
-                data: state => state.home.issues.assigned.nodes,
-                pageInfo: state => state.home.issues.assigned.pageInfo,
-                totalCount: state => state.home.issues.assigned.totalCount,
-                currentPage: state => state.home.issues.assigned.currentPage,
-                perPage: state => state.home.issues.assigned.perPage
+                loading: state => state.home.issue.assigned.loading,
+                data: state => state.home.issue.assigned.nodes,
+                pageInfo: state => state.home.issue.assigned.pageInfo,
+                totalCount: state => state.home.issue.assigned.totalCount,
+                currentPage: state => state.home.issue.assigned.currentPage,
+                perPage: state => state.home.issue.assigned.perPage
+            })
+        },
+        created(){
+            this.action_getData({
+                issueType: "issue",
+                meta: "assigned"
             })
         },
         methods: {
-            ...mapActions({
-                action_getData: ACTION_HOME_REQUEST_ISSUES_ASSIGNED
-            })
+            pagination_getData(payload){
+                this.action_getData({
+                    issueType: "issue",
+                    meta: "assigned",
+                    ...payload
+                })
+            }
         }
     }
 </script>

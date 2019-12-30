@@ -9,12 +9,12 @@ export default {
         events: [],
         organizations: []
     },
-    pullRequests: {
+    pullRequest: {
         created: GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE(),
         mentioned: GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE(),
         assigned:GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE()
     },
-    issues: {
+    issue: {
         created: GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE(),
         mentioned: GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE(),
         assigned: GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE()
