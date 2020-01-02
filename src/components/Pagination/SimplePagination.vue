@@ -2,7 +2,7 @@
     <Container class="container pagination flex-row-center">
         <Left class="flex-grow-1 flex-row-center width-full"
               :class="{disable: !pageInfo.prev}"
-              @click="prev">Previous</Left>
+              @click="goPrev">Previous</Left>
         <PageInfo >
             <strong style="color: #586069;">
                 {{currentPage}} of {{pageInfo.last.page}}
@@ -10,7 +10,7 @@
         </PageInfo>
         <Right class="flex-grow-1 flex-row-center width-full"
                :class="{disable: !pageInfo.next}"
-               @click="next">Next</Right>
+               @click="goNext">Next</Right>
     </Container>
 </template>
 
@@ -54,24 +54,34 @@
                 return 1
             }
         },
-        watch: {
-            loading: function (newOne, oldOne) {
-                if(!newOne) {
-                    if(this.scrollTargetSelector && this.scrollElSelector) {
-                        util_animatedScrollTo.scrollToEl(
-                            document.querySelector(this.scrollTargetSelector),
-                            document.querySelector(this.scrollElSelector),
-                            8)
-                        return
-                    }
-                    if(this.scrollElSelector) {
-                        util_animatedScrollTo.scrollTo(document.querySelector(this.scrollElSelector),0,8)
-                    }
+        methods: {
+            async goNext() {
+                await this.next()
+                this.scrollToTitle()
+            },
+            async goPrev() {
+                await this.prev()
+                this.scrollToTitle()
+            },
+            scrollToTitle() {
+                console.log("scroll because page change")
+                if(this.scrollTargetSelector && this.scrollElSelector) {
+                    util_animatedScrollTo.scrollToEl(
+                        document.querySelector(this.scrollTargetSelector),
+                        document.querySelector(this.scrollElSelector),
+                        8)
+                    return
+                }
+                if(this.scrollElSelector) {
+                    util_animatedScrollTo.scrollTo(document.querySelector(this.scrollElSelector),0,8)
                 }
             }
-        },
-        methods: {
 
+        },
+        watch: {
+            currentPage: function () {
+
+            }
         },
         components: {
             Container:styled.div``,

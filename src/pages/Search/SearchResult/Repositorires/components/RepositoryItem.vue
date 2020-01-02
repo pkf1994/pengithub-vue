@@ -1,5 +1,5 @@
 <template>
-    <Container class="py-4 flex flex-justify-start">
+    <Container class="py-4 mx-3 flex flex-justify-start">
         <IconColumn class="flex-shrink-0 mr-2">
             <svg height="16"
                  style="color: #6a737d"
@@ -14,14 +14,14 @@
 
         <Main class="mt-n1">
             <FullName class="f4 text-normal">
-                <router-link to="/search" :meta="'c' + randomMeta + 'd'">{{repository.full_name}}</router-link>
+                <router-link to="/search" :meta="randomMeta">{{repository.full_name}}</router-link>
             </FullName>
-            <Description class="mb-1" :meta="'c' + randomMeta + 'd'">
+            <Description class="mb-1" :meta="randomMeta">
                 {{repository.description}}
             </Description>
             <Topics>
                 <AnimatedHeightWrapper>
-                    <router-link :meta="'a' + randomMeta + 'b'"
+                    <router-link :meta="randomMeta"
                                  to="/search"
                                  class="topic-item d-inline-block topic-tag f6 px-2 mx-0"
                                  v-for="item in topics">
@@ -38,9 +38,9 @@
                         {{stars}}
                     </router-link>
                 </Stargazers>
-                <Language class="mr-3">
+                <Language class="mr-3"  v-if="repository.language">
                     <span>
-                        <span v-if="repository.languageColor" class="repo-language-color" :style="{backgroundColor: repository.languageColor}"></span>
+                        <span v-if="repository.languageColor" class="repo-language-color" :style="{backgroundColor: languageColor}"></span>
                         &nbsp;
                         <span>{{repository.language}}</span>
                     </span>
@@ -66,19 +66,15 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_numberFormat, util_dateFormat, util_adjustStyle} from '../../../../util'
+    import {util_numberFormat, util_dateFormat, util_adjustStyle} from '../../../../../util'
     import {mapState} from "vuex";
-    import {AnimatedHeightWrapper} from '../../../../components'
+    import {AnimatedHeightWrapper,WithRandomMetaMixin} from '../../../../../components'
     export default {
+        mixins: [WithRandomMetaMixin],
         props: {
             repository: {
                 type: Object,
                 required: true
-            }
-        },
-        data() {
-            return {
-                randomMeta: 1
             }
         },
         computed: {
@@ -93,18 +89,24 @@
             },
             topics: function () {
                 return this.repository.topics
+            },
+            languageColor: function () {
+                let color
+                this.repository.languageColor.forEach(item => {
+                    if(item.name === this.repository.language) {
+                        color = item.color
+                    }
+                })
+                return color
             }
         },
-        created(){
-            this.randomMeta = parseInt(Math.random() * 10000)
-        },
         mounted() {
-            util_adjustStyle.highlightKeyword(`[meta=c${this.randomMeta}d]`,this.searchQuery)
+            util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.searchQuery)
         },
         watch: {
             topics() {
                 this.$nextTick(() => {
-                    util_adjustStyle.adjustInlineBlockStyle(`.topic-item[meta=a${this.randomMeta}b]`)
+                    util_adjustStyle.adjustInlineBlockStyle(`.topic-item[meta=${this.randomMeta}]`)
                 })
             }
         },
@@ -122,7 +124,6 @@
             License: styled.div``,
             UpdateAt: styled.div``,
             HelpWantedIssues: styled.div``,
-
         }
     }
 </script>

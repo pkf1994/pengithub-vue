@@ -1,10 +1,14 @@
 import {CROSS_MUTATION_TRIGGER_LOADING} from "../crossMutation";
-import {STORE_ID} from "../constant";
 import {
     MUTATION_HOME_RESOLVE_DASHBOARD_DATA,
     MUTATION_HOME_RESOLVE_ISSUES,
     MUTATION_HOME_RESOLVE_NOTIFICATIONS_DATA
 } from "./mutationTypes";
+import {
+    ACTION_HOME_REQUEST_DASHBOARD_DATA,
+    ACTION_HOME_REQUEST_ISSUES,
+    ACTION_HOME_REQUEST_NOTIFICATIONS_DATA
+} from "./actionTypes";
 
 
 export default {
@@ -30,22 +34,12 @@ export default {
     },
 
     [CROSS_MUTATION_TRIGGER_LOADING](state, payload) {
-        if(payload.storeId === STORE_ID.HOME_DASHBOARD) {
+        if(payload.actionType === ACTION_HOME_REQUEST_DASHBOARD_DATA) {
             state.dashboard.loading = payload.loading
-        }else if(payload.storeId === STORE_ID.HOME_NOTIFICATIONS) {
+        }else if(payload.actionType === ACTION_HOME_REQUEST_NOTIFICATIONS_DATA) {
             state.notifications.loading = payload.loading
-        }else if(payload.storeId === STORE_ID.HOME_PULL_REQUESTS_CREATED) {
-            state.pullRequest.created.loading = payload.loading
-        }else if(payload.storeId === STORE_ID.HOME_PULL_REQUESTS_ASSIGNED) {
-            state.pullRequest.assigned.loading = payload.loading
-        }else if(payload.storeId === STORE_ID.HOME_PULL_REQUESTS_MENTIONED) {
-            state.pullRequest.mentioned.loading = payload.loading
-        }else if(payload.storeId === STORE_ID.HOME_ISSUES_CREATED) {
-            state.issue.created.loading = payload.loading
-        }else if(payload.storeId === STORE_ID.HOME_ISSUES_ASSIGNED) {
-            state.issue.assigned.loading = payload.loading
-        }else if(payload.storeId === STORE_ID.HOME_ISSUES_MENTIONED) {
-            state.issue.mentioned.loading = payload.loading
+        }else if(payload.actionType === ACTION_HOME_REQUEST_ISSUES) {
+            state[payload.meta.issueType][payload.meta.meta].loading = payload.loading
         }
     }
 }

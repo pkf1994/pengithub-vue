@@ -4,10 +4,10 @@
             <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'language',value:newOne})"
                       initialValue="Any"
                       :disable="loading"
-                      v-if="!(loadingCount || counts.length === 0)"
+                      v-if="!(loadingCount || countOfEachLanguge.length === 0)"
                       label="Language">
                 <option value="Any">Any</option>
-                <option v-for="item in counts"
+                <option v-for="item in countOfEachLanguge"
                         :value="item.language"
                         :key="item.language">{{item.language}}</option>
             </Selector>
@@ -31,15 +31,19 @@
         </AnimatedHeightWrapper>
 
 
-        <CommonLoadingWrapper :loading="loading || loadingTopicsLanguageColorHelpWantedIssuesCount || loadingCount"
+        <CommonLoadingWrapper :loading="loading || loadingTopicsLanguageColorHelpWantedIssuesCount || loadingCount || loadingCountOfEachSearchType"
                               :preventClickEvent="false"
                               :position="loading ? 'center' : 'corner'">
-            <ResultContent class="px-3">
+            <ResultContent>
                 <transition appear name="fade">
-                    <Title :id="'search-result-title-' + this.searchType" class="pb-3 pt-3 " v-show="!(data.length === 0)">{{totalCount}} repository results</Title>
+                    <Title :id="'search-result-title-' + this.searchType"
+                           class="p-3 "
+                           v-show="!(data.length === 0)">
+                        {{totalCount}} repository results
+                    </Title>
                 </transition>
                 <transition-group appear name="fade">
-                    <SearchResultRepositoryItem class="border-top" v-for="item in data" :key="item.id" :repository="item"/>
+                    <RepositoryItem class="border-top" v-for="item in data" :key="item.id" :repository="item"/>
                 </transition-group>
             </ResultContent>
         </CommonLoadingWrapper>
@@ -58,7 +62,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {mapActions, mapState} from "vuex";
-    import {SearchResultRepositoryItem} from '../components'
+    import {RepositoryItem} from './components'
     import {FirstTopic} from './components'
     import {AnimatedHeightWrapper} from '../../../../components'
     import {util_numberFormat} from '../../../../util'
@@ -70,30 +74,23 @@
                 searchType: 'repositories'
             }
         },
-        created() {
-
-        },
         computed: {
             ...mapState({
                 totalCount: state => util_numberFormat.thousands(state.search.searchResult.repositories.totalCount),
                 loading: state => state.search.searchResult.repositories.loading,
-                loadingCount: state => state.search.searchResult.repositories.loadingCount,
+                loadingCount: state => state.search.searchResult.repositories.loadingCountOfEachLanguage,
                 loadingTopicsLanguageColorHelpWantedIssuesCount: state => state.search.searchResult.repositories.loadingTopicsLanguageColorHelpWantedIssuesCount,
                 loadingFirstTopic: state => state.search.searchResult.repositories.loadingFirstTopic,
                 firstTopic: state => state.search.searchResult.repositories.firstTopic,
                 data: state => state.search.searchResult.repositories.data,
-                counts: state => state.search.searchResult.repositories.counts,
+                countOfEachLanguge: state => state.search.searchResult.repositories.countOfEachLanguage,
                 pageInfo: state => state.search.searchResult.repositories.pageInfo,
             })
         },
-        methods: {
-
-        },
         components: {
             AnimatedHeightWrapper,
-            SearchResultRepositoryItem,
+            RepositoryItem,
             FirstTopic,
-
         }
     }
 </script>

@@ -7,7 +7,6 @@ import {
 } from "./mutations";
 
 import {authRequiredGitHubGraphqlApiQuery, commonGet} from "../network";
-import {STORE_ID} from "../constant";
 import {
     ACTION_OAUTH_REQUEST_ACCESS_TOKEN,
     ACTION_OAUTH_REQUEST_VIEWER_INFO
@@ -20,7 +19,7 @@ import router from '../../../router'
 export default {
     async [ACTION_OAUTH_REQUEST_ACCESS_TOKEN] (context, payload) {
         try{
-            commitTriggerLoadingMutation(context,STORE_ID.OAUTH_ACCESS_TOKEN,true)
+            commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_ACCESS_TOKEN,true)
             //获取access_token
             const url_getAccessToken = API_OAUTH2_ACCESS_TOKEN(payload.code)
             const res_getAccessToken = await commonGet(url_getAccessToken)
@@ -30,21 +29,21 @@ export default {
                 ...accessTokenObject,
                 authenticated: true,
             })
-            commitTriggerLoadingMutation(context,STORE_ID.OAUTH_ACCESS_TOKEN,false)
+            commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_ACCESS_TOKEN,false)
+
         }catch (e) {
             handleException(e)
             context.commit({
                 type: MUTATION_OAUTH_GETTING_ACCESS_TOKEN_FAILED,
                 exception: e.response.data
             })
-            commitTriggerLoadingMutation(context,STORE_ID.OAUTH_ACCESS_TOKEN,false)
+            commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_ACCESS_TOKEN,false)
         }
     },
 
     async [ACTION_OAUTH_REQUEST_VIEWER_INFO] (context,payload) {
         try{
-            console.log(context.rootState.oauth)
-            commitTriggerLoadingMutation(context,STORE_ID.OAUTH_VIEWER_INFO,true)
+            commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_VIEWER_INFO,true)
             //获取基本用户信息
             const res_viewerBasicInfo = await authRequiredGitHubGraphqlApiQuery(GRAPH_QL_VIEWER)
 
@@ -53,13 +52,13 @@ export default {
                 login: res_viewerBasicInfo.data.data.viewer.login,
                 avatarUrl: res_viewerBasicInfo.data.data.viewer.avatarUrl,
             })
-            commitTriggerLoadingMutation(context,STORE_ID.OAUTH_VIEWER_INFO,false)
+            commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_VIEWER_INFO,false)
             await router.replace({
                 path: '/'
             })
         }catch (e) {
             handleException(e)
-            commitTriggerLoadingMutation(context,STORE_ID.OAUTH_VIEWER_INFO,false)
+            commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_VIEWER_INFO,false)
         }
     }
 }

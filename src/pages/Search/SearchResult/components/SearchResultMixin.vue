@@ -6,7 +6,7 @@
     import styled from 'vue-styled-components'
     import {ACTION_SEARCH_REQUEST_SEARCH_RESULT} from "../../../../store/modules/search/actionTypes";
     import {mapActions, mapMutations, mapState} from "vuex";
-    import {SimplePagination,AnimatedHeightLoadingWrapper,CommonLoadingWrapper} from '../../../../components'
+    import {SimplePagination,AnimatedHeightFlagWrapper,CommonLoadingWrapper} from '../../../../components'
     import {Selector} from './../components'
     import {
         MUTATION_SEARCH_SYNC_QUERY,
@@ -22,11 +22,28 @@
                 sort: "",
                 language: "",
                 state: "",
-                searchType: "repositories"
+                searchType: "repositories",
+                needToGetDataWhenActivated: false
             }
         },
+        computed: {
+            ...mapState({
+                loadingCountOfEachSearchType: state => state.search.loadingCountOfEachSearchType,
+                searchQuery: state => state.search.searchQuery,
+            })
+        },
         created() {
-            this.getData()
+            this.getData({
+                searchQueryChanged: true
+            })
+        },
+        activated() {
+            if(this.needToGetDataWhenActivated) {
+                this.getData({
+                    searchQueryChanged: true
+                })
+                this.needToGetDataWhenActivated = false
+            }
         },
         watch: {
             sort(newOne,oldOne) {
@@ -57,6 +74,15 @@
                 this.getData({
                     searchQueryChanged: false
                 })
+            },
+            searchQuery() {
+                if(this.$route.path === `/search/${this.searchType}`) {
+                    this.getData({
+                        searchQueryChanged: true
+                    })
+                } else {
+                    this.needToGetDataWhenActivated = true
+                }
             }
         },
         methods: {
@@ -76,15 +102,15 @@
                         ...payload
                 })
             },
-            next(){
-                this.action_search_requestSearchResult({
+            async next(){
+                await this.action_search_requestSearchResult({
                     searchType: this.searchType,
                     changePage:true,
                     forward:true
                 })
             },
-            prev(){
-                this.action_search_requestSearchResult({
+            async prev(){
+                await this.action_search_requestSearchResult({
                     searchType: this.searchType,
                     changePage:true,
                     forward:false
@@ -94,7 +120,7 @@
         components: {
             Selector,
             SimplePagination,
-            AnimatedHeightLoadingWrapper,
+            AnimatedHeightLoadingWrapper: AnimatedHeightFlagWrapper,
             CommonLoadingWrapper,
             Container: styled.div``,
             ResultContent: styled.div``,

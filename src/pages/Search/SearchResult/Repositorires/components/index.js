@@ -1,2 +1,3 @@
 import FirstTopic from "./FirstTopic";
-export {FirstTopic}
+import RepositoryItem from "./RepositoryItem";
+export {FirstTopic,RepositoryItem}

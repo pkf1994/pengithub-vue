@@ -1,7 +1,7 @@
-import {GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE} from "../constant";
+import {DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE} from "../constant";
 
 export default {
-    notifications: GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE(),
+    notifications: DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE(),
     dashboard: {
         loading: false,
         repositoriesContributedTo: [],
@@ -10,13 +10,13 @@ export default {
         organizations: []
     },
     pullRequest: {
-        created: GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE(),
-        mentioned: GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE(),
-        assigned:GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE()
+        created: DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE(),
+        mentioned: DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE(),
+        assigned:DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE()
     },
     issue: {
-        created: GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE(),
-        mentioned: GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE(),
-        assigned: GRAPHQL_DEFAULT_PAGINATIONAL_DATA_STATE()
+        created: DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE(),
+        mentioned: DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE(),
+        assigned: DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE()
     }
 }

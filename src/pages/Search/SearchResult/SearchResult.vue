@@ -32,9 +32,9 @@
                 countOfRepository: state => state.search.searchResult.repositories.totalCount,
                 countOfCode: state => state.search.searchResult.code.totalCount,
                 countOfCommit: state => state.search.searchResult.commits.totalCount,
-                countOfUser : state => state.search.searchResult.users.totalCount,
-                countOfIssue : state => state.search.searchResult.issues.totalCount,
-                countOfTopic : state => state.search.searchResult.topics.totalCount,
+                countOfUser: state => state.search.searchResult.users.totalCount,
+                countOfIssue: state => state.search.searchResult.issues.totalCount,
+                countOfTopic: state => state.search.searchResult.topics.totalCount,
             }),
             tabs: function () {
                 return [
@@ -70,6 +70,15 @@
                     }
                 ]
             }
+        },
+        methods: {
+            search() {
+                if(!this.localSearchQuery || this.localSearchQuery.trim() === "") return
+                console.log(`${this.$route.path}?q=${this.localSearchQuery}`)
+                this.$router.push({
+                    path: `${this.$route.path}?q=${this.localSearchQuery}`
+                })
+            },
         },
         components: {
             SearchInput,

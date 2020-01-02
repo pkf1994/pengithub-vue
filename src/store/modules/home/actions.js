@@ -1,6 +1,5 @@
 import {commitTriggerLoadingMutation, handleException} from "../util";
 import {authRequiredGet, authRequiredGitHubGraphqlApiQuery, commonGet} from "../network";
-import {STORE_ID} from "../constant";
 import {
     ACTION_HOME_REQUEST_DASHBOARD_DATA,
     ACTION_HOME_REQUEST_ISSUES,
@@ -32,23 +31,25 @@ import {
 export const actions = {
     async [ACTION_HOME_REQUEST_NOTIFICATIONS_DATA] (context,payload) {
         try{
-            commitTriggerLoadingMutation(context,STORE_ID.HOME_NOTIFICATIONS,true)
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_NOTIFICATIONS_DATA,true)
             //notifications
             const res= await authRequiredGet(API_USER_NOTIFICATIONS)
             context.commit({
                 type: MUTATION_HOME_RESOLVE_NOTIFICATIONS_DATA,
                 notifications: res.data,
             })
-            commitTriggerLoadingMutation(context,STORE_ID.HOME_NOTIFICATIONS,false)
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_NOTIFICATIONS_DATA,false)
+
         }catch (e) {
             handleException(e)
-            commitTriggerLoadingMutation(context,STORE_ID.HOME_NOTIFICATIONS,false)
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_NOTIFICATIONS_DATA,false)
+
         }
     },
 
     async [ACTION_HOME_REQUEST_DASHBOARD_DATA] (context, payload) {
         try{
-            commitTriggerLoadingMutation(context,STORE_ID.HOME_DASHBOARD,true)
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_DASHBOARD_DATA,true)
 
             const login = context.rootState.oauth.viewerInfo.login
             //recent activity (partially)
@@ -72,10 +73,10 @@ export const actions = {
                 organizations: organizations,
                 events: filterredEvents.slice(0,4),
             })
-            commitTriggerLoadingMutation(context,STORE_ID.HOME_DASHBOARD,false)
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_DASHBOARD_DATA,false)
         }catch (e) {
             handleException(e)
-            commitTriggerLoadingMutation(context,STORE_ID.HOME_DASHBOARD,false)
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_DASHBOARD_DATA,false)
         }
     },
 
@@ -89,7 +90,7 @@ export const actions = {
         }
         const storeId = 'home_' + payload.issueType + '_' + payload.meta
         try{
-            commitTriggerLoadingMutation(context,storeId,true)
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_ISSUES,true, {issueType: payload.issueType,meta:payload.meta})
             const perPage = context.rootState.home[payload.issueType][payload.meta].perPage
             const after = context.rootState.home[payload.issueType][payload.meta].pageInfo.endCursor
             const before = context.rootState.home[payload.issueType][payload.meta].pageInfo.startCursor
@@ -141,10 +142,10 @@ export const actions = {
                 ...data
             })
 
-            commitTriggerLoadingMutation(context,storeId,false)
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_ISSUES,false,{issueType: payload.issueType,meta:payload.meta})
         }catch (e) {
             handleException(e)
-            commitTriggerLoadingMutation(context,storeId,false)
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_ISSUES,false,{issueType: payload.issueType,meta:payload.meta})
         }
     }
 

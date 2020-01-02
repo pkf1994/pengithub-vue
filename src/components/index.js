@@ -13,7 +13,11 @@ import Bubble from './Bubble'
 import {IconPagination,SimplePagination} from './Pagination'
 import WithSearchInputMixin from './WithSearchInputMixin'
 import CancelNetworkOnDestroyMixin from './CancelNetworkOnDestroyMixin'
-import {AnimatedHeightLoadingWrapper,AnimatedHeightWrapper} from "./AnimatedHeightWrapper";
+import {
+    AnimatedHeightFlagWrapper,
+    AnimatedHeightWrapper,
+    AnimatedWidthWrapper} from "./AnimatedSizeWrapper";
+import WithRandomMetaMixin from "./WithRandomMetaMixin";
 export {
     Button,
     AnimatedNumber,
@@ -34,6 +38,8 @@ export {
     SimplePagination,
     WithSearchInputMixin,
     CancelNetworkOnDestroyMixin,
-    AnimatedHeightLoadingWrapper,
-    AnimatedHeightWrapper
+    AnimatedHeightFlagWrapper,
+    AnimatedHeightWrapper,
+    AnimatedWidthWrapper,
+    WithRandomMetaMixin
 }

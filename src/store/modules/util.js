@@ -6,16 +6,21 @@ import {
 import Vue from 'vue'
 import axios from 'axios'
 
-export function commitTriggerLoadingMutation(context, storeId, loading) {
+export function commitTriggerLoadingMutation(context, actionType, loading, meta) {
     const payload = {
-        storeId: storeId,
-        loading: loading
+        actionType,
+        loading,
+        meta
     }
     context.commit(CROSS_MUTATION_TRIGGER_LOADING, payload)
 }
 
-export function commitCancelAndUpdateAxiosCancelTokenSourceMutation(context, storeId) {
-    context.commit(CROSS_MUTATION_CANCEL_AND_UPDATE_AXIOS_CANCEL_TOKEN_SOURCE, storeId)
+export function commitCancelAndUpdateAxiosCancelTokenSourceMutation(context, actionType, meta) {
+    const payload = {
+        actionType,
+        meta
+    }
+    context.commit(CROSS_MUTATION_CANCEL_AND_UPDATE_AXIOS_CANCEL_TOKEN_SOURCE, payload)
 }
 
 export function commitResolveDataMutation(context, storeId, data) {

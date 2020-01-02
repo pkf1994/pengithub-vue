@@ -1,5 +1,5 @@
 import {CROSS_MUTATION_TRIGGER_LOADING} from '../crossMutation'
-import {STORE_ID} from "../constant";
+import {ACTION_OAUTH_REQUEST_ACCESS_TOKEN, ACTION_OAUTH_REQUEST_VIEWER_INFO} from "./actionTypes";
 
 export const MUTATION_OAUTH_RESOLVE_ACCESS_TOKEN = "MUTATION_OAUTH_RESOLVE_ACCESS_TOKEN"
 
@@ -27,12 +27,12 @@ export default {
     },
 
     [CROSS_MUTATION_TRIGGER_LOADING](state, payload) {
-        if(payload.storeId === STORE_ID.OAUTH_ACCESS_TOKEN) {
+        if(payload.actionType === ACTION_OAUTH_REQUEST_ACCESS_TOKEN) {
             if(payload.loading) {
                 state.accessToken.exceptionOccurred = false
             }
             state.accessToken.loading = payload.loading
-        }else if(payload.storeId === STORE_ID.OAUTH_VIEWER_INFO) {
+        }else if(payload.actionType === ACTION_OAUTH_REQUEST_VIEWER_INFO) {
             state.viewerInfo.loading = payload.loading
         }
     }

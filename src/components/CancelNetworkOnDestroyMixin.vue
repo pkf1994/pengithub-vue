@@ -5,10 +5,8 @@
 <script>
     export default {
         destroyed() {
-            if(!this.sourceArray || this.sourceArray.length === 0) return
-            this.sourceArray.forEach(item => {
-                item.cancel()
-            })
+            if(!this.source) return
+            this.source.cancel()
         }
     }
 </script>

@@ -64,8 +64,8 @@
     .corner{
         bottom: 20px !important;
         right: 20px !important;
-        height: 20px !important;
-        width: 20px !important;
+        height: 30px !important;
+        width: 30px !important;
     }
     .prevent-click-event{
         pointer-events: none;

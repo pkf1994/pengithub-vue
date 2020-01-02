@@ -9,7 +9,7 @@ export default {
             }
         })
     },
-    highlightKeyword: function (query,keyword) {
+    highlightKeyword: function (query,keyword,additionalStyle) {
         let elList = document.querySelectorAll(query)
         let keywordArray = keyword.split(" ")
         elList.forEach(item => {
@@ -23,12 +23,12 @@ export default {
                 }
                 let reg = new RegExp(_item,"g")
                 if(reg.test(innerHTML)) {
-                    innerHTML = innerHTML.replace(reg,`<strong>$&</strong>`)
+                    innerHTML = innerHTML.replace(reg,`<strong style="${additionalStyle}">$&</strong>`)
                 }
                 if(_item2) {
                     let reg2 = new RegExp(_item2,"g")
                     if(reg2.test(innerHTML)) {
-                        innerHTML = innerHTML.replace(reg2,`<strong>$&</strong>`)
+                        innerHTML = innerHTML.replace(reg2,`<strong style="${additionalStyle}">$&</strong>`)
                     }
                 }
             })

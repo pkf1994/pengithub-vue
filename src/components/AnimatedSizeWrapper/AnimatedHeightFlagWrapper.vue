@@ -21,7 +21,15 @@
             }
         },
         mounted() {
-            this.height = this.$refs.content.$el.offsetHeight
+            this.computeHeight()
+        },
+        updated() {
+            this.computeHeight()
+        },
+        methods: {
+            computeHeight() {
+                this.height = this.$refs.content.$el.offsetHeight
+            }
         },
         components: {
             Container: styled.div``,

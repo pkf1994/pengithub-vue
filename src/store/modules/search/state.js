@@ -1,51 +1,58 @@
-import {REST_DEFAULT_PAGINATIONAL_DATA_STATE} from "../constant";
+import {DEFAULT_REST_PAGINATIONAL_DATA_STATE} from "../constant";
+import axios from "axios";
 export default {
     searchQuery: "",
+    loadingCountOfEachSearchType: false,
     searchResult: {
         repositories: {
-            ...REST_DEFAULT_PAGINATIONAL_DATA_STATE(),
-            loadingCount: false,
+            ...DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
+            source: axios.CancelToken.source(),
+            loadingCountOfEachLanguage: false,
             loadingTopicsLanguageColorHelpWantedIssuesCount: false,
             loadingFirstTopic: false,
             firstTopic: {},
-            counts: [],
+            countOfEachLanguage: [],
             searchSuffix:{
                 language: "Any",
             },
             query: undefined
         },
         code: {
-            ...REST_DEFAULT_PAGINATIONAL_DATA_STATE(),
+            ...DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
+            source: axios.CancelToken.source(),
             searchSuffix:{
                 language: "Any",
             },
             query: undefined
         },
         commits: {
-            ...REST_DEFAULT_PAGINATIONAL_DATA_STATE(),
-
+            ...DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
+            source: axios.CancelToken.source(),
             query: undefined
         },
         issues: {
-            ...REST_DEFAULT_PAGINATIONAL_DATA_STATE(),
+            ...DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
             searchSuffix:{
                 language: "Any",
                 state: "Any",
             },
+            source: axios.CancelToken.source(),
             query: undefined
         },
         users: {
-            ...REST_DEFAULT_PAGINATIONAL_DATA_STATE(),
+            ...DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
             searchSuffix:{
                 language: "Any",
             },
+            source: axios.CancelToken.source(),
             query: undefined
         },
         topics: {
-            ...REST_DEFAULT_PAGINATIONAL_DATA_STATE(),
+            ...DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
             searchSuffix: {
 
             },
+            source: axios.CancelToken.source(),
             query: undefined
         },
     }
