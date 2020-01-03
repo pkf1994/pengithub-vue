@@ -14,7 +14,6 @@ import {IconPagination,SimplePagination} from './Pagination'
 import WithSearchInputMixin from './WithSearchInputMixin'
 import CancelNetworkOnDestroyMixin from './CancelNetworkOnDestroyMixin'
 import {
-    AnimatedHeightFlagWrapper,
     AnimatedHeightWrapper,
     AnimatedWidthWrapper} from "./AnimatedSizeWrapper";
 import WithRandomMetaMixin from "./WithRandomMetaMixin";
@@ -38,7 +37,6 @@ export {
     SimplePagination,
     WithSearchInputMixin,
     CancelNetworkOnDestroyMixin,
-    AnimatedHeightFlagWrapper,
     AnimatedHeightWrapper,
     AnimatedWidthWrapper,
     WithRandomMetaMixin

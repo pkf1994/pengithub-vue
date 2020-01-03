@@ -74,7 +74,6 @@
         methods: {
             search() {
                 if(!this.localSearchQuery || this.localSearchQuery.trim() === "") return
-                console.log(`${this.$route.path}?q=${this.localSearchQuery}`)
                 this.$router.push({
                     path: `${this.$route.path}?q=${this.localSearchQuery}`
                 })

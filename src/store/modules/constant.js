@@ -26,7 +26,6 @@ export const DEFAULT_REST_PAGINATIONAL_DATA_STATE = (payload) => {
         ...payload
     }
     return {
-
         data: [],
         totalCount: 0,
         perPage: payload.perPage,

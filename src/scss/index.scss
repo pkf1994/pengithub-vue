@@ -1,12 +1,3 @@
-@import '../../node_modules/@primer/css/utilities/index.scss';
-@import '../../node_modules/@primer/css/layout/index.scss';
-@import '../../node_modules/@primer/css/forms/index.scss';
-@import '../../node_modules/@primer/css/support/index.scss';
-@import '../../node_modules/@primer/css/box/index.scss';
-@import '../../node_modules/@primer/css/buttons/index.scss';
-@import '../../node_modules/@primer/octicons/index.scss';
-@import '../../node_modules/@primer/css/base/index.scss';
-@import '../../node_modules/@primer/css/markdown/index.scss';
 @import './themes';
 @import "./button";
 @import "./colors";
@@ -18,6 +9,15 @@
 @import "./padding";
 @import "./transition";
 @import "./list";
+@import '../../node_modules/@primer/css/utilities/index.scss';
+@import '../../node_modules/@primer/css/layout/index.scss';
+@import '../../node_modules/@primer/css/forms/index.scss';
+@import '../../node_modules/@primer/css/support/index.scss';
+@import '../../node_modules/@primer/css/box/index.scss';
+@import '../../node_modules/@primer/css/buttons/index.scss';
+@import '../../node_modules/@primer/octicons/index.scss';
+@import '../../node_modules/@primer/css/base/index.scss';
+@import '../../node_modules/@primer/css/markdown/index.scss';
 
 @include with-theme();
 @include init-titleFontSize();

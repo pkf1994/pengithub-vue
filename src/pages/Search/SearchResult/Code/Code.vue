@@ -30,7 +30,7 @@
             <option value="TeX">TeX</option>
             <option value="Vim script">Vim script</option>
         </Selector>
-        <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'sort',value:newOne})"
+        <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'query',value:newOne})"
 
                   label="Sort">
             <option value="">Best match</option>
@@ -49,9 +49,7 @@
                         Showing {{totalCount}} available code results
                     </Title>
                 </transition>
-                <transition-group appear name="fade">
-                    <CodeItem class="border-top" v-for="item in data" :key="item.path + item.repository.id" :code="item"/>
-                </transition-group>
+                <CodeItem class="border-top" v-for="item in data" :key="item.path + item.repository.id" :code="item"/>
             </ResultContent>
         </CommonLoadingWrapper>
 
@@ -59,7 +57,7 @@
                           class="pagination mx-3"
                           v-if="pageInfo.next"
                           scrollElSelector="#app-container"
-                          :scrollTargetSelector="'#search-result-title-' + this.searchType"
+                          :scrollTargetSelector="'#search-result-title-' + searchType"
                           :prev="prev"
                           :next="next"
                           :pageInfo="pageInfo"/>
@@ -83,9 +81,7 @@
             ...mapState({
                 totalCount: state => util_numberFormat.thousands(state.search.searchResult.code.totalCount),
                 loading: state => state.search.searchResult.code.loading,
-                loadingCount: state => state.search.searchResult.code.loadingCountOfEachLanguage,
                 data: state => state.search.searchResult.code.data,
-                countOfEachLanguge: state => state.search.searchResult.code.countOfEachLanguge,
                 pageInfo: state => state.search.searchResult.code.pageInfo,
             })
         },

@@ -38,7 +38,7 @@
     import {mapState} from "vuex";
     import {util_dateFormat,util_analyseFileType,util_adjustStyle} from '../../../../../util'
     import {
-        AnimatedHeightFlagWrapper,
+        AnimatedHeightWrapper,
         WithRandomMetaMixin,
         CancelNetworkOnDestroyMixin} from '../../../../../components'
     import {handleException} from "../../../../../store/modules/util";
@@ -85,7 +85,7 @@
             }
         },
         components: {
-            AnimatedHeightFlagWrapper,
+            AnimatedHeightFlagWrapper: AnimatedHeightWrapper,
             Container: styled.div``,
             FullName: styled.div``,
             CommitMessageFirstLine: styled.div``,

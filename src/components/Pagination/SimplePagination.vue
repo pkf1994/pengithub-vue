@@ -64,7 +64,6 @@
                 this.scrollToTitle()
             },
             scrollToTitle() {
-                console.log("scroll because page change")
                 if(this.scrollTargetSelector && this.scrollElSelector) {
                     util_animatedScrollTo.scrollToEl(
                         document.querySelector(this.scrollTargetSelector),

@@ -15,6 +15,8 @@ const Search = () => import('../pages/Search/Search.vue')
 const SearchResultRepositories = () => import('../pages/Search/SearchResult/Repositorires/Repositories.vue')
 const SearchResultCode = () => import('../pages/Search/SearchResult/Code/Code.vue')
 const SearchResultCommit = () => import('../pages/Search/SearchResult/Commits/Commits.vue')
+const SearchResultIssues = () => import('../pages/Search/SearchResult/Issues/Issues.vue')
+const SearchResultTopics = () => import('../pages/Search/SearchResult/Topics/Topics.vue')
 const Logout = () => import('../pages/Logout/Logout.vue')
 
 export const ROUTE_HOME = 'route-home'
@@ -101,6 +103,14 @@ export default [
             {
                 path: 'commits',
                 component: SearchResultCommit
+            },
+            {
+                path: 'issues',
+                component: SearchResultIssues
+            },
+            {
+                path: 'topics',
+                component: SearchResultTopics
             }
         ]
     }

@@ -10,7 +10,10 @@ import {
     MUTATION_SEARCH_SYNC_SEARCH_SUFFIX,
     MUTATION_SEARCH_SYNC_QUERY,
     MUTATION_SEARCH_RESOLVE_FIRST_TOPIC,
-    MUTATION_SEARCH_RESOLVE_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE
+    MUTATION_SEARCH_RESOLVE_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,
+    MUTATION_SEARCH_RESOLVE_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE,
+    MUTATION_SEARCH_RESOLVE_REPOSITORY_COUNT_BY_TOPICS,
+    MUTATION_SEARCH_RESOLVE_RELATED_TOPICS, MUTATION_SEARCH_RESOLVE_VIEWER_HAS_STARRED_TOPICS
 } from "./mutationTypes";
 import axios from "axios";
 
@@ -18,8 +21,10 @@ import Vue from 'vue'
 import {
     ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,
     ACTION_SEARCH_REQUEST_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE,
-    ACTION_SEARCH_REQUEST_REPOSITORIES_TOPICS_AND_LANGUAGE_COLOR_AND_HELP_WANTED_ISSUES_COUNT,
-    ACTION_SEARCH_REQUEST_SEARCH_RESULT, ACTION_SERACH_REQUEST_FIRST_TOPIC
+    ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA,
+    ACTION_SEARCH_REQUEST_SEARCH_RESULT,
+    ACTION_SERACH_REQUEST_FIRST_TOPIC,
+    ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE, ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA
 } from "./actionTypes";
 export default {
     [MUTATION_SEARCH_SYNC_SEARCH_QUERY](state, payload) {
@@ -43,7 +48,6 @@ export default {
 
     [MUTATION_SEARCH_RESOLVE_REPOSITORIES_TOPICS] (state,payload) {
         state.searchResult.repositories.data.forEach((item,index) => {
-
             Vue.set(state.searchResult.repositories.data,index, Object.assign({},item,{
                 topics: payload.data[item.full_name],
                 languageColor: payload.languageColors[item.full_name],
@@ -54,6 +58,10 @@ export default {
 
     [MUTATION_SEARCH_RESOLVE_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE] (state,payload) {
         state.searchResult.repositories.countOfEachLanguage = payload.countOfEachLanguage
+    },
+
+    [MUTATION_SEARCH_RESOLVE_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE] (state, payload) {
+        state.searchResult.issues.countOfEachLanguage = payload.countOfEachLanguage
     },
 
     [MUTATION_SEARCH_RESOLVE_FIRST_TOPIC] (state,payload) {
@@ -83,6 +91,30 @@ export default {
         }
     },
 
+    [MUTATION_SEARCH_RESOLVE_REPOSITORY_COUNT_BY_TOPICS] (state,payload) {
+        state.searchResult.topics.data.forEach((item,index) => {
+            Vue.set(state.searchResult.topics.data,index, Object.assign({},item,{
+                repositoryCount: payload.data[item.name]
+            }))
+        })
+    },
+
+    [MUTATION_SEARCH_RESOLVE_RELATED_TOPICS](state,payload) {
+        state.searchResult.topics.data.forEach((item,index) => {
+            Vue.set(state.searchResult.topics.data,index, Object.assign({},item,{
+                relatedTopics: payload.data[item.name],
+            }))
+        })
+    },
+
+    [MUTATION_SEARCH_RESOLVE_VIEWER_HAS_STARRED_TOPICS](state,payload) {
+        state.searchResult.topics.data.forEach((item,index) => {
+            Vue.set(state.searchResult.topics.data,index, Object.assign({},item,{
+                viewerHasStarred: payload.data[item.name],
+            }))
+        })
+    },
+
     [CROSS_MUTATION_TRIGGER_LOADING](state, payload) {
         if(payload.actionType === ACTION_SEARCH_REQUEST_SEARCH_RESULT) {
             state.searchResult[payload.meta].loading = payload.loading
@@ -90,14 +122,23 @@ export default {
         else if(payload.actionType === ACTION_SEARCH_REQUEST_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE) {
             state.searchResult.repositories.loadingCountOfEachLanguage = payload.loading
         }
-        else if(payload.actionType === ACTION_SEARCH_REQUEST_REPOSITORIES_TOPICS_AND_LANGUAGE_COLOR_AND_HELP_WANTED_ISSUES_COUNT) {
-            state.searchResult.repositories.loadingTopicsLanguageColorHelpWantedIssuesCount = payload.loading
+        else if(payload.actionType === ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA) {
+            state.searchResult.repositories.loadingAdditionalData = payload.loading
+        }
+        else if(payload.actionType === ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA) {
+            state.searchResult.topics.loadingAdditionalData = payload.loading
         }
         else if(payload.actionType === ACTION_SERACH_REQUEST_FIRST_TOPIC) {
             state.searchResult.repositories.loadingFirstTopic = payload.loading
         }
         else if(payload.actionType === ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE) {
             state.loadingCountOfEachSearchType = payload.loading
+        }
+        else if(payload.actionType === ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE) {
+            state.searchResult.issues.loadingCountOfEachLanguage = payload.loading
+        }
+        else if(payload.actionType === ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA) {
+            state.searchResult.topics.loadingAdditionalData = payload.loading
         }
     }
 }

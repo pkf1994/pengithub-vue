@@ -14,7 +14,6 @@ export default {
         }
     },
     scrollToEl(el,scrollEl,pace = 4) {
-        let scrollElOffsetTop = scrollEl.offsetTop
         let elOffsetTop = el.offsetTop
         if(elOffsetTop > scrollEl.scrollTop) {
             let interval = setInterval(() => {

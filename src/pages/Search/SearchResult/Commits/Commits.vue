@@ -1,6 +1,6 @@
 <template>
     <Container>
-        <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'sort',value:newOne})"
+        <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'query',value:newOne})"
                   label="Sort">
             <option value="">Best match</option>
             <option value="order=desc&sort=committer-date">Recently committed</option>
@@ -19,9 +19,7 @@
                         Showing {{totalCount}} available commit results
                     </Title>
                 </transition>
-                <transition-group appear name="fade">
-                    <CommitItem class="border-top" v-for="item in data" :commit="item" :key="item.url"/>
-                </transition-group>
+                <CommitItem class="border-top" v-for="item in data" :commit="item" :key="item.url"/>
             </ResultContent>
         </CommonLoadingWrapper>
 
@@ -29,7 +27,7 @@
                           class="pagination mx-3"
                           v-if="pageInfo.next"
                           scrollElSelector="#app-container"
-                          :scrollTargetSelector="'#search-result-title-' + this.searchType"
+                          :scrollTargetSelector="'#search-result-title-' + searchType"
                           :prev="prev"
                           :next="next"
                           :pageInfo="pageInfo"/>

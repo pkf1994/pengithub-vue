@@ -1,5 +1,5 @@
 <template>
-    <Container class="transition-all container" :style="{height:height}">
+    <Container class="transition-all container" :style="{height: stretch ? `${height}px` : 0}">
         <Inner ref="content">
             <slot></slot>
         </Inner>
@@ -9,24 +9,26 @@
 <script>
     import styled from 'vue-styled-components'
     export default {
-        data() {
-            return {
-                height: 0,
-                changingHeight: false
+        props: {
+            stretch: {
+                type: Boolean,
+                default: true
             }
         },
+        data() {
+            return {
+                height: 0
+            }
+        },
+        mounted() {
+            this.computeHeight()
+        },
         updated() {
-            this.$nextTick(() => {
-                if(!this.changingHeight) {
-                    this.changingHeight = true
-                    this.stretch()
-                    this.changingHeight = false
-                }
-            })
+            this.computeHeight()
         },
         methods: {
-            stretch() {
-                this.height = getComputedStyle(this.$refs.content.$el).height
+            computeHeight() {
+                this.height = this.$refs.content.$el.offsetHeight
             }
         },
         components: {
@@ -37,7 +39,7 @@
 </script>
 
 <style scoped>
-    .container{
-        overflow: hidden;
-    }
+.container{
+    overflow: hidden;
+}
 </style>

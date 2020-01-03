@@ -6,7 +6,7 @@
     import styled from 'vue-styled-components'
     import {ACTION_SEARCH_REQUEST_SEARCH_RESULT} from "../../../../store/modules/search/actionTypes";
     import {mapActions, mapMutations, mapState} from "vuex";
-    import {SimplePagination,AnimatedHeightFlagWrapper,CommonLoadingWrapper} from '../../../../components'
+    import {SimplePagination,AnimatedHeightWrapper,CommonLoadingWrapper} from '../../../../components'
     import {Selector} from './../components'
     import {
         MUTATION_SEARCH_SYNC_QUERY,
@@ -15,11 +15,7 @@
     export default {
         data() {
             return {
-                selectValueArray: {
-                    sort: "",
-                    language: ""
-                },
-                sort: "",
+                query: "",
                 language: "",
                 state: "",
                 searchType: "repositories",
@@ -46,7 +42,7 @@
             }
         },
         watch: {
-            sort(newOne,oldOne) {
+            query(newOne,oldOne) {
                 this.mutation_search_syncQuery({
                     searchType: this.searchType,
                     query: newOne
@@ -76,7 +72,8 @@
                 })
             },
             searchQuery() {
-                if(this.$route.path === `/search/${this.searchType}`) {
+                let currentSearchChildPath = this.searchType === "repositories" ? "" : `/${this.searchType}`
+                if(this.$route.path === `/search${currentSearchChildPath}`) {
                     this.getData({
                         searchQueryChanged: true
                     })
@@ -120,7 +117,7 @@
         components: {
             Selector,
             SimplePagination,
-            AnimatedHeightLoadingWrapper: AnimatedHeightFlagWrapper,
+            AnimatedHeightLoadingWrapper: AnimatedHeightWrapper,
             CommonLoadingWrapper,
             Container: styled.div``,
             ResultContent: styled.div``,

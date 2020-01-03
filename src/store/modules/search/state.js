@@ -8,7 +8,7 @@ export default {
             ...DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
             source: axios.CancelToken.source(),
             loadingCountOfEachLanguage: false,
-            loadingTopicsLanguageColorHelpWantedIssuesCount: false,
+            loadingAdditionalData: false,
             loadingFirstTopic: false,
             firstTopic: {},
             countOfEachLanguage: [],
@@ -32,9 +32,11 @@ export default {
         },
         issues: {
             ...DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
+            loadingCountOfEachLanguage: false,
+            countOfEachLanguage: [],
             searchSuffix:{
                 language: "Any",
-                state: "Any",
+                state: "",
             },
             source: axios.CancelToken.source(),
             query: undefined
@@ -49,6 +51,7 @@ export default {
         },
         topics: {
             ...DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
+            loadingAdditionalData: false,
             searchSuffix: {
 
             },

@@ -3,7 +3,7 @@ import {LANGUAGE_LIST} from "../../../constant/fileType";
 
 
 
-export const GRAPHQL_COUNT_OF_REPOSITORIES_GROUP_BY_LANGUAGE = (query,languageList = LANGUAGE_LIST) => {
+export const GRAPHQL_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE = (query, languageList = LANGUAGE_LIST) => {
     let ql = ""
     languageList.forEach((item,index) => {
         ql = `
@@ -19,6 +19,19 @@ export const GRAPHQL_COUNT_OF_REPOSITORIES_GROUP_BY_LANGUAGE = (query,languageLi
                     }
                   }
                 }
+            }
+        `
+    })
+    return `{${ql}}`
+}
+
+export const GRAPHQL_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE = (query,languageList = LANGUAGE_LIST) => {
+    let ql = ""
+    languageList.forEach((item,index) => {
+        ql = `
+            ${ql}
+            language${index}: search(type: ISSUE, query: "${query} language:${item.language}",first:1) {
+               issueCount
             }
         `
     })
@@ -54,6 +67,39 @@ export const GRAPHQL_TOPICS_AND_LANGUAGE_COLOR_AND_HELP_WANTED_ISSUES_COUNT_OF_R
     })
     return `{${ql}}`
 }
+
+export const GRAPHQL_RELATIVE_TOPICS_OF_TOPICS = topics => {
+    let ql = ""
+    topics.forEach((item,index) => {
+        ql = `
+            ${ql}
+            topic${index}: topic(name:"${item.name}") {
+                name
+                viewerHasStarred
+                relatedTopics(first: 4) {
+                  name
+                }
+              }
+        `
+    })
+    return `{${ql}}`
+}
+
+export const GRAPHQL_COUNT_OF_REPOSITORY_BY_TOPICS = topics => {
+    let ql = ""
+    topics.forEach((item,index) => {
+        let query = item.name
+        let regExp = new RegExp("\\.",'g')
+        ql = `
+            ${ql}
+            topic${index}:search(query: "${query.replace(regExp,"")}", type: REPOSITORY) {
+                repositoryCount
+              }
+        `
+    })
+    return `{${ql}}`
+}
+
 
 export const GRAPHQL_COUNT_GROUP_BY_SEARCH_TYPE = (query) => {
     let searchTypeList = [
