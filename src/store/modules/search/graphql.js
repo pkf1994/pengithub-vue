@@ -25,6 +25,19 @@ export const GRAPHQL_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE = (query, languageLis
     return `{${ql}}`
 }
 
+export const GRAPHQL_COUNT_OF_USER_GROUP_BY_LANGUAGE = (query, languageList = LANGUAGE_LIST) => {
+  let ql = ""
+  languageList.forEach((item,index) => {
+      ql = `
+          ${ql}
+          language${index}: search(type: USER, query: "${query} language:${item.language}",first:1) {
+              userCount
+          }
+      `
+  })
+  return `{${ql}}`
+}
+
 export const GRAPHQL_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE = (query,languageList = LANGUAGE_LIST) => {
     let ql = ""
     languageList.forEach((item,index) => {
@@ -92,7 +105,7 @@ export const GRAPHQL_COUNT_OF_REPOSITORY_BY_TOPICS = topics => {
         let regExp = new RegExp("\\.",'g')
         ql = `
             ${ql}
-            topic${index}:search(query: "${query.replace(regExp,"")}", type: REPOSITORY) {
+            topic${index}:search(query: "topic:${query.replace(regExp,"")}", type: REPOSITORY) {
                 repositoryCount
               }
         `
@@ -100,6 +113,20 @@ export const GRAPHQL_COUNT_OF_REPOSITORY_BY_TOPICS = topics => {
     return `{${ql}}`
 }
 
+export const GRAPHQL_AVATAR_OF_TOPICS = topics => {
+  let ql = ""
+  topics.forEach((item,index) => {
+      let query = item.name
+      let regExp = new RegExp("\\.",'g')
+      ql = `
+          ${ql}
+          topic${index}:search(query: "topic:${query.replace(regExp,"")}", type: REPOSITORY) {
+              repositoryCount
+            }
+      `
+  })
+  return `{${ql}}`
+}
 
 export const GRAPHQL_COUNT_GROUP_BY_SEARCH_TYPE = (query) => {
     let searchTypeList = [
@@ -117,4 +144,26 @@ export const GRAPHQL_COUNT_GROUP_BY_SEARCH_TYPE = (query) => {
         `
     })
     return `{${ql}}`
+}
+
+export const GRAPHQL_NAME_BIO_LOCATION_EMAIL_FOLLOWSHIP_OF_USERS = users => {
+  let ql = ""
+  users.forEach((item,index) => {
+      if(item.type === "User") {
+        ql = `
+            ${ql}
+            user${index}:user(login: "${item.login}") {
+              email
+              login
+              bio
+              name
+              viewerIsFollowing
+              viewerCanFollow
+              location
+            }
+        `
+      }
+  })
+  return `{${ql}}`
+
 }

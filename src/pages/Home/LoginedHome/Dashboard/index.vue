@@ -48,8 +48,10 @@
         CommonLoading,
         CommonLoadingWrapper,
         Bubble,
-        WithSearchInputMixin,
     } from '../../../../components'
+      import {
+        WithSearchInputMixin,
+    } from '../../../../mixins'
     import {
         ActivityListItem,
         RepositoryListItem

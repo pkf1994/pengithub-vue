@@ -1,5 +1,8 @@
 <template>
-    <Container>
+    <SearchResultTemplate :errorOccurred="errorData.errorOccurred" 
+                        :emptyResult="emptyResult" 
+                        :searchType="searchType" 
+                        :getData="getData">
         <AnimatedHeightWrapper>
             <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'language',value:newOne})"
                       initialValue="Any"
@@ -26,12 +29,12 @@
 
         <AnimatedHeightWrapper>
             <FirstTopic :firstTopic="firstTopic"
-                        v-if="(!loadingFirstTopic) && firstTopic !== {}">
+                        v-if="(!loadingFirstTopic) && !firstTopic && firstTopic !== {}">
             </FirstTopic>
         </AnimatedHeightWrapper>
 
 
-        <CommonLoadingWrapper :loading="loading || loadingTopicsLanguageColorHelpWantedIssuesCount || loadingCount || loadingCountOfEachSearchType"
+        <CommonLoadingWrapper :loading="loading || loadingAdditionalData || loadingCount"
                               :preventClickEvent="false"
                               :position="loading ? 'center' : 'corner'">
             <ResultContent>
@@ -54,7 +57,7 @@
                           :prev="prev"
                           :next="next"
                           :pageInfo="pageInfo"/>
-    </Container>
+    </SearchResultTemplate>
 </template>
 
 <script>

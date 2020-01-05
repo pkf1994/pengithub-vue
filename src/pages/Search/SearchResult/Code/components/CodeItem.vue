@@ -47,9 +47,10 @@
     import {mapState} from "vuex";
     import {util_dateFormat,util_analyseFileType,util_adjustStyle} from '../../../../../util'
     import {
-        AnimatedHeightWrapper,
+        AnimatedHeightWrapper} from '../../../../../components'
+    import {
         WithRandomMetaMixin,
-        CancelNetworkOnDestroyMixin} from '../../../../../components'
+        CancelNetworkOnDestroyMixin} from '../../../../../mixins'
     import {handleException} from "../../../../../store/modules/util";
     import {authRequiredGet} from "../../../../../store/modules/network";
     export default {

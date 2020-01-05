@@ -1,7 +1,7 @@
 <template>
     <Container class="container pagination flex-row-center">
         <Left class="flex-grow-1 flex-row-center width-full"
-              :class="{disable: !pageInfo.prev}"
+              :class="{disable: !pageInfo.prev || loading}"
               @click="goPrev">Previous</Left>
         <PageInfo >
             <strong style="color: #586069;">
@@ -9,7 +9,7 @@
             </strong>
         </PageInfo>
         <Right class="flex-grow-1 flex-row-center width-full"
-               :class="{disable: !pageInfo.next}"
+               :class="{disable: !pageInfo.next || loading}"
                @click="goNext">Next</Right>
     </Container>
 </template>
@@ -44,6 +44,7 @@
                 default: undefined
             }
         },
+     
         computed: {
             currentPage: function () {
                 if(this.pageInfo.prev) {
@@ -56,10 +57,12 @@
         },
         methods: {
             async goNext() {
+                if(this.loading) return
                 await this.next()
                 this.scrollToTitle()
             },
             async goPrev() {
+                if(this.loading) return
                 await this.prev()
                 this.scrollToTitle()
             },
@@ -76,11 +79,6 @@
                 }
             }
 
-        },
-        watch: {
-            currentPage: function () {
-
-            }
         },
         components: {
             Container:styled.div``,

@@ -23,7 +23,8 @@ export default {
             //获取access_token
             const url_getAccessToken = API_OAUTH2_ACCESS_TOKEN(payload.code)
             const res_getAccessToken = await commonGet(url_getAccessToken)
-            let accessTokenObject = util_queryParse(res_getAccessToken.data)
+            
+            let accessTokenObject = util_queryParse.parse(res_getAccessToken.data)
             await context.commit({
                 type: MUTATION_OAUTH_RESOLVE_ACCESS_TOKEN,
                 ...accessTokenObject,
@@ -32,11 +33,13 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_ACCESS_TOKEN,false)
 
         }catch (e) {
-            handleException(e)
-            context.commit({
-                type: MUTATION_OAUTH_GETTING_ACCESS_TOKEN_FAILED,
-                exception: e.response.data
-            })
+            handleException(e) 
+            if(e.response) {
+                context.commit({
+                    type: MUTATION_OAUTH_GETTING_ACCESS_TOKEN_FAILED,
+                    exception: e.response.data
+                })
+            }
             commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_ACCESS_TOKEN,false)
         }
     },

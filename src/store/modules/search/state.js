@@ -3,6 +3,7 @@ import axios from "axios";
 export default {
     searchQuery: "",
     loadingCountOfEachSearchType: false,
+    loadingCountOfEachSearchTypeSource: axios.CancelToken.source(),
     searchResult: {
         repositories: {
             ...DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
@@ -46,6 +47,10 @@ export default {
             searchSuffix:{
                 language: "Any",
             },
+            countOfEachLanguage: [],
+            loadingCount: false,
+            loadingCountOfEachLanguage: false,
+            loadingAdditionalData:false,
             source: axios.CancelToken.source(),
             query: undefined
         },

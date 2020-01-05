@@ -1,5 +1,5 @@
 <template>
-    <Container class="transition-all container d-inline-block" :style="{width:width}">
+    <Container class="transition-all container d-inline-block" :style="{width:width + 'px'}">
         <Inner ref="content" class="d-inline-block">
             <slot></slot>
         </Inner>
@@ -11,22 +11,19 @@
     export default {
         data() {
             return {
-                width: "0px",
+                width: 0,
                 changingWidth: false
             }
         },
+        mounted() {
+            this.computeHeight()
+        },
         updated() {
-            this.$nextTick(() => {
-                if(!this.changingWidth) {
-                    this.changingWidth = true
-                    this.stretch()
-                    this.changingWidth = false
-                }
-            })
+            this.computeHeight()
         },
         methods: {
-            stretch() {
-                this.width = getComputedStyle(this.$refs.content.$el).width
+            computeHeight() {
+                this.width = this.$refs.content.$el.offsetWidth
             }
         },
         components: {

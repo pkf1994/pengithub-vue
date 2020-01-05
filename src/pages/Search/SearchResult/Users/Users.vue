@@ -4,17 +4,10 @@
                         :searchType="searchType" 
                         :getData="getData">
 
-        <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'state',value:newOne})"
-                  label="State">
-            <option value="">Any</option>
-            <option value="closed">Closed</option>
-            <option value="open">Open</option>
-        </Selector>
-
-        <AnimatedHeightWrapper :stretch="!loadingCount">
+        <AnimatedHeightWrapper>
             <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'language',value:newOne})"
                       initialValue="Any"
-                      :disable="loading || loadingCount"
+                      :disable="loading"
                       v-if="!(loadingCount || countOfEachLanguage.length === 0)"
                       label="Language">
                 <option value="Any">Any</option>
@@ -24,18 +17,19 @@
             </Selector>
         </AnimatedHeightWrapper>
 
-        <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'query',value:newOne})"
+
+       <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'query',value:newOne})"
                   label="Sort">
             <option value="">Best match</option>
-            <option value="order=desc&sort=comments">Most commented</option>
-            <option value="order=asc&sort=comments">Least commented</option>
-            <option value="order=desc&sort=created">Newest</option>
-            <option value="order=asc&sort=created">Oldest</option>
-            <option value="order=desc&sort=updated">Recently updated</option>
-            <option value="order=asc&sort=updated">Least recently updated</option>
+            <option value="order=desc&sort=followers">Most followers</option>
+            <option value="order=asc&sort=followers">fewest followers</option>
+            <option value="order=desc&sort=joined">Most recently joined</option>
+            <option value="order=asc&sort=joined">Least recently joined</option>
+            <option value="order=desc&sort=repositories">Most repositories</option>
+            <option value="order=asc&sort=repositories">Least repositories</option>
         </Selector>
 
-        <CommonLoadingWrapper :loading="loading || loadingCount"
+        <CommonLoadingWrapper :loading="loading || loadingAdditionalData || loadingCount"
                               :preventClickEvent="false"
                               :position="loading ? 'center' : 'corner'">
             <ResultContent>
@@ -43,13 +37,13 @@
                     <Title :id="'search-result-title-' + this.searchType"
                            class="p-3 "
                            v-show="!(data.length === 0)">
-                       {{totalCount}} issues
+                       {{totalCount}} users results
                     </Title>
                 </transition>
-                <IssueItem class="border-top"
+                <UserItem class="border-top"
                            v-for="item in data"
-                           :key="item.url"
-                           :issue="item"/>
+                           :key="item.login"
+                           :user="item"/>
             </ResultContent>
         </CommonLoadingWrapper>
 
@@ -67,7 +61,7 @@
 
 <script>
     import SearchResultMixin from "../components/SearchResultMixin";
-    import {IssueItem} from './components'
+    import {UserItem} from './components'
     import {AnimatedHeightWrapper} from "../../../../components"
     import {util_numberFormat} from '../../../../util'
     import {mapState} from "vuex";
@@ -75,21 +69,22 @@
         mixins: [SearchResultMixin],
         data() {
             return {
-                searchType: 'issues'
+                searchType: 'users'
             }
         },
         computed: {
             ...mapState({
-                totalCount: state => util_numberFormat.thousands(state.search.searchResult.issues.totalCount),
-                loading: state => state.search.searchResult.issues.loading,
-                loadingCount: state => state.search.searchResult.issues.loadingCountOfEachLanguage,
-                countOfEachLanguage: state => state.search.searchResult.issues.countOfEachLanguage,
-                data: state => state.search.searchResult.issues.data,
-                pageInfo: state => state.search.searchResult.issues.pageInfo,
+                totalCount: state => util_numberFormat.thousands(state.search.searchResult.users.totalCount),
+                countOfEachLanguage: state => state.search.searchResult.users.countOfEachLanguage,
+                loading: state => state.search.searchResult.users.loading,
+                loadingCount: state => state.search.searchResult.users.loadingCount,
+                loadingAdditionalData: state => state.search.searchResult.users.loadingAdditionalData,
+                data: state => state.search.searchResult.users.data,
+                pageInfo: state => state.search.searchResult.users.pageInfo,
             })
         },
         components: {
-            IssueItem,
+            UserItem,
             AnimatedHeightWrapper
         }
     }

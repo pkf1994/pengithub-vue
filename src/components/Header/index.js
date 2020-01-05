@@ -1,2 +1,3 @@
 import LogoHeader from "./LogoHeader";
-export {LogoHeader}
+import LogoutedHeader from "./LogoutedHeader";
+export {LogoHeader,LogoutedHeader}

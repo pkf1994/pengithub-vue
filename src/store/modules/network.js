@@ -2,7 +2,9 @@ import axios from "axios";
 import store from '../index'
 import {API_GRAPHQL_ENDPOINT} from "./api";
 
-const authRequiredAxios = axios.create()
+const authRequiredAxios = axios.create({
+})
+
 authRequiredAxios.interceptors.request.use(
     config => {
         if(store.state.oauth.accessToken.accessToken) {
@@ -11,7 +13,11 @@ authRequiredAxios.interceptors.request.use(
             }
         }
         return config
-})
+    }, error => {
+        if(axios.isCancel(e))return
+        return Promise.reject(error);
+    }
+)
 
 export const commonGet = (url, config = {}) => {
     return axios.get(url,config).then(res => {

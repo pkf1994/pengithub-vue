@@ -1,8 +1,8 @@
 <template>
         <Container class="py-4 mx-3 flex">
             <AvatarColumn class="flex-shrink-0 mr-2">
-                <router-link v-if="topic.avatarUrl" to="/search">
-                    <img :src="topic.avatarUrl" width="20" height="20" class="d-block rounded-1" :alt="topic.name + 'logo'">
+                <router-link v-if="avatarUrl" to="/search">
+                    <img :src="avatarUrl" width="20" height="20" class="d-block rounded-1" :alt="topic.name + 'logo'">
                 </router-link>
                 <DefaultAvatar v-else class="bg-blue-light f4 text-gray-light text-bold rounded-1 text-center"
                                style="width:20px; height:20px; line-height:20px;">#</DefaultAvatar>
@@ -33,9 +33,6 @@
                         <RepositoryCount class="mr-3" v-if="repositoryCount">
                             {{repositoryCount}} repositories
                         </RepositoryCount>
-                    </AnimatedHeightWrapper>
-
-                    <AnimatedHeightWrapper>
                         <RelativeTopics v-if="topic.relatedTopics && topic.relatedTopics.length > 0" class="mr-3">
                             {{relatedRepoStr}}
                         </RelativeTopics>
@@ -50,10 +47,13 @@
     import {mapState} from "vuex";
     import {util_adjustStyle, util_numberFormat} from '../../../../../util'
     import {
-        AnimatedHeightWrapper,
-        WithRandomMetaMixin} from '../../../../../components'
+        AnimatedHeightWrapper} from '../../../../../components'
+    import {
+        WithRandomMetaMixin,
+        CancelNetworkOnDestroyMixin} from '../../../../../mixins'
+    import {authRequiredGitHubGraphqlApiQuery} from '../../../../../store/modules/network'
     export default {
-        mixins: [WithRandomMetaMixin],
+        mixins: [WithRandomMetaMixin,CancelNetworkOnDestroyMixin],
         props: {
             topic: {
                 type: Object,
@@ -62,6 +62,8 @@
         },
         data() {
             return {
+                avatarUrl: undefined,
+                loadingAvatarUrl: false
             }
         },
         computed: {
@@ -91,10 +93,49 @@
                 return str
             }
         },
-        created(){
-        },
         mounted() {
             util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.searchQuery)
+        },
+        watch: {
+            async topic(newOne,oldOne) {
+                if(!oldOne.repositoryCount && newOne.repositoryCount > 1000) {
+                    if(newOne.relatedTopics.length > 0 && !this.avatarUrl && !this.loadingAvatarUrl) {
+                        this.loadingAvatarUrl = true
+                        await this.getAavatarUrl()
+                        this.loadingAvatarUrl = false
+                        return
+                    }
+                }
+                if(!oldOne.relatedTopics && newOne.relatedTopics.length > 0) {
+                    if(newOne.repositoryCount > 1000 && !this.avatarUrl && !this.loadingAvatarUrl) {
+                        this.loadingAvatarUrl = true
+                        await this.getAavatarUrl()
+                        this.loadingAvatarUrl = false
+                    }
+                }
+            }
+        },
+        methods: {
+            async getAavatarUrl() {
+                let query = this.topic.name
+                let regExp = new RegExp("\\.",'g')
+                let graphql = `
+                    {
+                        search(query: "${query.replace(regExp,"")}", first:1,  type: REPOSITORY) {
+                            nodes {
+                                ... on Repository {
+                                    owner {
+                                        avatarUrl
+                                    }
+                                }
+                            }
+                        }
+                    }
+                `
+                const res = await authRequiredGitHubGraphqlApiQuery(graphql,{cancelToken: this.source.token})
+                console.log(res)
+                this.avatarUrl = res.data.data.search.nodes[0].owner.avatarUrl
+            }
         },
         components: {
             AnimatedHeightWrapper,

@@ -22,7 +22,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {SearchInput, ComplexTopTab, WithSearchInputMixin} from '../../../components'
+    import {SearchInput, ComplexTopTab} from '../../../components'
+    import {WithSearchInputMixin} from '../../../mixins'
     import {util_numberFormat} from '../../../util'
     import {mapState} from "vuex";
     export default {
@@ -73,9 +74,11 @@
         },
         methods: {
             search() {
+                let path = `${this.$route.path}?q=${this.localSearchQuery}`
                 if(!this.localSearchQuery || this.localSearchQuery.trim() === "") return
+                if(this.$route.fullPath === path) return 
                 this.$router.push({
-                    path: `${this.$route.path}?q=${this.localSearchQuery}`
+                    path
                 })
             },
         },

@@ -1,5 +1,8 @@
 <template>
-    <Container>
+    <SearchResultTemplate :errorOccurred="errorData.errorOccurred" 
+                        :emptyResult="emptyResult" 
+                        :searchType="searchType" 
+                        :getData="getData">
         <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'language',value:newOne})"
                   initialValue="Any"
                   label="Language">
@@ -61,7 +64,7 @@
                           :prev="prev"
                           :next="next"
                           :pageInfo="pageInfo"/>
-    </Container>
+    </SearchResultTemplate>
 
 </template>
 

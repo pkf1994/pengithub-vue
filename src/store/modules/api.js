@@ -1,7 +1,7 @@
 import {util_queryParse} from "../../util";
 
 const CLIENT_ID = "125cb651f63615c6d362"
-const SCOPE = "repo repo_deployment repo:invite admin:repo_hook home admin:org admin:public_key admin:org_hook gist notifications delete_repo write:discussion read:discussion write:packages read:packages delete:packages admin:gpg_key workflow"
+const SCOPE = "user repo repo_deployment repo:invite admin:repo_hook home admin:org admin:public_key admin:org_hook gist notifications delete_repo write:discussion read:discussion write:packages read:packages delete:packages admin:gpg_key workflow"
 const GITHUB_REST_API_BASE = "https://api.github.com"
 
 export const API_GRAPHQL_ENDPOINT = "https://api.github.com/graphql"

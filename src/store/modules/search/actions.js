@@ -5,7 +5,9 @@ import {
     ACTION_SERACH_REQUEST_FIRST_TOPIC,
     ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,
     ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE,
-    ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA
+    ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA,
+    ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE,
+    ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA 
 } from "./actionTypes";
 import {
     commitCancelAndUpdateAxiosCancelTokenSourceMutation,
@@ -18,14 +20,24 @@ import {
     MUTATION_SEARCH_RESOLVE_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE,
     MUTATION_SEARCH_RESOLVE_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE,
     MUTATION_SEARCH_RESOLVE_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,
-    MUTATION_SEARCH_RESOLVE_FIRST_TOPIC, MUTATION_SEARCH_RESOLVE_RELATED_TOPICS,
-    MUTATION_SEARCH_RESOLVE_REPOSITORIES_TOPICS, MUTATION_SEARCH_RESOLVE_REPOSITORY_COUNT_BY_TOPICS,
-    MUTATION_SEARCH_RESOLVE_SEARCH_RESULT, MUTATION_SEARCH_RESOLVE_VIEWER_HAS_STARRED_TOPICS
+    MUTATION_SEARCH_RESOLVE_FIRST_TOPIC,
+     MUTATION_SEARCH_RESOLVE_RELATED_TOPICS,
+    MUTATION_SEARCH_RESOLVE_REPOSITORIES_TOPICS, 
+    MUTATION_SEARCH_RESOLVE_REPOSITORY_COUNT_BY_TOPICS,
+    MUTATION_SEARCH_RESOLVE_SEARCH_RESULT, 
+    MUTATION_SEARCH_RESOLVE_VIEWER_HAS_STARRED_TOPICS,
+    MUTATION_SEARCH_RESOLVE_ADDITIONAL_DATA_OF_USERS,
+    MUTATION_SEARCH_RESOLVE_COUNT_OF_USER_GROUP_BY_LANGUAGE
 } from "./mutationTypes";
 import {
-    GRAPHQL_COUNT_GROUP_BY_SEARCH_TYPE, GRAPHQL_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE, GRAPHQL_COUNT_OF_REPOSITORY_BY_TOPICS,
-    GRAPHQL_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE, GRAPHQL_RELATIVE_TOPICS_OF_TOPICS,
+    GRAPHQL_COUNT_GROUP_BY_SEARCH_TYPE, 
+    GRAPHQL_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE, 
+    GRAPHQL_COUNT_OF_REPOSITORY_BY_TOPICS,
+    GRAPHQL_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE, 
+    GRAPHQL_RELATIVE_TOPICS_OF_TOPICS,
     GRAPHQL_TOPICS_AND_LANGUAGE_COLOR_AND_HELP_WANTED_ISSUES_COUNT_OF_REPOSITORIES,
+    GRAPHQL_NAME_BIO_LOCATION_EMAIL_FOLLOWSHIP_OF_USERS,
+    GRAPHQL_COUNT_OF_USER_GROUP_BY_LANGUAGE
 } from "./graphql";
 import {LANGUAGE_LIST} from "../../../constant/fileType";
 
@@ -33,6 +45,8 @@ var parse = require('parse-link-header');
 
 
 export const actions = {
+
+
     async [ACTION_SEARCH_REQUEST_SEARCH_RESULT](context, payload) {
         payload = {
             searchType: 'repositories',
@@ -41,6 +55,7 @@ export const actions = {
             searchQueryChanged: true,
             ...payload
         }
+        console.log(payload)
         try{
             commitCancelAndUpdateAxiosCancelTokenSourceMutation(context,ACTION_SEARCH_REQUEST_SEARCH_RESULT,payload.searchType)
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_SEARCH_RESULT,true,payload.searchType)
@@ -72,6 +87,7 @@ export const actions = {
             const cancelToken =  context.rootState.search.searchResult[payload.searchType].source.token
             let config = {
                 cancelToken,
+                
                 headers: {
                     "Accept": "application/vnd.github.mercy-preview+json," +
                         "application/vnd.github.cloak-preview," +
@@ -92,7 +108,14 @@ export const actions = {
                     context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE)
                 }
             }
+            //users分页下获取各语言的搜索结果数量
+            if(payload.searchType === "users") {
+                if(payload.searchQueryChanged && !payload.changePage) {
+                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE)
+                }
+            }
             const res = await authRequiredGet(url,config)
+           
             const linkParsed = parse(res.headers.link)
 
             context.commit({
@@ -104,10 +127,12 @@ export const actions = {
             })
 
             //获取各分页的搜索结果数量
-            context.dispatch({
-                type: ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,
-                exclude: payload.searchType
-            })
+          /*   if(payload.getCountGroupBySearchType) {
+                context.dispatch({
+                    type: ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,
+                    exclude: payload.searchType
+                })
+            } */
 
             //repositories分页下获取各搜索结果的其他信息：关联topic、语言、需要协助的issue数量
             if(payload.searchType === "repositories") {
@@ -119,11 +144,16 @@ export const actions = {
                 context.dispatch(ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA,res.data.items)
             }
 
+            //users分页下获取额外信息：是否可follow、是否following、地址、邮件地址
+            if(payload.searchType === 'users') {
+                context.dispatch(ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA,res.data.items)
+            }
+
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_SEARCH_RESULT,false,payload.searchType)
 
         }catch (e) {
-            handleException(e)
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_SEARCH_RESULT,false,payload.searchType)
+            handleException(e,{throwNetworkErrorToComponent: true})
         }
     },
 
@@ -183,9 +213,6 @@ export const actions = {
                 repositoryCount[repositoryCountCursor[key]] = repositoryCountData[key].repositoryCount
             }
 
-            console.log(relatedTopics)
-            console.log(repositoryCount)
-
             context.commit({
                 type: MUTATION_SEARCH_RESOLVE_RELATED_TOPICS,
                 data: relatedTopics,
@@ -243,6 +270,42 @@ export const actions = {
 
     },
 
+    async [ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE] (context,payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE,true)
+
+            const cancelToken =  context.rootState.search.searchResult.users.source.token
+            const searchQuery = context.rootState.search.searchQuery
+            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_USER_GROUP_BY_LANGUAGE(searchQuery),{cancelToken})
+            let languageCursor = {}
+            LANGUAGE_LIST.forEach((item,index) => {
+                languageCursor[`language${index}`] = item.language
+            })
+            let countOfEachLanguage = []
+            for(let key in res.data.data) {
+                if(res.data.data[key].userCount > 0) {
+                    countOfEachLanguage.push({
+                        language: languageCursor[key],
+                        count: res.data.data[key].userCount
+                    })
+                }
+            }
+            countOfEachLanguage.sort((a,b) => {
+                return b.count - a.count
+            })
+            context.commit({
+                type: MUTATION_SEARCH_RESOLVE_COUNT_OF_USER_GROUP_BY_LANGUAGE,
+                countOfEachLanguage: countOfEachLanguage.slice(0,10)
+            })
+            commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE,false)
+
+        }catch (e) {
+            commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE,false)
+            handleException(e)
+        }
+
+    },
+
     async [ACTION_SERACH_REQUEST_FIRST_TOPIC] (context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SERACH_REQUEST_FIRST_TOPIC,true)
@@ -282,8 +345,17 @@ export const actions = {
 
     async [ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE] (context, payload) {
         try{
-            commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,true,payload.exclude)
-            const cancelToken =  context.rootState.search.searchResult.repositories.source.token
+            commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,true)
+            context.commit({
+                type: MUTATION_SEARCH_RESOLVE_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,
+                repositories: 0,
+                users: 0,
+                issues:0,
+                code: 0,
+                commits: 0,
+                topics: 0,
+            })
+            const cancelToken =  context.rootState.search.loadingCountOfEachSearchTypeSource.token
             const searchQuery = context.rootState.search.searchQuery
             const res_graphql = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_GROUP_BY_SEARCH_TYPE(searchQuery),{cancelToken})
             const restParam = {
@@ -313,12 +385,11 @@ export const actions = {
                 code: res_rest_arr[0].data.total_count,
                 commits: res_rest_arr[1].data.total_count,
                 topics: res_rest_arr[2].data.total_count,
-                exclude: payload.exclude
             })
 
-            commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,false,payload.exclude)
+            commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,false)
         }catch (e) {
-            commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,false,payload.exclude)
+            commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,false)
             handleException(e)
         }
     },
@@ -356,5 +427,36 @@ export const actions = {
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE,false)
             handleException(e)
         }
+    },
+
+    async [ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA] (context, payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA,true)
+
+            const cancelToken =  context.rootState.search.searchResult.users.source.token
+            const res = await  authRequiredGitHubGraphqlApiQuery(GRAPHQL_NAME_BIO_LOCATION_EMAIL_FOLLOWSHIP_OF_USERS(payload),{cancelToken})
+            const data = res.data.data
+            const additionalData = {}
+
+            for(let key in data) {
+                additionalData[data[key].login] = {
+                    name: data[key].name,
+                    bio: data[key].bio,
+                    location: data[key].location,
+                    email: data[key].email,
+                    viewerIsFollowing: data[key].viewerIsFollowing,
+                    viewerCanFollow: data[key].viewerCanFollow
+                }
+            }
+            context.commit({
+                type: MUTATION_SEARCH_RESOLVE_ADDITIONAL_DATA_OF_USERS,
+                data: additionalData
+            })
+            commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA,false)
+        }catch(e) {
+            commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA,false)
+            handleException(e)
+        }
     }
+
 }

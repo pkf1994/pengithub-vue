@@ -62,8 +62,9 @@
     import {mapState} from "vuex";
     import {util_dateFormat,util_color,util_adjustStyle} from '../../../../../util'
     import {
-        AnimatedHeightWrapper,
-        WithRandomMetaMixin} from '../../../../../components'
+        AnimatedHeightWrapper} from '../../../../../components'
+    import {
+        WithRandomMetaMixin} from '../../../../../mixins'
     export default {
         mixins: [WithRandomMetaMixin],
         props: {

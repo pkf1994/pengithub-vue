@@ -1,5 +1,8 @@
 <template>
-    <Container>
+    <SearchResultTemplate :errorOccurred="errorData.errorOccurred" 
+                        :emptyResult="emptyResult" 
+                        :searchType="searchType" 
+                        :getData="getData">
 
       <!--  <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'query',value:newOne})"
                   label="Sort">
@@ -38,7 +41,7 @@
                           :prev="prev"
                           :next="next"
                           :pageInfo="pageInfo"/>
-    </Container>
+    </SearchResultTemplate>
 
 </template>
 
@@ -59,7 +62,7 @@
             ...mapState({
                 totalCount: state => util_numberFormat.thousands(state.search.searchResult.topics.totalCount),
                 loading: state => state.search.searchResult.topics.loading,
-                loadingAdditionalData: state => state.search.searchResult.repositories.loadingAdditionalData,
+                loadingAdditionalData: state => state.search.searchResult.topics.loadingAdditionalData,
                 data: state => state.search.searchResult.topics.data,
                 pageInfo: state => state.search.searchResult.topics.pageInfo,
             })

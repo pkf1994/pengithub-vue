@@ -1,3 +1,4 @@
 import Selector from "./Selector";
 import SearchResultMixin from "./SearchResultMixin";
-export {Selector,SearchResultMixin}
+import SearchResultTemplate from './SearchResultTemplate.vue'
+export {Selector,SearchResultMixin,SearchResultTemplate}

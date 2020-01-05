@@ -39,12 +39,15 @@ export function commitTriggerFlagMutation(context,storeId,flag) {
     context.commit(CROSS_MUTATION_TRIGGER_FLAG, payload)
 }
 
-export function handleException(e) {
-    if (axios.isCancel(e)) {
-        console.log("Request canceled", e.message)
+export function handleException(e,meta) {
+    meta = {
+        throwNetworkErrorToComponent: false,
+        ...meta
+    }
+    if(meta.throwNetworkErrorToComponent) {
+        throw e
         return
     }
-    console.log(e)
     Vue.toast(e.message,{type:"error"})
 }
 

@@ -37,10 +37,11 @@
     import axios from 'axios'
     import {mapState} from "vuex";
     import {util_dateFormat,util_analyseFileType,util_adjustStyle} from '../../../../../util'
+     import {
+        AnimatedHeightWrapper} from '../../../../../components'
     import {
-        AnimatedHeightWrapper,
         WithRandomMetaMixin,
-        CancelNetworkOnDestroyMixin} from '../../../../../components'
+        CancelNetworkOnDestroyMixin} from '../../../../../mixins'
     import {handleException} from "../../../../../store/modules/util";
     import {authRequiredGet} from "../../../../../store/modules/network";
     export default {

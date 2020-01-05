@@ -1,5 +1,6 @@
 <template>
     <Container class="py-4 mx-3 flex flex-justify-start">
+        
         <IconColumn class="flex-shrink-0 mr-2">
             <svg height="16"
                  style="color: #6a737d"
@@ -19,13 +20,15 @@
             <Description class="mb-1" :meta="randomMeta">
                 {{repository.description}}
             </Description>
+            
             <Topics>
-                <AnimatedHeightWrapper>
-                    <router-link :meta="randomMeta"
+                <AnimatedHeightWrapper v-if="topics.length > 0">
+                    <router-link :meta="randomMeta" 
+                                 :key="item + randomMeta"
                                  to="/search"
                                  class="topic-item d-inline-block topic-tag f6 px-2 mx-0"
                                  v-for="item in topics">
-                        {{item.topic.name}}
+                        {{item}}
                     </router-link>
                 </AnimatedHeightWrapper>
             </Topics>
@@ -68,7 +71,10 @@
     import styled from 'vue-styled-components'
     import {util_numberFormat, util_dateFormat, util_adjustStyle} from '../../../../../util'
     import {mapState} from "vuex";
-    import {AnimatedHeightWrapper,WithRandomMetaMixin} from '../../../../../components'
+    import {
+        AnimatedHeightWrapper} from '../../../../../components'
+    import {
+        WithRandomMetaMixin} from '../../../../../mixins'
     export default {
         mixins: [WithRandomMetaMixin],
         props: {
@@ -88,7 +94,13 @@
                 return util_dateFormat.dateFormat("zzz dd, yyyy",new Date(this.repository.updated_at))
             },
             topics: function () {
-                return this.repository.topics
+                let topics = []
+                if(this.repository.topics) {
+                    this.repository.topics.forEach(item => {
+                        if(item.topic)topics.push(item.topic.name)
+                    })
+                }
+                return topics
             },
             languageColor: function () {
                 let color

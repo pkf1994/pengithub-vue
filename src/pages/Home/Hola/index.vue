@@ -1,6 +1,5 @@
 <template>
     <Container>
-        <LogoutedHeader/>
         <Main>
             <HolaJumbotron class="py-6 px-3 bg-sub-primary flex-column-center">
                 <HolaJumbotronTitle class="h0-mktg font-inter text-white text-center mb-3 lh-1">
@@ -318,7 +317,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {LogoutedHeader,Button} from '../../../components'
+    import {Button} from '../../../components'
     import {AdvantageItem,CaseItem,SellingPoint,Footer} from './components'
 
     export default {
@@ -483,7 +482,6 @@
         },
 
         components: {
-            LogoutedHeader,
             Button,
             AdvantageItem,
             CaseItem,

@@ -1,5 +1,8 @@
 <template>
-    <Container>
+     <SearchResultTemplate :errorOccurred="errorData.errorOccurred" 
+                        :emptyResult="emptyResult" 
+                        :searchType="searchType" 
+                        :getData="getData">
         <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'query',value:newOne})"
                   label="Sort">
             <option value="">Best match</option>
@@ -31,7 +34,7 @@
                           :prev="prev"
                           :next="next"
                           :pageInfo="pageInfo"/>
-    </Container>
+    </SearchResultTemplate>
 
 </template>
 

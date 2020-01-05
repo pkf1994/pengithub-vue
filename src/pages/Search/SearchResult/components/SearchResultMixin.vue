@@ -7,7 +7,8 @@
     import {ACTION_SEARCH_REQUEST_SEARCH_RESULT} from "../../../../store/modules/search/actionTypes";
     import {mapActions, mapMutations, mapState} from "vuex";
     import {SimplePagination,AnimatedHeightWrapper,CommonLoadingWrapper} from '../../../../components'
-    import {Selector} from './../components'
+    import Selector from './Selector.vue'
+    import SearchResultTemplate from './SearchResultTemplate.vue'
     import {
         MUTATION_SEARCH_SYNC_QUERY,
         MUTATION_SEARCH_SYNC_SEARCH_SUFFIX
@@ -19,18 +20,25 @@
                 language: "",
                 state: "",
                 searchType: "repositories",
-                needToGetDataWhenActivated: false
+                needToGetDataWhenActivated: false,
+                errorData: {
+                    errorOccurred: false,
+                    errorMessage: ""
+                }
             }
         },
         computed: {
             ...mapState({
                 loadingCountOfEachSearchType: state => state.search.loadingCountOfEachSearchType,
                 searchQuery: state => state.search.searchQuery,
-            })
+            }),
+            emptyResult() {
+                return this.data.length === 0 && !this.loading
+            }
         },
         created() {
             this.getData({
-                searchQueryChanged: true
+                searchQueryChanged: true,
             })
         },
         activated() {
@@ -75,7 +83,7 @@
                 let currentSearchChildPath = this.searchType === "repositories" ? "" : `/${this.searchType}`
                 if(this.$route.path === `/search${currentSearchChildPath}`) {
                     this.getData({
-                        searchQueryChanged: true
+                        searchQueryChanged: true,
                     })
                 } else {
                     this.needToGetDataWhenActivated = true
@@ -93,11 +101,22 @@
             syncSelectedValue({key,value}) {
                 this[key] = value
             },
-            getData(payload) {
-                this.action_search_requestSearchResult({
-                    searchType: this.searchType,
+            async getData(payload) {
+                try{
+                    this.errorData.errorOccurred = false
+                    console.log("getData:" + this.searchType)
+                    await this.action_search_requestSearchResult({
+                        searchType: this.searchType,
                         ...payload
-                })
+                    })
+                }catch(e){
+                    this.errorData = {
+                        errorOccurred: true,
+                        errorMessage: e.message
+                    }
+                    console.log(e)
+                }
+              
             },
             async next(){
                 await this.action_search_requestSearchResult({
@@ -117,9 +136,9 @@
         components: {
             Selector,
             SimplePagination,
-            AnimatedHeightLoadingWrapper: AnimatedHeightWrapper,
+            SearchResultTemplate,
+            AnimatedHeightWrapper,
             CommonLoadingWrapper,
-            Container: styled.div``,
             ResultContent: styled.div``,
             Title: styled.h3``
         }

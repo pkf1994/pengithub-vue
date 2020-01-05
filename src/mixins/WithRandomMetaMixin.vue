@@ -3,14 +3,11 @@
 </template>
 
 <script>
-
-    import {mapState} from "vuex";
-
     export default {
         computed: {
-            ...mapState({
-                logined: state => state.logined
-            })
+            randomMeta: function() {
+                return  `random${parseInt(Math.random() * 10000)}meta`
+            }
         }
     }
 </script>

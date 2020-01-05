@@ -1,0 +1,16 @@
+import {util_queryParse} from '../util'
+export default {
+    router_pushByPath(context,path) {
+        if(context.$route.fullPath === path) return 
+        context.$router.push({
+            path
+        })
+    },
+    router_pushByPathAndParams(context,path,params) {
+        path = path + util_queryParse.querify(pararms)
+        if(context.$route.fullPath === path) return 
+        context.$router.push({
+            path
+        })
+    }
+}

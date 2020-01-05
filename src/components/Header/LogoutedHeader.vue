@@ -22,10 +22,9 @@
 </template>
 
 <script>
-    import {Button} from '../index'
-    import {Container,Inner,Logo,PanelRight,Menu} from "./style";
+    import Button from '../Button'
     import {API_OAUTH2} from "../../store/modules/api";
-
+    import styled from 'vue-styled-components'
     export default {
         data(){
           return {
@@ -54,7 +53,32 @@
             }
         },
         components: {
-            Container,Inner,Logo,PanelRight,Button,Menu
+            Button,
+            Container: styled.div`
+                    padding-top: 8px;
+                    padding-bottom: 8px;
+                    padding-right: 16px;
+                    padding-left: 16px;
+                `,
+                Inner: styled.div`
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                `,
+                Logo:styled.a`
+                    align-self: stretch;
+                `,
+                PanelRight: styled.div`
+                    display: flex;
+                    align-items: center;
+                `,
+                Menu:  styled.button`
+                    outline: none;
+                    background: transparent;
+                    border-width: 0;
+                    padding-right: 0;
+                    padding-left: 0;
+                `
         }
     }
 </script>
