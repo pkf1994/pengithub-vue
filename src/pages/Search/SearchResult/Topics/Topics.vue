@@ -1,8 +1,12 @@
 <template>
-    <SearchResultTemplate :errorOccurred="errorData.errorOccurred" 
+    <SearchResultTemplate 
+                        :loadingInfo="{
+                                basicLoading: loading,
+                                additionalLoading: loadingAdditionalData
+                            }" 
+                        :errorData="errorData" 
                         :emptyResult="emptyResult" 
-                        :searchType="searchType" 
-                        :getData="getData">
+                        :searchType="searchType">
 
       <!--  <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'query',value:newOne})"
                   label="Sort">
@@ -15,23 +19,19 @@
             <option value="order=asc&sort=updated">Least recently updated</option>
         </Selector>-->
 
-        <CommonLoadingWrapper :loading="loading || loadingAdditionalData"
-                              :preventClickEvent="false"
-                              :position="loading ? 'center' : 'corner'">
-            <ResultContent>
-                <transition appear name="fade">
-                    <Title :id="'search-result-title-' + this.searchType"
-                           class="p-3 "
-                           v-show="!(data.length === 0)">
-                       {{totalCount}} topics results
-                    </Title>
-                </transition>
-                <TopicItem class="border-top"
-                           v-for="item in data"
-                           :key="item.name"
-                           :topic="item"/>
-            </ResultContent>
-        </CommonLoadingWrapper>
+        <ResultContent>
+            <transition appear name="fade">
+                <Title :id="'search-result-title-' + this.searchType"
+                        class="p-3 "
+                        v-show="!(data.length === 0)">
+                    {{totalCount}} topics results
+                </Title>
+            </transition>
+            <TopicItem class="border-top"
+                        v-for="item in data"
+                        :key="item.name"
+                        :topic="item"/>
+        </ResultContent>
 
         <SimplePagination :loading="loading"
                           class="pagination mx-3"

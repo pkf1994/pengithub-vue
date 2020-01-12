@@ -1,5 +1,3 @@
-
-
 export const SEARCH_PAGE_MODAL_CONTENT = `
     <p>GitHub’s search supports a variety of different operations. Here’s a quick cheat sheet for some of the common searches.</p>
     <p>For more information, visit our <a href="https://help.github.com/articles/about-searching-on-github/">search help section</a>.</p>

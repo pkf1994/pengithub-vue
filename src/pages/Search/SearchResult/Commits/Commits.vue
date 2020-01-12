@@ -1,8 +1,12 @@
 <template>
-     <SearchResultTemplate :errorOccurred="errorData.errorOccurred" 
+     <SearchResultTemplate   
+                        :loadingInfo="{
+                            basicLoading: loading,
+                            additionalLoading: loadingCount
+                        }" 
+                        :errorData="errorData" 
                         :emptyResult="emptyResult" 
-                        :searchType="searchType" 
-                        :getData="getData">
+                        :searchType="searchType">
         <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'query',value:newOne})"
                   label="Sort">
             <option value="">Best match</option>
@@ -12,19 +16,16 @@
             <option value="order=asc&sort=author-date">Least recently authored</option>
         </Selector>
 
-        <CommonLoadingWrapper :loading="loading"
-                              :preventClickEvent="false">
-            <ResultContent>
-                <transition appear name="fade">
-                    <Title :id="'search-result-title-' + this.searchType"
-                           class="p-3 "
-                           v-show="!(data.length === 0)">
-                        Showing {{totalCount}} available commit results
-                    </Title>
-                </transition>
-                <CommitItem class="border-top" v-for="item in data" :commit="item" :key="item.url"/>
-            </ResultContent>
-        </CommonLoadingWrapper>
+        <ResultContent>
+            <transition appear name="fade">
+                <Title :id="'search-result-title-' + this.searchType"
+                        class="p-3 "
+                        v-show="!(data.length === 0)">
+                    Showing {{totalCount}} available commit results
+                </Title>
+            </transition>
+            <CommitItem class="border-top" v-for="item in data" :commit="item" :key="item.url"/>
+        </ResultContent>
 
         <SimplePagination :loading="loading"
                           class="pagination mx-3"
@@ -34,6 +35,7 @@
                           :prev="prev"
                           :next="next"
                           :pageInfo="pageInfo"/>
+
     </SearchResultTemplate>
 
 </template>

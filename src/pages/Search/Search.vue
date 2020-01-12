@@ -4,7 +4,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import SearchPage from "./SearchPage";
+    import SearchPage from "./SearchIndexPage";
     import SearchResult from "./SearchResult/SearchResult";
     import {mapMutations,mapActions} from "vuex";
     import {MUTATION_SEARCH_SYNC_SEARCH_QUERY} from "../../store/modules/search/mutationTypes";
@@ -14,9 +14,7 @@
             searchQuery: function() {
                 return this.$route.query.q
             },
-            currentPage: function() {
-                return this.$route.query.p ? this.$route.query.p : 1
-            },
+            
             currentComponent: function () {
                 if(this.searchQuery && this.searchQuery.trim() !== "") {
                     return 'SearchResult'
@@ -25,18 +23,17 @@
             }
         },  
         created() {
-            this.syncSearchQuery()
-             this.action_search_requestCountGroupBySearchType()
-        },
-        watch: {
-            currentComponent() {
-                 this.syncSearchQuery()
-                 this.action_search_requestCountGroupBySearchType()
+             if(this.searchQuery && this.searchQuery.trim() !== "") {
+                this.syncSearchQuery()
+                this.action_search_requestCountGroupBySearchType()
+                }
             },
+        watch: {
             searchQuery() {
                  this.syncSearchQuery()
                  this.action_search_requestCountGroupBySearchType()
-            }
+            },
+           
         },
         methods: {
             ...mapActions({
@@ -48,8 +45,7 @@
             syncSearchQuery() {
                 if(this.searchQuery && this.searchQuery.trim() !== "") {
                     this.mutation_search_syncSearchQuery({
-                        searchQuery: this.searchQuery,
-                        currentPage: this.currentPage
+                        searchQuery: this.searchQuery
                     })
                 }
             }

@@ -5,6 +5,11 @@ export const LANGUAGE_LIST = [
         color: "#882B0F"
     },
     {
+        language: "C",
+        extensions: [".c",".cats",".h",".idc"],
+        color: "#555555"
+    },
+    {
         language: "C#",
         extensions: [".cs",".cake",".csx"],
         color: "#178600"

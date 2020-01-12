@@ -1,14 +1,21 @@
 <template>
     <Container class="bg-primary">
-        <nav class="text-center">
+        <nav class="text-center reponav">
             <router-link :to="tabItem.routerLink"
-                         :exact="tabItem.routerLink === '/'"
+                         :exact="tabItem.exact"
                          class="pt-1 px-2 pb-3 d-inline-block nav-item to-adjust"
+                         v-if="!tabItem.disable"
                          v-for="tabItem in tabs"
                          :key="tabItem.label" >
-                    <span class="lh-15 ">
-                        {{tabItem.label}}
-                    </span>
+                     <AnimatedWidthWrapper class=" v-align-bottom">
+                        <span class="lh-15  no-wrap">
+                            {{tabItem.label}}
+                        </span>
+                        
+                        <span class="Counter no-wrap"  
+                        style="background-color: hsla(0,0%,100%,.15);color: inherit;" 
+                        v-if="tabItem.meta">{{tabItem.meta}}</span>
+                    </AnimatedWidthWrapper> 
             </router-link>
         </nav>
     </Container>
@@ -16,6 +23,7 @@
 
 <script>
     import styled from 'vue-styled-components'
+    import {AnimatedWidthWrapper} from '../AnimatedSizeWrapper'
     export default {
         props: {
             tabs: {
@@ -43,6 +51,7 @@
             }
         },
         components: {
+            AnimatedWidthWrapper,
             Container: styled.div``,
             Inner: styled.div``,
         }
@@ -57,4 +66,12 @@
         font-weight: 600;
         color: white;
     }
+    .reponav {
+    padding-right: 8px;
+    padding-left: 8px;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    text-align: center;
+    white-space: nowrap;
+}
 </style>

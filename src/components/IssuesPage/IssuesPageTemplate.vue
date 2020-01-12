@@ -1,10 +1,13 @@
 <template>
     <Container class="flex-column flex-grow-1">
-        <CommonLoadingWrapper :loading="loading" class="bg-white flex-justify-between flex-column"
+        <CommonLoadingWrapper :loading="loading" class="bg-white flex-column"
                               :class="{'flex-grow-1' : data && data.length > 0}">
-            <transition-group name="slide-up-gentle">
-                <IssueListItem :type="type" meta="issue-list-item" v-for="item in data" :key="item.id" :issue="item"/>
-            </transition-group>
+            <IssueListItem :showRepoFullName="showRepoFullName" 
+                            :type="type" 
+                            meta="issue-list-item" 
+                            v-for="item in filterEmptyData" 
+                            :key="item.id + item.title" 
+                            :issue="item"/>
             <slot></slot>
         </CommonLoadingWrapper>
 
@@ -18,8 +21,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoadingWrapper} from '../../../../components'
-    import {IssueListItem} from '../components'
+    import {CommonLoadingWrapper} from '../Loading'
+    import IssueListItem from './IssueItem'
     export default {
         props: {
             data: {
@@ -41,6 +44,19 @@
             type: {
                 type: String,
                 required: true
+            },
+            showRepoFullName: {
+                type: Boolean,
+                default: true
+            }
+        },
+        computed: {
+            filterEmptyData() {
+                let data = []
+                this.data.forEach(item => {
+                    if(item.id) data.push(item)
+                })
+                return data
             }
         },
         components: {

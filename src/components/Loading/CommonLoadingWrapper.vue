@@ -23,10 +23,6 @@
             position: {
                 type: String,
                 default: 'center'
-            },
-            transitionName: {
-                type: String,
-                default: "slide-up-gentle"
             }
         },
         components: {

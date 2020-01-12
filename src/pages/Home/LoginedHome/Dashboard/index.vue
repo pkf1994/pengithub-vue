@@ -15,27 +15,29 @@
                        spellcheck="false"
                        type="text"/>
             </SearchWrapper>
-            <CommonLoadingWrapper :loading="loading">
 
-                <Bubble v-if="events && events.length > 0"
-                        title="Recent activity">
-                    <ActivityListItem v-for="item in events" :event="item" :key="item.id" >
+            <SimpleBubble v-if="events && events.length > 0"
+                    :loading="loading"
+                    title="Recent activity">
+                <ActivityListItem v-for="item in events" :event="item" :key="item.id" >
 
-                    </ActivityListItem>
-                </Bubble>
+                </ActivityListItem>
+            </SimpleBubble>
+            
 
-                <Bubble title="Repositories you contribute to"
-                        :disableFlag="!repositoriesContributedTo || repositoriesContributedTo.length === 0"
-                        disableNotice="You haven't contributed any repository yet.">
-                    <RepositoryListItem v-for="item in repositoriesContributedTo" :key="item.nameWithOwner" :repository="item"/>
-                </Bubble>
+            <SimpleBubble title="Repositories you contribute to"
+                    :loading="loading"
+                    :disableFlag="!repositoriesContributedTo || repositoriesContributedTo.length === 0"
+                    disableNotice="You haven't contributed any repository yet.">
+                <RepositoryListItem v-for="item in repositoriesContributedTo" :key="item.nameWithOwner" :repository="item"/>
+            </SimpleBubble>
 
-                <Bubble title="Starred repositories"
-                        :disableFlag="!starredRepositories || starredRepositories.length === 0"
-                        disableNotice="You haven't starred any repository yet">
-                    <RepositoryListItem v-for="item in starredRepositories" :key="item.nameWithOwner" :repository="item"/>
-                </Bubble>
-            </CommonLoadingWrapper>
+            <SimpleBubble title="Starred repositories"
+                        :loading="loading"
+                    :disableFlag="!starredRepositories || starredRepositories.length === 0"
+                    disableNotice="You haven't starred any repository yet">
+                <RepositoryListItem v-for="item in starredRepositories" :key="item.nameWithOwner" :repository="item"/>
+            </SimpleBubble>
         </Main>
     </Container>
 </template>
@@ -47,7 +49,8 @@
         SearchInput,
         CommonLoading,
         CommonLoadingWrapper,
-        Bubble,
+        AnimatedHeightWrapper,
+        SimpleBubble,
     } from '../../../../components'
       import {
         WithSearchInputMixin,
@@ -99,14 +102,15 @@
             RepositoryListItem,
             CommonLoading,
             CommonLoadingWrapper,
-            Bubble,
+            AnimatedHeightWrapper,
+            SimpleBubble,
             ActivityListItem,
             Container: styled.div``,
             TopNav: styled.div``,
             Main: styled.div``,
             SearchWrapper: styled.div``,
             ContributedRepo: styled.div``,
-            BubbleTitle: styled.h3``,
+            SimpleBubbleTitle: styled.h3``,
             StarredRepo: styled.div``,
         }
     }

@@ -1,8 +1,12 @@
 <template>
-     <SearchResultTemplate :errorOccurred="errorData.errorOccurred" 
+     <SearchResultTemplate 
+                        :loadingInfo="{
+                            basicLoading: loading,
+                            additionalLoading: loadingCount
+                        }" 
+                        :errorData="errorData" 
                         :emptyResult="emptyResult" 
-                        :searchType="searchType" 
-                        :getData="getData">
+                        :searchType="searchType">
 
         <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'state',value:newOne})"
                   label="State">
@@ -35,23 +39,20 @@
             <option value="order=asc&sort=updated">Least recently updated</option>
         </Selector>
 
-        <CommonLoadingWrapper :loading="loading || loadingCount"
-                              :preventClickEvent="false"
-                              :position="loading ? 'center' : 'corner'">
-            <ResultContent>
-                <transition appear name="fade">
-                    <Title :id="'search-result-title-' + this.searchType"
-                           class="p-3 "
-                           v-show="!(data.length === 0)">
-                       {{totalCount}} issues
-                    </Title>
-                </transition>
-                <IssueItem class="border-top"
-                           v-for="item in data"
-                           :key="item.url"
-                           :issue="item"/>
-            </ResultContent>
-        </CommonLoadingWrapper>
+        
+        <ResultContent>
+            <transition appear name="fade">
+                <Title :id="'search-result-title-' + this.searchType"
+                        class="p-3 "
+                        v-show="!(data.length === 0)">
+                    {{totalCount}} issues
+                </Title>
+            </transition>
+            <IssueItem class="border-top"
+                        v-for="item in data"
+                        :key="item.url"
+                        :issue="item"/>
+        </ResultContent>
 
         <SimplePagination :loading="loading"
                           class="pagination mx-3"
@@ -62,7 +63,6 @@
                           :next="next"
                           :pageInfo="pageInfo"/>
     </SearchResultTemplate>
-
 </template>
 
 <script>

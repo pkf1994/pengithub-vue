@@ -15,7 +15,7 @@
 
         <Footer class="mt-6 py-6 px-3">
             <ul class="flex-row-center f6">
-                <li class="mr-3" v-for="item in footerStatementList">
+                <li class="mr-3" :key="item.href" v-for="item in footerStatementList">
                     <a :href="item.href">{{item.title}}</a>
                 </li>
                 <li class="mr-3 link-gray">

@@ -1,5 +1,5 @@
 <template>
-    <BaseIssuesPageTemplate :data="data"
+    <IssuesPageTemplate :data="data"
                             :loading="loading"
                             :noDataFlag="noData"
                             type="pullRequest"
@@ -11,15 +11,14 @@
                     :currentPage="currentPage"
                     :dataGetter="pagination_getData"
                     :pageInfo="pageInfo"/>
-    </BaseIssuesPageTemplate>
+    </IssuesPageTemplate>
 </template>
 
 <script>
-    import {BaseIssuesPageMixin} from '../components'
+    import {IssuesPageMixin} from '../../../../components'
     import {mapActions,mapState} from "vuex";
-    import {ACTION_HOME_REQUEST_PULL_REQUESTS_CREATED} from "../../../../store/modules/home/actionTypes";
     export default {
-        mixins: [BaseIssuesPageMixin],
+        mixins: [IssuesPageMixin],
         data() {
             return {
                 noDataMsg: "No pull request to show"

@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE = (payload) => {
     payload = {
-        perPage: 8,
+        perPage: 15,
         ...payload
     }
     return {

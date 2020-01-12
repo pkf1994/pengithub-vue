@@ -1,5 +1,4 @@
 import {
-    CROSS_MUTATION_CANCEL_AND_UPDATE_AXIOS_CANCEL_TOKEN_SOURCE,
     CROSS_MUTATION_TRIGGER_LOADING
 } from "../crossMutation";
 import {
@@ -7,8 +6,6 @@ import {
     MUTATION_SEARCH_RESOLVE_REPOSITORIES_TOPICS,
     MUTATION_SEARCH_RESOLVE_SEARCH_RESULT,
     MUTATION_SEARCH_SYNC_SEARCH_QUERY,
-    MUTATION_SEARCH_SYNC_SEARCH_SUFFIX,
-    MUTATION_SEARCH_SYNC_QUERY,
     MUTATION_SEARCH_RESOLVE_FIRST_TOPIC,
     MUTATION_SEARCH_RESOLVE_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,
     MUTATION_SEARCH_RESOLVE_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE,
@@ -36,14 +33,6 @@ export default {
     [MUTATION_SEARCH_SYNC_SEARCH_QUERY](state, payload) {
         state.searchQuery = payload.searchQuery
         state.currentPage = payload.currentPage
-    },
-
-    [MUTATION_SEARCH_SYNC_SEARCH_SUFFIX](state,payload) {
-        state.searchResult[payload.searchType].searchSuffix[payload.key] = payload.value
-    },
-
-    [MUTATION_SEARCH_SYNC_QUERY](state,payload) {
-        state.searchResult[payload.searchType].query = payload.query
     },
 
     [MUTATION_SEARCH_RESOLVE_SEARCH_RESULT] (state,payload) {
@@ -95,12 +84,6 @@ export default {
         })
     },
 
-    [CROSS_MUTATION_CANCEL_AND_UPDATE_AXIOS_CANCEL_TOKEN_SOURCE] (state,payload) {
-        if(payload.actionType === ACTION_SEARCH_REQUEST_SEARCH_RESULT) {
-            state.searchResult[payload.meta].source.cancel()
-            state.searchResult[payload.meta].source = axios.CancelToken.source()
-        }
-    },
 
     [MUTATION_SEARCH_RESOLVE_REPOSITORY_COUNT_BY_TOPICS] (state,payload) {
         state.searchResult.topics.data.forEach((item,index) => {
@@ -119,7 +102,6 @@ export default {
     },
 
     [MUTATION_SEARCH_RESOLVE_ADDITIONAL_DATA_OF_USERS](state, payload) {
-        console.log(payload)
         state.searchResult.users.data.forEach((item,index) => {
             Vue.set(state.searchResult.users.data, index, Object.assign({},item,{
                 ...payload.data[item.login],

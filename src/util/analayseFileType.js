@@ -4,7 +4,7 @@ export default function (fileName) {
     let fileTypeAndColor
     let indexOfLastDot = fileName.lastIndexOf(".")
     if(indexOfLastDot !== -1) {
-        let extensions = fileName.substring(indexOfLastDot,fileName.length)
+        let extensions = fileName.substring(indexOfLastDot)
         let multiList = LANGUAGE_LIST.concat(PROSE_LIST).concat(DATA_LIST)
         multiList.forEach(item => {
             if(item.extensions.indexOf(extensions) !== -1) {

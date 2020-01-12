@@ -14,7 +14,7 @@ authRequiredAxios.interceptors.request.use(
         }
         return config
     }, error => {
-        if(axios.isCancel(e))return
+        if(axios.isCancel(error))return
         return Promise.reject(error);
     }
 )

@@ -1,4 +1,4 @@
-import {SimpleFooter,LogoHeader,LabelsFooter} from '../components'
+import {SimpleFooter,LogoHeader,RepoHeader,LabelsFooter} from '../components'
 
 const Home = () => import('../pages/Home/Home.vue')
 const OauthRedirectPage = () => import('../pages/OauthRedirectPage/OauthRedirectPage.vue')
@@ -18,6 +18,19 @@ const SearchResultCommit = () => import('../pages/Search/SearchResult/Commits/Co
 const SearchResultIssues = () => import('../pages/Search/SearchResult/Issues/Issues.vue')
 const SearchResultTopics = () => import('../pages/Search/SearchResult/Topics/Topics.vue')
 const SearchResultUsers = () => import('../pages/Search/SearchResult/Users/Users.vue')
+const Respository = () => import('../pages/Repository/Repository.vue')
+const RespositoryCode = () => import('../pages/Repository/Code/Code.vue')
+const RespositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
+const RespositoryIssuesOpen = () => import('../pages/Repository/Issues/Open.vue')
+const RespositoryIssuesClosed = () => import('../pages/Repository/Issues/Closed.vue')
+const RespositoryIssuesYours = () => import('../pages/Repository/Issues/Yours.vue')
+const RespositoryPullRequests = () => import('../pages/Repository/PullRequests/PullRequests.vue')
+const RespositoryPullRequestsOpen = () => import('../pages/Repository/PullRequests/Open.vue')
+const RespositoryPullRequestsClosed = () => import('../pages/Repository/PullRequests/Closed.vue')
+const RespositoryPullRequestsYours = () => import('../pages/Repository/PullRequests/Yours.vue')
+const RespositoryProjects = () => import('../pages/Repository/Projects/Projects.vue')
+const RespositoryPulse = () => import('../pages/Repository/Pulse/Pulse.vue')
+const RespositoryCommunity = () => import('../pages/Repository/Community/Community.vue')
 const Logout = () => import('../pages/Logout/Logout.vue')
 
 export const ROUTE_HOME = 'route-home'
@@ -118,5 +131,72 @@ export default [
                 component: SearchResultUsers
             }
         ]
-    }
+    },
+    {
+        path: '/:owner/:repo',
+        components: {
+            default: Respository,
+            header: RepoHeader,
+            footer: SimpleFooter
+        },
+        props: {
+            default: true,
+            header: false
+        },
+        children: [
+            {
+                path: '/',
+                component: RespositoryCode
+            },
+            {
+                path: 'issues',
+                component: RespositoryIssues,
+                children: [
+                    {
+                        path: '/',
+                        component: RespositoryIssuesOpen
+                    },
+                    {
+                        path: 'closed',
+                        component: RespositoryIssuesClosed
+                    },
+                    {
+                        path: 'yours',
+                        component: RespositoryIssuesYours
+                    },
+                ]
+            },
+            {
+                path: 'pulls',
+                component: RespositoryPullRequests,
+                children: [
+                    {
+                        path: '/',
+                        component: RespositoryPullRequestsOpen
+                    },
+                    {
+                        path: 'closed',
+                        component: RespositoryPullRequestsClosed
+                    },
+                    {
+                        path: 'yours',
+                        component: RespositoryPullRequestsYours
+                    },
+                ]
+            },
+            {
+                path: 'projects',
+                component: RespositoryProjects,
+            },
+            {
+                path: 'pulse',
+                component: RespositoryPulse,
+            },
+            {
+                path: 'community',
+                component: RespositoryCommunity,
+            }
+        ]
+    },
+    
 ]

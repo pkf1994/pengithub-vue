@@ -17,7 +17,8 @@ import {
     GRAPHQL_VIEWER_ISSUES_MENTIONED,
     GRAPHQL_VIEWER_PR_ASSIGNED,
     GRAPHQL_VIEWER_PR_MENTIONED,
-    GRAPHQL_VIEWER_PULL_REQUEST_CREATED
+    GRAPHQL_VIEWER_PULL_REQUEST_CREATED,
+    GRAPHQL_VIEWER_ISSUES
 } from "./graphql";
 import {
     API_OAUTH2_USER_INFO,
@@ -64,7 +65,6 @@ export const actions = {
 
             //organizations
             const organizations = res_dashboard.data.data.viewer.organizations.nodes
-            console.log(organizations)
 
             context.commit({
                 type: MUTATION_HOME_RESOLVE_DASHBOARD_DATA,
@@ -88,7 +88,6 @@ export const actions = {
             meta: "created",
             ...payload
         }
-        const storeId = 'home_' + payload.issueType + '_' + payload.meta
         try{
             commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_ISSUES,true, {issueType: payload.issueType,meta:payload.meta})
             const perPage = context.rootState.home[payload.issueType][payload.meta].perPage
@@ -98,46 +97,22 @@ export const actions = {
             let _payload
             if(!payload.changePage) {
                 _payload = {
-                    perPage,login
+                    ...payload,
+                    perPage,
+                    login
                 }
             }else{
-                _payload = payload.forward ? {perPage,login,after} : {perPage,login,before}
+                _payload = payload.forward ? {perPage,login,after,...payload,} : {perPage,login,before,...payload,}
             }
 
-            let url
-            if(payload.issueType === "pullRequest") {
-               switch (payload.meta) {
-                   case "created":
-                       url = GRAPHQL_VIEWER_PULL_REQUEST_CREATED(_payload)
-                       break
-                   case "assigned":
-                       url = GRAPHQL_VIEWER_PR_ASSIGNED(_payload)
-                       break
-                   default:
-                       url = GRAPHQL_VIEWER_PR_MENTIONED(_payload)
-               }
-            }else{
-                switch (payload.meta) {
-                    case "created":
-                        url = GRAPHQL_VIEWER_ISSUES_CREATED(_payload)
-                        break
-                    case "assigned":
-                        url = GRAPHQL_VIEWER_ISSUES_ASSIGNED(_payload)
-                        break
-                    default:
-                        url = GRAPHQL_VIEWER_ISSUES_MENTIONED(_payload)
-                }
-            }
+            let url = GRAPHQL_VIEWER_ISSUES(_payload)
 
             const res = await authRequiredGitHubGraphqlApiQuery(url)
             let data
-            if(payload.meta === "created") {
-                data = res.data.data.viewer[`${payload.issueType}s`]
-            }else{
-                data = res.data.data.search
-            }
+            data = res.data.data.search
             context.commit({
                 type: MUTATION_HOME_RESOLVE_ISSUES,
+                totalCount: data.issueCount,
                 ...payload,
                 ...data
             })

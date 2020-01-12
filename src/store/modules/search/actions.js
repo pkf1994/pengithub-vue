@@ -10,9 +10,10 @@ import {
     ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA 
 } from "./actionTypes";
 import {
-    commitCancelAndUpdateAxiosCancelTokenSourceMutation,
+    cancelAndUpdateAxiosCancelTokenSource,
     commitTriggerLoadingMutation,
-    handleException
+    handleException,
+    axiosCancelTokenSourceStore
 } from "../util";
 import {authRequiredGet, authRequiredGitHubGraphqlApiQuery} from "../network";
 import {API_SEARCH} from "../api";
@@ -21,7 +22,7 @@ import {
     MUTATION_SEARCH_RESOLVE_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE,
     MUTATION_SEARCH_RESOLVE_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,
     MUTATION_SEARCH_RESOLVE_FIRST_TOPIC,
-     MUTATION_SEARCH_RESOLVE_RELATED_TOPICS,
+    MUTATION_SEARCH_RESOLVE_RELATED_TOPICS,
     MUTATION_SEARCH_RESOLVE_REPOSITORIES_TOPICS, 
     MUTATION_SEARCH_RESOLVE_REPOSITORY_COUNT_BY_TOPICS,
     MUTATION_SEARCH_RESOLVE_SEARCH_RESULT, 
@@ -50,14 +51,14 @@ export const actions = {
     async [ACTION_SEARCH_REQUEST_SEARCH_RESULT](context, payload) {
         payload = {
             searchType: 'repositories',
+            page: 1,
             changePage: false,
             forward: true,
             searchQueryChanged: true,
             ...payload
         }
-        console.log(payload)
         try{
-            commitCancelAndUpdateAxiosCancelTokenSourceMutation(context,ACTION_SEARCH_REQUEST_SEARCH_RESULT,payload.searchType)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_SEARCH_REQUEST_SEARCH_RESULT + payload.searchType)
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_SEARCH_RESULT,true,payload.searchType)
             let url
             if(payload.changePage) {
@@ -67,27 +68,23 @@ export const actions = {
                     url = context.rootState.search.searchResult[payload.searchType].pageInfo.prev.url
                 }
             } else {
-                const currentPage = context.rootState.search.searchResult[payload.searchType].currentPage
                 let searchQuery = context.rootState.search.searchQuery
                 const perPage = context.rootState.search.searchResult[payload.searchType].perPage
-                const searchSuffix = context.rootState.search.searchResult[payload.searchType].searchSuffix
-                const query = context.rootState.search.searchResult[payload.searchType].query
-                for(let key in searchSuffix) {
-                    if(searchSuffix[key] && searchSuffix[key].trim() !== "") {
-                        searchQuery = `${searchQuery} ${key}:${searchSuffix[key]}`
+                const query = payload.query
+                for(let key in payload.qualifiers) {
+                    if(payload.qualifiers[key] && payload.qualifiers[key].trim() !== "") {
+                        searchQuery = `${searchQuery} ${key}:${payload.qualifiers[key]}`
                     }
                 }
                 url = API_SEARCH(payload.searchType,{
                     q: searchQuery,
-                    page: currentPage,
+                    page: payload.page,
                     per_page: perPage,
                 }) + (query ? `&${query}` : "")
             }
 
-            const cancelToken =  context.rootState.search.searchResult[payload.searchType].source.token
             let config = {
                 cancelToken,
-                
                 headers: {
                     "Accept": "application/vnd.github.mercy-preview+json," +
                         "application/vnd.github.cloak-preview," +
@@ -98,20 +95,20 @@ export const actions = {
             //repositories分页内获取各语言的搜索结果数量；获取first topic
             if(payload.searchType === "repositories") {
                 if(payload.searchQueryChanged && !payload.changePage) {
-                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE)
-                    context.dispatch(ACTION_SERACH_REQUEST_FIRST_TOPIC)
+                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE,{cancelToken})
+                    context.dispatch(ACTION_SERACH_REQUEST_FIRST_TOPIC,{cancelToken})
                 }
             }
             //issues分页下获取各语言的搜索结果数量
             if(payload.searchType === "issues") {
                 if(payload.searchQueryChanged && !payload.changePage) {
-                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE)
+                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE,{cancelToken})
                 }
             }
             //users分页下获取各语言的搜索结果数量
             if(payload.searchType === "users") {
                 if(payload.searchQueryChanged && !payload.changePage) {
-                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE)
+                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE,{cancelToken})
                 }
             }
             const res = await authRequiredGet(url,config)
@@ -136,17 +133,17 @@ export const actions = {
 
             //repositories分页下获取各搜索结果的其他信息：关联topic、语言、需要协助的issue数量
             if(payload.searchType === "repositories") {
-                context.dispatch(ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA,res.data.items)
+                context.dispatch(ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA,{items:res.data.items,cancelToken})
             }
 
             //topics分页下获取额外信息： 关联topic、从属仓库数量、是否star
             if(payload.searchType === "topics") {
-                context.dispatch(ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA,res.data.items)
+                context.dispatch(ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA,{items:res.data.items,cancelToken})
             }
 
             //users分页下获取额外信息：是否可follow、是否following、地址、邮件地址
             if(payload.searchType === 'users') {
-                context.dispatch(ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA,res.data.items)
+                context.dispatch(ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA,{items:res.data.items,cancelToken})
             }
 
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_SEARCH_RESULT,false,payload.searchType)
@@ -161,8 +158,7 @@ export const actions = {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA,true)
 
-            const cancelToken =  context.rootState.search.searchResult.repositories.source.token
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_TOPICS_AND_LANGUAGE_COLOR_AND_HELP_WANTED_ISSUES_COUNT_OF_REPOSITORIES(payload),{cancelToken})
+            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_TOPICS_AND_LANGUAGE_COLOR_AND_HELP_WANTED_ISSUES_COUNT_OF_REPOSITORIES(payload.items),{cancelToken:payload.cancelToken})
             const topics = {}
             const languageColors = {}
             const helpWantedIssuesCount = {}
@@ -189,11 +185,9 @@ export const actions = {
     async [ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA](context, payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA,true)
-
-            const cancelToken =  context.rootState.search.searchResult.topics.source.token
             const res = await Promise.all([
-                authRequiredGitHubGraphqlApiQuery(GRAPHQL_RELATIVE_TOPICS_OF_TOPICS(payload),{cancelToken}),
-                authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_REPOSITORY_BY_TOPICS(payload),{cancelToken})
+                authRequiredGitHubGraphqlApiQuery(GRAPHQL_RELATIVE_TOPICS_OF_TOPICS(payload),{cancelToken:payload.cancelToken}),
+                authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_REPOSITORY_BY_TOPICS(payload.items),{cancelToken:payload.cancelToken})
             ])
             const relatedTopicsData = res[0].data.data
             const repositoryCountData = res[1].data.data
@@ -237,10 +231,8 @@ export const actions = {
     async [ACTION_SEARCH_REQUEST_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE] (context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE,true)
-
-            const cancelToken =  context.rootState.search.searchResult.repositories.source.token
             const searchQuery = context.rootState.search.searchQuery
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE(searchQuery),{cancelToken})
+            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE(searchQuery),{cancelToken:payload.cancelToken})
             let languageCursor = {}
             LANGUAGE_LIST.forEach((item,index) => {
                 languageCursor[`language${index}`] = item.language
@@ -273,10 +265,8 @@ export const actions = {
     async [ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE] (context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE,true)
-
-            const cancelToken =  context.rootState.search.searchResult.users.source.token
             const searchQuery = context.rootState.search.searchQuery
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_USER_GROUP_BY_LANGUAGE(searchQuery),{cancelToken})
+            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_USER_GROUP_BY_LANGUAGE(searchQuery),{cancelToken:payload.cancelToken})
             let languageCursor = {}
             LANGUAGE_LIST.forEach((item,index) => {
                 languageCursor[`language${index}`] = item.language
@@ -309,7 +299,6 @@ export const actions = {
     async [ACTION_SERACH_REQUEST_FIRST_TOPIC] (context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SERACH_REQUEST_FIRST_TOPIC,true)
-            const cancelToken =  context.rootState.search.searchResult.repositories.source.token
             const searchQuery = context.rootState.search.searchQuery
             const url = API_SEARCH(
                 "topics",
@@ -317,9 +306,9 @@ export const actions = {
             )
             const res = await authRequiredGet(
                 url,
-            {
+                {
                     headers: {"Accept": "application/vnd.github.mercy-preview+json"},
-                    cancelToken
+                    cancelToken:payload.cancelToken
                 }
             )
             if(res.data.total_count > 0) {
@@ -327,7 +316,7 @@ export const actions = {
                     "repositories",
                     {q: searchQuery, per_page:1,page:1}
                 )
-                const res_firstTopicAvatar = await authRequiredGet(url_firstTopicAvatar,{cancelToken})
+                const res_firstTopicAvatar = await authRequiredGet(url_firstTopicAvatar,{cancelToken:payload.cancelToken})
                 context.commit({
                     type: MUTATION_SEARCH_RESOLVE_FIRST_TOPIC,
                     data: {
@@ -345,6 +334,7 @@ export const actions = {
 
     async [ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE] (context, payload) {
         try{
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE)
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,true)
             context.commit({
                 type: MUTATION_SEARCH_RESOLVE_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,
@@ -355,7 +345,6 @@ export const actions = {
                 commits: 0,
                 topics: 0,
             })
-            const cancelToken =  context.rootState.search.loadingCountOfEachSearchTypeSource.token
             const searchQuery = context.rootState.search.searchQuery
             const res_graphql = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_GROUP_BY_SEARCH_TYPE(searchQuery),{cancelToken})
             const restParam = {
@@ -377,6 +366,7 @@ export const actions = {
                     cancelToken
                 }),
             ])
+        
             context.commit({
                 type: MUTATION_SEARCH_RESOLVE_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,
                 repositories: res_graphql.data.data.REPOSITORY.repositoryCount,
@@ -397,10 +387,8 @@ export const actions = {
     async [ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE] (context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE,true)
-
-            const cancelToken =  context.rootState.search.searchResult.repositories.source.token
             const searchQuery = context.rootState.search.searchQuery
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE(searchQuery),{cancelToken})
+            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE(searchQuery),{cancelToken:payload.cancelToken})
             let languageCursor = {}
             LANGUAGE_LIST.forEach((item,index) => {
                 languageCursor[`language${index}`] = item.language
@@ -432,9 +420,7 @@ export const actions = {
     async [ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA] (context, payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA,true)
-
-            const cancelToken =  context.rootState.search.searchResult.users.source.token
-            const res = await  authRequiredGitHubGraphqlApiQuery(GRAPHQL_NAME_BIO_LOCATION_EMAIL_FOLLOWSHIP_OF_USERS(payload),{cancelToken})
+            const res = await  authRequiredGitHubGraphqlApiQuery(GRAPHQL_NAME_BIO_LOCATION_EMAIL_FOLLOWSHIP_OF_USERS(payload.items),{cancelToken:payload.cancelToken})
             const data = res.data.data
             const additionalData = {}
 

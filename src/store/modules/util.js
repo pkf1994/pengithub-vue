@@ -1,5 +1,5 @@
 import {
-    CROSS_MUTATION_RESOLVE_DATA, CROSS_MUTATION_CANCEL_AND_UPDATE_AXIOS_CANCEL_TOKEN_SOURCE,
+    CROSS_MUTATION_RESOLVE_DATA,
     CROSS_MUTATION_TRIGGER_FLAG,
     CROSS_MUTATION_TRIGGER_LOADING
 } from "./crossMutation";
@@ -15,12 +15,10 @@ export function commitTriggerLoadingMutation(context, actionType, loading, meta)
     context.commit(CROSS_MUTATION_TRIGGER_LOADING, payload)
 }
 
-export function commitCancelAndUpdateAxiosCancelTokenSourceMutation(context, actionType, meta) {
-    const payload = {
-        actionType,
-        meta
-    }
-    context.commit(CROSS_MUTATION_CANCEL_AND_UPDATE_AXIOS_CANCEL_TOKEN_SOURCE, payload)
+export function cancelAndUpdateAxiosCancelTokenSource(meta) {
+    axiosCancelTokenSourceStore[meta] && axiosCancelTokenSourceStore[meta].cancel()
+    axiosCancelTokenSourceStore[meta] = axios.CancelToken.source()
+    return  axiosCancelTokenSourceStore[meta].token
 }
 
 export function commitResolveDataMutation(context, storeId, data) {
@@ -42,12 +40,19 @@ export function commitTriggerFlagMutation(context,storeId,flag) {
 export function handleException(e,meta) {
     meta = {
         throwNetworkErrorToComponent: false,
+        toastError: true,
         ...meta
     }
     if(meta.throwNetworkErrorToComponent) {
         throw e
         return
     }
-    Vue.toast(e.message,{type:"error"})
+    if(meta.toastError) {
+        Vue.toast(e.message,{type:"error"})
+    }
+    console.log(e)
 }
 
+export const axiosCancelTokenSourceStore = {
+
+}

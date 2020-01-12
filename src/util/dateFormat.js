@@ -67,7 +67,7 @@ export default {
         } else if (minC >= 1) {
             return "about " + parseInt(minC) + " minutes ago";
         }
-        return '刚刚';
+        return 'before long';
     },
         
     dateFormat: function (fmt, date) {

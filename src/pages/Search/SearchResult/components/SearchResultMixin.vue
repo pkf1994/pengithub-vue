@@ -6,7 +6,7 @@
     import styled from 'vue-styled-components'
     import {ACTION_SEARCH_REQUEST_SEARCH_RESULT} from "../../../../store/modules/search/actionTypes";
     import {mapActions, mapMutations, mapState} from "vuex";
-    import {SimplePagination,AnimatedHeightWrapper,CommonLoadingWrapper} from '../../../../components'
+    import {SimplePagination,AnimatedHeightWrapper} from '../../../../components'
     import Selector from './Selector.vue'
     import SearchResultTemplate from './SearchResultTemplate.vue'
     import {
@@ -23,7 +23,8 @@
                 needToGetDataWhenActivated: false,
                 errorData: {
                     errorOccurred: false,
-                    errorMessage: ""
+                    errorMessage: "",
+                    reTryCallback: () => {}
                 }
             }
         },
@@ -34,7 +35,10 @@
             }),
             emptyResult() {
                 return this.data.length === 0 && !this.loading
-            }
+            },
+            currentPage: function() {
+                return this.$route.query.p ? this.$route.query.p : 1
+            },
         },
         created() {
             this.getData({
@@ -51,31 +55,33 @@
         },
         watch: {
             query(newOne,oldOne) {
-                this.mutation_search_syncQuery({
-                    searchType: this.searchType,
-                    query: newOne
-                })
                 this.getData({
+                    query: newOne,
+                    qualifiers: {
+                         state: this.state,
+                        language: this.language,
+                    },
                     searchQueryChanged: false
                 })
             },
             language(newOne,oldOne) {
-                this.mutation_search_syncSearchSuffix({
-                    searchType: this.searchType,
-                    key: 'language',
-                    value: newOne
-                })
+           
                 this.getData({
+                    query: this.query,
+                    qualifiers: {
+                        state: this.state,
+                        language: newOne,
+                    },
                     searchQueryChanged: false
                 })
             },
             state(newOne) {
-                this.mutation_search_syncSearchSuffix({
-                    searchType: this.searchType,
-                    key: 'state',
-                    value: newOne
-                })
                 this.getData({
+                    query: this.query,
+                    qualifiers: {
+                        state: newOne,
+                        language: this.language,
+                    },
                     searchQueryChanged: false
                 })
             },
@@ -84,19 +90,23 @@
                 if(this.$route.path === `/search${currentSearchChildPath}`) {
                     this.getData({
                         searchQueryChanged: true,
+                        query: this.query,
+                        qualifiers: {
+                            state: this.state,
+                            language: this.language,
+                        },
                     })
                 } else {
                     this.needToGetDataWhenActivated = true
                 }
+            },
+            currentPage() {
+
             }
         },
         methods: {
             ...mapActions({
                 action_search_requestSearchResult: ACTION_SEARCH_REQUEST_SEARCH_RESULT
-            }),
-            ...mapMutations({
-                mutation_search_syncQuery: MUTATION_SEARCH_SYNC_QUERY,
-                mutation_search_syncSearchSuffix: MUTATION_SEARCH_SYNC_SEARCH_SUFFIX,
             }),
             syncSelectedValue({key,value}) {
                 this[key] = value
@@ -104,33 +114,54 @@
             async getData(payload) {
                 try{
                     this.errorData.errorOccurred = false
-                    console.log("getData:" + this.searchType)
                     await this.action_search_requestSearchResult({
                         searchType: this.searchType,
+                        page: this.currentPage,
                         ...payload
                     })
                 }catch(e){
                     this.errorData = {
                         errorOccurred: true,
-                        errorMessage: e.message
+                        errorMessage: e.message,
+                        reTryCallback: () => this.getData(payload)
                     }
                     console.log(e)
                 }
               
             },
             async next(){
-                await this.action_search_requestSearchResult({
-                    searchType: this.searchType,
-                    changePage:true,
-                    forward:true
-                })
+                try{
+                    this.errorData.errorOccurred = false
+                    await this.action_search_requestSearchResult({
+                        searchType: this.searchType,
+                        changePage:true,
+                        forward:true
+                    })
+                }catch(e){
+                    this.errorData = {
+                        errorOccurred: true,
+                        errorMessage: e.message,
+                        reTryCallback: this.next
+                    }
+                    console.log(e)
+                }
             },
             async prev(){
-                await this.action_search_requestSearchResult({
-                    searchType: this.searchType,
-                    changePage:true,
-                    forward:false
-                })
+               try{
+                    this.errorData.errorOccurred = false
+                    await this.action_search_requestSearchResult({
+                        searchType: this.searchType,
+                        changePage:true,
+                        forward:false
+                    })
+                }catch(e){
+                    this.errorData = {
+                        errorOccurred: true,
+                        errorMessage: e.message,
+                        reTryCallback: this.prev
+                    }
+                    console.log(e)
+                }
             }
         },
         components: {
@@ -138,7 +169,6 @@
             SimplePagination,
             SearchResultTemplate,
             AnimatedHeightWrapper,
-            CommonLoadingWrapper,
             ResultContent: styled.div``,
             Title: styled.h3``
         }

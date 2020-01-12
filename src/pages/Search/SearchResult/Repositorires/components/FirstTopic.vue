@@ -5,7 +5,7 @@
                  width="64"
                  height="64"
                  class="d-block rounded-1 mr-3 flex-shrink-0"
-                 alt="vue logo">
+                 :alt="firstTopic.name + ' logo'">
             <Main class="d-md-flex flex-items-start flex-auto">
                 <MainInner class="flex-auto">
                     <MainTitle class="mb-1">{{firstTopic.display_name}}</MainTitle>

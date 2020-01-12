@@ -1,8 +1,12 @@
 <template>
-    <SearchResultTemplate :errorOccurred="errorData.errorOccurred" 
+    <SearchResultTemplate
+                        :loadingInfo="{
+                            basicLoading: loading,
+                            additionalLoading: false
+                        }"
+                        :errorData="errorData"
                         :emptyResult="emptyResult" 
-                        :searchType="searchType" 
-                        :getData="getData">
+                        :searchType="searchType"">
         <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'language',value:newOne})"
                   initialValue="Any"
                   label="Language">
@@ -40,21 +44,17 @@
             <option value="order=desc&sort=indexed">Recently indexed</option>
             <option value="order=asc&sort=indexed">Least recently indexed</option>
         </Selector>
-
-        <CommonLoadingWrapper :loading="loading"
-                              :preventClickEvent="false"
-                              :position="loading ? 'center' : 'corner'">
-            <ResultContent>
-                <transition appear name="fade">
-                    <Title :id="'search-result-title-' + this.searchType"
-                           class="p-3 "
-                           v-show="!(data.length === 0)">
-                        Showing {{totalCount}} available code results
-                    </Title>
-                </transition>
-                <CodeItem class="border-top" v-for="item in data" :key="item.path + item.repository.id" :code="item"/>
-            </ResultContent>
-        </CommonLoadingWrapper>
+        
+        <ResultContent>
+            <transition appear name="fade">
+                <Title :id="'search-result-title-' + this.searchType"
+                        class="p-3 "
+                        v-show="!(data.length === 0)">
+                    Showing {{totalCount}} available code results
+                </Title>
+            </transition>
+            <CodeItem class="border-top" v-for="item in data" :key="item.path + item.repository.id" :code="item"/>
+        </ResultContent>
 
         <SimplePagination :loading="loading"
                           class="pagination mx-3"

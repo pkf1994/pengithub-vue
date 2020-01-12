@@ -37,214 +37,58 @@ export const GRAPHQL_DASHBOARD = (login) => `
 }
 `
 
-export const GRAPHQL_VIEWER_PULL_REQUEST_CREATED = (payload) => {
-    payload = {
-        perPage: 10,
-        ...payload
-    }
-    return `
-    query {
-    viewer {
-        pullRequests(${payload.before ? 'last' : 'first'}: ${payload.perPage},orderBy:{field:CREATED_AT,direction:DESC},states:[OPEN]${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
-            totalCount
-            nodes{
-                author{
-                    login
-                }
-                title
-                url
-                number
-                createdAt
-                id
-                repository{
-                    nameWithOwner
-                }
-                labels(first: 20) {
-                    nodes {
-                        name
-                        color
-                        id
-                    }
-                }
+export const GRAPHQL_VIEWER_ISSUES = (payload) => {
+  payload = {
+      issueType: 'issue',
+      perPage: 10,
+      ...payload
+  }
+
+  const firstCharToUpperCase = (str) => {
+    return str[0].toUpperCase() + str.substring(1)
+  }
+
+  
+  return `
+{
+search(query: "${payload.meta === 'assigned' ? 'assignee:' + payload.login : ''} ${payload.meta === 'mentioned' ? 'mentions:' + payload.login : ''} ${payload.meta === 'created' ? 'author:' + payload.login : ''} is:${payload.issueType === 'issue' ? 'issue' : 'pr'}", type: ISSUE, ${payload.before ? 'last' : 'first'}: ${payload.perPage}${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
+  ${GRAPHQL_FRAGMENT_PAGEINFO}
+  issueCount
+  nodes {
+    ... on ${firstCharToUpperCase(payload.issueType)} {
+      id
+      url
+      number
+      state
+      closedAt
+      createdAt
+      ${payload.issueType === 'pullRequest' ? 'merged' : ''}
+      timelineItems(last: 1, itemTypes: CLOSED_EVENT) {
+        nodes {
+          ... on ClosedEvent {
+            id
+            actor {
+              login
             }
-             ${GRAPHQL_FRAGMENT_PAGEINFO}
+          }
         }
-    }
-}
-`}
-
-export const GRAPHQL_VIEWER_PR_ASSIGNED = (payload) => {
-    payload = {
-        perPage: 10,
-        ...payload
-    }
-    return `
-{
-  search(query: "assignee:${payload.login} type:pr", type: ISSUE, ${payload.before ? 'last' : 'first'}: ${payload.perPage}${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
-    ${GRAPHQL_FRAGMENT_PAGEINFO}
-    nodes {
-      ... on PullRequest {
-        id
-        url
-        number
-        author {
-          login
-        }
-        title
-        createdAt
-        repository {
-          nameWithOwner
-        }
-        labels(first: 20) {
-                    nodes {
-                        name
-                        color
-                        id
-                    }
-                }
       }
+      author {
+        login
+      }
+      title
+      repository {
+        nameWithOwner
+      }
+      labels(first: 20) {
+                  nodes {
+                      name
+                      color
+                      id
+                  }
+              }
     }
   }
 }
-`}
-
-export const GRAPHQL_VIEWER_PR_MENTIONED = (payload) => {
-    payload = {
-        perPage: 10,
-        ...payload
-    }
-    return `
-{
-  search(query: "mentions:${payload.login} type:pr", type: ISSUE, ${payload.before ? 'last' : 'first'}: ${payload.perPage}${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
-    ${GRAPHQL_FRAGMENT_PAGEINFO}
-    nodes {
-      ... on PullRequest {
-        id
-        url
-        number
-        createdAt
-        author {
-          login
-        }
-        title
-        repository {
-          nameWithOwner
-        }
-        labels(first: 20) {
-                    nodes {
-                        name
-                        color
-                        id
-                    }
-                }
-      }
-    }
-  }
-}
-`}
-
-export const GRAPHQL_VIEWER_ISSUES_CREATED = (payload) => {
-    payload = {
-        perPage: 10,
-        ...payload
-    }
-    return `
-    query {
-    viewer {
-        issues(${payload.before ? 'last' : 'first'}: ${payload.perPage},orderBy:{field:CREATED_AT,direction:DESC},states:[OPEN]${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
-            totalCount
-            ${GRAPHQL_FRAGMENT_PAGEINFO}
-            nodes{
-                author{
-                    login
-                }
-                title
-                url
-                number
-                createdAt
-                id
-                repository{
-                    nameWithOwner
-                }
-                labels(first: 20) {
-                    nodes {
-                        name
-                        color
-                        id
-                    }
-                }
-            }
-        }
-    }
-}
-`}
-
-export const GRAPHQL_VIEWER_ISSUES_ASSIGNED = (payload) => {
-    payload = {
-        perPage: 10,
-        ...payload
-    }
-    return `
-{
-  search(query: "assignee:${payload.login} type:issue", type: ISSUE, ${payload.before ? 'last' : 'first'}: ${payload.perPage}${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
-    ${GRAPHQL_FRAGMENT_PAGEINFO}
-    nodes {
-      ... on Issue {
-        id
-        url
-        number
-        author {
-          login
-        }
-        title
-        createdAt
-        repository {
-          nameWithOwner
-        }
-        labels(first: 20) {
-                    nodes {
-                        name
-                        color
-                        id
-                    }
-                }
-      }
-    }
-  }
-}
-`}
-
-export const GRAPHQL_VIEWER_ISSUES_MENTIONED = (payload) => {
-    payload = {
-        perPage: 10,
-        ...payload
-    }
-    return `
-{
-  search(query: "mentions:${payload.login} type:issue", type: ISSUE, ${payload.before ? 'last' : 'first'}: ${payload.perPage}${payload.after ? ',after:' + '"'+ payload.after+'"' : '' }${payload.before ? ',before:' + '"'+ payload.before+'"' : '' }) {
-    ${GRAPHQL_FRAGMENT_PAGEINFO}
-    nodes {
-      ... on Issue {
-        id
-        url
-        number
-        createdAt
-        author {
-          login
-        }
-        title
-        repository {
-          nameWithOwner
-        }
-        labels(first: 20) {
-                    nodes {
-                        name
-                        color
-                        id
-                    }
-                }
-      }
-    }
-  }
 }
 `}

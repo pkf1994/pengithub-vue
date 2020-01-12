@@ -1,23 +1,22 @@
-import AnimatedNumber from "./AnimatedNumber";
-import {LogoHeader,LogoutedHeader} from './Header'
+import {LogoHeader,RepoHeader,LogoutedHeader} from './Header'
 import ScrollTopListenerMixin from "./ScrollTopListenerMixin";
 import Button from './Button'
-import LoadingIcon from './LoadingIcon'
 import {HeaderDetachTopTab,PageTopTab,ComplexTopTab} from './TopTab'
 import SearchInput from './SearchInput'
-import CommonLoading from './CommonLoading'
-import CommonLoadingWrapper from './CommonLoadingWrapper'
 import {SimpleFooter,LabelsFooter} from './Footer'
-import Bubble from './Bubble'
+import {SimpleBubble,ComplexBubble} from './Bubble'
 import {IconPagination,SimplePagination} from './Pagination'
 import {
     AnimatedHeightWrapper,
     AnimatedWidthWrapper} from "./AnimatedSizeWrapper";
+import LoadingAndCatchErrorTemplate from './LoadingAndCatchErrorTemplate'
+import {LoadingIcon,CommonLoadingEx,CommonLoading,CommonLoadingWrapper,LoadingIconEx} from './Loading'
+import {IssuesPageMixin,IssueListItem} from './IssuesPage'
 export {
     Button,
-    AnimatedNumber,
     LogoHeader,
     LogoutedHeader,
+    RepoHeader,
     LoadingIcon,
     HeaderDetachTopTab,
     PageTopTab,
@@ -27,9 +26,15 @@ export {
     CommonLoadingWrapper,
     SimpleFooter,
     LabelsFooter,
-    Bubble,
+    SimpleBubble,
+    CommonLoadingEx,
     IconPagination,
     SimplePagination,
     AnimatedHeightWrapper,
-    AnimatedWidthWrapper
+    AnimatedWidthWrapper,
+    LoadingAndCatchErrorTemplate,
+    LoadingIconEx,
+    ComplexBubble,
+    IssuesPageMixin,
+    IssueListItem
 }

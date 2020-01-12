@@ -49,7 +49,6 @@
         watch: {
             loading: function (newOne, oldOne) {
                 if(!newOne) {
-                    console.log("scroll")
                     util_animatedScrollTo.scrollTo(document.getElementById("app-container"),0)
                 }
             }

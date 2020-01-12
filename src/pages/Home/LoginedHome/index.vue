@@ -31,6 +31,7 @@
                 tabs: [
                     {
                         label: TAB_DASHBOARD,
+                        exact: true,
                         routerLink: '/'
                     },
                     {

@@ -4,7 +4,8 @@ export default {
         Vue.mixin({
             data() {
                 return {
-                    primaryColor: '#24292e'
+                    primaryColor: '#24292e',
+                    primaryBackgroundColor: '#fafbfc'
                 }
             }
         })

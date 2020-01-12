@@ -33,3 +33,12 @@
 .list-item+.list-item {
   border-top: 1px solid #eaecef;
 }
+
+.list-item>svg {
+  position: absolute;
+  top: 14px;
+  left: 12px;
+  width: 16px;
+  text-align: center;
+  vertical-align: bottom;
+}

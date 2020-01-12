@@ -3,8 +3,7 @@
             <img class="rounded-1 v-align-middle flex-shrink-0 mr-1"
                  :src="code.repository.owner.avatar_url"
                  width="20"
-                 height="20"
-                 :alt="'@'+code.repository.owner.login">
+                 height="20">
 
             <Main class="width-full">
                 <FullName class="flex-shrink-0 text-small text-bold">

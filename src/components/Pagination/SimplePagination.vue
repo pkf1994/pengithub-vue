@@ -91,7 +91,6 @@
 
 <style scoped>
     .container{
-        z-index: 2;
         padding: 0;
         margin-top: 0;
         margin-bottom: -1px;

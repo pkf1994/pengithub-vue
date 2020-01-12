@@ -4,17 +4,22 @@
             {{title}}
         </Title>
 
-        <slot></slot>
+        <AnimatedHeightWrapper>
+            <slot></slot>
+        </AnimatedHeightWrapper>  
 
-        <BubbleDisable v-if="disableFlag" class="bubble-disabled bubble-content">
-            <p style="margin-block-start: 1em;
-    margin-block-end: 1em;">{{disableNotice}}</p>
+
+        <BubbleDisable v-if="disableFlag || loading" class="bubble-disabled bubble-content">
+            <p v-if="disableFlag && !loading" style="margin-block-start: 1em;margin-block-end: 1em;">{{disableNotice}}</p>
+             <LoadingIconEx  style="margin-block-start: 1em;margin-block-end: 1em;"  v-if="loading"/>
         </BubbleDisable>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
+    import {LoadingIconEx} from '../Loading'
+    import {AnimatedHeightWrapper} from '../AnimatedSizeWrapper'
     export default {
         props: {
             title: {
@@ -28,12 +33,19 @@
             disableFlag: {
                 type: Boolean,
                 default: false
+            },
+            loading: {
+                type: Boolean,
+                default: false
             }
         },
         components: {
+            LoadingIconEx,
+            AnimatedHeightWrapper,
             Container: styled.div``,
             Title: styled.h3``,
-            BubbleDisable: styled.div``
+            BubbleDisable: styled.div``,
+            LoadingContainer: styled.div``
         }
     }
 </script>
@@ -42,7 +54,7 @@
 
     .bubble {
         padding: 0;
-        margin: 0 15px 15px;
+        margin:0 15px 15px 15px;
         overflow: hidden;
         word-break: break-word;
         word-wrap: break-word;
@@ -50,8 +62,6 @@
         background: #fff;
         border: 1px solid #d1d5da;
         border-radius: 3px;
-
-
     }
 
     .bubble-title {

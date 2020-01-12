@@ -1,5 +1,6 @@
 <template>
         <Container class="py-4 mx-3 flex">
+            
             <AvatarColumn class="flex-shrink-0 mr-2">
                 <router-link v-if="avatarUrl" to="/search">
                     <img :src="avatarUrl" width="20" height="20" class="d-block rounded-1" :alt="topic.name + 'logo'">
@@ -133,7 +134,6 @@
                     }
                 `
                 const res = await authRequiredGitHubGraphqlApiQuery(graphql,{cancelToken: this.source.token})
-                console.log(res)
                 this.avatarUrl = res.data.data.search.nodes[0].owner.avatarUrl
             }
         },
