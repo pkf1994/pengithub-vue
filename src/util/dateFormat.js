@@ -42,10 +42,8 @@ export default {
         // 使用
         if (monthC > 12) {
             // 超过1年，直接显示年月日
-            return (function () {
-                var date = new Date(dateTimeStamp);
-                return date.getFullYear() + '年' + zero(date.getMonth() + 1) + '月' + zero(date.getDate()) + '日';
-            })();
+            let yearNumber =  (monthC/12).toFixed()
+            return yearNumber + (yearNumber > 1 ? ' years ago' : ' year ago');
         } else if (monthC >= 1 && monthC < 2) {
             return parseInt(monthC) + " month ago";
         } else if (monthC > 2) {

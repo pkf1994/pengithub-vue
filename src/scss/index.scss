@@ -19,6 +19,8 @@
 @import '../../node_modules/@primer/css/base/index.scss';
 @import '../../node_modules/@primer/css/markdown/index.scss';
 @import '../../node_modules/@primer/css/labels/index.scss';
+@import './primerAdj.scss';
+
 
 @include with-theme();
 @include init-titleFontSize();

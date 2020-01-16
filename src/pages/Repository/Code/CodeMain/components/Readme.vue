@@ -7,7 +7,7 @@
             </Title>   
         </template>
 
-        <Content class="bubble-content">
+        <Content class="bubble-content p-0">
             <Inner v-html="readme"/>
         </Content>
 
@@ -21,8 +21,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../components'
-    import {util_dateFormat} from '../../../../util'
+    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../../components'
+    import {util_dateFormat} from '../../../../../util'
     export default {
         props: {
             loading: {

@@ -17,10 +17,9 @@
                                 style="white-space: pre">{{matchesContent}}</MatchesContent>
 
                 <MultiInfo class="d-flex flex-wrap text-small text-gray">
-                    <Language class="mr-3">
+                    <Language class="mr-3" v-if="fileTypeAndColor.type !== 'Unknow'">
                     <span>
                         <span class="repo-language-color" :style="{backgroundColor: fileTypeAndColor.color}"></span>
-                        &nbsp;
                         <span>{{fileTypeAndColor.type}}</span>
                     </span>
                     </Language>
@@ -73,7 +72,7 @@
                 searchQuery: state => state.search.searchQuery
             }),
             fileTypeAndColor: function() {
-               return util_analyseFileType(this.code.path)
+               return util_analyseFileType.anaylseCodeLanguageByExtensions(this.code.path)
             },
             lastCommitApi: function () {
                 return `https://api.github.com/repos/${this.code.repository.full_name}/commits?path=${this.code.path}&page=1&per_page=1`

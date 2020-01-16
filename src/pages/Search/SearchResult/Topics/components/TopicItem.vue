@@ -1,13 +1,13 @@
 <template>
         <Container class="py-4 mx-3 flex">
             
-            <AvatarColumn class="flex-shrink-0 mr-2">
+           <!--  <AvatarColumn class="flex-shrink-0 mr-2">
                 <router-link v-if="avatarUrl" to="/search">
                     <img :src="avatarUrl" width="20" height="20" class="d-block rounded-1" :alt="topic.name + 'logo'">
                 </router-link>
                 <DefaultAvatar v-else class="bg-blue-light f4 text-gray-light text-bold rounded-1 text-center"
                                style="width:20px; height:20px; line-height:20px;">#</DefaultAvatar>
-            </AvatarColumn>
+            </AvatarColumn> -->
             <Main class="ml-1  flex-grow-1">
                 <Name class="f4 text-normal flex">
                     <router-link to="/search" :meta="randomMeta">{{name}}</router-link>
@@ -98,7 +98,7 @@
             util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.searchQuery)
         },
         watch: {
-            async topic(newOne,oldOne) {
+            /* async topic(newOne,oldOne) {
                 if(!oldOne.repositoryCount && newOne.repositoryCount > 1000) {
                     if(newOne.relatedTopics.length > 0 && !this.avatarUrl && !this.loadingAvatarUrl) {
                         this.loadingAvatarUrl = true
@@ -114,7 +114,7 @@
                         this.loadingAvatarUrl = false
                     }
                 }
-            }
+            } */
         },
         methods: {
             async getAavatarUrl() {

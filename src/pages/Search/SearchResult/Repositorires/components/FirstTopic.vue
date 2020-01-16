@@ -1,11 +1,7 @@
 <template>
-    <Container class="pt-3 px-3 pb-2">
+    <Container class="pt-3 px-3 pb-2" v-if="containTheSearchQuery">
         <Inner class="Box p-3 d-flex">
-            <img :src="firstTopic.avatar"
-                 width="64"
-                 height="64"
-                 class="d-block rounded-1 mr-3 flex-shrink-0"
-                 :alt="firstTopic.name + ' logo'">
+        
             <Main class="d-md-flex flex-items-start flex-auto">
                 <MainInner class="flex-auto">
                     <MainTitle class="mb-1">{{firstTopic.display_name}}</MainTitle>
@@ -30,6 +26,14 @@
             firstTopic: {
                 type: Object,
                 required: true
+            }
+        },
+        computed: {
+            ...mapState({
+                searchQuery: state => state.search.searchQuery.toLowerCase()
+            }),
+            containTheSearchQuery() {
+                 return this.firstTopic.display_name.toLowerCase().indexOf(this.searchQuery) !== -1
             }
         },
         components: {

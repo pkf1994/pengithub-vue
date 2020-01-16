@@ -11,27 +11,15 @@
         </template>
 
         <Content class="bubble-content p-0">
-            <router-link to="/" class="d-block issue-item" v-for="item in issues" :key="item.id">
-                <svg class="d-inline-block opened" fill="currentColor" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
-                <Number class="number">
-                    {{`#${item.number}`}}
-                </Number> 
-                <IssueTitle class="issue-title">
-                    {{item.title}}
-                </IssueTitle>
-                <Byline class="by-line">
-                    {{dateFormat(item.createdAt)}}
-                </Byline>
-                <Labels class="labels" v-if="item.labels.nodes.length > 0">
-                    <span class="label d-inline-block" 
-                        v-for="label in item.labels.nodes"
-                        style="margin-right:2px"
-                        :style="{color:isLight(`#${label.color}`) ? 'inherit' : '#fff',backgroundColor:`#${label.color}`}" 
-                        :key="label.name">
-                        {{label.name}}
-                    </span>
-                </Labels>
-            </router-link>
+            <IssueListItem v-for="item in issues" 
+                        :key="item.id" 
+                        :issue="item" 
+                        type="issue" 
+                        :showRepoFullName="false">
+
+            </IssueListItem>
+
+
         </Content>
         <template v-slot:footer>
             <router-link to="/" class="d-block footer text-center">
@@ -43,8 +31,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../components'
-    import {util_dateFormat,util_color} from '../../../../util'
+    import {ComplexBubble,AnimatedHeightWrapper,IssueListItem} from '../../../../../components'
+    import {util_dateFormat,util_color} from '../../../../../util'
     export default {
         props: {
             loading: {
@@ -73,6 +61,7 @@
         },
         components: {
             ComplexBubble,
+            IssueListItem,
             AnimatedHeightWrapper,
             Title: styled.div``,
             Content: styled.div``,

@@ -1,8 +1,6 @@
 import {util_uniqueArray} from '../../../util'
 import {LANGUAGE_LIST} from "../../../constant/fileType";
 
-
-
 export const GRAPHQL_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE = (query, languageList = LANGUAGE_LIST) => {
     let ql = ""
     languageList.forEach((item,index) => {
@@ -58,7 +56,7 @@ export const GRAPHQL_TOPICS_AND_LANGUAGE_COLOR_AND_HELP_WANTED_ISSUES_COUNT_OF_R
             ${ql}
             repository${index}: repository(name:"${item.name}", owner: "${item.owner.login}") {
                nameWithOwner
-               languages(first: 3) {
+               languages(first: 10) {
                   nodes {
                     name
                     color

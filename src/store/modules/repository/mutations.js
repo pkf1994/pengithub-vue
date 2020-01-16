@@ -7,6 +7,9 @@ import {
     ACTION_REPOSITORY_REQUEST_BASIC_DATA,
     ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_REST,
     ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_GRAPHQL,
+    ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS,
+    ACTION_REPOSITORY_REQUEST_CONTENTS,
+    ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH,
     ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
     ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA} from './actionTypes.js'
 import { 
@@ -16,11 +19,15 @@ import {
     MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT,
     MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST,
     MUTATION_REPOSITORY_RESOLVE_README_DATA,
+    MUTATION_REPOSITORY_RESOLVE_UPDATEDAT_OF_CONTENTS,
     MUTATION_REPOSITORY_RESOLVE_PULSE_ISSUES,
+    MUTATION_REPOSITORY_RESOLVE_CONTENTS,
+    MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH,
     MUTATION_REPOSITORY_RESOLVE_COMMUNITY_DATA,
     MUTATION_REPOSITORY_RESOLVE_PROJECTS,
-     MUTATION_REPOSITORY_RESOLVE_BASIC_DATA } from './mutationTypes.js'
+    MUTATION_REPOSITORY_RESOLVE_BASIC_DATA } from './mutationTypes.js'
 import {CROSS_MUTATION_TRIGGER_LOADING} from '../crossMutation'
+import Vue from 'vue'
 export default {
     [MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO](state,payload) {
         state.code.data = payload.data
@@ -88,6 +95,22 @@ export default {
         state.community.data = payload.data
     },
 
+    [MUTATION_REPOSITORY_RESOLVE_CONTENTS] (state,payload) {
+        state.code.codeFileBrowser.data = payload.data
+    },
+
+    [MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH] (state,payload) {
+        state.code.codeFileBrowser.countOfCommits.data = payload.data
+    },
+
+    [MUTATION_REPOSITORY_RESOLVE_UPDATEDAT_OF_CONTENTS] (state,payload) {
+        state.code.codeFileBrowser.data.forEach((item,index) => {
+            Vue.set(state.code.codeFileBrowser.data,index,Object.assign({},item,{
+                updatedAt: payload.data[`history${index}`].nodes[0].committedDate
+            }))
+        })
+    },
+
     [CROSS_MUTATION_TRIGGER_LOADING](state,payload) {
         if(payload.actionType === ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA) {
             state.code.loading = payload.loading
@@ -107,8 +130,17 @@ export default {
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA) {
             state.community.loading = payload.loading
         }
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS) {
+            state.code.codeFileBrowser.loadingUpdatedAtOfContents = payload.loading
+        }
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUES) {
             state[payload.meta.issueType][payload.meta.state].loading = payload.loading
+        }
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_CONTENTS) {
+            state.code.codeFileBrowser.loading = payload.loading
+        }
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH) {
+            state.code.codeFileBrowser.countOfCommits.loading = payload.loading
         }
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_PROJECTS_DATA) {
             if(!payload.meta.getMoreData){

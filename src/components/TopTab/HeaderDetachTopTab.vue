@@ -3,6 +3,7 @@
         <nav class="text-center reponav">
             <router-link :to="tabItem.routerLink"
                          :exact="tabItem.exact"
+                         :class="{'router-link-active':tabItem.extraActiveRouterLinks && tabItem.extraActiveRouterLinks.indexOf(currentPath) !== -1}"
                          class="pt-1 px-2 pb-3 d-inline-block nav-item to-adjust"
                          v-if="!tabItem.disable"
                          v-for="tabItem in tabs"
@@ -33,6 +34,11 @@
             activeTab: {
                 type: String,
                 required: true
+            }
+        },
+        computed: {
+            currentPath() {
+                return this.$route.path
             }
         },
         mounted() {

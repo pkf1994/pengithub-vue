@@ -4,7 +4,7 @@ export const GRAPHQL_REPOSITORY_CODE_BASIC_INFO = (owner,repo) => {
     return `
     {
         repository(name: "${repo}", owner: "${owner}") {
-        
+          homepageUrl
           stargazers {
             totalCount
           }
@@ -16,7 +16,7 @@ export const GRAPHQL_REPOSITORY_CODE_BASIC_INFO = (owner,repo) => {
             platform
             url
           }
-          repositoryTopics(first: 10) {
+          repositoryTopics(first: 5) {
             nodes {
               topic {
                 name
@@ -28,9 +28,13 @@ export const GRAPHQL_REPOSITORY_CODE_BASIC_INFO = (owner,repo) => {
             target {
               ... on Commit {
                 history(first: 1) {
+                  totalCount
                   nodes {
                     author {
                       name
+                      user{
+                        login
+                      }
                     }
                     authoredDate
                   }
@@ -38,10 +42,19 @@ export const GRAPHQL_REPOSITORY_CODE_BASIC_INFO = (owner,repo) => {
               }
             }
           }
-          refs(first: 5, refPrefix: "refs/heads/") {
+          refs(first: 100, refPrefix: "refs/heads/") {
             totalCount
             nodes {
               name
+              target {
+                ... on Commit {
+                  history(first: 1) {
+                    nodes {
+                      committedDate
+                    }
+                  }
+                }
+              }
             }
           }
           releases(first: 1, orderBy: {field: CREATED_AT, direction: DESC}) {
@@ -51,10 +64,12 @@ export const GRAPHQL_REPOSITORY_CODE_BASIC_INFO = (owner,repo) => {
               tagName
             }
           }
-          issues(first: 5, orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {}) {
+          issues(first: 5, states:OPEN, orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: {}) {
             totalCount
             nodes {
               title
+              url
+              state
               createdAt
               number
               labels(first: 10) {
@@ -68,10 +83,12 @@ export const GRAPHQL_REPOSITORY_CODE_BASIC_INFO = (owner,repo) => {
               }
             }
           }
-          pullRequests(first: 5, orderBy: {field: UPDATED_AT, direction: DESC}) {
+          pullRequests(first: 5, states:OPEN, orderBy: {field: UPDATED_AT, direction: DESC}) {
             totalCount
             nodes {
               title
+              state
+              url
               number
               createdAt
               labels(first: 10) {
@@ -205,3 +222,64 @@ export const GRAPHQL_REPOSITORY_PROJECTS = payload => {
     }
   `
 }
+
+export const GRAPHQL_REPOSITORY_LAST_COMMITDATE_BY_PATH = payload => {
+    let branch = payload.path.split(':')[0]
+    let parentPath = payload.path.split(':')[1]
+    if(parentPath.length > 0 && parentPath[parentPath.length - 1] !== '/') {
+      parentPath = `${parentPath}/`
+    }
+    let graphQL = ''
+    payload.contents.forEach((item,index) => {
+      graphQL = `${graphQL}
+        history${index}:history(path: "${parentPath}${item.name}", first: 1) {
+          nodes {
+            committedDate
+          }
+        }
+      `
+    })
+  return `
+  {
+    repository(name: "${payload.repo}", owner: "${payload.owner}") {
+      object(expression: "${branch}") {
+        ... on Commit {
+          ${graphQL}
+        }
+      }
+    }
+  }
+  `
+}
+
+export const GRAPHQL_REPOSITORY_COMMITS_COUNT_BY_BRANCH = payload => `
+{
+  repository(name: "${payload.repo}", owner: "${payload.owner}") {
+    ref(qualifiedName: "refs/heads/${payload.branch}") {
+      target {
+        ... on Commit {
+          history {
+            totalCount
+          }
+        }
+      }
+    }
+  }
+}
+`
+
+export const GRAPHQL_REPOSITORY_CONTENTS = payload => `
+{
+  repository(name: "${payload.repo}", owner: "${payload.owner}") {
+    object(expression: "${payload.path}") {
+      ... on Tree {
+        entries {
+          oid
+          name
+          type
+        }
+      }
+    }
+  }
+}
+`

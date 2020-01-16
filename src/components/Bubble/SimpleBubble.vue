@@ -1,6 +1,6 @@
 <template>
     <Container class="bubble">
-        <Title class="bubble-title bg-gray">
+        <Title class="bubble-title bg-gray" style="font-weight:700">
             {{title}}
         </Title>
 

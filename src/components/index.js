@@ -1,5 +1,5 @@
 import {LogoHeader,RepoHeader,LogoutedHeader} from './Header'
-import ScrollTopListenerMixin from "./ScrollTopListenerMixin";
+import SummaryAndDetail from './SummaryAndDetail.vue'
 import Button from './Button'
 import {HeaderDetachTopTab,PageTopTab,ComplexTopTab} from './TopTab'
 import SearchInput from './SearchInput'
@@ -36,5 +36,6 @@ export {
     LoadingIconEx,
     ComplexBubble,
     IssuesPageMixin,
-    IssueListItem
+    IssueListItem,
+    SummaryAndDetail
 }

@@ -5,7 +5,7 @@ import util_color from './colorUtil'
 import util_animatedScrollTo from './animatedScrollTo'
 import util_uniqueArray from './uniqueArray'
 import util_adjustStyle from './adjustStyle'
-import util_analyseFileType from './analayseFileType'
+import util_analyseFileType from './analyseFileType'
 import './protoExtend'
 
 export {

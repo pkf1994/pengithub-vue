@@ -12,6 +12,15 @@ export default {
         readme: {
             data: undefined,
             loading: false
+        },
+        codeFileBrowser: {
+            loading: false,
+            data: [],
+            path: '',
+            countOfCommits: {
+                data: 0,
+                loading: false
+            }
         }
     },
     projects: {

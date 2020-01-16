@@ -44,7 +44,6 @@
                 <Language class="mr-3"  v-if="repository.language">
                     <span>
                         <span v-if="repository.languageColor" class="repo-language-color" :style="{backgroundColor: languageColor}"></span>
-                        &nbsp;
                         <span>{{repository.language}}</span>
                     </span>
                 </Language>

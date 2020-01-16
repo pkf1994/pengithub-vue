@@ -7,14 +7,13 @@
 
             <AnimatedHeightWrapper :delay="delay">
                 <slot v-if="!disableFlag && !loading"></slot>
-                <BubbleDisable v-else-if="disable" class="bubble-content text-center p-0">
+                <BubbleDisable v-else-if="disable" class="bubble-content text-center">
                     <p style="margin-block-start: 1em;margin-block-end: 1em;">{{disableNotice}}</p>
                 </BubbleDisable>
                 <BubbleDisable v-else-if="isLoading" class="bubble-content flex-row-center">
                     <LoadingIconEx style="margin-block-start: 1em;margin-block-end: 1em;"/>
                 </BubbleDisable>
             </AnimatedHeightWrapper>  
-
 
             <Footer :class="{footer:withFooterSlot,'disable-filter':disable}" v-if="!loading">
                 <slot name="footer"></slot>
@@ -43,7 +42,7 @@
             },
             delay: {
                 type: Number,
-                default: 50
+                default: 0
             }
         },
       

@@ -20,8 +20,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../components'
-    import {util_dateFormat,util_color,util_adjustStyle} from '../../../../util'
+    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../../components'
+    import {util_dateFormat,util_color,util_adjustStyle} from '../../../../../util'
     export default {
         props: {
             viewerSubscription: [String,null],

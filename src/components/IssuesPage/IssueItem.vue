@@ -16,7 +16,7 @@
         <Byline v-if="issue.state.toLowerCase() === 'open'" class="byline">
             Opened by {{issue.author ? issue.author.login : issue.user.login}} {{formatDate}}
         </Byline>
-        <Byline v-if="issue.state.toLowerCase() === 'closed' || issue.state.toLowerCase() === 'merged' && issue.timelineItems" class="byline">
+        <Byline v-if="issue.timelineItems && (issue.state.toLowerCase() === 'closed' || issue.state.toLowerCase() === 'merged') " class="byline">
             Closed by {{issue.timelineItems.nodes[0].actor.login}} {{formatClosedDate}}
         </Byline>
 

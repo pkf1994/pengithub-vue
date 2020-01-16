@@ -18,19 +18,21 @@ const SearchResultCommit = () => import('../pages/Search/SearchResult/Commits/Co
 const SearchResultIssues = () => import('../pages/Search/SearchResult/Issues/Issues.vue')
 const SearchResultTopics = () => import('../pages/Search/SearchResult/Topics/Topics.vue')
 const SearchResultUsers = () => import('../pages/Search/SearchResult/Users/Users.vue')
-const Respository = () => import('../pages/Repository/Repository.vue')
-const RespositoryCode = () => import('../pages/Repository/Code/Code.vue')
-const RespositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
-const RespositoryIssuesOpen = () => import('../pages/Repository/Issues/Open.vue')
-const RespositoryIssuesClosed = () => import('../pages/Repository/Issues/Closed.vue')
-const RespositoryIssuesYours = () => import('../pages/Repository/Issues/Yours.vue')
-const RespositoryPullRequests = () => import('../pages/Repository/PullRequests/PullRequests.vue')
-const RespositoryPullRequestsOpen = () => import('../pages/Repository/PullRequests/Open.vue')
-const RespositoryPullRequestsClosed = () => import('../pages/Repository/PullRequests/Closed.vue')
-const RespositoryPullRequestsYours = () => import('../pages/Repository/PullRequests/Yours.vue')
-const RespositoryProjects = () => import('../pages/Repository/Projects/Projects.vue')
-const RespositoryPulse = () => import('../pages/Repository/Pulse/Pulse.vue')
-const RespositoryCommunity = () => import('../pages/Repository/Community/Community.vue')
+const Repository = () => import('../pages/Repository/Repository.vue')
+const RepositoryCode = () => import('../pages/Repository/Code/Code.vue')
+const RepositoryCodeMain = () => import('../pages/Repository/Code/CodeMain/CodeMain.vue')
+const RepositoryCodeFileBrowser = () => import('../pages/Repository/Code/CodeFile/CodeFileBrowser/CodeFileBrowser.vue')
+const RepositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
+const RepositoryIssuesOpen = () => import('../pages/Repository/Issues/Open.vue')
+const RepositoryIssuesClosed = () => import('../pages/Repository/Issues/Closed.vue')
+const RepositoryIssuesYours = () => import('../pages/Repository/Issues/Yours.vue')
+const RepositoryPullRequests = () => import('../pages/Repository/PullRequests/PullRequests.vue')
+const RepositoryPullRequestsOpen = () => import('../pages/Repository/PullRequests/Open.vue')
+const RepositoryPullRequestsClosed = () => import('../pages/Repository/PullRequests/Closed.vue')
+const RepositoryPullRequestsYours = () => import('../pages/Repository/PullRequests/Yours.vue')
+const RepositoryProjects = () => import('../pages/Repository/Projects/Projects.vue')
+const RepositoryPulse = () => import('../pages/Repository/Pulse/Pulse.vue')
+const RepositoryCommunity = () => import('../pages/Repository/Community/Community.vue')
 const Logout = () => import('../pages/Logout/Logout.vue')
 
 export const ROUTE_HOME = 'route-home'
@@ -135,7 +137,7 @@ export default [
     {
         path: '/:owner/:repo',
         components: {
-            default: Respository,
+            default: Repository,
             header: RepoHeader,
             footer: SimpleFooter
         },
@@ -146,55 +148,65 @@ export default [
         children: [
             {
                 path: '/',
-                component: RespositoryCode
-            },
-            {
-                path: 'issues',
-                component: RespositoryIssues,
+                component: RepositoryCode,
                 children: [
                     {
                         path: '/',
-                        component: RespositoryIssuesOpen
+                        component: RepositoryCodeMain
+                    },
+                    {
+                        path: 'file/:branch/(\.*)?',
+                        component: RepositoryCodeFileBrowser
+                    }
+                ]
+            },
+            {
+                path: 'issues',
+                component: RepositoryIssues,
+                children: [
+                    {
+                        path: '/',
+                        component: RepositoryIssuesOpen
                     },
                     {
                         path: 'closed',
-                        component: RespositoryIssuesClosed
+                        component: RepositoryIssuesClosed
                     },
                     {
                         path: 'yours',
-                        component: RespositoryIssuesYours
+                        component: RepositoryIssuesYours
                     },
                 ]
             },
             {
                 path: 'pulls',
-                component: RespositoryPullRequests,
+                component: RepositoryPullRequests,
                 children: [
                     {
                         path: '/',
-                        component: RespositoryPullRequestsOpen
+                        component: RepositoryPullRequestsOpen
                     },
                     {
                         path: 'closed',
-                        component: RespositoryPullRequestsClosed
+                        component: RepositoryPullRequestsClosed
                     },
                     {
                         path: 'yours',
-                        component: RespositoryPullRequestsYours
+                        component: RepositoryPullRequestsYours
                     },
                 ]
             },
             {
                 path: 'projects',
-                component: RespositoryProjects,
+                component: RepositoryProjects,
             },
             {
                 path: 'pulse',
-                component: RespositoryPulse,
+                component: RepositoryPulse,
             },
             {
                 path: 'community',
-                component: RespositoryCommunity,
+                component: RepositoryCommunity,
             }
         ]
     },

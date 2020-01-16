@@ -32,7 +32,7 @@
                      height="16"
                      width="16"
                      :src="event.actor.avatar_url"
-                     :alt="'@' + event.actor.login">&nbsp;
+                     :alt="'@' + event.actor.login">
                 <span class="mx-1">·</span>
                 <router-link to="/" class="link-gray f6">
                     {{event.repo.name}}
@@ -40,8 +40,7 @@
                 <span class="px-1">·</span>
                 <span class="text-gray f6 mt-1 no-wrap">
                         {{activityDescrioption}}
-
-                    </span>
+                </span>
                 <router-link to="/" class="link-gray f6">
                     {{formatDate}}
                 </router-link>

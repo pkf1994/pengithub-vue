@@ -38,3 +38,8 @@ export const API_README = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner
 export const API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/stats/contributors`
 
 export const API_REPOSITORY_COMMUNITY = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/community/profile`
+
+export const API_REPOSITORY_COMMITS = (owner,repo,params) => {
+    let query = util_queryParse.querify(params)
+    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/commits?${query}`
+}

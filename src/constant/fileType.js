@@ -1,21 +1,25 @@
-export const LANGUAGE_LIST = [
-    {
-        language: "ActionScript",
+export const PROGRAMMING_LIST = [
+    { 
+        type: 'programming',  
+        name: "ActionScript",
         extensions: [".as"],
         color: "#882B0F"
     },
-    {
-        language: "C",
+    { 
+        type: 'programming',  
+        name: "C",
         extensions: [".c",".cats",".h",".idc"],
         color: "#555555"
     },
-    {
-        language: "C#",
+    { 
+        type: 'programming',  
+        name: "C#",
         extensions: [".cs",".cake",".csx"],
         color: "#178600"
     },
-    {
-        language: "C++",
+    { 
+        type: 'programming',  
+        name: "C++",
         extensions:[
             ".cpp",
             ".c++",
@@ -37,8 +41,9 @@ export const LANGUAGE_LIST = [
         ],
         color: "#f34b7d"
     },
-    {
-        language: "Clojure",
+    { 
+        type: 'programming',  
+        name: "Clojure",
         extensions: [
             ".clj",
             ".boot",
@@ -52,28 +57,32 @@ export const LANGUAGE_LIST = [
         ],
         color: "#db5855"
     },
-    {
-        language: "CoffeeScript",
+    { 
+        type: 'programming',  
+        name: "CoffeeScript",
         extensions: [".rg"],
         color: "#cc0088"
     },
-    {
-        language: "CSS",
+    { 
+        type: 'programming',  
+        name: "CSS",
         extensions: [
             ".css",
             ".scss"
         ],
         color: "#563d7c"
     },
-    {
-        language: "Go",
+    { 
+        type: 'programming',  
+        name: "Go",
         extensions: [
             ".go",
         ],
         color: "#00ADD8"
     },
-    {
-        language: "Haskell",
+    { 
+        type: 'programming',  
+        name: "Haskell",
         extensions: [
             ".hs",
             ".hs-boot",
@@ -81,8 +90,9 @@ export const LANGUAGE_LIST = [
         ],
         color: "#5e5086"
     },
-    {
-        language: "HTML",
+    { 
+        type: 'programming',  
+        name: "HTML",
         extensions: [
             ".html",
             ".htm",
@@ -94,15 +104,17 @@ export const LANGUAGE_LIST = [
         ],
         color: "#e34c26"
     },
-    {
-        language: "Java",
+    { 
+        type: 'programming',  
+        name: "Java",
         extensions: [
             ".java"
         ],
         color: "#b07219"
     },
-    {
-        language: "JavaScript",
+    { 
+        type: 'programming',  
+        name: "JavaScript",
         extensions: [
             ".js",
             "._js",
@@ -128,8 +140,9 @@ export const LANGUAGE_LIST = [
         ],
         color: "#f1e05a"
     },
-    {
-        language: "Lua",
+    { 
+        type: 'programming',  
+        name: "Lua",
         extensions: [
             ".lua",
             ".fcgi",
@@ -141,24 +154,27 @@ export const LANGUAGE_LIST = [
         ],
         color: "#000080"
     },
-    {
-        language: "MATLAB",
+    { 
+        type: 'programming',  
+        name: "MATLAB",
         extensions: [
             ".matlab",
             ".m"
         ],
         color: "#e16737"
     },
-    {
-        language: "Objective-C",
+    { 
+        type: 'programming',  
+        name: "Objective-C",
         extensions: [
             ".m",
             ".h"
         ],
         color: "#438eff"
     },
-    {
-        language: "Perl",
+    { 
+        type: 'programming',  
+        name: "Perl",
         extensions: [
             ".pl",
             ".al",
@@ -173,8 +189,9 @@ export const LANGUAGE_LIST = [
         ],
         color: "#0298c3"
     },
-    {
-        language: "PHP",
+    { 
+        type: 'programming',  
+        name: "PHP",
         extensions: [
             ".php",
             ".aw",
@@ -189,8 +206,9 @@ export const LANGUAGE_LIST = [
         ],
         color: "#4F5D95"
     },
-    {
-        language: "Python",
+    { 
+        type: 'programming',  
+        name: "Python",
         extensions: [
             ".py",
             ".bzl",
@@ -213,8 +231,9 @@ export const LANGUAGE_LIST = [
         ],
         color: "#3572A5"
     },
-    {
-        language: "R",
+    { 
+        type: 'programming',  
+        name: "R",
         extensions: [
             ".r",
             ".rd",
@@ -222,8 +241,9 @@ export const LANGUAGE_LIST = [
         ],
         color: "#198CE7"
     },
-    {
-        language: "Ruby",
+    { 
+        type: 'programming',  
+        name: "Ruby",
         extensions: [
             ".rb",
             ".builder",
@@ -249,8 +269,9 @@ export const LANGUAGE_LIST = [
         ],
         color: "#701516"
     },
-    {
-        language: "Scala",
+    { 
+        type: 'programming',  
+        name: "Scala",
         extensions: [
             ".scala",
             ".kojo",
@@ -259,8 +280,9 @@ export const LANGUAGE_LIST = [
         ],
         color: "#c22d40"
     },
-    {
-        language: "Shell",
+    { 
+        type: 'programming',  
+        name: "Shell",
         extensions: [
             ".sh",
             ".bash",
@@ -276,15 +298,17 @@ export const LANGUAGE_LIST = [
         ],
         color: "#89e051"
     },
-    {
-        language: "Swift",
+    { 
+        type: 'programming',  
+        name: "Swift",
         extensions: [
             ".swift"
         ],
         color: "#ffac45"
     },
-    {
-        language: "TeX",
+    { 
+        type: 'programming',  
+        name: "TeX",
         extensions: [
             ".tex",
             ".aux",
@@ -303,8 +327,9 @@ export const LANGUAGE_LIST = [
         ],
         color: "#3D6117"
     },
-    {
-        language: "Vim script",
+    { 
+        type: 'programming',  
+        name: "Vim script",
         extensions: [
             ".vim",
             ".vba",
@@ -312,15 +337,17 @@ export const LANGUAGE_LIST = [
         ],
         color: "#199f4b"
     },
-    {
-        language: "Vue",
+    { 
+        type: 'programming',  
+        name: "Vue",
         extensions: [
             ".vue"
         ],
         color: "#2c3e50"
     },
-    {
-        language: "TypeScript",
+    { 
+        type: 'programming',  
+        name: "TypeScript",
         extensions: [
             ".ts"
         ],
@@ -329,8 +356,9 @@ export const LANGUAGE_LIST = [
 ]
 
 export const PROSE_LIST = [
-    {
-        prose: "Text",
+    { 
+        type: 'prose',  
+        name: "Text",
         extensions: [
             ".txt",
             ".fr",
@@ -339,8 +367,9 @@ export const PROSE_LIST = [
             ".no"
         ]
     },
-    {
-        prose: "Markdown",
+    { 
+        type: 'prose',  
+        name: "Markdown",
         extensions: [
             ".md",
             ".markdown",
@@ -357,8 +386,9 @@ export const PROSE_LIST = [
 ]
 
 export const DATA_LIST = [
-    {
-        data: "INI",
+    { 
+        type: 'data',
+        name: "INI",
         extensions: [
             ".ini",
             ".cfg",
@@ -368,8 +398,9 @@ export const DATA_LIST = [
             ".properties"
         ]
     },
-    {
-        data: "JSON",
+    { 
+        type: 'data',
+        name: "JSON",
         extensions: [
             ".json",
             ".avsc",
@@ -377,7 +408,7 @@ export const DATA_LIST = [
             ".gltf",
             ".har",
             ".ice",
-            ".JSON-tmLanguage",
+            ".JSON-tmname",
             ".jsonl",
             ".mcmeta",
             ".tfstate",
@@ -389,8 +420,9 @@ export const DATA_LIST = [
             ".yyp"
         ]
     },
-    {
-        data: "XML",
+    { 
+        type: 'data',
+        name: "XML",
         extensions: [
             ".xml",
             ".adml",
@@ -490,4 +522,10 @@ export const DATA_LIST = [
             ".zcml"
         ]
     }
+]
+
+export const LANGUAGE_LIST = [
+    ...PROGRAMMING_LIST,
+    ...PROSE_LIST,
+    ...DATA_LIST
 ]

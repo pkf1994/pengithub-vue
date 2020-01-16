@@ -95,20 +95,20 @@ export const actions = {
             //repositories分页内获取各语言的搜索结果数量；获取first topic
             if(payload.searchType === "repositories") {
                 if(payload.searchQueryChanged && !payload.changePage) {
-                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE,{cancelToken})
-                    context.dispatch(ACTION_SERACH_REQUEST_FIRST_TOPIC,{cancelToken})
+                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE)
+                    context.dispatch(ACTION_SERACH_REQUEST_FIRST_TOPIC)
                 }
             }
             //issues分页下获取各语言的搜索结果数量
             if(payload.searchType === "issues") {
                 if(payload.searchQueryChanged && !payload.changePage) {
-                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE,{cancelToken})
+                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE)
                 }
             }
             //users分页下获取各语言的搜索结果数量
             if(payload.searchType === "users") {
                 if(payload.searchQueryChanged && !payload.changePage) {
-                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE,{cancelToken})
+                    context.dispatch(ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE)
                 }
             }
             const res = await authRequiredGet(url,config)
@@ -133,17 +133,17 @@ export const actions = {
 
             //repositories分页下获取各搜索结果的其他信息：关联topic、语言、需要协助的issue数量
             if(payload.searchType === "repositories") {
-                context.dispatch(ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA,{items:res.data.items,cancelToken})
+                context.dispatch(ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA,res.data.items)
             }
 
             //topics分页下获取额外信息： 关联topic、从属仓库数量、是否star
             if(payload.searchType === "topics") {
-                context.dispatch(ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA,{items:res.data.items,cancelToken})
+                context.dispatch(ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA,res.data.items)
             }
 
             //users分页下获取额外信息：是否可follow、是否following、地址、邮件地址
             if(payload.searchType === 'users') {
-                context.dispatch(ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA,{items:res.data.items,cancelToken})
+                context.dispatch(ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA,res.data.items)
             }
 
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_SEARCH_RESULT,false,payload.searchType)
@@ -157,8 +157,8 @@ export const actions = {
     async [ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA](context, payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA,true)
-
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_TOPICS_AND_LANGUAGE_COLOR_AND_HELP_WANTED_ISSUES_COUNT_OF_REPOSITORIES(payload.items),{cancelToken:payload.cancelToken})
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA)
+            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_TOPICS_AND_LANGUAGE_COLOR_AND_HELP_WANTED_ISSUES_COUNT_OF_REPOSITORIES(payload),{cancelToken})
             const topics = {}
             const languageColors = {}
             const helpWantedIssuesCount = {}
@@ -185,9 +185,10 @@ export const actions = {
     async [ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA](context, payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA,true)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_SEARCH_REQUEST_TOPICS_ADDITIONAL_DATA)
             const res = await Promise.all([
-                authRequiredGitHubGraphqlApiQuery(GRAPHQL_RELATIVE_TOPICS_OF_TOPICS(payload),{cancelToken:payload.cancelToken}),
-                authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_REPOSITORY_BY_TOPICS(payload.items),{cancelToken:payload.cancelToken})
+                authRequiredGitHubGraphqlApiQuery(GRAPHQL_RELATIVE_TOPICS_OF_TOPICS(payload),{cancelToken}),
+                authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_REPOSITORY_BY_TOPICS(payload),{cancelToken})
             ])
             const relatedTopicsData = res[0].data.data
             const repositoryCountData = res[1].data.data
@@ -231,8 +232,9 @@ export const actions = {
     async [ACTION_SEARCH_REQUEST_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE] (context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE,true)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_SEARCH_REQUEST_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE)
             const searchQuery = context.rootState.search.searchQuery
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE(searchQuery),{cancelToken:payload.cancelToken})
+            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE(searchQuery),{cancelToken})
             let languageCursor = {}
             LANGUAGE_LIST.forEach((item,index) => {
                 languageCursor[`language${index}`] = item.language
@@ -265,8 +267,9 @@ export const actions = {
     async [ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE] (context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE,true)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_SEARCH_REQUEST_COUNT_OF_USER_GROUP_BY_LANGUAGE)
             const searchQuery = context.rootState.search.searchQuery
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_USER_GROUP_BY_LANGUAGE(searchQuery),{cancelToken:payload.cancelToken})
+            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_USER_GROUP_BY_LANGUAGE(searchQuery),{cancelToken})
             let languageCursor = {}
             LANGUAGE_LIST.forEach((item,index) => {
                 languageCursor[`language${index}`] = item.language
@@ -299,28 +302,23 @@ export const actions = {
     async [ACTION_SERACH_REQUEST_FIRST_TOPIC] (context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SERACH_REQUEST_FIRST_TOPIC,true)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_SERACH_REQUEST_FIRST_TOPIC)
             const searchQuery = context.rootState.search.searchQuery
             const url = API_SEARCH(
                 "topics",
-                {q:`is:curated is:featured ${searchQuery} `, per_page:1,page:1}
+                {q:`is:curated ${searchQuery} is:featured ${searchQuery} `, per_page:1,page:1}
             )
             const res = await authRequiredGet(
                 url,
                 {
                     headers: {"Accept": "application/vnd.github.mercy-preview+json"},
-                    cancelToken:payload.cancelToken
+                    cancelToken
                 }
             )
             if(res.data.total_count > 0) {
-                const url_firstTopicAvatar = API_SEARCH(
-                    "repositories",
-                    {q: searchQuery, per_page:1,page:1}
-                )
-                const res_firstTopicAvatar = await authRequiredGet(url_firstTopicAvatar,{cancelToken:payload.cancelToken})
                 context.commit({
                     type: MUTATION_SEARCH_RESOLVE_FIRST_TOPIC,
                     data: {
-                        avatar: res_firstTopicAvatar.data.items[0].owner.avatar_url,
                         ...res.data.items[0]
                     }
                 })
@@ -387,8 +385,9 @@ export const actions = {
     async [ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE] (context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE,true)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_SEARCH_REQUEST_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE)
             const searchQuery = context.rootState.search.searchQuery
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE(searchQuery),{cancelToken:payload.cancelToken})
+            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE(searchQuery),{cancelToken})
             let languageCursor = {}
             LANGUAGE_LIST.forEach((item,index) => {
                 languageCursor[`language${index}`] = item.language
@@ -420,7 +419,8 @@ export const actions = {
     async [ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA] (context, payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA,true)
-            const res = await  authRequiredGitHubGraphqlApiQuery(GRAPHQL_NAME_BIO_LOCATION_EMAIL_FOLLOWSHIP_OF_USERS(payload.items),{cancelToken:payload.cancelToken})
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_SEARCH_REQUEST_USERS_ADDITIONAL_DATA)
+            const res = await  authRequiredGitHubGraphqlApiQuery(GRAPHQL_NAME_BIO_LOCATION_EMAIL_FOLLOWSHIP_OF_USERS(payload),{cancelToken})
             const data = res.data.data
             const additionalData = {}
 

@@ -1,5 +1,5 @@
 <template>
-    <Container class="transition-all container d-inline-block" :style="{width:width + 'px'}">
+    <Container class="transition-all container d-inline-block height-full" :style="{width:width + 'px'}">
         <Inner ref="content" class="d-inline-block">
             <slot></slot>
         </Inner>

@@ -27,8 +27,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../components'
-    import {util_dateFormat} from '../../../../util'
+    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../../components'
+    import {util_dateFormat} from '../../../../../util'
     export default {
         props: {
             loading: {

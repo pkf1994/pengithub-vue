@@ -1,7 +1,9 @@
 <template>
     <Container class="container">
         <HeaderDetachTopTab :tabs="tabs" :activeTab="activeTab"></HeaderDetachTopTab>
-        <router-view></router-view>
+        <keep-alive>
+            <router-view></router-view>
+        </keep-alive>
     </Container>
 </template>
 
@@ -46,7 +48,10 @@
                     {
                         label: TAB_CODE,
                         routerLink: path,
-                        exact: true
+                        exact: true,
+                        extraActiveRouterLinks: [
+                            `${path}/file`
+                        ]
                     },
                     {
                         label: TAB_ISSUES,
