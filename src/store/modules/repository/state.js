@@ -13,13 +13,25 @@ export default {
             data: undefined,
             loading: false
         },
-        codeFileBrowser: {
+        codeFile: {
             loading: false,
             data: [],
             path: '',
             countOfCommits: {
                 data: 0,
                 loading: false
+            },
+            fileDetail: {
+                data: '',
+                loading: false,
+                lastCommit: {
+                    data: {},
+                    loading: false
+                },
+                contributors: {
+                    data: [],
+                    loading: false
+                }
             }
         }
     },

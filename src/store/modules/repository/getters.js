@@ -12,7 +12,7 @@ export default {
         return activeBranchList
     },
     sortedContents: state => {
-        let sortedContents = state.code.codeFileBrowser.data
+        let sortedContents = state.code.codeFile.data
         sortedContents.sort((a,b) => {
             let aIndex = a.type === 'tree' ? 1 : 0
             let bIndex = b.type === 'tree' ? 1 : 0

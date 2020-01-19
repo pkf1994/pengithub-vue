@@ -7,9 +7,11 @@ import {
     ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_REST,
     ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_GRAPHQL,
     ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA,
-    ACTION_REPOSITORY_REQUEST_CONTENTS,
+    ACTION_REPOSITORY_REQUEST_CONTENTS_TREE,
     ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH,
+    ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,
     ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS,
+    ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS,
     ACTION_REPOSITORY_REQUEST_PULSE_COMMIT_COUNT,
     ACTION_REPOSITORY_REQUEST_README_DATA} from './actionTypes'
 import { handleException,commitTriggerLoadingMutation,cancelAndUpdateAxiosCancelTokenSource } from '../util'
@@ -20,6 +22,8 @@ import {
     GRAPHQL_REPOSITORY_COMMITS_COUNT_BY_BRANCH,
     GRAPHQL_REPOSITORY_PROJECTS,
     GRAPHQL_REPOSITORY_ISSUES,
+    GRAPHQL_USER,
+    GRAPHQL_REPOSITORY_CONTENT_AND_LAST_COMMIT_AND_COMMIT_HISTORY,
     GRAPHQL_REPOSITORY_LAST_COMMITDATE_BY_PATH,
     GRAPHQL_REPOSITORY_CONTENTS} from './graphql'
 import {
@@ -32,11 +36,14 @@ import {
     MUTATION_REPOSITORY_RESOLVE_PULSE_ISSUES,
     MUTATION_REPOSITORY_RESOLVE_UPDATEDAT_OF_CONTENTS,
     MUTATION_REPOSITORY_RESOLVE_COMMUNITY_DATA,
-    MUTATION_REPOSITORY_RESOLVE_CONTENTS,
+    MUTATION_REPOSITORY_RESOLVE_CONTENTS_TREE,
+    MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
+    MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_OF_CONTENT,
+    MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT,
     MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH,
     MUTATION_REPOSITORY_RESOLVE_README_DATA} from './mutationTypes'
-import {API_README,API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST, API_SEARCH,API_REPOSITORY_COMMUNITY} from '../api'
-import {util_dateFormat} from '../../../util'
+import {API_README,API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST, API_SEARCH,API_REPOSITORY_COMMUNITY, API_REPOSITORY_COMMITS, API_CONTENTS} from '../api'
+import {util_dateFormat,util_analyseFileType} from '../../../util'
 var parse = require('parse-link-header');
 export default {
     async [ACTION_REPOSITORY_REQUEST_BASIC_DATA](context,payload) {
@@ -359,20 +366,16 @@ export default {
         }
     },
 
-    async [ACTION_REPOSITORY_REQUEST_CONTENTS] (context,payload) {
+    async [ACTION_REPOSITORY_REQUEST_CONTENTS_TREE] (context,payload) {
         try{
-            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENTS,true)
-            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_CONTENTS)
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENTS_TREE,true)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_CONTENTS_TREE)
           
-            const graphQL = GRAPHQL_REPOSITORY_CONTENTS({
-                owner: payload.owner,
-                repo: payload.repo,
-                path: payload.path
-            }) 
+            const graphQL = GRAPHQL_REPOSITORY_CONTENTS(payload) 
 
             const res = await authRequiredGitHubGraphqlApiQuery(graphQL,{cancelToken})
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_CONTENTS,
+                type: MUTATION_REPOSITORY_RESOLVE_CONTENTS_TREE,
                 data: res.data.data.repository.object.entries
             })
 
@@ -381,9 +384,9 @@ export default {
                 contents: res.data.data.repository.object.entries,
                 ...payload
             })
-            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENTS,false)
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENTS_TREE,false)
         }catch(e) {
-            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENTS,false)
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENTS_TREE,false)
             handleException(e,{throwNetworkErrorToComponent:true})
         }
     },
@@ -394,12 +397,7 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS,true)
             const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS)
           
-            const graphQL = GRAPHQL_REPOSITORY_LAST_COMMITDATE_BY_PATH({
-                owner: payload.owner,
-                repo: payload.repo,
-                path: payload.path,
-                contents: payload.contents
-            }) 
+            const graphQL = GRAPHQL_REPOSITORY_LAST_COMMITDATE_BY_PATH(payload) 
 
             const res = await authRequiredGitHubGraphqlApiQuery(graphQL,{cancelToken})
             context.commit({
@@ -432,6 +430,79 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH,false)
         }catch(e) {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH,false)
+            handleException(e,{throwNetworkErrorToComponent:true})
+        }
+    },
+
+    async [ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB](context,payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,true)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB)
+          
+            const graphQL = GRAPHQL_REPOSITORY_CONTENT_AND_LAST_COMMIT_AND_COMMIT_HISTORY({
+                ...payload
+            })
+            const res_graphQL = await authRequiredGitHubGraphqlApiQuery(graphQL,{cancelToken})
+
+            let contributorLogins = []
+
+            res_graphQL.data.data.repository.commitHistory.history.nodes.forEach(item => {
+                if(contributorLogins.indexOf(item.author.user.login) === -1) {
+                    contributorLogins.push(item.author.user.login)
+                }
+                if(!item.authoredByCommitter) {
+                    if(contributorLogins.indexOf(item.committer.user.login) === -1) {
+                        contributorLogins.push(item.committer.user.login)
+                    }
+                }
+            })
+
+            context.dispatch({
+                type: ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS,
+                contributorLogins,
+                ...payload
+            })
+
+            context.commit({
+                type: MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT,
+                data: res_graphQL.data.data.repository.commit.history.nodes[0]
+            })
+
+            if(!res_graphQL.data.data.repository.content.isBinary) {
+                context.commit({
+                    type: MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
+                    data: res_graphQL.data.data.repository.content.text
+                })
+            }
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,false)
+        }catch(e) {
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,false)
+            handleException(e,{throwNetworkErrorToComponent:true})
+        }
+    },
+
+    async [ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS](context,payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS,true)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS)
+          
+            const graphQL = GRAPHQL_USER(payload.contributorLogins)
+            const res_graphQL = await authRequiredGitHubGraphqlApiQuery(graphQL,{cancelToken})
+
+            console.log(res_graphQL.data.data)
+            let contributors = []
+            for(let key in res_graphQL.data.data) {
+                contributors.push(res_graphQL.data.data[key])
+            }
+
+            context.commit({
+                type: MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_OF_CONTENT,
+                data: contributors
+            })
+
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS,false)
+        }catch(e) {
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS,false)
             handleException(e,{throwNetworkErrorToComponent:true})
         }
     }

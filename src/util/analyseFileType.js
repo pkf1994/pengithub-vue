@@ -1,6 +1,8 @@
 
 export default {
     anaylseCodeLanguageByExtensions:function(fileName) {
+        let reg = /\S*\//g
+        fileName = fileName.replace(reg,'')
         let fileTypeAndColor
         let indexOfLastDot = fileName.lastIndexOf(".")
         if(indexOfLastDot !== -1) {
@@ -124,6 +126,8 @@ export default {
 
         return contentType || 'file'
     },
+
+
 }
 
 export const PROGRAMMING_LIST = [
@@ -1120,3 +1124,4 @@ export const BOOK_EXTENSIONS_LIST = [
     ".ronn",
     ".workbook"
 ]
+

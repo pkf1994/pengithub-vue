@@ -35,6 +35,8 @@ export const API_SEARCH = (type,param) => {
 
 export const API_README = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/readme`
 
+export const API_CONTENTS = (owner,repo,path,branch) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/contents/${path}${branch?'?ref='+branch:''}`
+
 export const API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/stats/contributors`
 
 export const API_REPOSITORY_COMMUNITY = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/community/profile`

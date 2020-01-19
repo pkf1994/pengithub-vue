@@ -33,8 +33,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper,SummaryAndDetail} from '../../../../../components'
-    import {util_dateFormat} from '../../../../../util'
+    import {ComplexBubble,AnimatedHeightWrapper,SummaryAndDetail} from '../../../../components'
+    import {util_dateFormat} from '../../../../util'
     import { mapState, mapGetters } from 'vuex'
     export default {
         inject: ['owner','repo'],
@@ -55,7 +55,7 @@
                 return this.defaultBranch.target && util_dateFormat.getDateDiff(new Date(this.defaultBranch.target.history.nodes[0].authoredDate))
             },
             codeFileBrowserRouterLink() {
-                return `/${this.owner}/${this.repo}/tree/${this.defaultBranch.name}`
+                return `/${this.owner}/${this.repo}/file`
             }
         },
         methods: {

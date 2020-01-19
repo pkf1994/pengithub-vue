@@ -7,7 +7,7 @@
                     <template v-slot:summary>
                             <span>{{currentBranch ? currentBranch : "loading..."}}</span>
                     </template>
-                        <router-link @click.native="triggerSummaryAndDetail" :to="`/${owner}/${repo}/file/${item.name}`" class="branch-item d" v-for="item in otherBranches" :key="item.name">
+                        <router-link @click.native="triggerSummaryAndDetail" :to="`/${owner}/${repo}/tree/${item.name}`" class="branch-item d" v-for="item in otherBranches" :key="item.name">
                             {{item.name}}
                         </router-link>
                         <router-link to="/" class="to-all-branches">View more branches</router-link>
@@ -21,13 +21,15 @@
             </AnimatedWidthWrapper>   
         </Header>
 
-        <CurrentPath class="path border-bottom">
-            {{repo}}/<Breadcrumb :path="path"/>
+        <CurrentPath class="path" style="border-bottom: 1px solid #eaecef;">
+            <router-link class="text-gray" :to="`/${owner}/${repo}/tree/${currentBranch}`">
+                {{repo}}</router-link>/<Breadcrumb :startIndex="4"/>
         </CurrentPath>    
 
         <transition-group name="slide-up" appear>
-            <router-link class="d-block"  v-for="item in sortedContents" 
-                        :to="`/${owner}/${repo}/file/${currentBranch}/` + path + '/' + item.name"
+            <router-link class="d-block bg-white list-item" 
+                         v-for="item in sortedContents" 
+                        :to="adjustPath(`/${owner}/${repo}/${item.type}/${currentBranch}/` + path + '/' + item.name)"
                         :key="item.oid" >
                 <FileItem :branch="currentBranch"
                             :file="item"/>
@@ -42,23 +44,23 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {AnimatedHeightWrapper,AnimatedWidthWrapper,SummaryAndDetail,CommonLoading} from '../../../../../components'
+    import {AnimatedHeightWrapper,AnimatedWidthWrapper,SummaryAndDetail,CommonLoading,Breadcrumb} from '../../../../../components'
     import { mapState, mapActions,mapGetters } from 'vuex'
     import {
-        ACTION_REPOSITORY_REQUEST_CONTENTS,
+        ACTION_REPOSITORY_REQUEST_CONTENTS_TREE,
         ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH
         } from '../../../../../store/modules/repository/actionTypes'
     import {util_numberFormat} from '../../../../../util'
-    import {FileItem,Breadcrumb} from './components'
+    import {FileItem} from './components'
     export default {
         inject: ['owner','repo'],
         computed: {
             ...mapState({
                 loadingBranches: state => state.repository.code.loading,
-                loading: state => state.repository.code.codeFileBrowser.loading,
-                loadingCountOfCommits: state => state.repository.code.codeFileBrowser.countOfCommits.loading,
-                countOfCommits: state => state.repository.code.codeFileBrowser.countOfCommits.data,
-                data: state => state.repository.code.codeFileBrowser.data,
+                loading: state => state.repository.code.codeFile.loading,
+                loadingCountOfCommits: state => state.repository.code.codeFile.countOfCommits.loading,
+                countOfCommits: state => state.repository.code.codeFile.countOfCommits.data,
+                data: state => state.repository.code.codeFile.data,
                 defaultBranch: state => state.repository.code.data.defaultBranchRef,
             }),
             ...mapGetters([
@@ -91,9 +93,6 @@
                 return otherBranches.slice(0,5)
             }
         },
-        mounted() {
-            console.log(this.$route)
-        },
         created() {
             if(this.currentBranch && this.currentBranch !== '') {
                  this.getData()
@@ -107,15 +106,16 @@
             },
             path() {
                 this.action_getContents({
-                        path: this.currentBranch + ":" +  this.path,
+                        path: this.path,
                         owner: this.owner,
-                        repo: this.repo
+                        repo: this.repo,
+                        branch: this.$route.params.branch
                 })
             }
         },
         methods: {
             ...mapActions({
-                action_getContents: ACTION_REPOSITORY_REQUEST_CONTENTS,
+                action_getContents: ACTION_REPOSITORY_REQUEST_CONTENTS_TREE,
                 action_getCommitsCount: ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH
             }),
             triggerSummaryAndDetail() {
@@ -123,15 +123,20 @@
             },
             getData() {
                  this.action_getContents({
-                        path: this.currentBranch + ":" +  this.path,
+                        path: this.path,
                         owner: this.owner,
-                        repo: this.repo
+                        repo: this.repo,
+                        branch: this.$route.params.branch
                     })
                     this.action_getCommitsCount({
                         owner: this.owner,
                         repo: this.repo,
-                        branch: this.currentBranch
+                        branch:this.$route.params.branch,
                     })
+            },
+            adjustPath(path) {
+                let reg = /\/\//g
+                return path.replace(reg,'/')
             }
         },
         components: {
@@ -213,5 +218,10 @@
 .to-all-branches{
     font-size: 13px;
     font-weight: 400;
+}
+
+.list-item{
+    border-top: none;
+    border-bottom: 1px solid #eaecef;
 }
 </style>

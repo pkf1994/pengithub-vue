@@ -8,7 +8,9 @@ import {
     ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_REST,
     ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_GRAPHQL,
     ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS,
-    ACTION_REPOSITORY_REQUEST_CONTENTS,
+    ACTION_REPOSITORY_REQUEST_CONTENTS_TREE,
+    ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS,
+    ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,
     ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH,
     ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
     ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA} from './actionTypes.js'
@@ -21,7 +23,10 @@ import {
     MUTATION_REPOSITORY_RESOLVE_README_DATA,
     MUTATION_REPOSITORY_RESOLVE_UPDATEDAT_OF_CONTENTS,
     MUTATION_REPOSITORY_RESOLVE_PULSE_ISSUES,
-    MUTATION_REPOSITORY_RESOLVE_CONTENTS,
+    MUTATION_REPOSITORY_RESOLVE_CONTENTS_TREE,
+    MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
+    MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_OF_CONTENT,
+    MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT,
     MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH,
     MUTATION_REPOSITORY_RESOLVE_COMMUNITY_DATA,
     MUTATION_REPOSITORY_RESOLVE_PROJECTS,
@@ -95,17 +100,30 @@ export default {
         state.community.data = payload.data
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_CONTENTS] (state,payload) {
-        state.code.codeFileBrowser.data = payload.data
+    [MUTATION_REPOSITORY_RESOLVE_CONTENTS_TREE] (state,payload) {
+        state.code.codeFile.data = payload.data
+    },
+
+    
+    [MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB] (state,payload) {
+        state.code.codeFile.fileDetail.data = payload.data
+    },
+
+    [MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT] (state,payload) {
+        state.code.codeFile.fileDetail.lastCommit.data = payload.data
     },
 
     [MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH] (state,payload) {
-        state.code.codeFileBrowser.countOfCommits.data = payload.data
+        state.code.codeFile.countOfCommits.data = payload.data
+    },
+
+    [MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_OF_CONTENT] (state,payload) {
+        state.code.codeFile.fileDetail.contributors.data = payload.data
     },
 
     [MUTATION_REPOSITORY_RESOLVE_UPDATEDAT_OF_CONTENTS] (state,payload) {
-        state.code.codeFileBrowser.data.forEach((item,index) => {
-            Vue.set(state.code.codeFileBrowser.data,index,Object.assign({},item,{
+        state.code.codeFile.data.forEach((item,index) => {
+            Vue.set(state.code.codeFile.data,index,Object.assign({},item,{
                 updatedAt: payload.data[`history${index}`].nodes[0].committedDate
             }))
         })
@@ -131,16 +149,22 @@ export default {
             state.community.loading = payload.loading
         }
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS) {
-            state.code.codeFileBrowser.loadingUpdatedAtOfContents = payload.loading
+            state.code.codeFile.loadingUpdatedAtOfContents = payload.loading
         }
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUES) {
             state[payload.meta.issueType][payload.meta.state].loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_CONTENTS) {
-            state.code.codeFileBrowser.loading = payload.loading
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_CONTENTS_TREE) {
+            state.code.codeFile.loading = payload.loading
         }
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH) {
-            state.code.codeFileBrowser.countOfCommits.loading = payload.loading
+            state.code.codeFile.countOfCommits.loading = payload.loading
+        }
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS) {
+            state.code.codeFile.fileDetail.contributors.loading = payload.loading
+        }
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB) {
+            state.code.codeFile.fileDetail.loading = payload.loading
         }
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_PROJECTS_DATA) {
             if(!payload.meta.getMoreData){

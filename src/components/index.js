@@ -5,6 +5,7 @@ import {HeaderDetachTopTab,PageTopTab,ComplexTopTab} from './TopTab'
 import SearchInput from './SearchInput'
 import {SimpleFooter,LabelsFooter} from './Footer'
 import {SimpleBubble,ComplexBubble} from './Bubble'
+import Breadcrumb from './Breadcrumb.vue'
 import {IconPagination,SimplePagination} from './Pagination'
 import {
     AnimatedHeightWrapper,
@@ -37,5 +38,6 @@ export {
     ComplexBubble,
     IssuesPageMixin,
     IssueListItem,
-    SummaryAndDetail
+    SummaryAndDetail,
+    Breadcrumb
 }

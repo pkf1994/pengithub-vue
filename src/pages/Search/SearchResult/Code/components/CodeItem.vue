@@ -1,12 +1,13 @@
 <template>
-        <Container class="py-4 mx-3 flex">
-            <img class="rounded-1 v-align-middle flex-shrink-0 mr-1"
-                 :src="code.repository.owner.avatar_url"
-                 width="20"
-                 height="20">
-
-            <Main class="width-full">
-                <FullName class="flex-shrink-0 text-small text-bold">
+        <Container class="py-4 px-3 flex">
+            <AnimatedWidthWrapper class="mr-1" style="flex-shrink:0">
+                <img class="rounded-1 v-align-middle"
+                    :src="code.repository.owner.avatar_url"
+                    width="20"
+                    height="20">
+            </AnimatedWidthWrapper>
+            <Main style="width:calc(100% - 8px);flex-shrink:100000">
+                <FullName class="text-small text-bold">
                     <router-link to="/search" class="link-gray">{{code.repository.full_name}}</router-link>
                 </FullName>
                 <ThePath class="f4 text-normal">
@@ -45,7 +46,7 @@
     import {mapState} from "vuex";
     import {util_dateFormat,util_analyseFileType,util_adjustStyle} from '../../../../../util'
     import {
-        AnimatedHeightWrapper} from '../../../../../components'
+        AnimatedHeightWrapper,AnimatedWidthWrapper} from '../../../../../components'
     import {
         WithRandomMetaMixin,
         CancelNetworkOnDestroyMixin} from '../../../../../mixins'
@@ -114,6 +115,7 @@
         },
         components: {
             AnimatedHeightWrapper,
+            AnimatedWidthWrapper,
             Container: styled.div``,
             Main: styled.div``,
             FullName: styled.div``,

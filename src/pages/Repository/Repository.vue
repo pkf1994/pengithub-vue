@@ -50,7 +50,8 @@
                         routerLink: path,
                         exact: true,
                         extraActiveRouterLinks: [
-                            `${path}/file`
+                            `${path}/tree`,
+                            `${path}/blob`,
                         ]
                     },
                     {

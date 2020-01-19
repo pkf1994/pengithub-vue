@@ -21,7 +21,8 @@ const SearchResultUsers = () => import('../pages/Search/SearchResult/Users/Users
 const Repository = () => import('../pages/Repository/Repository.vue')
 const RepositoryCode = () => import('../pages/Repository/Code/Code.vue')
 const RepositoryCodeMain = () => import('../pages/Repository/Code/CodeMain/CodeMain.vue')
-const RepositoryCodeFileBrowser = () => import('../pages/Repository/Code/CodeFile/CodeFileBrowser/CodeFileBrowser.vue')
+const RepositoryCodeFileBrowser = () => import('../pages/Repository/Code/CodeFile/FileBrowser/FileBrowser.vue')
+const RepositoryCodeFileDetail = () => import('../pages/Repository/Code/CodeFile/FileDetail/FileDetail.vue')
 const RepositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
 const RepositoryIssuesOpen = () => import('../pages/Repository/Issues/Open.vue')
 const RepositoryIssuesClosed = () => import('../pages/Repository/Issues/Closed.vue')
@@ -155,8 +156,12 @@ export default [
                         component: RepositoryCodeMain
                     },
                     {
-                        path: 'file/:branch/(\.*)?',
+                        path: 'tree/:branch/(\.*)?',
                         component: RepositoryCodeFileBrowser
+                    },
+                    {
+                        path: 'blob/:branch/(\.*)?',
+                        component: RepositoryCodeFileDetail
                     }
                 ]
             },

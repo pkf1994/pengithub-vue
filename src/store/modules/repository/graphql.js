@@ -224,15 +224,14 @@ export const GRAPHQL_REPOSITORY_PROJECTS = payload => {
 }
 
 export const GRAPHQL_REPOSITORY_LAST_COMMITDATE_BY_PATH = payload => {
-    let branch = payload.path.split(':')[0]
-    let parentPath = payload.path.split(':')[1]
-    if(parentPath.length > 0 && parentPath[parentPath.length - 1] !== '/') {
-      parentPath = `${parentPath}/`
+    let path = payload.path
+    if(path.length > 0 && path[path.length - 1] !== '/') {
+      path = `${path}/`
     }
     let graphQL = ''
     payload.contents.forEach((item,index) => {
       graphQL = `${graphQL}
-        history${index}:history(path: "${parentPath}${item.name}", first: 1) {
+        history${index}:history(path: "${path}${item.name}", first: 1) {
           nodes {
             committedDate
           }
@@ -242,7 +241,7 @@ export const GRAPHQL_REPOSITORY_LAST_COMMITDATE_BY_PATH = payload => {
   return `
   {
     repository(name: "${payload.repo}", owner: "${payload.owner}") {
-      object(expression: "${branch}") {
+      object(expression: "${payload.branch}") {
         ... on Commit {
           ${graphQL}
         }
@@ -271,7 +270,7 @@ export const GRAPHQL_REPOSITORY_COMMITS_COUNT_BY_BRANCH = payload => `
 export const GRAPHQL_REPOSITORY_CONTENTS = payload => `
 {
   repository(name: "${payload.repo}", owner: "${payload.owner}") {
-    object(expression: "${payload.path}") {
+    object(expression: "${payload.branch}:${payload.path}") {
       ... on Tree {
         entries {
           oid
@@ -279,7 +278,73 @@ export const GRAPHQL_REPOSITORY_CONTENTS = payload => `
           type
         }
       }
+      ... on Blob {
+        text
+        isBinary
+      }
     }
   }
 }
 `
+
+export const GRAPHQL_REPOSITORY_CONTENT_AND_LAST_COMMIT_AND_COMMIT_HISTORY = payload => `
+{
+  repository(name: "${payload.repo}", owner: "${payload.owner}") {
+    content: object(expression: "${payload.branch}:${payload.path}") {
+      ... on Blob {
+        text
+        isBinary
+      }
+    }
+    commit: object(expression: "${payload.branch}") {
+      ... on Commit {
+        history(first: 1, path: "${payload.path}") {
+          nodes {
+            message
+            abbreviatedOid
+            committer {
+              avatarUrl
+              user {
+                login
+              }
+            }
+            committedDate
+          }
+        }
+      }
+    }
+    commitHistory: object(expression: "${payload.branch}") {
+      ... on Commit {
+        history(first: 100, path: "${payload.path}") {
+          nodes {
+            authoredByCommitter
+            committer {
+              user {
+                login
+              }
+            }
+            author {
+              user {
+                login
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`
+export const GRAPHQL_USER = userLogins => {
+  let graphQL = ''
+  userLogins.forEach((item,index) => {
+    graphQL = `
+      ${graphQL}
+      user${index}:user(login: "${item}") {
+        avatarUrl
+        login
+      }
+    `
+  })
+  return `{${graphQL}}`
+}
