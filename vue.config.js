@@ -1,6 +1,9 @@
 
 
   module.exports = {
+    css: {
+      sourceMap:true,
+    },
     lintOnSave: false,
     chainWebpack: config => {
       config.module

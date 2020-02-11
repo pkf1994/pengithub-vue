@@ -1,6 +1,6 @@
 <template>
-    <Container class="position-relative">
-        <SearchInput v-if="!empty" class="position-relative m-3 flex-self-stretch">
+    <Container class="position-relative px-3">
+        <SearchInput v-if="!empty" class="position-relative my-3 flex-self-stretch">
             <input class="form-control form-control input-contrast width-full" 
                     v-model="searchQuery"
                     ref="input"

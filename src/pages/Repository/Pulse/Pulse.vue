@@ -1,6 +1,6 @@
 <template>
-    <Container class="flex-column flex-items-stretch">
-        <select class="form-select" v-model="selectedValue" style="margin:15px;font-family: Arial;">
+    <Container class="flex-column flex-items-stretch px-3">
+        <select class="form-select my-3" v-model="selectedValue" style="font-family: Arial;">
             <option value="weekly">
                 Past week
             </option>

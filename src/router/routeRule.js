@@ -7,10 +7,10 @@ const HomePullRequests = () => import('../pages/Home/LoginedHome/PullRequests/in
 const HomePullRequestsCreated = () => import('../pages/Home/LoginedHome/PullRequests/Created.vue')
 const HomePullRequestsAssigned = () => import('../pages/Home/LoginedHome/PullRequests/Assigned.vue')
 const HomePullRequestsMentioned = () => import('../pages/Home/LoginedHome/PullRequests/Mentioned.vue')
-const HomeIssues = () => import('../pages/Home/LoginedHome/Issues/index.vue')
-const HomeIssuesCreated = () => import('../pages/Home/LoginedHome/Issues/Created.vue')
+const HomeIssues = () => import('../pages/Home/LoginedHome/Issues/Issues.vue')
+/* const HomeIssuesCreated = () => import('../pages/Home/LoginedHome/Issues/Created.vue')
 const HomeIssuesAssigned = () => import('../pages/Home/LoginedHome/Issues/Assigned.vue')
-const HomeIssuesMentioned = () => import('../pages/Home/LoginedHome/Issues/Mentioned.vue')
+const HomeIssuesMentioned = () => import('../pages/Home/LoginedHome/Issues/Mentioned.vue') */
 const Search = () => import('../pages/Search/Search.vue')
 const SearchResultRepositories = () => import('../pages/Search/SearchResult/Repositorires/Repositories.vue')
 const SearchResultCode = () => import('../pages/Search/SearchResult/Code/Code.vue')
@@ -69,9 +69,9 @@ export default [
                 ]
             },
             {
-                path: 'issues',
+                path: 'issues/:meta?',
                 component: HomeIssues,
-                children: [
+               /*  children: [
                     {
                         path: '/',
                         component: HomeIssuesCreated
@@ -84,7 +84,7 @@ export default [
                         path: 'mentioned',
                         component: HomeIssuesMentioned
                     }
-                ]
+                ] */
             },
             {
                 path: '/',
@@ -153,15 +153,21 @@ export default [
                 children: [
                     {
                         path: '/',
-                        component: RepositoryCodeMain
+                        components: {
+                            RepositoryCodeMain: RepositoryCodeMain
+                        }
                     },
                     {
                         path: 'tree/:branch/(\.*)?',
-                        component: RepositoryCodeFileBrowser
+                        components: {
+                            RepositoryCodeFileBrowser: RepositoryCodeFileBrowser
+                        }
                     },
                     {
                         path: 'blob/:branch/(\.*)?',
-                        component: RepositoryCodeFileDetail
+                        components: {
+                            RepositoryCodeFileDetail: RepositoryCodeFileDetail
+                        }
                     }
                 ]
             },

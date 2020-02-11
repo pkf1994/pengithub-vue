@@ -19,5 +19,9 @@ export default {
             return bIndex - aIndex
         })
         return sortedContents
+    },
+    fileDetailRows: state => {
+        let rows = state.code.codeFile.fileDetail.data && state.code.codeFile.fileDetail.data.split(/\n/)
+        return rows || []
     }
 }

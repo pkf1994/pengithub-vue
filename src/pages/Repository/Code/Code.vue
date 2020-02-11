@@ -1,5 +1,11 @@
 <template>
-    <router-view></router-view>
+    <Container>
+        <router-view name="RepositoryCodeMain"></router-view>
+        <keep-alive>
+            <router-view name="RepositoryCodeFileBrowser"></router-view>
+        </keep-alive>
+        <router-view name="RepositoryCodeFileDetail"></router-view>
+    </Container>   
 </template>
 
 <script>
@@ -17,6 +23,9 @@
             ...mapActions({
                 action_getData: ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA
             }),
+        },
+        components: {
+            Container: styled.div``
         }
     }
 </script>

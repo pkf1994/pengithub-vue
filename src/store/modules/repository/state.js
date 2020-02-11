@@ -23,6 +23,8 @@ export default {
             },
             fileDetail: {
                 data: '',
+                html: '',
+                raw: '',
                 loading: false,
                 lastCommit: {
                     data: {},
@@ -42,15 +44,15 @@ export default {
         totalCountClosed: 0,
         ...DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE()
     },
-    issue: {
-        open: DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE(),
-        closed: DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE(),
-        yours: DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE()
+    issues: {
+        open: DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
+        closed: DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
+        yours: DEFAULT_REST_PAGINATIONAL_DATA_STATE()
     },
-    pullRequest: {
-        open: DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE(),
-        closed: DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE(),
-        yours: DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE()
+    pullRequests: {
+        open: DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
+        closed: DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
+        yours: DEFAULT_REST_PAGINATIONAL_DATA_STATE()
     },
     pulse: {
         codeChanges: {

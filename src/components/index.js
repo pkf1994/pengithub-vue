@@ -2,7 +2,7 @@ import {LogoHeader,RepoHeader,LogoutedHeader} from './Header'
 import SummaryAndDetail from './SummaryAndDetail.vue'
 import Button from './Button'
 import {HeaderDetachTopTab,PageTopTab,ComplexTopTab} from './TopTab'
-import SearchInput from './SearchInput'
+import {IconSearchInput} from './SearchInput'
 import {SimpleFooter,LabelsFooter} from './Footer'
 import {SimpleBubble,ComplexBubble} from './Bubble'
 import Breadcrumb from './Breadcrumb.vue'
@@ -13,6 +13,8 @@ import {
 import LoadingAndCatchErrorTemplate from './LoadingAndCatchErrorTemplate'
 import {LoadingIcon,CommonLoadingEx,CommonLoading,CommonLoadingWrapper,LoadingIconEx} from './Loading'
 import {IssuesPageMixin,IssueListItem} from './IssuesPage'
+import SelectMenuItem from './SelectMenuItem'
+import Modal from './Modal'
 export {
     Button,
     LogoHeader,
@@ -22,7 +24,7 @@ export {
     HeaderDetachTopTab,
     PageTopTab,
     ComplexTopTab,
-    SearchInput,
+    IconSearchInput,
     CommonLoading,
     CommonLoadingWrapper,
     SimpleFooter,
@@ -39,5 +41,7 @@ export {
     IssuesPageMixin,
     IssueListItem,
     SummaryAndDetail,
-    Breadcrumb
+    Breadcrumb,
+    SelectMenuItem,
+    Modal
 }

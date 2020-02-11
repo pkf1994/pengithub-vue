@@ -1,79 +1,155 @@
 <template>
-    <Container class="flex-column flex-grow-1">
-        <CommonLoadingWrapper :loading="loading" class="bg-white flex-column"
-                              :class="{'flex-grow-1' : data && data.length > 0}">
-            <IssueListItem :showRepoFullName="showRepoFullName" 
-                            :type="type" 
-                            meta="issue-list-item" 
-                            v-for="item in filterEmptyData" 
-                            :key="item.id + item.title" 
-                            :issue="item"/>
-            <slot></slot>
-        </CommonLoadingWrapper>
+    <Container class="bg-white flex-grow-1">
+        <SearchInput class="p-3">
+            <slot name="searchInput">
+              
+            </slot>    
+        </SearchInput>
+
+        <AnimatedHeightWrapper>
+            <Statistic class="px-3 pb-3 statistic" v-if="countInfo.open && !loadingCountOfIssueByState">
+                <router-link :to="countInfo.toOpen" active-class="no-active-style" :class="{active:countInfo.currentIssueState === 'open'}">
+                    <svg class="octicon octicon-issue-opened" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
+                    &nbsp;{{countInfo.open && countInfo.open.issueCount}} Open
+                </router-link> 
+                &nbsp;
+                <router-link :to="countInfo.toClosed" active-class="no-active-style" :class="{active:countInfo.currentIssueState === 'closed'}">
+                    <svg class="octicon octicon-check" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
+                    &nbsp;{{countInfo.closed && countInfo.closed.issueCount}} Closed
+                </router-link> 
+            </Statistic>
+        </AnimatedHeightWrapper>
+       
+
+        <Entries>
+            <EntriesFilterRow class="entries-filter-row Box-header flex flex-justify-between">
+                <slot name="entriesFilterRow">
+                    <EntriesFilterItem class="px-3">Visibility</EntriesFilterItem>
+                    <EntriesFilterItem class="px-3">Organization</EntriesFilterItem>
+                    <EntriesFilterItem class="px-3">Sort</EntriesFilterItem>
+                </slot>
+            </EntriesFilterRow>
+            <EntriesContent>
+                <IssueListItem v-for="item in data" 
+                                :issue="item"
+                                :key="item.id" 
+                                :type="type"></IssueListItem>
+            </EntriesContent>
+        </Entries>
+
+        <EmptyNotice class="empty-notice text-center relative" v-if="data.length === 0 && !loading">
+            <svg height="40" class="octicon octicon-issue-opened blankslate-icon" viewBox="0 0 14 16" version="1.1" width="35" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
+            <EmptyNoticeTitle>No results matched your search.</EmptyNoticeTitle>
+            <EmptyNoticeSubTitle>You could search <router-link to="/search">all of GitHub</router-link>.</EmptyNoticeSubTitle>
+        </EmptyNotice>
+
+        <slot></slot>    
 
         <transition name="fade" appear>
-            <NoDataMsg class="nodata-msg w-600 flex-row-center" v-show="noDataFlag">
-                {{noDataMsg}}
-            </NoDataMsg>
-        </transition>
+            <CommonLoading v-if="loading || loadingAdditionalData || loadingCountOfIssueByState"
+                            :preventClickEvent="false"
+                            :position="loading ? 'center' : 'corner'"/>
+        </transition>  
+
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoadingWrapper} from '../Loading'
+    import {CommonLoading, AnimatedHeightWrapper} from '../'
     import IssueListItem from './IssueItem'
+    import {mapState, mapActions} from 'vuex'
+    import { ACTION_HOME_REQUEST_ISSUES } from '../../store/modules/home/actionTypes'
     export default {
         props: {
             data: {
                 type: Array,
-                required: true
-            },
-            noDataMsg: {
-                type: String,
-                default: 'No item to show.'
-            },
-            noDataFlag: {
-                type: Boolean,
-                required: true
+                default: []
             },
             loading: {
                 type: Boolean,
-                required: true
+                default: false
+            },
+            loadingAdditionalData: {
+                type: Boolean,
+                default: false
+            },
+            loadingCountOfIssueByState: {
+                type: Boolean,
+                default: false
             },
             type: {
                 type: String,
-                required: true
+                default: 'issue'
             },
-            showRepoFullName: {
-                type: Boolean,
-                default: true
+            countInfo: {
+                type: Object,
+                default: () => ({})
+            },
+            query: {
+                type: String,
+                default: ''
             }
         },
         computed: {
-            filterEmptyData() {
-                let data = []
-                this.data.forEach(item => {
-                    if(item.id) data.push(item)
-                })
-                return data
+            currentIssueState() {
+                if(this.query.indexOf('is:open') > -1) return 'open'
+                if(this.query.indexOf('is:closed') > -1) return 'closed'
+                return ''
             }
         },
         components: {
+            CommonLoading,
+            AnimatedHeightWrapper,
             IssueListItem,
-            CommonLoadingWrapper,
             Container: styled.div``,
-            NoDataMsg: styled.div``
+            Main: styled.div``,
+            SearchInput: styled.div``,
+            Statistic: styled.div``,
+            Entries: styled.div``,
+            EntriesFilterRow: styled.div``,
+            EntriesFilterItem: styled.div``,
+            EntriesContent: styled.div``,
+            EmptyNotice: styled.div``,
+            EmptyNoticeTitle: styled.h3``,
+            EmptyNoticeSubTitle: styled.p``,
         }
     }
 </script>
 
-<style scoped>
-    .nodata-msg{
-        padding: 45px;
-        color: #586069;
+<style scoped lang="scss">
+
+
+.statistic{
+    a{
+     color: #24292e;
     }
-    [meta=issue-list-item]:last-child{
-        border-bottom:1px solid #eaecef;
+}
+
+.entries-filter-row{
+    border-left-width: 0;
+    border-right-width: 0;
+    border-radius: 0;
+}
+
+.active{
+    font-weight: 600
+}
+
+.empty-notice{
+    padding: 80px 40px;
+    svg{
+        margin-right: 4px;
+        margin-bottom: 8px;
+        margin-left: 4px;
+        color: #a3aab1;
     }
+    h3{
+        margin: 16px 0;
+        font-size: 24px;
+    }
+    p{
+        font-size: 16px;
+    }
+}
 </style>

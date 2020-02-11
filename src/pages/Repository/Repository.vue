@@ -1,5 +1,5 @@
 <template>
-    <Container class="container">
+    <Container class="container flex-column">
         <HeaderDetachTopTab :tabs="tabs" :activeTab="activeTab"></HeaderDetachTopTab>
         <keep-alive>
             <router-view></router-view>

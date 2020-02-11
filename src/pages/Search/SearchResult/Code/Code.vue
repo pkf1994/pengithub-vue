@@ -6,7 +6,7 @@
                         }"
                         :errorData="errorData"
                         :emptyResult="emptyResult" 
-                        :searchType="searchType"">
+                        :searchType="searchType">
         <Selector :syncSelectedValue="(newOne) => syncSelectedValue({key:'language',value:newOne})"
                   initialValue="Any"
                   label="Language">

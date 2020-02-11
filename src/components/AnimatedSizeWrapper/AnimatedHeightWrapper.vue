@@ -24,6 +24,7 @@
                 height: 0
             }
         },
+    
         mounted() {
             this.computeHeight()
         },
@@ -34,6 +35,9 @@
                     this.computeHeight()
                 },this.delay)
             }
+        },
+        activated() {
+            this.computeHeight()
         },
         methods: {
             computeHeight() {

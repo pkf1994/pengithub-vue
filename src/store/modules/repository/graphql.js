@@ -180,6 +180,48 @@ export const GRAPHQL_REPOSITORY_ISSUES = (payload) => {
 }
 `}
 
+export const GRAPHQL_REPOSITORY_ISSUES_BY_NUMBERS = (payload) => {
+  payload = {
+    issueType: 'issues',
+    ...payload
+  }
+  let issueType = payload.issueType === 'issues' ? 'issue' : 'pullRequest'
+  let graphql = ''
+  payload.numbers.forEach(item => {
+    graphql = `
+      ${graphql}
+      ${issueType}${item}:${issueType}(number:${item}){
+        state
+        createdAt
+        closedAt
+        ${payload.issueType === 'pullRequests' ? 'merged' : ''}
+        timelineItems(last: 1, itemTypes: CLOSED_EVENT) {
+          nodes {
+            ... on ClosedEvent {
+              id
+              actor {
+                login
+              }
+            }
+          }
+        }
+        labels(first: 20) {
+          nodes {
+            color
+            name
+          }
+        }
+      }
+    `
+  })
+  return `
+ {
+  repository(name: "${payload.repo}", owner: "${payload.owner}") {
+    ${graphql}
+  }
+}
+`}
+
 export const GRAPHQL_REPOSITORY_PROJECTS = payload => {
   const orderBy = payload.orderBy
   let orderByFragment

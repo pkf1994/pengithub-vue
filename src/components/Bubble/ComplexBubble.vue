@@ -15,9 +15,11 @@
                 </BubbleDisable>
             </AnimatedHeightWrapper>  
 
-            <Footer :class="{footer:withFooterSlot,'disable-filter':disable}" v-if="!loading">
-                <slot name="footer"></slot>
-            </Footer>
+            <AnimatedHeightWrapper>
+                <Footer :class="{footer:withFooterSlot && withFooterBorderTop,'disable-filter':disable}" v-if="!loading">
+                    <slot name="footer"></slot>
+                </Footer>
+            </AnimatedHeightWrapper>    
         </Inner>
     </Container>
 </template>
@@ -43,6 +45,10 @@
             delay: {
                 type: Number,
                 default: 0
+            },
+            withFooterBorderTop: {
+                type: Boolean,
+                default: true
             }
         },
       
@@ -74,8 +80,6 @@
 
     .bubble {
         padding: 0;
-        margin-right:15px;
-        margin-left:15px;
         overflow: hidden;
         word-break: break-word;
         word-wrap: break-word;

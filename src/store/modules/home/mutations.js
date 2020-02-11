@@ -24,13 +24,8 @@ export default {
     },
 
     [MUTATION_HOME_RESOLVE_ISSUES](state,payload) {
-        state[payload.issueType][payload.meta] = Object.assign(state[payload.issueType][payload.meta],payload)
-        if(!payload.changePage) return
-        if(payload.forward) {
-            state[payload.issueType][payload.meta].currentPage += 1
-        } else {
-            state[payload.issueType][payload.meta].currentPage += -1
-        }
+        state[`${payload.issueType}s`].data = payload.data
+        state[`${payload.issueType}s`].pageInfo = payload.pageInfo
     },
 
     [CROSS_MUTATION_TRIGGER_LOADING](state, payload) {
@@ -39,7 +34,7 @@ export default {
         }else if(payload.actionType === ACTION_HOME_REQUEST_NOTIFICATIONS_DATA) {
             state.notifications.loading = payload.loading
         }else if(payload.actionType === ACTION_HOME_REQUEST_ISSUES) {
-            state[payload.meta.issueType][payload.meta.meta].loading = payload.loading
+            state[`${payload.meta.issueType}s`].loading = payload.loading
         }
     }
 }

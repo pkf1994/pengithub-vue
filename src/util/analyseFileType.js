@@ -814,7 +814,7 @@ export const BINARY_EXTENSIONS_LIST = [
     ".udf",
     ".viw",
     ".ston",
-    ".svg",
+    
     ".sfd",
     ".srt",
     ".toml",
@@ -1064,7 +1064,8 @@ export const IMG_EXTENSIONS_LIST = [
     ".TGA",
     ".exif",
     ".FPX",
-    ".psd"
+    ".psd",
+    ".svg",
 ]
 
 export const VIDEA_EXTENSIONS_LIST = [

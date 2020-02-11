@@ -1,5 +1,5 @@
 <template>
-    <Container class="flex-column flex-items-stretch py-4">
+    <Container class="flex-column flex-items-stretch py-4 px-3">
         <Head class="head mx-3">
             <h2>Community profile</h2>  
         </Head>
@@ -19,26 +19,26 @@
             <CheckItem :checked="data.description && data.description.trim() !== ''">
                     Description
             </CheckItem>
-            <CheckItem :checked="data.files.readme">
+            <CheckItem :checked="data.files && data.files.readme">
                     README
             </CheckItem>
-            <CheckItem :checked="data.files.code_of_conduct" :withProposeBtn="true">
+            <CheckItem :checked="data.files && data.files.code_of_conduct" :withProposeBtn="true">
                    Code of conduct
             </CheckItem>
-            <CheckItem :checked="data.files.contributing" 
+            <CheckItem :checked="data.files && data.files.contributing" 
                         :withProposeBtn="true" 
                         subNotice="Writing contributing guidelines">
                     Contributing
             </CheckItem>
-            <CheckItem :checked="data.files.license" 
+            <CheckItem :checked="data.files && data.files.license" 
                         :withProposeBtn="true" 
                         subNotice="Choosing a license">
                     License
             </CheckItem>
-            <CheckItem :checked="data.files.issue_template">
+            <CheckItem :checked="data.files && data.files.issue_template">
                     Issue templates
             </CheckItem>
-            <CheckItem :checked="data.files.pull_request_template">
+            <CheckItem :checked="data.files && data.files.pull_request_template">
                     Pull request template
             </CheckItem>
         </ComplexBubble>

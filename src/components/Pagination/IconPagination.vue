@@ -1,12 +1,12 @@
 <template>
     <Container class="container pagination flex-row-center">
         <Left class="flex-grow-1"
-              :class="{disable: !pageInfo.hasPreviousPage}"
+              :class="{disable: !hasPreviousPage}"
               @click="getPreviousPage">◀</Left>
-        <PageInfo class="flex-grow-1">{{currentPage}} of {{maxPage}}</PageInfo>
+        <PageInfo class="flex-grow-1">{{currentPage === -1 ? computedCurrentPage : currentPage}} of {{maxPage}}</PageInfo>
         <Right class="flex-grow-1"
                style="border-right: 0"
-               :class="{disable: !pageInfo.hasNextPage}"
+               :class="{disable: !hasNextPage}"
                @click="getNextPage">▶</Right>
     </Container>
 </template>
@@ -16,6 +16,10 @@
     import {util_animatedScrollTo} from '../../util'
     export default {
         props: {
+            apiType: {
+                type: String,
+                default: 'rest'
+            },
             loading: {
                 type: Boolean,
                 required: true
@@ -26,7 +30,7 @@
             },
             currentPage: {
                 type: Number,
-                required: true
+                default: -1
             },
             totalCount: {
                 type: Number,
@@ -44,7 +48,29 @@
         computed: {
             maxPage: function () {
                 return Math.ceil(this.totalCount/this.perPage)
-            }
+            },
+            computedCurrentPage: function () {
+                if(this.pageInfo.prev) {
+                    return parseInt(this.pageInfo.prev.page) + 1
+                }else if(this.pageInfo.next) {
+                    return parseInt(this.pageInfo.next.page) - 1
+                }
+                return 1
+            },
+            hasPreviousPage() {
+                if(this.apiType === 'rest') {
+                    if(this.pageInfo.prev) return true
+                    return false
+                }
+                return this.pageInfo.hasPreviousPage
+            },
+            hasNextPage() {
+                if(this.apiType === 'rest') {
+                    if(this.pageInfo.next) return true
+                    return false
+                }
+                return this.pageInfo.hasNextPage
+            },
         },
         watch: {
             loading: function (newOne, oldOne) {
@@ -55,11 +81,11 @@
         },
         methods: {
             getPreviousPage: function() {
-                if(!this.pageInfo.hasPreviousPage || this.loading) return
+                if(!this.hasPreviousPage || this.loading) return
                 this.dataGetter({forward:false,changePage: true})
             },
             getNextPage: function () {
-                if(!this.pageInfo.hasNextPage || this.loading) return
+                if(!this.hasNextPage || this.loading) return
                 this.dataGetter({forward:true,changePage: true})
             }
         },

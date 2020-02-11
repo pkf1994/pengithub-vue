@@ -1,6 +1,7 @@
 <template>
    <IssuesPageTemplate :data="data"
                         :loading="loading"
+                        :loadingAdditionalData="loadingAdditionalData"
                         :noDataFlag="noData"
                         :showRepoFullName="false"
                         type="pullRequest"
@@ -9,7 +10,6 @@
                     :totalCount="totalCount"
                     :loading="loading"
                     :perPage="perPage"
-                    :currentPage="currentPage"
                     :dataGetter="pagination_getData"
                     :pageInfo="pageInfo"/>
     </IssuesPageTemplate>
@@ -26,18 +26,18 @@
         inject: ['owner','repo'],
         computed: {
             ...mapState({
-                loading: state => state.repository.pullRequest.open.loading,
-                data: state => state.repository.pullRequest.open.nodes,
-                pageInfo: state => state.repository.pullRequest.open.pageInfo,
-                totalCount: state => state.repository.pullRequest.open.totalCount,
-                currentPage: state => state.repository.pullRequest.open.currentPage,
-                perPage: state => state.repository.pullRequest.open.perPage
+                loading: state => state.repository.pullRequests.open.loading,
+                loadingAdditionalData: state => state.repository.pullRequests.closed.loadingAdditionalData,
+                data: state => state.repository.pullRequests.open.data,
+                pageInfo: state => state.repository.pullRequests.open.pageInfo,
+                totalCount: state => state.repository.pullRequests.open.totalCount,
+                perPage: state => state.repository.pullRequests.open.perPage
             })
         },
         created(){
             this.action_getData({
-                issueType: "pullRequest",
-                state: "open",
+                issueType: "pullRequests",
+                meta: "open",
                 owner: this.owner,
                 repo: this.repo
             })
@@ -48,8 +48,8 @@
             }),
             pagination_getData(payload){
                 this.action_getData({
-                    issueType: "pullRequest",
-                    state: "open",
+                    issueType: "pullRequests",
+                    meta: "open",
                     owner: this.owner,
                     repo: this.repo,
                     ...payload

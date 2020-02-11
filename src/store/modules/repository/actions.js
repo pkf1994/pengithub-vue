@@ -2,6 +2,7 @@ import {
     ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA,
     ACTION_REPOSITORY_REQUEST_BASIC_DATA,
     ACTION_REPOSITORY_REQUEST_ISSUES,
+    ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA,
     ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
     ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA,
     ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_REST,
@@ -25,11 +26,13 @@ import {
     GRAPHQL_USER,
     GRAPHQL_REPOSITORY_CONTENT_AND_LAST_COMMIT_AND_COMMIT_HISTORY,
     GRAPHQL_REPOSITORY_LAST_COMMITDATE_BY_PATH,
-    GRAPHQL_REPOSITORY_CONTENTS} from './graphql'
+    GRAPHQL_REPOSITORY_CONTENTS,
+    GRAPHQL_REPOSITORY_ISSUES_BY_NUMBERS} from './graphql'
 import {
     MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO,
     MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST,
     MUTATION_REPOSITORY_RESOLVE_ISSUES,
+    MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA,
     MUTATION_REPOSITORY_RESOLVE_PROJECTS,
     MUTATION_REPOSITORY_RESOLVE_BASIC_DATA,
     MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT,
@@ -106,45 +109,89 @@ export default {
         payload = {
             changePage: false,
             forward: true,
-            issueType: "issue",
-            state: "open",
+            issueType: "issues",
+            meta: "open",
             ...payload
         }
+        console.log(payload)
         try{
-            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES,true, {issueType: payload.issueType,state:payload.state})
-            const perPage = context.rootState.repository[payload.issueType][payload.state].perPage
-            const after = context.rootState.repository[payload.issueType][payload.state].pageInfo.endCursor
-            const before = context.rootState.repository[payload.issueType][payload.state].pageInfo.startCursor
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES,true,payload)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUES + payload.repo + payload.owner + payload.meta)
+            const perPage = context.rootState.repository[payload.issueType][payload.meta].perPage
+            const pageInfo = context.rootState.repository[payload.issueType][payload.meta].pageInfo
             const login = context.rootState.oauth.viewerInfo.login
-            let _payload = {
-                issueType: payload.issueType,
-                login: login,
-                state: payload.state,
-                ...payload
-            }
-            if(!payload.changePage) {
-                _payload = {
-                    perPage,
-                    ..._payload
+
+            let url
+            if(payload.changePage){
+                if(payload.forward) {
+                    url = pageInfo.next.url
+                }else{
+                    url = pageInfo.prev.url
                 }
-            }else{
-                _payload = payload.forward ? {perPage,after,..._payload} : {perPage,before,..._payload}
+            } else {
+                url = API_SEARCH('issues',{
+                    sort: 'created',
+                    order: 'desc',
+                    q: `repo:${payload.owner}/${payload.repo} is:${payload.issueType === 'issues' ? 'issue' : 'pullRequest'} ${payload.meta === 'yours' ? 'state:open author:' + login : 'state:' + payload.meta}`,
+                    per_page: perPage,
+                })
             }
 
-            let graphQL = GRAPHQL_REPOSITORY_ISSUES(_payload)
-            const res = await authRequiredGitHubGraphqlApiQuery(graphQL)
-            let data = res.data.data.search
+            const res_rest = await authRequiredGet(url,{cancelToken})
+            const linkParsed = parse(res_rest.headers.link)
             context.commit({
                 type: MUTATION_REPOSITORY_RESOLVE_ISSUES,
-                totalCount: data.issueCount,
-                ...payload,
-                ...data
+                totalCount: res_rest.data.total_count,
+                data: res_rest.data.items,
+                pageInfo: linkParsed,
+                ...payload
             })
 
-            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES,false,{issueType: payload.issueType,state:payload.state})
+            context.dispatch({
+                type: ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA,
+                issues: res_rest.data.items,
+                ...payload
+            })
+
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES,false,payload)
         }catch (e) {
             handleException(e)
-            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES,false,{issueType: payload.issueType,state:payload.state})
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES,false,payload)
+        }
+    },
+
+    async [ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA] (context,payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA,true,payload)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA + payload.repo + payload.owner + payload.meta)
+            
+            const numbers = []
+            payload.issues.forEach(item => {
+                numbers.push(item.number)
+            })
+            const graphQL = GRAPHQL_REPOSITORY_ISSUES_BY_NUMBERS({
+                numbers,
+                ...payload
+            })
+            console.log(graphQL)
+            const res_graphQL = await authRequiredGitHubGraphqlApiQuery(graphQL,{cancelToken})
+            let dataArr = []
+            if(res_graphQL.data.data) {
+                for(let key in res_graphQL.data.data.repository) {
+                    dataArr.push(res_graphQL.data.data.repository[key])
+                }
+            }
+
+            context.commit({
+                data: dataArr,
+                ...payload,
+                type: MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA
+            })
+            
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA,false,payload)
+        }catch(e) {
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA,false,payload)
+            handleException(e,{throwNetworkErrorToComponent:true})
         }
     },
 
@@ -438,7 +485,7 @@ export default {
         try{
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,true)
             const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB)
-          
+
             const graphQL = GRAPHQL_REPOSITORY_CONTENT_AND_LAST_COMMIT_AND_COMMIT_HISTORY({
                 ...payload
             })
@@ -447,12 +494,12 @@ export default {
             let contributorLogins = []
 
             res_graphQL.data.data.repository.commitHistory.history.nodes.forEach(item => {
-                if(contributorLogins.indexOf(item.author.user.login) === -1) {
+                if(item.author.user && contributorLogins.indexOf(item.author.user.login) === -1) {
                     contributorLogins.push(item.author.user.login)
                 }
                 if(!item.authoredByCommitter) {
-                    if(contributorLogins.indexOf(item.committer.user.login) === -1) {
-                        contributorLogins.push(item.committer.user.login)
+                    if(contributorLogins.indexOf(item.committer.user && item.committer.user.login) === -1) {
+                        contributorLogins.push(item.committer.user && item.committer.user.login)
                     }
                 }
             })
@@ -471,7 +518,28 @@ export default {
             if(!res_graphQL.data.data.repository.content.isBinary) {
                 context.commit({
                     type: MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
-                    data: res_graphQL.data.data.repository.content.text
+                    data: res_graphQL.data.data.repository.content.text,
+                    meta: 'text'
+                })
+                //查看是否返回html
+                const url = API_CONTENTS(payload.owner,payload.repo,payload.path,payload.branch)
+                const res = await authRequiredGet(url,{
+                    headers: {
+                        "Accept":"application/vnd.github.VERSION.html"
+                    }
+                })
+                if(res.status === 200) {
+                    context.commit({
+                        type: MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
+                        data: res.data,
+                        meta: 'html'
+                    })
+                }
+            }else{
+                context.commit({
+                    type: MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
+                    data: `https://github.com/${payload.owner}/${payload.repo}/blob/${payload.branch}/${payload.path}?raw=true`,
+                    meta: 'binary'
                 })
             }
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,false)
@@ -489,7 +557,6 @@ export default {
             const graphQL = GRAPHQL_USER(payload.contributorLogins)
             const res_graphQL = await authRequiredGitHubGraphqlApiQuery(graphQL,{cancelToken})
 
-            console.log(res_graphQL.data.data)
             let contributors = []
             for(let key in res_graphQL.data.data) {
                 contributors.push(res_graphQL.data.data[key])

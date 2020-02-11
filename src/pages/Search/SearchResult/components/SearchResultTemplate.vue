@@ -2,7 +2,7 @@
     <Container>
         <slot v-if="!errorData.errorOccurred && !emptyResult"></slot>  
 
-         <transition name="fade" appear>
+        <transition name="fade" appear>
             <CommonLoading  v-if="loadingInfo.basicLoading || loadingInfo.additionalLoading"
                             :preventClickEvent="false"
                             :position="loadingInfo.basicLoading ? 'center' : 'corner'"/>

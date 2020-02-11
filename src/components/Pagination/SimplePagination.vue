@@ -5,7 +5,7 @@
               @click="goPrev">Previous</Left>
         <PageInfo >
             <strong style="color: #586069;">
-                {{currentPage}} of {{pageInfo.last.page}}
+                {{currentPage}} of {{pageInfo.last ? pageInfo.last.page : currentPage}}
             </strong>
         </PageInfo>
         <Right class="flex-grow-1 flex-row-center width-full"
@@ -21,19 +21,15 @@
         props: {
             loading: {
                 type: Boolean,
-                required: true
+                default: false
             },
             pageInfo: {
                 type: Object,
                 required: true
             },
-            prev: {
+            dataGetter: {
                 type: Function,
-                required: true
-            },
-            next: {
-                type: Function,
-                required: true
+                default: () => {console.log('get data')}
             },
             scrollTargetSelector: {
                 type: String,
@@ -58,12 +54,18 @@
         methods: {
             async goNext() {
                 if(this.loading) return
-                await this.next()
+                await this.dataGetter({
+                    changePage: true,
+                    forward: true
+                })
                 this.scrollToTitle()
             },
             async goPrev() {
                 if(this.loading) return
-                await this.prev()
+                await this.dataGetter({
+                    changePage: true,
+                    forward: false
+                })
                 this.scrollToTitle()
             },
             scrollToTitle() {

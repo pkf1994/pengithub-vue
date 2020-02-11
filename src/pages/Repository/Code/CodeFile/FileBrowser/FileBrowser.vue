@@ -44,7 +44,14 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {AnimatedHeightWrapper,AnimatedWidthWrapper,SummaryAndDetail,CommonLoading,Breadcrumb} from '../../../../../components'
+    import {
+        AnimatedHeightWrapper,
+        AnimatedWidthWrapper,
+        SummaryAndDetail,
+        CommonLoading,
+        Breadcrumb} from '../../../../../components'
+    import {
+        RouteActiveAwareMixin} from '../../../../../mixins'
     import { mapState, mapActions,mapGetters } from 'vuex'
     import {
         ACTION_REPOSITORY_REQUEST_CONTENTS_TREE,
@@ -53,7 +60,14 @@
     import {util_numberFormat} from '../../../../../util'
     import {FileItem} from './components'
     export default {
+        mixins: [RouteActiveAwareMixin],
         inject: ['owner','repo'],
+        data() {
+            return {
+                cachedPath: '',
+                cachedBranch: '',
+            }
+        },
         computed: {
             ...mapState({
                 loadingBranches: state => state.repository.code.loading,
@@ -99,18 +113,31 @@
             }
         },
         watch: {
-            currentBranch(newOne) {
-                if(newOne) {
-                    this.getData()
+            async currentBranch(newOne) {
+              /*   if(!this.$route.matched.some(item => {
+                    return item.path === '/:owner/:repo/tree/:branch/(.*)?'
+                })) return 
+                if(this.cachedBranch === this.currentBranch) return */
+                if(newOne && this.routeActive) {
+                    await this.getData()
                 }
+                //this.cachedBranch = this.currentBranch
             },
-            path() {
-                this.action_getContents({
-                        path: this.path,
-                        owner: this.owner,
-                        repo: this.repo,
-                        branch: this.$route.params.branch
-                })
+            async path() {
+               /*  if(!this.$route.matched.some(item => {
+                    return item.path === '/:owner/:repo/tree/:branch/(.*)?'
+                })) return 
+                if(this.cachedPath === this.path) return */
+                if(this.routeActive) {
+                    await this.action_getContents({
+                            path: this.path,
+                            owner: this.owner,
+                            repo: this.repo,
+                            branch: this.$route.params.branch
+                    })
+                }
+              /* 
+                this.cachedPath = this.path */
             }
         },
         methods: {
@@ -122,17 +149,17 @@
                 this.$refs.summaryAndDetail.triggerStretch()
             },
             getData() {
-                 this.action_getContents({
-                        path: this.path,
-                        owner: this.owner,
-                        repo: this.repo,
-                        branch: this.$route.params.branch
-                    })
-                    this.action_getCommitsCount({
-                        owner: this.owner,
-                        repo: this.repo,
-                        branch:this.$route.params.branch,
-                    })
+                this.action_getContents({
+                    path: this.path,
+                    owner: this.owner,
+                    repo: this.repo,
+                    branch: this.$route.params.branch
+                })
+                this.action_getCommitsCount({
+                    owner: this.owner,
+                    repo: this.repo,
+                    branch:this.$route.params.branch,
+                })
             },
             adjustPath(path) {
                 let reg = /\/\//g

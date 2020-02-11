@@ -24,10 +24,7 @@
     import styled from 'vue-styled-components'
     export default {
         props: {
-            checked: {
-                type: Boolean,
-                default: true
-            },
+            checked: [Object,Boolean],
             withProposeBtn: {
                 type: Boolean,
                 default: false

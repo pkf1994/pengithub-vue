@@ -1,13 +1,14 @@
 <template>
-    <container>
+    <container class="px-3">
         <AnimatedHeightWrapper :class="{'mt-3' : data.description && data.description !== ''}">  
-            <Description class="repository-meta mb-0 mx-3" v-if="data.description && data.description !== ''">
+            <Description class="repository-meta mb-0" v-if="data.description && data.description !== ''">
                 {{data.description}}
                 <span v-if="data.homepageUrl && data.homepageUrl.trim() !== ''">-</span>
                 <a v-if="data.homepageUrl && data.homepageUrl.trim() !== ''" 
                 :href="data.homepageUrl">{{data.homepageUrl}}</a>   
             </Description>
-            <Topics v-if="data.repositoryTopics && data.repositoryTopics.nodes && data.repositoryTopics.nodes.length > 0" class="repository-meta mx-3 mt-2 d-inline-flex flex-wrap">
+            <Topics v-if="data.repositoryTopics && data.repositoryTopics.nodes && data.repositoryTopics.nodes.length > 0" 
+                    class="repository-meta mt-2 d-inline-flex flex-wrap">
                 <router-link 
                             :key="item.topic.name"
                             to="/search"
@@ -18,7 +19,7 @@
             </Topics>
         </AnimatedHeightWrapper>   
 
-        <ActionPane class="bubble flex mt-3">
+        <ActionPane class="bubble flex mt-3 mb-3">
             <StarItOrNot class="flex-auto text-center">
                 <button class="px-2">
                     <svg class="v-align-text-bottom d-inline-block" fill="currentColor" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74L14 6z"></path></svg>

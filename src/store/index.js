@@ -8,7 +8,8 @@ import {
     oauthStore,
     homeStore,
     searchStore,
-    repositoryStore
+    repositoryStore,
+    issuesStore
 } from "./modules"
 
 export default new Vuex.Store ({
@@ -17,7 +18,8 @@ export default new Vuex.Store ({
         oauth: oauthStore,
         home: homeStore,
         search: searchStore,
-        repository: repositoryStore
+        repository: repositoryStore,
+        issues: issuesStore,
     },
     plugins: [
         createPersistedState({

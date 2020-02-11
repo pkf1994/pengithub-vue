@@ -48,7 +48,6 @@
     import styled from 'vue-styled-components'
     import Vue from 'vue/dist/vue.js';
     import {SEARCH_PAGE_MODAL_CONTENT} from './contant'
-    import {SearchInput} from '../../components'
     import {WithSearchInputMixin} from '../../mixins'
     import {MUTATION_SEARCH_SYNC_SEARCH_QUERY} from '../../store/modules/search/mutationTypes'
     import {mapMutations} from "vuex";
@@ -90,7 +89,6 @@
             }
         },
         components: {
-            SearchInput,
             Container: styled.div``,
             Inner: styled.div``,
             Title: styled.h2``,

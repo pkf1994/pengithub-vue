@@ -2,47 +2,84 @@
 </template>
 
 <script>
+    import styled from 'vue-styled-components'
+    import {SimplePagination,IconSearchInput} from '../'
     import IssuesPageTemplate from './IssuesPageTemplate.vue'
-    import {mapActions, mapState} from "vuex";
-    import {IconPagination} from '../Pagination'
-    import {
-        ACTION_HOME_REQUEST_ISSUES
-    } from "../../store/modules/home/actionTypes";
+    import {mapState, mapActions} from 'vuex'
+    import { ACTION_HOME_REQUEST_ISSUES } from '../../store/modules/home/actionTypes'
     export default {
         data() {
             return {
-                noDataMsg: "No item to show",
+                type: 'issue',
+                belongTo: 'home',
+                searchQuery: ''
             }
         },
         computed: {
             ...mapState({
-                loading: state => state.home.pullRequest.created.loading,
-                data: state => state.home.pullRequest.created.nodes,
-                pageInfo: state => state.home.issue.created.pageInfo,
-                totalCount: state => state.home.issue.created.totalCount,
-                perPage: state => state.home.issue.created.perPage
+                login: state => state.oauth.viewerInfo.login,
+                loading: state => false,
+                loadingAdditionalData: state => false,
+                data: state => [],
+                pageInfo: state => ({}),
+                countInfo: state => ({})
             }),
-            noData: function () {
-                return (!this.data || this.data.length === 0) && !this.loading
+            meta() {
+                return this.$route.params.meta
             },
-            showPagination: function () {
-                return this.totalCount > this.perPage
+            query() {
+                if(this.meta) {
+                    switch(this.meta) {
+                        case 'assigned':
+                            this.searchQuery = `is:open is:${this.type} assignee:${this.login} archived:false`
+                            return `is:open is:${this.type} assignee:${this.login} archived:false`
+                        case 'mentioned':
+                            this.searchQuery = `is:open is:${this.type} mentions:${this.login} archived:false`
+                            return `is:open is:${this.type} mentions:${this.login} archived:false`
+                        default:
+                            return ''
+                    }
+                }
+                if(!this.$route.query.q){
+                    this.searchQuery = `is:open is:${this.type} author:${this.login} archived:false`
+                }else{
+                    this.searchQuery = this.$route.query.q
+                }
+                return this.$route.query.q || `is:open is:${this.type} author:${this.login} archived:false`
+            },
+        },
+        created() {
+            this.action_getData({
+                issueType: this.type,
+                belongTo: this.belongTo,
+                q: this.query
+            })
+        },
+        watch: {
+            query() {
+                this.action_getData({
+                    issueType: this.type,
+                    belongTo: this.belongTo,
+                    q: this.query
+                })
             }
         },
-
         methods: {
             ...mapActions({
                 action_getData: ACTION_HOME_REQUEST_ISSUES
-            })
+            }),
+            search() {
+                this.$router.replace(`/issues?q=${this.searchQuery}`)
+            }
         },
-
         components: {
-            IconPagination,
-            IssuesPageTemplate
+          IssuesPageTemplate,
+          IconSearchInput,
+          SimplePagination
         }
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 
 </style>

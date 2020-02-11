@@ -13,10 +13,12 @@ import {
     ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,
     ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH,
     ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
-    ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA} from './actionTypes.js'
+    ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA,
+    ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA} from './actionTypes.js'
 import { 
     MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO,
     MUTATION_REPOSITORY_RESOLVE_ISSUES,
+    MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA,
     MUTATION_REPOSITORY_SYNC_SEARCH_PROJECTS_QUERY,
     MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT,
     MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST,
@@ -61,13 +63,17 @@ export default {
     },
 
     [MUTATION_REPOSITORY_RESOLVE_ISSUES](state,payload) {
-        state[payload.issueType][payload.state] = Object.assign({},state[payload.issueType][payload.state],payload)
-        if(!payload.changePage) return
-        if(payload.forward) {
-            state[payload.issueType][payload.state].currentPage += 1
-        } else {
-            state[payload.issueType][payload.state].currentPage += -1
-        }
+        state[payload.issueType][payload.meta].data = payload.data
+        state[payload.issueType][payload.meta].totalCount = payload.totalCount
+        state[payload.issueType][payload.meta].pageInfo = payload.pageInfo
+    },
+
+    [MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA] (state,payload) {
+        state[payload.issueType][payload.meta].data.forEach((item,index) => {
+            Vue.set(state[payload.issueType][payload.meta].data,index,Object.assign({},item,{
+                ...payload.data[index]
+            }))
+        })
     },
 
     [MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST](state,payload) {
@@ -106,8 +112,24 @@ export default {
 
     
     [MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB] (state,payload) {
-        state.code.codeFile.fileDetail.data = payload.data
+        payload = {
+            meta: 'text',
+            ...payload
+        }
+        switch(payload.meta){
+            case 'text':
+                state.code.codeFile.fileDetail.data = payload.data
+                break
+            case 'html':
+                state.code.codeFile.fileDetail.html = payload.data
+                break
+            case 'binary':
+                state.code.codeFile.fileDetail.raw = payload.data
+                break
+        }
     },
+
+
 
     [MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT] (state,payload) {
         state.code.codeFile.fileDetail.lastCommit.data = payload.data
@@ -152,7 +174,10 @@ export default {
             state.code.codeFile.loadingUpdatedAtOfContents = payload.loading
         }
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUES) {
-            state[payload.meta.issueType][payload.meta.state].loading = payload.loading
+            state[payload.meta.issueType][payload.meta.meta].loading = payload.loading
+        }
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA) {
+            state[payload.meta.issueType][payload.meta.meta].loadingAdditionalData = payload.loading
         }
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_CONTENTS_TREE) {
             state.code.codeFile.loading = payload.loading

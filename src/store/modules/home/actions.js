@@ -1,33 +1,20 @@
-import {commitTriggerLoadingMutation, handleException} from "../util";
+import {commitTriggerLoadingMutation, handleException, cancelAndUpdateAxiosCancelTokenSource} from "../util";
 import {authRequiredGet, authRequiredGitHubGraphqlApiQuery, commonGet} from "../network";
 import {
     ACTION_HOME_REQUEST_DASHBOARD_DATA,
-    ACTION_HOME_REQUEST_ISSUES,
-    ACTION_HOME_REQUEST_NOTIFICATIONS_DATA
+    ACTION_HOME_REQUEST_NOTIFICATIONS_DATA,
 } from "./actionTypes";
 import {
     MUTATION_HOME_RESOLVE_DASHBOARD_DATA,
-    MUTATION_HOME_RESOLVE_ISSUES,
     MUTATION_HOME_RESOLVE_NOTIFICATIONS_DATA,
 } from "./mutationTypes";
 import {
     GRAPHQL_DASHBOARD,
-    GRAPHQL_VIEWER_ISSUES_ASSIGNED,
-    GRAPHQL_VIEWER_ISSUES_CREATED,
-    GRAPHQL_VIEWER_ISSUES_MENTIONED,
-    GRAPHQL_VIEWER_PR_ASSIGNED,
-    GRAPHQL_VIEWER_PR_MENTIONED,
-    GRAPHQL_VIEWER_PULL_REQUEST_CREATED,
-    GRAPHQL_VIEWER_ISSUES
 } from "./graphql";
 import {
-    API_OAUTH2_USER_INFO,
     API_USER_EVENTS,
     API_USER_NOTIFICATIONS,
-    API_USER_ORG_EVENTS,
-    API_USER_RECEIVED_EVENTS
 } from "../api";
-
 
 export const actions = {
     async [ACTION_HOME_REQUEST_NOTIFICATIONS_DATA] (context,payload) {
@@ -80,7 +67,86 @@ export const actions = {
         }
     },
 
-    async [ACTION_HOME_REQUEST_ISSUES] (context,payload) {
+    /* async [ACTION_HOME_REQUEST_ISSUES] (context,payload) {
+        payload = {
+            changePage: false,
+            forward: true,
+            issueType: "issue",
+            ...payload
+        }
+        try{
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_ISSUES,true,payload)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_HOME_REQUEST_ISSUES)
+            const perPage = context.rootState.home[`${payload.issueType}s`].perPage
+            const pageInfo = context.rootState.home[`${payload.issueType}s`].pageInfo
+           
+            let url
+            if(payload.changePage) {
+                if(payload.forward) {
+                    url = pageInfo.next.url
+                } else {
+                    url = pageInfo.prev.url
+                }
+            }else{
+                url = API_SEARCH(
+                    'issues',
+                    {
+                        q: payload.q,
+                        per_page: perPage
+                    }
+                )
+            }
+
+            const res = await authRequiredGet(url,{cancelToken})
+            let _pageInfo = parse(res.headers.link)
+            
+            context.commit({
+                type: MUTATION_HOME_RESOLVE_ISSUES,
+                totalCount: res.data.total_count,
+                data: res.data.items,
+                pageInfo: _pageInfo,
+                ...payload,
+            })
+
+            context.dispatch({
+                ...payload,
+                type: ACTION_HOME_REQUEST_ISSUES_ADDITIONAL_DATA,
+                issues: res.data.items
+            })
+
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_ISSUES,false,payload)
+        }catch (e) {
+            handleException(e)
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_ISSUES,false,payload)
+        }
+    },
+
+    async [ACTION_HOME_REQUEST_ISSUES_ADDITIONAL_DATA] (context,payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_ISSUES_ADDITIONAL_DATA,true,payload)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_HOME_REQUEST_ISSUES_ADDITIONAL_DATA)
+            
+            let graphql = GRAPHQL_HOME
+            
+            context.commit({
+                type: MUTATION_HOME_RESOLVE_ISSUES,
+                totalCount: res.data.total_count,
+                data: res.data.items,
+                pageInfo: _pageInfo,
+                ...payload,
+            })
+
+           
+
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_ISSUES_ADDITIONAL_DATA,false,payload)
+        }catch (e) {
+            handleException(e)
+            commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_ISSUES_ADDITIONAL_DATA,false,payload)
+        }
+    }, */
+
+    //deprecated
+  /*   async [ACTION_HOME_REQUEST_ISSUES] (context,payload) {
         payload = {
             changePage: false,
             forward: true,
@@ -123,7 +189,7 @@ export const actions = {
             commitTriggerLoadingMutation(context,ACTION_HOME_REQUEST_ISSUES,false,{issueType: payload.issueType,meta:payload.meta})
         }
     }
-
+ */
 }
 
 

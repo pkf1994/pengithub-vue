@@ -14,7 +14,10 @@
         <FilePath class="file-path text-normal my-2 flex-auto text-bold">
             <router-link :to="`/${owner}/${repo}`">{{repo}}</router-link>&nbsp;/<Breadcrumb :customFragment="[{index:2,fragment:'tree'}]" :spaceArround="true" :startIndex="4"/>
         </FilePath>
+        
+        <ContributionMessage></ContributionMessage> 
 
+        <Content></Content>
     </Container>
 </template>
 
@@ -22,12 +25,12 @@
     import styled from 'vue-styled-components'
     import {Breadcrumb} from '../../../../../components'
     import ClipboardJS from 'clipboard'
+    import {ContributionMessage,Content} from './components'
     import {ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB} from '../../../../../store/modules/repository/actionTypes'
     import {mapActions,mapState} from 'vuex'
     export default {
         inject: ['owner','repo'],
         created() {
-            console.log(this.$route)
             this.action_getBlob({
                 owner: this.owner,
                 repo: this.repo,
@@ -56,6 +59,7 @@
         },
         components: {
             Breadcrumb,
+            ContributionMessage,Content,
             Container: styled.div``,
             RowOne: styled.div``,
             CopyPath: styled.div``,
