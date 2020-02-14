@@ -1,5 +1,24 @@
 <template>
     <Container class="flex-grow-1 flex-column">
+
+        <SubNav class="px-3 pt-4 pb-1 flex flex-justify-between">
+            <nav class="flex">
+                <router-link class="subnav-item" to="/">
+                    <svg class="octicon octicon-tag" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
+                    Labels
+                </router-link>
+                <router-link class="subnav-item" to="/">
+                    <svg class="octicon octicon-milestone" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2H6V0h2v2zm4 5H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h10l2 2-2 2zM8 4H6v2h2V4zM6 16h2V8H6v8z"></path></svg>
+                    Milestones
+                </router-link>
+            </nav> 
+
+            <router-link :to="`/${owner}/${repo}/issues/new`" class="btn btn-primary">
+                New
+            </router-link>  
+        </SubNav>
+        
+
         <IssuesPageTemplate :data="data" 
                         :type="type"
                         v-model="searchQuery"
@@ -11,13 +30,19 @@
                         :query="query"
                         :loadingAdditionalData="loadingAdditionalData">
             <template v-slot:searchInput>
-                <IconSearchInput v-model="searchQuery" 
+                <ButtonLeftSearchInput v-model="searchQuery" 
                                 :search="search" 
-                                placeholder="Search all issues"/>
+                                :clickButtonHandler="() => triggerModel('filter')"
+                                placeholder="Search all issues">
+                                Filters
+                                <span class="dropdown-caret"></span>
+                </ButtonLeftSearchInput>
             </template>
 
             <template v-slot:entriesFilterRow>
-                    <EntriesFilterItem class="px-3" @click="() => triggerModel('author')">Author</EntriesFilterItem>
+                    <EntriesFilterItem class="px-3" @click="() => triggerModel('author')">
+                            Author
+                    </EntriesFilterItem>
                     <EntriesFilterItem class="px-3" @click="() => triggerModel('label')">Label</EntriesFilterItem>
                     <EntriesFilterItem class="px-3" @click="() => triggerModel('assignee')">Assignee</EntriesFilterItem>
                     <EntriesFilterItem class="px-3" @click="() => triggerModel('sort')">Sort</EntriesFilterItem>
@@ -25,7 +50,7 @@
 
             <SimplePagination   v-if="pageInfo && (pageInfo.next || pageInfo.prev)"   
                                 :pageInfo="pageInfo" 
-                                scrollElSelector="fix-full-scrollable"
+                                scrollElSelector=".fix-full-scrollable"
                                 :dataGetter="paginationDataGetter"></SimplePagination>
 
         </IssuesPageTemplate>
@@ -54,7 +79,7 @@
             </router-link> 
         </Modal>
 
-         <Modal title="Filter by label" ref="labelModal" :modalStyle="{height:'80vh'}">
+        <Modal title="Filter by label" ref="labelModal" :modalStyle="{height:'80vh'}">
             <div v-if="loadingLabels" class="flex-row-center height-full">
                 <LoadingIconEx></LoadingIconEx>
             </div>
@@ -76,19 +101,14 @@
             <transition-group name="slide-up" appear>
                 <router-link v-for="item in labels" class="d-block" :key="item.name" :to='item.routerLink'>
                     <SelectMenuItem :selected="query.indexOf(item.queryFragment) > -1"  @click.native="closeModal">
-                        <div class="avatar mr-2 label-badge" :style="{background:`#${item.color}`}"/>
-                        <span>{{item.name}}</span>    
+                        <LabelBadge class="avatar mr-2 label-badge flex-shrink-0" :style="{background:`#${item.color}`}" />
+                        <LabelContent style="min-width:0">
+                            <LabelName class="text-bold">{{item.name}}</LabelName>    
+                            <LabelDescription v-if="item.description && item.description !== ''" class="label-description">{{item.description}}</LabelDescription>    
+                        </LabelContent>
                     </SelectMenuItem>
                 </router-link> 
             </transition-group>
-            
-            <router-link  @click.native="closeModal" 
-                            v-if="assigneeModalSearchQuery !== ''" 
-                            class="d-block p-3 text-gray-light bg-white" 
-                            :to='authorModalSearchRouterLink'>
-                <div class="text-bold f5">assginee:{{authorModalSearchQuery}}</div>    
-                <div>Filter by this user</div>    
-            </router-link> 
         </Modal>
 
         <Modal title="Filter by who's assigned" ref="assigneeModal" :modalStyle="{height:'80vh'}">
@@ -146,6 +166,24 @@
             </Reactions>
         </Modal>
 
+        <Modal title="Filter issues" ref="filterModal">
+            <router-link    v-for="item in filterModalRouterLink" 
+                            class="p-3 text-gray-light d-block SelectMenu-item"
+                            :key="item.label" 
+                            :to='item.routerLink' 
+                            @click.native="closeModal">
+                {{item.label}}
+            </router-link> 
+            <a href="https://help.github.com/en/github/searching-for-information-on-github/searching-issues-and-pull-requests"> 
+                <SelectMenuItem>
+                    <template v-slot:icon>
+                        <svg class="octicon octicon-link-external mr-2" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M11 10h1v3c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h3v1H1v10h10v-3zM6 2l2.25 2.25L5 7.5 6.5 9l3.25-3.25L12 8V2H6z"></path></svg>
+                    </template>
+                    <strong>View advanced search syntax</strong>   
+                </SelectMenuItem>
+            </a> 
+        </Modal>
+
     </Container>
 </template>
 
@@ -156,6 +194,7 @@
         SelectMenuItem,
         SimpleSearchInput,
         Modal,
+        ButtonLeftSearchInput,
         LoadingIconEx} from '../../../components'
     import {mapState, mapActions} from 'vuex'
     import { 
@@ -247,6 +286,30 @@
                     })
                 }
                 return labels
+            },
+            filterModalRouterLink() {
+                return [
+                    {
+                        label: 'Open issues and pull requests',
+                        routerLink: `/${this.owner}/${this.repo}/issues?q=repo:${this.owner}/${this.repo} is:open`
+                    },
+                    {
+                        label: 'Your issues',
+                        routerLink: `/${this.owner}/${this.repo}/issues?q=repo:${this.owner}/${this.repo} is:open is:issue author:${this.login}`
+                    },
+                    {
+                        label: 'Your pull requests',
+                        routerLink: `/${this.owner}/${this.repo}/issues?q=repo:${this.owner}/${this.repo} is:open is:pr author:${this.login}`
+                    },
+                    {
+                        label: 'Everything assigned to you',
+                        routerLink: `/${this.owner}/${this.repo}/issues?q=repo:${this.owner}/${this.repo} is:open assignee:${this.login}`
+                    },
+                    {
+                        label: 'Everything mentioned to you',
+                        routerLink: `/${this.owner}/${this.repo}/issues?q=repo:${this.owner}/${this.repo} is:open mentions:${this.login}`
+                    }
+                ]
             },
             countInfo() {
                 let currentIssueState = ''
@@ -408,6 +471,9 @@
                             })
                         }
                         break
+                    case 'filter':
+                        this.$refs.filterModal.show = true
+                        break
                 }
             },
             async paginationDataGetter(payload) {
@@ -423,19 +489,26 @@
                 this.$refs.sortModal.show = false
                 this.$refs.assigneeModal.show = false
                 this.$refs.labelModal.show = false
+                this.$refs.filterModal.show = false
             }
         },
         components: {
             SelectMenuItem,
             Modal,
             LoadingIconEx,
+            ButtonLeftSearchInput,
             SimpleSearchInput,
+            SubNav: styled.div``,
             Container: styled.div``,
             TopTabContainer: styled.div``,
             EntriesFilterItem: styled.div``,
             ModalContent: styled.div``,
             Reactions: styled.div``,
             AuthorItem: styled.div``,
+            LabelBadge: styled.div``,
+            LabelContent: styled.div``,
+            LabelName: styled.div``,
+            LabelDescription: styled.div``,
         }
     }
 </script>
@@ -492,5 +565,10 @@
     vertical-align: middle;
     border: 1px solid rgba(27,31,35,.15);
     border-radius: 3px;
+}
+.label-description{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>

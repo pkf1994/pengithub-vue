@@ -57,9 +57,15 @@ export default {
         }
     },
     pr: {
-        avaliableAuthors: {
-            data: [],
-            loading: false
+        associatedUsers: {
+            author: {
+                data: [],
+                loading: false
+            },
+            assignee: {
+                data: [],
+                loading: false
+            }
         }
     },
     pulse: {

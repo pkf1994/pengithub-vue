@@ -7,3 +7,17 @@
     background-color: #f6f8fa;
     border-bottom: 1px solid #eaecef;
 }
+
+.SelectMenu-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 16px;
+    overflow: hidden;
+    color: #586069;
+    text-align: left;
+    cursor: pointer;
+    background-color: #fff;
+    border: 0;
+    border-bottom: 1px solid #eaecef;
+}

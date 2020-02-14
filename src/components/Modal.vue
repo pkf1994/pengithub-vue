@@ -50,6 +50,7 @@
             Container: styled.div``,
             Cover: styled.div``,
             Title: styled.div``,
+            Main: styled.div``,
             Content: styled.div``
         }
     }
@@ -85,6 +86,14 @@
         max-width: 90vw;
         border-radius: 6px;
         background-color: #f6f8fa;
+        .Box-body{
+            border-radius: 6px;
+        }
+    }
+
+    .Box-header{
+         border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
     }
 
     .modal-basic-enter-active,

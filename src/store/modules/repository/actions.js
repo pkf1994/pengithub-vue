@@ -652,8 +652,6 @@ export default {
             let url = API_REPO_LABELS(payload.owner,payload.repo)
             let res = await authRequiredGet(url,{cancelToken})
 
-            console.log(res.data)
-            
             context.commit({
                 ...payload,
                 type: MUTATION_REPOSITORY_RESOLVE_LABELS,

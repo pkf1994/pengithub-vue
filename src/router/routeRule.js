@@ -28,9 +28,9 @@ const RepositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
 const RepositoryIssuesClosed = () => import('../pages/Repository/Issues/Closed.vue')
 const RepositoryIssuesYours = () => import('../pages/Repository/Issues/Yours.vue') */
 const RepositoryPullRequests = () => import('../pages/Repository/PullRequests/PullRequests.vue')
-const RepositoryPullRequestsOpen = () => import('../pages/Repository/PullRequests/Open.vue')
+/* const RepositoryPullRequestsOpen = () => import('../pages/Repository/PullRequests/Open.vue')
 const RepositoryPullRequestsClosed = () => import('../pages/Repository/PullRequests/Closed.vue')
-const RepositoryPullRequestsYours = () => import('../pages/Repository/PullRequests/Yours.vue')
+const RepositoryPullRequestsYours = () => import('../pages/Repository/PullRequests/Yours.vue') */
 const RepositoryProjects = () => import('../pages/Repository/Projects/Projects.vue')
 const RepositoryPulse = () => import('../pages/Repository/Pulse/Pulse.vue')
 const RepositoryCommunity = () => import('../pages/Repository/Community/Community.vue')
@@ -172,7 +172,7 @@ export default [
                 ]
             },
             {
-                path: 'issues/:meta?',
+                path: 'issues',
                 component: RepositoryIssues,
                /*  children: [
                     {
@@ -191,8 +191,8 @@ export default [
             },
             {
                 path: 'pulls',
-                component: RepositoryPullRequests,
-                children: [
+                component: RepositoryPullRequests
+                /* children: [
                     {
                         path: '/',
                         component: RepositoryPullRequestsOpen
@@ -205,7 +205,7 @@ export default [
                         path: 'yours',
                         component: RepositoryPullRequestsYours
                     },
-                ]
+                ] */
             },
             {
                 path: 'projects',

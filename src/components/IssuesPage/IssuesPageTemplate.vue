@@ -6,8 +6,8 @@
             </slot>    
         </SearchInput>
 
-        <AnimatedHeightWrapper>
-            <QueryAndFilterReset style="padding-bottom: 20px" v-if="canBeReset" class="mx-3">
+        <AnimatedHeightWrapper :stretch="canBeReset">
+            <QueryAndFilterReset style="padding-bottom: 20px" class="mx-3">
                 <router-link :to="resetRouterLink" class="reset-query">
                     <svg class="reset-query-icon v-align-text-bottom" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
                     Clear current search query, filters, and sorts
@@ -16,8 +16,8 @@
         </AnimatedHeightWrapper>
         
 
-        <AnimatedHeightWrapper>
-            <Statistic class="px-3 pb-3 statistic" v-if="countInfo.open && !loadingCountOfIssueByState">
+        <AnimatedHeightWrapper :stretch="countInfo.open && !loadingCountOfIssueByState">
+            <Statistic class="px-3 pb-3 statistic">
                 <router-link :to="countInfo.toOpen" active-class="no-active-style" :class="{active:countInfo.currentIssueState === 'open'}">
                     <svg class="octicon octicon-issue-opened" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
                     &nbsp;{{countInfo.open && countInfo.open.issueCount}} Open

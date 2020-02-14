@@ -6,7 +6,7 @@
                     width="20"
                     height="20">
             </AnimatedWidthWrapper>
-            <Main style="width:calc(100% - 8px);flex-shrink:100000">
+            <Main style="min-width:0">
                 <FullName class="text-small text-bold">
                     <router-link to="/search" class="link-gray">{{code.repository.full_name}}</router-link>
                 </FullName>

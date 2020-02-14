@@ -1,3 +1,4 @@
 import IconSearchInput from './IconSearchInput.vue'
 import SimpleSearchInput from './SimpleSearchInput.vue'
-export {IconSearchInput,SimpleSearchInput}
+import ButtonLeftSearchInput from './ButtonLeftSearchInput.vue'
+export {IconSearchInput,SimpleSearchInput,ButtonLeftSearchInput}

@@ -49,10 +49,6 @@
                 type: Object,
                 required: true
             },
-            type: {
-                type: String,
-                required: true
-            },
             showRepoFullName: {
                 type: Boolean,
                 default: false
@@ -82,6 +78,10 @@
             },
             repoFullName() {
                 return this.issue.repository_url.replace('https://api.github.com/repos/','');
+            },
+            type() {
+                if(this.issue.pull_request) return 'pr'
+                else return 'issue'
             }
         },
         mounted() {
@@ -161,5 +161,9 @@
             border-radius: 2px;
             box-shadow: inset 0 -1px 0 rgba(27,31,35,.12);
         }
+    }
+
+    svg{
+        vertical-align: text-bottom;
     }
 </style>
