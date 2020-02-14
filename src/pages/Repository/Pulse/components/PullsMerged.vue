@@ -22,14 +22,14 @@
                     {{dateFormat(item.closedAt)}}
                 </Byline>
             </router-link> -->
-            <IssueListItem
+            <IssueItem
                 v-for="item in data" 
                 :key="item.id"
                 :issue="item"
                 :showLabels="false"
                 :showRepoFullName="false"
                 type="pullRequest"
-            ></IssueListItem>
+            ></IssueItem>
         </Content>
         <template v-slot:footer>
             <LoadMore v-if="hasNextPage" @click="() => getMoreData(loadingMore)" :class="{'text-gray':loadingMore}" class="text-center p-3 text-blue">
@@ -41,7 +41,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper,IssueListItem} from '../../../../components'
+    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../components'
+    import {IssueItem} from '../../components'
     import {WithRandomMetaMixin} from '../../../../mixins'
     import {util_dateFormat} from '../../../../util'
     import {mapState,mapActions} from 'vuex'
@@ -78,7 +79,8 @@
         components: {
             ComplexBubble,
             AnimatedHeightWrapper,
-            IssueListItem,
+            IssueItem,
+            IssueItem,
             Title: styled.div``,
             Content: styled.div``,
             LoadMore: styled.div``,

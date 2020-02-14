@@ -46,7 +46,6 @@
     import styled from 'vue-styled-components'
     import {
         PageTopTab,
-        SearchInput,
         CommonLoading,
         CommonLoadingWrapper,
         AnimatedHeightWrapper,
@@ -98,7 +97,6 @@
         },
         components: {
             PageTopTab,
-            SearchInput,
             RepositoryListItem,
             CommonLoading,
             CommonLoadingWrapper,

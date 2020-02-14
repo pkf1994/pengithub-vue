@@ -52,13 +52,13 @@
         <Releases v-if="data.releases && data.releases.nodes.length > 0" :loading="loading" :releases="data.releases"/>
 
         <Issues :loading="loading" 
-                        :issues="data.issues && data.issues.nodes" 
-                        :totalCount="data.issues && data.issues.totalCount"/>      
+                :issues="data.issues && data.issues.nodes" 
+                :totalCount="data.issues && data.issues.totalCount"/>      
  
         <PullRequests 
-            :loading="loading" 
-            :pullRequests="data.pullRequests && data.pullRequests.nodes" 
-            :totalCount="data.pullRequests && data.pullRequests.totalCount"/>
+                :loading="loading" 
+                :pullRequests="data.pullRequests && data.pullRequests.nodes" 
+                :totalCount="data.pullRequests && data.pullRequests.totalCount"/>
 
         <Notifications :loading="loading" :viewerSubscription="data.viewerSubscription"/>
 

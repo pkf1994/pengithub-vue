@@ -33,6 +33,10 @@ export const API_SEARCH = (type,param) => {
     return `${GITHUB_REST_API_BASE}/search/${type}?${query}`
 }
 
+export const API_REPO = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}`
+
+export const API_REPO_LABELS = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/labels`
+
 export const API_README = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/readme`
 
 export const API_CONTENTS = (owner,repo,path,branch) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/contents/${path}${branch?'?ref='+branch:''}`
@@ -44,4 +48,8 @@ export const API_REPOSITORY_COMMUNITY = (owner,repo) => `${GITHUB_REST_API_BASE}
 export const API_REPOSITORY_COMMITS = (owner,repo,params) => {
     let query = util_queryParse.querify(params)
     return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/commits?${query}`
+}
+
+export const API_REPOSITORY_CONTRIBUTORS = (owner,repo) => {
+    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/contributors`
 }

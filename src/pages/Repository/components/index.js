@@ -1,2 +1,3 @@
 import RepositoryTabViewMixin from './RepositoryTabViewMixin.vue'
-export {RepositoryTabViewMixin}
+import IssueItem from './IssueItem.vue'
+export {RepositoryTabViewMixin,IssueItem}

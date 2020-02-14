@@ -91,13 +91,16 @@ export const actions = {
             commitTriggerLoadingMutation(context,ACTION_ISSUES_REQUEST_ISSUES_ADDITIONAL_DATA,true,payload)
             const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_ISSUES_REQUEST_ISSUES_ADDITIONAL_DATA)
             
-            let graphql = GRAPHQL_GET_ISSUES_BY_REPO_AND_NUMBERS(payload)
+            let graphql = GRAPHQL_GET_ISSUES_BY_REPO_AND_NUMBERS({
+                ...payload,
+                issueType: payload.issueType === 'pr' ? 'pullRequest' : payload.issueType
+            })
         
             const res = await authRequiredGitHubGraphqlApiQuery(graphql,{cancelToken})
 
             let issueArr = []
             for(let key in res.data.data){
-                issueArr.push(res.data.data[key].issue)
+                issueArr.push(res.data.data[key][payload.issueType === 'pr' ? 'pullRequest' : payload.issueType])
             }
             context.commit({
                 data: issueArr,

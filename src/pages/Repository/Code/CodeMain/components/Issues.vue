@@ -11,13 +11,13 @@
         </template>
 
         <Content class="bubble-content p-0">
-            <IssueListItem v-for="item in issues" 
+            <IssueItem v-for="item in issues" 
                         :key="item.id" 
                         :issue="item" 
                         type="issue" 
                         :showRepoFullName="false">
 
-            </IssueListItem>
+            </IssueItem>
 
 
         </Content>
@@ -31,7 +31,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper,IssueListItem} from '../../../../../components'
+    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../../components'
+    import {IssueItem} from '../../../components'
     import {util_dateFormat,util_color} from '../../../../../util'
     export default {
         props: {
@@ -61,7 +62,7 @@
         },
         components: {
             ComplexBubble,
-            IssueListItem,
+            IssueItem,
             AnimatedHeightWrapper,
             Title: styled.div``,
             Content: styled.div``,

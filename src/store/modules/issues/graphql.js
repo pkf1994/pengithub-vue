@@ -25,12 +25,6 @@ export const GRAPHQL_GET_ISSUES_BY_REPO_AND_NUMBERS = (payload) => {
               }
             }
           }
-          labels(first: 20) {
-            nodes {
-              color
-              name
-            }
-          }
         }
       }
     `

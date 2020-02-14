@@ -12,11 +12,11 @@
             <Main class="ml-1  flex-grow-1">
                 <NameLoginStarBtn class="f4 text-normal flex">
                     <NameLogin>
-                        <AnimatedWidthWrapper class="v-align-bottom">
+                        <AnimatedWidthWrapper class=" v-align-text-top">
                             <router-link to="/search"  
                                         v-if="user.name && user.name.trim() !== ''" 
                                         :meta="randomMeta" 
-                                        class="mr-1 no-wrap">{{user.name}}</router-link>&nbsp;
+                                        class="mr-1 no-wrap">{{user.name}}</router-link>
                         </AnimatedWidthWrapper>
                         <router-link to="/search" :meta="randomMeta" class="text-gray" >{{user.login}}</router-link>
                     </NameLogin>

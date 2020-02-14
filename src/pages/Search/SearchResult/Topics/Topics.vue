@@ -38,8 +38,7 @@
                           v-if="pageInfo.next"
                           scrollElSelector="#app-container"
                           :scrollTargetSelector="'#search-result-title-' + searchType"
-                          :prev="prev"
-                          :next="next"
+                          :dataGetter="paginationDataGetter"
                           :pageInfo="pageInfo"/>
     </SearchResultTemplate>
 

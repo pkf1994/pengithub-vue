@@ -5,6 +5,7 @@ export const GRAPHQL_REPOSITORY_CODE_BASIC_INFO = (owner,repo) => {
     {
         repository(name: "${repo}", owner: "${owner}") {
           homepageUrl
+          id
           stargazers {
             totalCount
           }
@@ -389,4 +390,68 @@ export const GRAPHQL_USER = userLogins => {
     `
   })
   return `{${graphQL}}`
+}
+
+export const GRAPHQL_SEARCH_FOR_ISSUES_COUNT_BY_ASSOCIATE_USER = (payload) => {
+  let graphql = ''
+  payload.users.forEach((item,index) => {
+    graphql = `
+      ${graphql}
+      issueCount${index}: search(query: "${payload.query} ${payload.meta}:${item.login}", type: ISSUE) {
+        issueCount
+      }
+    `
+  })
+
+  return `
+    {
+      ${graphql}
+    }
+  `
+}
+
+export const GRAPHQL_REPOSITORY_GET_USER_NAME_BY_LOGIN = (payload) => {
+  let graphql = ''
+  payload.users.forEach((item,index) => {
+    graphql = `
+      ${graphql}
+      user${index}: user(login:"${item.login}") {
+        login
+        name
+      }
+    `
+  })
+
+  return `
+    {
+      ${graphql}
+    }
+  `
+}
+
+export const GRAPHQL_REPOSITORY_GET_ISSUES_FOR_LABELS = (payload) => {
+  return `
+  {
+    search(query: "${payload.query}",first:100, type: ISSUE${payload.after ? ',after:' + payload.after : ''}) {
+      issueCount
+      nodes {
+        ... on Issue {
+          labels(first: 20) {
+            nodes {
+              name
+              id
+              color
+            }
+          }
+        }
+      }
+      pageInfo {
+        hasPreviousPage
+        hasNextPage
+        endCursor
+        startCursor
+      }
+    }
+  }
+  `
 }

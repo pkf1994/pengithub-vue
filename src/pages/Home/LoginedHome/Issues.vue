@@ -12,6 +12,7 @@
                         :loadingCountOfIssueByState="loadingCountOfIssueByState" 
                         :countInfo="countInfo"
                         :query="query"
+                        :issueItemShowRepoFullName="true"
                         :loadingAdditionalData="loadingAdditionalData">
             <template v-slot:searchInput>
                 <IconSearchInput v-model="searchQuery" 
@@ -27,7 +28,8 @@
 
             <SimplePagination   v-if="pageInfo && (pageInfo.next || pageInfo.prev)"   
                                 :pageInfo="pageInfo" 
-                                :dataGetter="(payload) => {action_getData({...payload,issueType:type,q:query,belongTo:belongTo})}"></SimplePagination>
+                                scrollElSelector="fix-full-scrollable"
+                                :dataGetter="paginationDataGetter"></SimplePagination>
 
             
         </IssuesPageTemplate>
@@ -72,9 +74,9 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {IssuesPageMixin,SelectMenuItem,Modal} from '../../../../components'
+    import {IssuesPageMixin,SelectMenuItem,Modal} from '../../../components'
     import {mapState, mapActions} from 'vuex'
-    import { ACTION_ISSUES_REQUEST_ISSUES } from '../../../../store/modules/issues/actionTypes'
+    import { ACTION_ISSUES_REQUEST_ISSUES } from '../../../store/modules/issues/actionTypes'
     export default {
         mixins: [IssuesPageMixin],
         data() {
@@ -226,6 +228,14 @@
                         this.$refs.sortModal.show = true
                         break
                 }
+            },
+            async paginationDataGetter(payload) {
+                await this.action_getData({
+                    ...payload,
+                    issueType:this.type,
+                    q:this.query,
+                    belongTo:this.belongTo
+                })
             }
         },
         components: {

@@ -22,7 +22,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {SearchInput, ComplexTopTab} from '../../../components'
+    import {ComplexTopTab} from '../../../components'
     import {WithSearchInputMixin} from '../../../mixins'
     import {util_numberFormat} from '../../../util'
     import {mapState} from "vuex";
@@ -83,7 +83,6 @@
             },
         },
         components: {
-            SearchInput,
             ComplexTopTab,
             Container: styled.div``,
             SearchInputWrapper: styled.div``

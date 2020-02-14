@@ -23,7 +23,7 @@ export const DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE = (payload) => {
 
 export const DEFAULT_REST_PAGINATIONAL_DATA_STATE = (payload) => {
     payload = {
-        perPage: 15,
+        perPage: 10,
         ...payload
     }
     return {

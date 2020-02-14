@@ -2,7 +2,7 @@ import {LogoHeader,RepoHeader,LogoutedHeader} from './Header'
 import SummaryAndDetail from './SummaryAndDetail.vue'
 import Button from './Button'
 import {HeaderDetachTopTab,PageTopTab,ComplexTopTab} from './TopTab'
-import {IconSearchInput} from './SearchInput'
+import {IconSearchInput,SimpleSearchInput} from './SearchInput'
 import {SimpleFooter,LabelsFooter} from './Footer'
 import {SimpleBubble,ComplexBubble} from './Bubble'
 import Breadcrumb from './Breadcrumb.vue'
@@ -25,6 +25,7 @@ export {
     PageTopTab,
     ComplexTopTab,
     IconSearchInput,
+    SimpleSearchInput,
     CommonLoading,
     CommonLoadingWrapper,
     SimpleFooter,

@@ -129,39 +129,11 @@
                 }
               
             },
-            async next(){
-                try{
-                    this.errorData.errorOccurred = false
-                    await this.action_search_requestSearchResult({
-                        searchType: this.searchType,
-                        changePage:true,
-                        forward:true
-                    })
-                }catch(e){
-                    this.errorData = {
-                        errorOccurred: true,
-                        errorMessage: e.message,
-                        reTryCallback: this.next
-                    }
-                    console.log(e)
-                }
-            },
-            async prev(){
-               try{
-                    this.errorData.errorOccurred = false
-                    await this.action_search_requestSearchResult({
-                        searchType: this.searchType,
-                        changePage:true,
-                        forward:false
-                    })
-                }catch(e){
-                    this.errorData = {
-                        errorOccurred: true,
-                        errorMessage: e.message,
-                        reTryCallback: this.prev
-                    }
-                    console.log(e)
-                }
+            async paginationDataGetter(payload) {
+                await this.action_search_requestSearchResult({
+                    ...payload,
+                    searchType: this.searchType,
+                })
             }
         },
         components: {

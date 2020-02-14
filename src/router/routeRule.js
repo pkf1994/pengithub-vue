@@ -3,11 +3,11 @@ import {SimpleFooter,LogoHeader,RepoHeader,LabelsFooter} from '../components'
 const Home = () => import('../pages/Home/Home.vue')
 const OauthRedirectPage = () => import('../pages/OauthRedirectPage/OauthRedirectPage.vue')
 const Dashboard = () => import('../pages/Home/LoginedHome/Dashboard/index.vue')
-const HomePullRequests = () => import('../pages/Home/LoginedHome/PullRequests/index.vue')
-const HomePullRequestsCreated = () => import('../pages/Home/LoginedHome/PullRequests/Created.vue')
+const HomePullRequests = () => import('../pages/Home/LoginedHome/PullRequests.vue')
+/* const HomePullRequestsCreated = () => import('../pages/Home/LoginedHome/PullRequests/Created.vue')
 const HomePullRequestsAssigned = () => import('../pages/Home/LoginedHome/PullRequests/Assigned.vue')
-const HomePullRequestsMentioned = () => import('../pages/Home/LoginedHome/PullRequests/Mentioned.vue')
-const HomeIssues = () => import('../pages/Home/LoginedHome/Issues/Issues.vue')
+const HomePullRequestsMentioned = () => import('../pages/Home/LoginedHome/PullRequests/Mentioned.vue') */
+const HomeIssues = () => import('../pages/Home/LoginedHome/Issues.vue')
 /* const HomeIssuesCreated = () => import('../pages/Home/LoginedHome/Issues/Created.vue')
 const HomeIssuesAssigned = () => import('../pages/Home/LoginedHome/Issues/Assigned.vue')
 const HomeIssuesMentioned = () => import('../pages/Home/LoginedHome/Issues/Mentioned.vue') */
@@ -24,9 +24,9 @@ const RepositoryCodeMain = () => import('../pages/Repository/Code/CodeMain/CodeM
 const RepositoryCodeFileBrowser = () => import('../pages/Repository/Code/CodeFile/FileBrowser/FileBrowser.vue')
 const RepositoryCodeFileDetail = () => import('../pages/Repository/Code/CodeFile/FileDetail/FileDetail.vue')
 const RepositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
-const RepositoryIssuesOpen = () => import('../pages/Repository/Issues/Open.vue')
+/* const RepositoryIssuesOpen = () => import('../pages/Repository/Issues/Open.vue')
 const RepositoryIssuesClosed = () => import('../pages/Repository/Issues/Closed.vue')
-const RepositoryIssuesYours = () => import('../pages/Repository/Issues/Yours.vue')
+const RepositoryIssuesYours = () => import('../pages/Repository/Issues/Yours.vue') */
 const RepositoryPullRequests = () => import('../pages/Repository/PullRequests/PullRequests.vue')
 const RepositoryPullRequestsOpen = () => import('../pages/Repository/PullRequests/Open.vue')
 const RepositoryPullRequestsClosed = () => import('../pages/Repository/PullRequests/Closed.vue')
@@ -51,9 +51,9 @@ export default [
         },
         children: [
             {
-                path: 'pulls',
+                path: 'pulls/:meta?',
                 component: HomePullRequests,
-                children: [
+                /* children: [
                     {
                         path: '/',
                         component: HomePullRequestsCreated
@@ -66,7 +66,7 @@ export default [
                         path: 'mentioned',
                         component: HomePullRequestsMentioned
                     }
-                ]
+                ] */
             },
             {
                 path: 'issues/:meta?',
@@ -172,9 +172,9 @@ export default [
                 ]
             },
             {
-                path: 'issues',
+                path: 'issues/:meta?',
                 component: RepositoryIssues,
-                children: [
+               /*  children: [
                     {
                         path: '/',
                         component: RepositoryIssuesOpen
@@ -187,7 +187,7 @@ export default [
                         path: 'yours',
                         component: RepositoryIssuesYours
                     },
-                ]
+                ] */
             },
             {
                 path: 'pulls',

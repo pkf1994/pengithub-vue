@@ -7,6 +7,7 @@ import util_uniqueArray from './uniqueArray'
 import util_adjustStyle from './adjustStyle'
 import util_analyseFileType from './analyseFileType'
 import util_string from './stringUtil'
+import util_throttle from './throttle'
 import './protoExtend'
 
 export {
@@ -18,4 +19,5 @@ export {
     util_uniqueArray,
     util_analyseFileType,
     util_string,
+    util_throttle,
     util_adjustStyle}

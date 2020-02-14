@@ -20,7 +20,7 @@ export default {
 
     [MUTATION_ISSUES_RESOLVE_ISSUES_ADDITIONAL_DATA](state,payload) {
         state[payload.belongTo][payload.issueType].data.forEach((item,index) => {
-            Vue.set(state[payload.belongTo][payload.issueType].data,index,Object.assign({},item,state[payload.belongTo][payload.issueType].data[index]))
+            Vue.set(state[payload.belongTo][payload.issueType].data,index,Object.assign({},item,payload.data[index]))
         })
     },
 

@@ -1,10 +1,20 @@
 <template>
-    <Container class="bg-white flex-grow-1">
+    <Container class="bg-white flex-grow-1 flex-column">
         <SearchInput class="p-3">
             <slot name="searchInput">
               
             </slot>    
         </SearchInput>
+
+        <AnimatedHeightWrapper>
+            <QueryAndFilterReset style="padding-bottom: 20px" v-if="canBeReset" class="mx-3">
+                <router-link :to="resetRouterLink" class="reset-query">
+                    <svg class="reset-query-icon v-align-text-bottom" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
+                    Clear current search query, filters, and sorts
+                </router-link>
+            </QueryAndFilterReset>
+        </AnimatedHeightWrapper>
+        
 
         <AnimatedHeightWrapper>
             <Statistic class="px-3 pb-3 statistic" v-if="countInfo.open && !loadingCountOfIssueByState">
@@ -21,27 +31,27 @@
         </AnimatedHeightWrapper>
        
 
-        <Entries>
-            <EntriesFilterRow class="entries-filter-row Box-header flex flex-justify-between">
+        <Entries class="flex-grow-1">
+            <EntriesFilterRow class="entries-filter-row Box-header mx-0 flex flex-justify-between">
                 <slot name="entriesFilterRow">
                     <EntriesFilterItem class="px-3">Visibility</EntriesFilterItem>
                     <EntriesFilterItem class="px-3">Organization</EntriesFilterItem>
                     <EntriesFilterItem class="px-3">Sort</EntriesFilterItem>
                 </slot>
             </EntriesFilterRow>
-            <EntriesContent>
+            <EntriesContent class="flex-column flex-grow-1">
                 <IssueListItem v-for="item in data" 
+                                :showRepoFullName="issueItemShowRepoFullName"
                                 :issue="item"
                                 :key="item.id" 
                                 :type="type"></IssueListItem>
+                <EmptyNotice class="empty-notice text-center relative" v-if="data.length === 0 && !loading">
+                    <svg height="40" class="octicon octicon-issue-opened blankslate-icon" viewBox="0 0 14 16" version="1.1" width="35" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
+                    <EmptyNoticeTitle>No results matched your search.</EmptyNoticeTitle>
+                    <EmptyNoticeSubTitle>You could search <router-link to="/search">all of GitHub</router-link>.</EmptyNoticeSubTitle>
+                </EmptyNotice>
             </EntriesContent>
         </Entries>
-
-        <EmptyNotice class="empty-notice text-center relative" v-if="data.length === 0 && !loading">
-            <svg height="40" class="octicon octicon-issue-opened blankslate-icon" viewBox="0 0 14 16" version="1.1" width="35" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
-            <EmptyNoticeTitle>No results matched your search.</EmptyNoticeTitle>
-            <EmptyNoticeSubTitle>You could search <router-link to="/search">all of GitHub</router-link>.</EmptyNoticeSubTitle>
-        </EmptyNotice>
 
         <slot></slot>    
 
@@ -89,6 +99,18 @@
             query: {
                 type: String,
                 default: ''
+            },
+            issueItemShowRepoFullName: {
+                type: Boolean,
+                default: false
+            },
+            resetRouterLink: {
+                type: String,
+                default: undefined
+            },
+            baseQuery: {
+                type: String,
+                default: undefined
             }
         },
         computed: {
@@ -96,6 +118,9 @@
                 if(this.query.indexOf('is:open') > -1) return 'open'
                 if(this.query.indexOf('is:closed') > -1) return 'closed'
                 return ''
+            },
+            canBeReset() {
+                return this.resetRouterLink && this.baseQuery && this.query !== this.baseQuery
             }
         },
         components: {
@@ -113,6 +138,7 @@
             EmptyNotice: styled.div``,
             EmptyNoticeTitle: styled.h3``,
             EmptyNoticeSubTitle: styled.p``,
+            QueryAndFilterReset: styled.div``
         }
     }
 </script>
@@ -151,5 +177,21 @@
     p{
         font-size: 16px;
     }
+}
+
+.reset-query{
+    font-weight: 600;
+    color: #586069;
+}
+.reset-query-icon{
+    width: 18px;
+    height: 18px;
+    padding: 1px;
+    margin-right: 3px;
+    color: #fff;
+    text-align: center;
+    background-color: #6a737d;
+    border-radius: 3px;
+    fill: currentColor;
 }
 </style>

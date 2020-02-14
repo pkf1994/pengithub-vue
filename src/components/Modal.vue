@@ -1,18 +1,18 @@
 <template>
-    <Container class="container flex-row-center" ref="cover" @click="close" 
+    <Container class="container flex-row-center" ref="cover"
                 :style="{'pointer-events':show ? 'auto' : 'none'}">
         <transition name='fade'>
-            <Cover class="cover flex-row-center" v-show="show" ></Cover>
+            <Cover class="cover flex-row-center" v-show="show"  @click="close"></Cover>
         </transition>
         <transition name="modal-basic">
-            <Main class="main Box flex-column" v-show="show"  style="width: 640px;">
+            <Main class="main Box flex-column" v-if="show" :style="modalStyle" style="width: 640px;">
                 <Title class="p-3 Box-title Box-header">
                     <button @click="close" class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog="">
                         <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
                     </button>
                     {{title}}
                 </Title>
-                <Content class="Box-body overflow-auto markdown-body p-0">
+                <Content class="Box-body bg-white overflow-auto markdown-body p-0 flex-grow-1">
                     <slot></slot>
                 </Content>
             </Main>
@@ -22,12 +22,17 @@
 
 <script>
     import styled from 'vue-styled-components'
+    import {AnimatedHeightWrapper} from './'
     export default {
         props: {
             title: {
                 type: String,
                 default: 'Modal'
-            }
+            },
+            modalStyle: {
+                 type: Object,
+                 default: () => ({})
+            },
         },
         data() {
             return {
@@ -39,7 +44,9 @@
                 this.show = false
             }
         },
+       
         components: {
+            AnimatedHeightWrapper,
             Container: styled.div``,
             Cover: styled.div``,
             Title: styled.div``,
@@ -59,6 +66,7 @@
         display: flex;
         justify-content: center;
         align-content: center;
+        
     }
 
     .cover{
@@ -76,6 +84,7 @@
         max-height: 80vh;
         max-width: 90vw;
         border-radius: 6px;
+        background-color: #f6f8fa;
     }
 
     .modal-basic-enter-active,

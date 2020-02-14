@@ -44,15 +44,23 @@ export default {
         totalCountClosed: 0,
         ...DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE()
     },
-    issues: {
-        open: DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
-        closed: DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
-        yours: DEFAULT_REST_PAGINATIONAL_DATA_STATE()
+    issue: {
+        associatedUsers: {
+            author: {
+                data: [],
+                loading: false
+            },
+            assignee: {
+                data: [],
+                loading: false
+            }
+        }
     },
-    pullRequests: {
-        open: DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
-        closed: DEFAULT_REST_PAGINATIONAL_DATA_STATE(),
-        yours: DEFAULT_REST_PAGINATIONAL_DATA_STATE()
+    pr: {
+        avaliableAuthors: {
+            data: [],
+            loading: false
+        }
     },
     pulse: {
         codeChanges: {
@@ -84,6 +92,10 @@ export default {
     },
     community: {
         data: {},
+        loading: false
+    },
+    label: {
+        data: [],
         loading: false
     }
 }

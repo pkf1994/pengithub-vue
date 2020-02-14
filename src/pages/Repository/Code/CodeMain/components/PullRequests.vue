@@ -11,11 +11,11 @@
         </template>
 
         <Content class="bubble-content p-0">
-           <IssueListItem v-for="item in pullRequests" 
+           <IssueItem v-for="item in pullRequests" 
                     :key="item.id" 
                     :issue="item" 
                     :showRepoFullName="false"
-                        type="pullRequest"></IssueListItem>    
+                        type="pullRequest"></IssueItem>    
         </Content>
         <template v-slot:footer>
             <router-link to="/" class="d-block footer text-center">
@@ -27,7 +27,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper,IssueListItem} from '../../../../../components'
+    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../../components'
+    import {IssueItem} from '../../../components'
     import {WithRandomMetaMixin} from '../../../../../mixins'
     import {util_dateFormat,util_color,util_adjustStyle} from '../../../../../util'
     export default {
@@ -59,7 +60,7 @@
         components: {
             ComplexBubble,
             AnimatedHeightWrapper,
-            IssueListItem,
+            IssueItem,
             Title: styled.div``,
             Content: styled.div``,
             Number: styled.span``,

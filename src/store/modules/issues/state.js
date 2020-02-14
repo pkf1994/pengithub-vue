@@ -8,7 +8,17 @@ export default {
             loadingCountOfIssueByState: false,
             ...DEFAULT_REST_PAGINATIONAL_DATA_STATE()
         },
-        pullRequest:{
+        pr:{
+            loadingCountOfIssueByState: false,
+            ...DEFAULT_REST_PAGINATIONAL_DATA_STATE()
+        }
+    },
+    repository: {
+        issue:{
+            loadingCountOfIssueByState: false,
+            ...DEFAULT_REST_PAGINATIONAL_DATA_STATE()
+        },
+        pr:{
             loadingCountOfIssueByState: false,
             ...DEFAULT_REST_PAGINATIONAL_DATA_STATE()
         }

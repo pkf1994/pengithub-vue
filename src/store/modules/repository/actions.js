@@ -1,8 +1,10 @@
 import {
     ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA,
     ACTION_REPOSITORY_REQUEST_BASIC_DATA,
-    ACTION_REPOSITORY_REQUEST_ISSUES,
-    ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA,
+    /* ACTION_REPOSITORY_REQUEST_ISSUES,
+    ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA, */
+    ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS,
+    ACTION_REPOSITORY_REQUEST_LABELS,
     ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
     ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA,
     ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_REST,
@@ -23,16 +25,21 @@ import {
     GRAPHQL_REPOSITORY_COMMITS_COUNT_BY_BRANCH,
     GRAPHQL_REPOSITORY_PROJECTS,
     GRAPHQL_REPOSITORY_ISSUES,
+    GRAPHQL_REPOSITORY_GET_ISSUES_FOR_LABELS,
     GRAPHQL_USER,
     GRAPHQL_REPOSITORY_CONTENT_AND_LAST_COMMIT_AND_COMMIT_HISTORY,
     GRAPHQL_REPOSITORY_LAST_COMMITDATE_BY_PATH,
     GRAPHQL_REPOSITORY_CONTENTS,
-    GRAPHQL_REPOSITORY_ISSUES_BY_NUMBERS} from './graphql'
+    GRAPHQL_SEARCH_FOR_ISSUES_COUNT_BY_ASSOCIATE_USER,
+    GRAPHQL_REPOSITORY_ISSUES_BY_NUMBERS,
+    GRAPHQL_REPOSITORY_GET_USER_NAME_BY_LOGIN} from './graphql'
 import {
     MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO,
     MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST,
-    MUTATION_REPOSITORY_RESOLVE_ISSUES,
-    MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA,
+    /* MUTATION_REPOSITORY_RESOLVE_ISSUES,
+    MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA, */
+    MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS,
+    MUTATION_REPOSITORY_RESOLVE_LABELS,
     MUTATION_REPOSITORY_RESOLVE_PROJECTS,
     MUTATION_REPOSITORY_RESOLVE_BASIC_DATA,
     MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT,
@@ -45,7 +52,13 @@ import {
     MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT,
     MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH,
     MUTATION_REPOSITORY_RESOLVE_README_DATA} from './mutationTypes'
-import {API_README,API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST, API_SEARCH,API_REPOSITORY_COMMUNITY, API_REPOSITORY_COMMITS, API_CONTENTS} from '../api'
+import {
+    API_README,API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST, 
+    API_SEARCH,API_REPOSITORY_COMMUNITY, 
+    API_REPOSITORY_CONTRIBUTORS,
+    API_REPO_LABELS,
+    API_REPOSITORY_COMMITS, 
+    API_CONTENTS} from '../api'
 import {util_dateFormat,util_analyseFileType} from '../../../util'
 var parse = require('parse-link-header');
 export default {
@@ -105,7 +118,7 @@ export default {
         }
     },
 
-    async [ACTION_REPOSITORY_REQUEST_ISSUES] (context,payload) {
+    /* async [ACTION_REPOSITORY_REQUEST_ISSUES] (context,payload) {
         payload = {
             changePage: false,
             forward: true,
@@ -158,9 +171,9 @@ export default {
             handleException(e)
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES,false,payload)
         }
-    },
+    }, */
 
-    async [ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA] (context,payload) {
+    /* async [ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA] (context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA,true,payload)
             const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA + payload.repo + payload.owner + payload.meta)
@@ -193,7 +206,8 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA,false,payload)
             handleException(e,{throwNetworkErrorToComponent:true})
         }
-    },
+    }, */
+
 
     async [ACTION_REPOSITORY_REQUEST_PROJECTS_DATA] (context,payload) {
         payload = {
@@ -572,5 +586,84 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS,false)
             handleException(e,{throwNetworkErrorToComponent:true})
         }
-    }
+    },
+
+    async [ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS](context,payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS,true,payload)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS + payload.meta + payload.repo)
+            
+            const url_contributors = API_REPOSITORY_CONTRIBUTORS(payload.owner,payload.repo) 
+            const res_contributors = await authRequiredGet(url_contributors,{cancelToken})
+
+            //console.log(res_contributors.data)
+            const graphql = GRAPHQL_SEARCH_FOR_ISSUES_COUNT_BY_ASSOCIATE_USER({
+                users: res_contributors.data,
+                meta: payload.meta,
+                query: payload.query
+            })
+            const res_graphql = await authRequiredGitHubGraphqlApiQuery(graphql,{cancelToken})
+            //console.log(res_graphql.data.data)
+            let contributors = []
+
+            for(let key in res_graphql.data.data) {
+                contributors.push(res_graphql.data.data[key])
+            }
+
+            let avaliableUsers = []
+            contributors.forEach((item,index) => {
+                if(item.issueCount > 0) avaliableUsers.push(res_contributors.data[index])
+            })
+
+            const graphql_userName = GRAPHQL_REPOSITORY_GET_USER_NAME_BY_LOGIN({
+                users: avaliableUsers
+            })
+
+            const res_userName = await authRequiredGitHubGraphqlApiQuery(graphql_userName,{cancelToken})
+            
+            let userNameArr = []
+            for(let key in res_userName.data.data){
+                userNameArr.push(res_userName.data.data[key])
+            }
+
+            let withUserNameAvaliableUsers = []
+            avaliableUsers.forEach((item,index) => {
+                withUserNameAvaliableUsers.push(Object.assign(item,userNameArr[index]))
+            })
+            
+            context.commit({
+                ...payload,
+                type: MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS,
+                data: withUserNameAvaliableUsers
+            })
+            
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS,false,payload)
+        }catch(e) {
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS,false,payload)
+            handleException(e,{throwNetworkErrorToComponent:true})
+        }
+    },
+
+    async [ACTION_REPOSITORY_REQUEST_LABELS](context,payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_LABELS,true,payload)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_LABELS + payload.meta + payload.repo)
+            
+            let url = API_REPO_LABELS(payload.owner,payload.repo)
+            let res = await authRequiredGet(url,{cancelToken})
+
+            console.log(res.data)
+            
+            context.commit({
+                ...payload,
+                type: MUTATION_REPOSITORY_RESOLVE_LABELS,
+                data: res.data
+            })
+            
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_LABELS,false,payload)
+        }catch(e) {
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_LABELS,false,payload)
+            handleException(e,{throwNetworkErrorToComponent:true})
+        }
+    },
 }

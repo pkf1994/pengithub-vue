@@ -1,7 +1,7 @@
 import {
     ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA,
     ACTION_REPOSITORY_REQUEST_README_DATA,
-    ACTION_REPOSITORY_REQUEST_ISSUES,
+    ACTION_REPOSITORY_REQUEST_LABELS,
     ACTION_REPOSITORY_REQUEST_PULSE_COMMIT_COUNT,
     ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA,
     ACTION_REPOSITORY_REQUEST_BASIC_DATA,
@@ -14,15 +14,17 @@ import {
     ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH,
     ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
     ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA,
-    ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA} from './actionTypes.js'
+    ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS} from './actionTypes.js'
 import { 
     MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO,
-    MUTATION_REPOSITORY_RESOLVE_ISSUES,
-    MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA,
+    /* MUTATION_REPOSITORY_RESOLVE_ISSUES,
+    MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA, */
+    MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS,
     MUTATION_REPOSITORY_SYNC_SEARCH_PROJECTS_QUERY,
     MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT,
     MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST,
     MUTATION_REPOSITORY_RESOLVE_README_DATA,
+    MUTATION_REPOSITORY_RESOLVE_LABELS,
     MUTATION_REPOSITORY_RESOLVE_UPDATEDAT_OF_CONTENTS,
     MUTATION_REPOSITORY_RESOLVE_PULSE_ISSUES,
     MUTATION_REPOSITORY_RESOLVE_CONTENTS_TREE,
@@ -62,7 +64,7 @@ export default {
         state.projects.searchQuery = payload.searchQuery
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_ISSUES](state,payload) {
+    /* [MUTATION_REPOSITORY_RESOLVE_ISSUES](state,payload) {
         state[payload.issueType][payload.meta].data = payload.data
         state[payload.issueType][payload.meta].totalCount = payload.totalCount
         state[payload.issueType][payload.meta].pageInfo = payload.pageInfo
@@ -74,6 +76,18 @@ export default {
                 ...payload.data[index]
             }))
         })
+    }, */
+
+    [MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS] (state,payload) {
+        state[payload.issueType].associatedUsers[payload.meta].data = Object.assign({},{
+            [`${payload.owner}/${payload.repo}`]: payload.data
+        },state[payload.issueType].associatedUsers[payload.meta].data)
+    },
+
+    [MUTATION_REPOSITORY_RESOLVE_LABELS] (state,payload) {
+        state.label.data = Object.assign({},{
+            [`${payload.owner}/${payload.repo}`]: payload.data
+        },state.label.data)
     },
 
     [MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST](state,payload) {
@@ -173,11 +187,17 @@ export default {
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS) {
             state.code.codeFile.loadingUpdatedAtOfContents = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUES) {
+        /* else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUES) {
             state[payload.meta.issueType][payload.meta.meta].loading = payload.loading
         }
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA) {
             state[payload.meta.issueType][payload.meta.meta].loadingAdditionalData = payload.loading
+        } */
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS) {
+            state[payload.meta.issueType].associatedUsers[payload.meta.meta].loading = payload.loading
+        }
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_LABELS) {
+            state.label.loading = payload.loading
         }
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_CONTENTS_TREE) {
             state.code.codeFile.loading = payload.loading

@@ -1,3 +1,3 @@
 import IconSearchInput from './IconSearchInput.vue'
-
-export {IconSearchInput}
+import SimpleSearchInput from './SimpleSearchInput.vue'
+export {IconSearchInput,SimpleSearchInput}
