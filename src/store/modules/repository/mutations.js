@@ -12,6 +12,9 @@ import {
     ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS,
     ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,
     ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH,
+    ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA,
+    ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,
+    /* ACTOIN_REPOSITORY_REQUEST_ISSUE_DETAIL_ADDITIONAL_DATA, */
     ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
     ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA,
     ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS} from './actionTypes.js'
@@ -20,6 +23,8 @@ import {
     /* MUTATION_REPOSITORY_RESOLVE_ISSUES,
     MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA, */
     MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS,
+    MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA,
+    MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE,
     MUTATION_REPOSITORY_SYNC_SEARCH_PROJECTS_QUERY,
     MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT,
     MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST,
@@ -143,7 +148,15 @@ export default {
         }
     },
 
+    [MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA] (state,payload) {
+        state.issue.issueDetail.data = payload.data
+    },
 
+    [MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE] (state,payload) {
+        state.issue.issueDetail.timeline.data = payload.data
+        state.issue.issueDetail.timeline.lastData = payload.lastData
+        state.issue.issueDetail.timeline.pageInfo = payload.pageInfo
+    },
 
     [MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT] (state,payload) {
         state.code.codeFile.fileDetail.lastCommit.data = payload.data
@@ -211,6 +224,15 @@ export default {
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB) {
             state.code.codeFile.fileDetail.loading = payload.loading
         }
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA) {
+            state.issue.issueDetail.loading = payload.loading
+        }
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE) {
+            state.issue.issueDetail.timeline.loading = payload.loading
+        }
+      /*   else if(payload.actionType === ACTOIN_REPOSITORY_REQUEST_ISSUE_DETAIL_ADDITIONAL_DATA) {
+            state.issue.issueDetail.loadingAdditionalData = payload.loading
+        } */
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_PROJECTS_DATA) {
             if(!payload.meta.getMoreData){
                 state.projects.loading = payload.loading

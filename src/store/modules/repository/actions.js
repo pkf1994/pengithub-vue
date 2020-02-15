@@ -4,6 +4,7 @@ import {
     /* ACTION_REPOSITORY_REQUEST_ISSUES,
     ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA, */
     ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS,
+    ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,
     ACTION_REPOSITORY_REQUEST_LABELS,
     ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
     ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA,
@@ -16,6 +17,7 @@ import {
     ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS,
     ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS,
     ACTION_REPOSITORY_REQUEST_PULSE_COMMIT_COUNT,
+    ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA,
     ACTION_REPOSITORY_REQUEST_README_DATA} from './actionTypes'
 import { handleException,commitTriggerLoadingMutation,cancelAndUpdateAxiosCancelTokenSource } from '../util'
 import {authRequiredGitHubGraphqlApiQuery, authRequiredGet, authRequiredPost} from '../network'
@@ -39,6 +41,8 @@ import {
     /* MUTATION_REPOSITORY_RESOLVE_ISSUES,
     MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA, */
     MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS,
+    MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA,
+    MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE,
     MUTATION_REPOSITORY_RESOLVE_LABELS,
     MUTATION_REPOSITORY_RESOLVE_PROJECTS,
     MUTATION_REPOSITORY_RESOLVE_BASIC_DATA,
@@ -57,8 +61,10 @@ import {
     API_SEARCH,API_REPOSITORY_COMMUNITY, 
     API_REPOSITORY_CONTRIBUTORS,
     API_REPO_LABELS,
+    API_ISSUE,
     API_REPOSITORY_COMMITS, 
-    API_CONTENTS} from '../api'
+    API_CONTENTS,
+    API_ISSUE_TIMELINE} from '../api'
 import {util_dateFormat,util_analyseFileType} from '../../../util'
 var parse = require('parse-link-header');
 export default {
@@ -661,6 +667,73 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_LABELS,false,payload)
         }catch(e) {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_LABELS,false,payload)
+            handleException(e,{throwNetworkErrorToComponent:true})
+        }
+    },
+
+    async [ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA](context,payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA,true,payload)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA)
+
+            let url_issue = API_ISSUE(payload)
+            
+            let res_issue = await authRequiredGet(url_issue,{cancelToken})
+
+            context.commit({
+                type: MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA,
+                data: res_issue.data
+            })
+
+            context.dispatch({
+                ...payload,
+                type: ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE
+            })
+
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA,false,payload)
+        }catch(e) {
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA,false,payload)
+            handleException(e,{throwNetworkErrorToComponent:true})
+        }
+    },
+
+    async [ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE](context,payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,true,payload)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE)
+
+            let url_issueTimeline = API_ISSUE_TIMELINE(payload)
+
+            let config = {
+                cancelToken,
+                headers:{
+                    'Accept': 'application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json'
+                }   
+            }
+
+            let res_issueTimeline = await authRequiredGet(
+                url_issueTimeline,
+                config
+            )
+
+            let pageInfo = parse(res_issueTimeline.headers.link)
+
+            let lastData = []
+            if(pageInfo && pageInfo.last) {
+                let res_issueTimeline_last = await authRequiredGet(pageInfo.last.url,config)
+                lastData = res_issueTimeline_last.data
+            }
+
+            context.commit({
+                type: MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE,
+                data: res_issueTimeline.data,
+                lastData,
+                pageInfo
+            })
+
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,false,payload)
+        }catch(e) {
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,false,payload)
             handleException(e,{throwNetworkErrorToComponent:true})
         }
     },

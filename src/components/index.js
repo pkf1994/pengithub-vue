@@ -15,6 +15,7 @@ import {LoadingIcon,CommonLoadingEx,CommonLoading,CommonLoadingWrapper,LoadingIc
 import {IssuesPageMixin,IssueListItem} from './IssuesPage'
 import SelectMenuItem from './SelectMenuItem'
 import Modal from './Modal'
+import Label from './Label'
 export {
     Button,
     LogoHeader,
@@ -31,6 +32,7 @@ export {
     CommonLoadingWrapper,
     SimpleFooter,
     LabelsFooter,
+    Label,
     SimpleBubble,
     CommonLoadingEx,
     IconPagination,

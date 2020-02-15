@@ -24,6 +24,8 @@ const RepositoryCodeMain = () => import('../pages/Repository/Code/CodeMain/CodeM
 const RepositoryCodeFileBrowser = () => import('../pages/Repository/Code/CodeFile/FileBrowser/FileBrowser.vue')
 const RepositoryCodeFileDetail = () => import('../pages/Repository/Code/CodeFile/FileDetail/FileDetail.vue')
 const RepositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
+const RepositoryIssuesBrowser = () => import('../pages/Repository/Issues/IssuesBrowser.vue')
+const RepositoryIssueDetail = () => import('../pages/Repository/Issues/IssueDetail.vue')
 /* const RepositoryIssuesOpen = () => import('../pages/Repository/Issues/Open.vue')
 const RepositoryIssuesClosed = () => import('../pages/Repository/Issues/Closed.vue')
 const RepositoryIssuesYours = () => import('../pages/Repository/Issues/Yours.vue') */
@@ -174,20 +176,16 @@ export default [
             {
                 path: 'issues',
                 component: RepositoryIssues,
-               /*  children: [
+                children: [
                     {
                         path: '/',
-                        component: RepositoryIssuesOpen
+                        component: RepositoryIssuesBrowser
                     },
                     {
-                        path: 'closed',
-                        component: RepositoryIssuesClosed
-                    },
-                    {
-                        path: 'yours',
-                        component: RepositoryIssuesYours
-                    },
-                ] */
+                        path: ':number',
+                        component: RepositoryIssueDetail
+                    }
+                ]
             },
             {
                 path: 'pulls',

@@ -12,7 +12,7 @@
             <!-- <Meta class="meta">
                 #{{issue.number}}
             </Meta> -->
-            <Title class="h4 muted-link">
+            <Title class="h4 text-gray-dark">
                 <span class="pr-2" v-if="showRepoFullName">{{repoFullName}}</span>{{issue.title}}
             </Title>
            
@@ -65,7 +65,7 @@
         },
         computed: {
             PRRouterLink: function () {
-                return this.issue.url.replace("https://github.com","")
+                return this.issue.url.replace("https://api.github.com/repos","")
             },
             formatDate: function () {
                 return util_dateFormat.getDateDiff(this.issue.created_at)

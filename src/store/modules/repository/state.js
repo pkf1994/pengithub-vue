@@ -45,6 +45,17 @@ export default {
         ...DEFAULT_GRAPHQL_PAGINATIONAL_DATA_STATE()
     },
     issue: {
+        issueDetail: {
+            data: {},
+            loading: false,
+            loadingAdditionalData: false,
+            timeline: {
+                loading: false,
+                data: [],
+                lastData: [],
+                pageInfo: {}
+            }
+        },
         associatedUsers: {
             author: {
                 data: [],

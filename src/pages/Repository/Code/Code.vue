@@ -13,7 +13,7 @@
     import { mapState,mapActions } from 'vuex'
     import {
         ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA,
-        ACTION_REPOSITORY_REQUEST_README_DATA} from '../../../store/modules/repository/actionTypes'
+        } from '../../../store/modules/repository/actionTypes'
     export default {
         inject: ['owner','repo'],
         created() {

@@ -53,3 +53,11 @@ export const API_REPOSITORY_COMMITS = (owner,repo,params) => {
 export const API_REPOSITORY_CONTRIBUTORS = (owner,repo) => {
     return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/contributors`
 }
+
+export const API_ISSUE = (payload) => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}`
+}
+
+export const API_ISSUE_TIMELINE = (payload) => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/timeline`
+}

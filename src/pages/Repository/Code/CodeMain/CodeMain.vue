@@ -75,7 +75,6 @@
         LoadingAndCatchErrorTemplate,
         ComplexBubble} from '../../../../components'
     import {
-        ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA,
         ACTION_REPOSITORY_REQUEST_README_DATA} from '../../../../store/modules/repository/actionTypes'
     import { util_numberFormat } from '../../../../util'
     import {Branchs,Readme,Releases,Issues,PullRequests,Notifications} from './components'
