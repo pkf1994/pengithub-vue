@@ -25,7 +25,7 @@ const RepositoryCodeFileBrowser = () => import('../pages/Repository/Code/CodeFil
 const RepositoryCodeFileDetail = () => import('../pages/Repository/Code/CodeFile/FileDetail/FileDetail.vue')
 const RepositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
 const RepositoryIssuesBrowser = () => import('../pages/Repository/Issues/IssuesBrowser.vue')
-const RepositoryIssueDetail = () => import('../pages/Repository/Issues/IssueDetail.vue')
+const RepositoryIssueDetail = () => import('../pages/Repository/Issues/IssueDetail/IssueDetail.vue')
 /* const RepositoryIssuesOpen = () => import('../pages/Repository/Issues/Open.vue')
 const RepositoryIssuesClosed = () => import('../pages/Repository/Issues/Closed.vue')
 const RepositoryIssuesYours = () => import('../pages/Repository/Issues/Yours.vue') */

@@ -1,7 +1,12 @@
 export default {
     getDateDiff:(standardDateString) => {
 
-        let dateTimeStamp = new Date(standardDateString).getTime()
+        let dateTimeStamp
+        if(standardDateString instanceof Date) {
+            dateTimeStamp = standardDateString.getTime()
+        }else{
+            dateTimeStamp = new Date(standardDateString).getTime()
+        }
         // 补全为13位
         var arrTimestamp = (dateTimeStamp + '').split('');
         for (var start = 0; start < 13; start++) {
@@ -69,6 +74,11 @@ export default {
     },
         
     dateFormat: function (fmt, date) {
+
+        if(!(date instanceof Date)){
+            date = new Date(date)
+        }
+
         var o = {
             'M+': date.getMonth() + 1, // 月份
             'd+': date.getDate(), // 日
@@ -105,5 +115,19 @@ export default {
             fmt = fmt.replace(RegExp.$1,  monthMapping[date.getMonth() + 1])
         }
         return fmt
+    },
+
+    getDateDiffOrDateFormatDependOnGap: (fmt,date,gap) => {
+        let dateTimeStamp
+        if(date instanceof Date) {
+            dateTimeStamp = Date.parse(date)
+        }else {
+            dateTimeStamp = Date.parse(new Date(date))
+        }
+        if(Date.parse(new Date()) - dateTimeStamp > gap) {
+            return this.dateFormat(fmt,date)
+        }else{
+            return this.getDateDiff(date)
+        }
     }
 }

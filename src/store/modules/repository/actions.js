@@ -702,7 +702,8 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,true,payload)
             const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE)
 
-            let url_issueTimeline = API_ISSUE_TIMELINE(payload)
+            //let url_issueTimeline = API_ISSUE_TIMELINE(payload)
+            let url_issueTimeline = 'https://api.github.com/repos/pkf1994/pengithub-vue/issues/18/timeline'
 
             let config = {
                 cancelToken,
