@@ -455,3 +455,45 @@ export const GRAPHQL_REPOSITORY_GET_ISSUES_FOR_LABELS = (payload) => {
   }
   `
 }
+
+export const GRAPHQL_ISSUE_COMMENT_BODY_AND_REACTIONS = payload => {
+  let graphql = ''
+  payload.comments.forEach((item,index) => {
+    graphql = `
+      ${graphql}
+      commentBodyHTML${index}:node(id: "${item.node_id}") {
+        ... on IssueComment {
+          id
+          bodyHTML
+          reactions(first: 100) {
+            totalCount
+            nodes {
+              content
+              id
+            }
+          }
+        }
+      }
+     
+    `
+  })
+  return `{${graphql}}`
+}
+
+export const GRAPHQL_ISSUE_BODY = payload => {
+  return `
+    {
+      node(id: "${payload.nodeId}") {
+        ... on Issue {
+          bodyHTML
+          reactions(first: 100) {
+            nodes {
+              content
+            }
+            totalCount
+          }
+        }
+      }
+    }  
+  `
+}

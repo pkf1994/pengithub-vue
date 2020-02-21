@@ -13,18 +13,20 @@ import {
     ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,
     ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH,
     ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA,
+    ACTION_REPOSITORY_REQUEST_ISSUE_BODY,
     ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,
+    ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML,
     /* ACTOIN_REPOSITORY_REQUEST_ISSUE_DETAIL_ADDITIONAL_DATA, */
     ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
     ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA,
     ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS} from './actionTypes.js'
-import { 
+/* import { 
     MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO,
-    /* MUTATION_REPOSITORY_RESOLVE_ISSUES,
-    MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA, */
     MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS,
     MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA,
+    MUTATION_REPOSITORY_RESOLVE_ISSUE_BODY,
     MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE,
+    MUTATION_REPOSITORY_RESOLVE_ISSUE_COMMENT_BODY_AND_REACTIONS,
     MUTATION_REPOSITORY_SYNC_SEARCH_PROJECTS_QUERY,
     MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT,
     MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST,
@@ -39,23 +41,25 @@ import {
     MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH,
     MUTATION_REPOSITORY_RESOLVE_COMMUNITY_DATA,
     MUTATION_REPOSITORY_RESOLVE_PROJECTS,
-    MUTATION_REPOSITORY_RESOLVE_BASIC_DATA } from './mutationTypes.js'
+    MUTATION_REPOSITORY_RESOLVE_BASIC_DATA } from './mutationTypes.js' */
+import * as mutationType from './mutationTypes'
+import * as actionType from './actionTypes'
 import {CROSS_MUTATION_TRIGGER_LOADING} from '../crossMutation'
 import Vue from 'vue'
 export default {
-    [MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO](state,payload) {
+    [mutationType.MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO](state,payload) {
         state.code.data = payload.data
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_README_DATA] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_README_DATA] (state,payload) {
         state.code.readme.data = payload.data
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_BASIC_DATA](state, payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_BASIC_DATA](state, payload) {
         state.basic.data = payload.data
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_PROJECTS](state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_PROJECTS](state,payload) {
         if(payload.getMoreData) {
             payload.data.nodes =  state.projects.nodes.concat(payload.data.nodes)
         }
@@ -65,17 +69,17 @@ export default {
         state.projects.totalCountClosed = payload.totalCountClosed
     },
 
-    [MUTATION_REPOSITORY_SYNC_SEARCH_PROJECTS_QUERY](state,payload) {
+    [mutationType.MUTATION_REPOSITORY_SYNC_SEARCH_PROJECTS_QUERY](state,payload) {
         state.projects.searchQuery = payload.searchQuery
     },
 
-    /* [MUTATION_REPOSITORY_RESOLVE_ISSUES](state,payload) {
+    /* [mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUES](state,payload) {
         state[payload.issueType][payload.meta].data = payload.data
         state[payload.issueType][payload.meta].totalCount = payload.totalCount
         state[payload.issueType][payload.meta].pageInfo = payload.pageInfo
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA] (state,payload) {
         state[payload.issueType][payload.meta].data.forEach((item,index) => {
             Vue.set(state[payload.issueType][payload.meta].data,index,Object.assign({},item,{
                 ...payload.data[index]
@@ -83,27 +87,28 @@ export default {
         })
     }, */
 
-    [MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS] (state,payload) {
+   
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS] (state,payload) {
         state[payload.issueType].associatedUsers[payload.meta].data = Object.assign({},{
             [`${payload.owner}/${payload.repo}`]: payload.data
         },state[payload.issueType].associatedUsers[payload.meta].data)
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_LABELS] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_LABELS] (state,payload) {
         state.label.data = Object.assign({},{
             [`${payload.owner}/${payload.repo}`]: payload.data
         },state.label.data)
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST](state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST](state,payload) {
         state.pulse.codeChanges.data = payload.data
     },
 
-    [MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT] (state,payload) {
         state.pulse.codeChanges.commitCount.data = payload.data
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_PULSE_ISSUES](state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_PULSE_ISSUES](state,payload) {
         if(payload.from === 'rest') {
             if(payload.getMoreData) {
                 payload.data.items = state.pulse[payload.meta].data.concat(payload.data.items)
@@ -121,16 +126,16 @@ export default {
     },
 
 
-    [MUTATION_REPOSITORY_RESOLVE_COMMUNITY_DATA] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_COMMUNITY_DATA] (state,payload) {
         state.community.data = payload.data
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_CONTENTS_TREE] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_CONTENTS_TREE] (state,payload) {
         state.code.codeFile.data = payload.data
     },
 
     
-    [MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB] (state,payload) {
         payload = {
             meta: 'text',
             ...payload
@@ -148,29 +153,41 @@ export default {
         }
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA] (state,payload) {
         state.issue.issueDetail.data = payload.data
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_BODY] (state,payload) {
+        state.issue.issueDetail.body.data = payload.data
+    },
+
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE] (state,payload) {
         state.issue.issueDetail.timeline.data = payload.data
         state.issue.issueDetail.timeline.lastData = payload.lastData
         state.issue.issueDetail.timeline.pageInfo = payload.pageInfo
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_COMMENT_BODY_AND_REACTIONS] (state,payload) {
+        let commentBodyHTMLAndReactionArr = []
+        for(let key in payload.data) {
+            commentBodyHTMLAndReactionArr.push(payload.data[key])
+        }
+        state.issue.issueDetail.timeline.commentBodyHTMLAndReactions.data = commentBodyHTMLAndReactionArr 
+    },
+
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT] (state,payload) {
         state.code.codeFile.fileDetail.lastCommit.data = payload.data
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH] (state,payload) {
         state.code.codeFile.countOfCommits.data = payload.data
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_OF_CONTENT] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_OF_CONTENT] (state,payload) {
         state.code.codeFile.fileDetail.contributors.data = payload.data
     },
 
-    [MUTATION_REPOSITORY_RESOLVE_UPDATEDAT_OF_CONTENTS] (state,payload) {
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_UPDATEDAT_OF_CONTENTS] (state,payload) {
         state.code.codeFile.data.forEach((item,index) => {
             Vue.set(state.code.codeFile.data,index,Object.assign({},item,{
                 updatedAt: payload.data[`history${index}`].nodes[0].committedDate
@@ -227,8 +244,14 @@ export default {
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA) {
             state.issue.issueDetail.loading = payload.loading
         }
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUE_BODY) {
+            state.issue.issueDetail.body.loading = payload.loading
+        }
         else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE) {
             state.issue.issueDetail.timeline.loading = payload.loading
+        }
+        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML) {
+            state.issue.issueDetail.timeline.commentBodyHTML.loading = payload.loading
         }
       /*   else if(payload.actionType === ACTOIN_REPOSITORY_REQUEST_ISSUE_DETAIL_ADDITIONAL_DATA) {
             state.issue.issueDetail.loadingAdditionalData = payload.loading

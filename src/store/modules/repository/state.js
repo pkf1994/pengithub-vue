@@ -49,8 +49,16 @@ export default {
             data: {},
             loading: false,
             loadingAdditionalData: false,
+            body: {
+                data: '',
+                loading: false
+            },
             timeline: {
                 loading: false,
+                commentBodyHTMLAndReactions: {
+                    data: [],
+                    loading: false
+                },
                 data: [],
                 lastData: [],
                 pageInfo: {}

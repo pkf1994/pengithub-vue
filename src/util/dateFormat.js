@@ -1,5 +1,5 @@
 export default {
-    getDateDiff:(standardDateString) => {
+    getDateDiff:function(standardDateString)  {
 
         let dateTimeStamp
         if(standardDateString instanceof Date) {
@@ -117,7 +117,7 @@ export default {
         return fmt
     },
 
-    getDateDiffOrDateFormatDependOnGap: (fmt,date,gap) => {
+    getDateDiffOrDateFormatDependOnGap: function(fmt,date,gap)  {
         let dateTimeStamp
         if(date instanceof Date) {
             dateTimeStamp = Date.parse(date)

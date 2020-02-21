@@ -4,7 +4,9 @@ import {
     /* ACTION_REPOSITORY_REQUEST_ISSUES,
     ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA, */
     ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS,
+    ACTION_REPOSITORY_REQUEST_ISSUE_BODY,
     ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,
+    ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS,
     ACTION_REPOSITORY_REQUEST_LABELS,
     ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
     ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA,
@@ -27,7 +29,10 @@ import {
     GRAPHQL_REPOSITORY_COMMITS_COUNT_BY_BRANCH,
     GRAPHQL_REPOSITORY_PROJECTS,
     GRAPHQL_REPOSITORY_ISSUES,
+    
     GRAPHQL_REPOSITORY_GET_ISSUES_FOR_LABELS,
+    GRAPHQL_ISSUE_COMMENT_BODY_AND_REACTIONS,
+    GRAPHQL_ISSUE_BODY,
     GRAPHQL_USER,
     GRAPHQL_REPOSITORY_CONTENT_AND_LAST_COMMIT_AND_COMMIT_HISTORY,
     GRAPHQL_REPOSITORY_LAST_COMMITDATE_BY_PATH,
@@ -42,7 +47,9 @@ import {
     MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA, */
     MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS,
     MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA,
+    MUTATION_REPOSITORY_RESOLVE_ISSUE_BODY,
     MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE,
+    MUTATION_REPOSITORY_RESOLVE_ISSUE_COMMENT_BODY_AND_REACTIONS,
     MUTATION_REPOSITORY_RESOLVE_LABELS,
     MUTATION_REPOSITORY_RESOLVE_PROJECTS,
     MUTATION_REPOSITORY_RESOLVE_BASIC_DATA,
@@ -419,7 +426,14 @@ export default {
             
           
             const url = API_REPOSITORY_COMMUNITY(payload.owner,payload.repo)
-            const res = await authRequiredGet(url,{cancelToken,headers:{"Accept":"application/vnd.github.black-panther-preview+json"}})
+            const res = await authRequiredGet(url,
+                {
+                    cancelToken,
+                    headers:{
+                        "Accept":"application/vnd.github.black-panther-preview+json"
+                    }
+                }
+            )
             
             context.commit({
                 type: MUTATION_REPOSITORY_RESOLVE_COMMUNITY_DATA,
@@ -687,6 +701,12 @@ export default {
 
             context.dispatch({
                 ...payload,
+                nodeId:  res_issue.data.node_id,
+                type: ACTION_REPOSITORY_REQUEST_ISSUE_BODY
+            })
+
+            context.dispatch({
+                ...payload,
                 type: ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE
             })
 
@@ -697,18 +717,36 @@ export default {
         }
     },
 
+    async [ACTION_REPOSITORY_REQUEST_ISSUE_BODY](context,payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_BODY,true,payload)
+            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUE_BODY)
+
+            let graphql = GRAPHQL_ISSUE_BODY(payload)
+            
+            let res = await authRequiredGitHubGraphqlApiQuery(graphql,{cancelToken})
+
+            context.commit({
+                type: MUTATION_REPOSITORY_RESOLVE_ISSUE_BODY,
+                data: res.data.data.node.bodyHTML
+            })
+
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_BODY,false,payload)
+        }catch(e) {
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_BODY,false,payload)
+            handleException(e,{throwNetworkErrorToComponent:true})
+        }
+    },
+
     async [ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE](context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,true,payload)
-            const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE)
 
-            //let url_issueTimeline = API_ISSUE_TIMELINE(payload)
-            let url_issueTimeline = 'https://api.github.com/repos/pkf1994/pengithub-vue/issues/18/timeline'
+            let url_issueTimeline = API_ISSUE_TIMELINE(payload)
 
             let config = {
-                cancelToken,
                 headers:{
-                    'Accept': 'application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json'
+                    'Accept': 'application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json,application/vnd.github.VERSION.html'
                 }   
             }
 
@@ -732,9 +770,50 @@ export default {
                 pageInfo
             })
 
+            let commentArr = []
+           
+           
+            res_issueTimeline.data.forEach(item => {
+                if(item.event === 'commented') {
+                    commentArr.push(item)
+                }
+            })
+            context.dispatch({
+                type: ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS,
+                comments: commentArr
+            })
+
+           /*  let u = "https://api.github.com/repos/pkf1994/pengithub-vue/issues/18"
+
+            let r = await authRequiredGet(u)
+
+            console.log(r)
+ */
+
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,false,payload)
         }catch(e) {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,false,payload)
+            handleException(e,{throwNetworkErrorToComponent:true})
+        }
+    },
+
+    async [ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS](context,payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS,true,payload)
+            
+            let graphql = GRAPHQL_ISSUE_COMMENT_BODY_AND_REACTIONS(payload)
+            
+            let res = await authRequiredGitHubGraphqlApiQuery(graphql)
+
+            context.commit({
+                type: MUTATION_REPOSITORY_RESOLVE_ISSUE_COMMENT_BODY_AND_REACTIONS,
+                data: res.data.data
+            })
+
+
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS,false,payload)
+        }catch(e) {
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS,false,payload)
             handleException(e,{throwNetworkErrorToComponent:true})
         }
     },

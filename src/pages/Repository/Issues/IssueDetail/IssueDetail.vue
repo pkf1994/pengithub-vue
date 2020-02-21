@@ -1,5 +1,5 @@
 <template>
-    <Container class="px-3 pt-3">
+    <Container class="px-3 pt-3 bg-white flex-grow-1">
         <Header>
             <HeaderActions class="flex flex-justify-between flex-items-center mb-3">
                 <router-link to="/" class="btn btn-primary d-inline-block btn-sm">
@@ -39,8 +39,16 @@
             </div>
         </Labels>
 
+        <Comment :data="data" :bodyHTML="issueBodyHTML" :loading="loadingIssueBody">
+
+        </Comment>
+
+        <TimelineItem v-for="item in timelineData" :data="item" :key="item.id">
+
+        </TimelineItem>
+
         <transition name="fade" appear>
-            <CommonLoading v-if="loading || loadingAdditionalData"
+            <CommonLoading v-if="loading || loadingTimeline || loadingTimelineCommentDetail"
                             :preventClickEvent="false"
                             :position="loading ? 'center' : 'corner'"/>
         </transition>  
@@ -50,6 +58,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {CommonLoading,Label} from '../../../../components'
+    import {TimelineItem,Comment} from './components'
     import {util_dateFormat} from '../../../../util'
     import {ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA} from '../../../../store/modules/repository/actionTypes'
     import {mapState,mapActions} from 'vuex'
@@ -58,8 +67,12 @@
         computed: {
             ...mapState({
                 data: state => state.repository.issue.issueDetail.data,
+                timelineData: state => state.repository.issue.issueDetail.timeline.data,
+                issueBodyHTML: state => state.repository.issue.issueDetail.body.data,
                 loading: state => state.repository.issue.issueDetail.loading,
-                loadingAdditionalData: state => state.repository.issue.issueDetail.loadingAdditionalData,
+                loadingTimeline: state => state.repository.issue.issueDetail.timeline.loading,
+                loadingIssueBody: state => state.repository.issue.issueDetail.body.loading,
+                loadingTimelineCommentDetail: state => state.repository.issue.issueDetail.timeline.commentBodyHTMLAndReactions.loading,
             }),
             number() {
                 return this.$route.params.number
@@ -86,6 +99,8 @@
         components: {
             CommonLoading,
             Label,
+            Comment,
+            TimelineItem,
             Container: styled.span``,
             Header: styled.div``,
             HeaderActions: styled.div``,

@@ -7,11 +7,11 @@
         </Badge>
         <Body class="body">
             <WhoDidWhat>
-                <router-link class="d-inline-block">
-                    <img :src="data.user.avatar_url" :alt="`@${data.user.login}`" class="avatar" height="20" width="20">
+                <router-link v-if="showActor && showActorAvatar" to="/" class="d-inline-block">
+                    <img :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" class="avatar" height="20" width="20">
                 </router-link>
-                <router-link class="text-bold link-gray-dark">
-                    {{data.user.login}}
+                <router-link v-if="showActor" to="/" class="text-bold link-gray-dark">
+                    {{data.actor.login}}
                 </router-link>
                 <slot name="action"></slot>
                 <span class="no-wrap">{{dateStampGap > dataStampGapThreshold && 'on'}} {{createdAtFormat}}</span>
@@ -34,6 +34,14 @@
             badgeStyle: {
                 type: Object,
                 default: () => ({})
+            },
+            showActor: {
+                type: Boolean,
+                default: true
+            },
+            showActorAvatar: {
+                type: Boolean,
+                default: true
             }
         },
         data() {
