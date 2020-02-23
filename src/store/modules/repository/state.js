@@ -54,14 +54,17 @@ export default {
                 loading: false
             },
             timeline: {
-                loading: false,
                 commentBodyHTMLAndReactions: {
                     data: [],
                     loading: false
                 },
-                data: [],
                 lastData: [],
-                pageInfo: {}
+                pageInfo: {},
+                ...DEFAULT_REST_PAGINATIONAL_DATA_STATE()
+            },
+            projects: {
+                data: [],
+                loading: false
             }
         },
         associatedUsers: {

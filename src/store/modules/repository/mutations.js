@@ -1,25 +1,24 @@
-import {
-    ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA,
-    ACTION_REPOSITORY_REQUEST_README_DATA,
-    ACTION_REPOSITORY_REQUEST_LABELS,
-    ACTION_REPOSITORY_REQUEST_PULSE_COMMIT_COUNT,
-    ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA,
-    ACTION_REPOSITORY_REQUEST_BASIC_DATA,
-    ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_REST,
-    ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_GRAPHQL,
-    ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS,
-    ACTION_REPOSITORY_REQUEST_CONTENTS_TREE,
-    ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS,
-    ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,
-    ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH,
-    ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA,
-    ACTION_REPOSITORY_REQUEST_ISSUE_BODY,
-    ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,
-    ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML,
-    /* ACTOIN_REPOSITORY_REQUEST_ISSUE_DETAIL_ADDITIONAL_DATA, */
-    ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
-    ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA,
-    ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS} from './actionTypes.js'
+/* import {
+    actionType.ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA,
+    actionType.ACTION_REPOSITORY_REQUEST_README_DATA,
+    actionType.ACTION_REPOSITORY_REQUEST_LABELS,
+    actionType.ACTION_REPOSITORY_REQUEST_PULSE_COMMIT_COUNT,
+    actionType.ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA,
+    actionType.ACTION_REPOSITORY_REQUEST_BASIC_DATA,
+    actionType.ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_REST,
+    actionType.ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_GRAPHQL,
+    actionType.ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS,
+    actionType.ACTION_REPOSITORY_REQUEST_CONTENTS_TREE,
+    actionType.ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS,
+    actionType.ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,
+    actionType.ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH,
+    actionType.ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA,
+    actionType.ACTION_REPOSITORY_REQUEST_ISSUE_BODY,
+    actionType.ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,
+    actionType.ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML,
+    actionType.ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
+    actionType.ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA,
+    actionType.ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS} from './actionTypes.js' */
 /* import { 
     MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO,
     MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS,
@@ -161,9 +160,17 @@ export default {
         state.issue.issueDetail.body.data = payload.data
     },
 
+    [mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_PROJECTS] (state,payload) {
+        state.issue.issueDetail.projects.data = payload.data
+    },
+
     [mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE] (state,payload) {
-        state.issue.issueDetail.timeline.data = payload.data
-        state.issue.issueDetail.timeline.lastData = payload.lastData
+        if(payload.changePage) {
+            state.issue.issueDetail.timeline.data = state.issue.issueDetail.timeline.data.concat(payload.data)
+        }else{
+            state.issue.issueDetail.timeline.data = payload.data
+            state.issue.issueDetail.timeline.lastData = payload.lastData
+        }
         state.issue.issueDetail.timeline.pageInfo = payload.pageInfo
     },
 
@@ -172,7 +179,7 @@ export default {
         for(let key in payload.data) {
             commentBodyHTMLAndReactionArr.push(payload.data[key])
         }
-        state.issue.issueDetail.timeline.commentBodyHTMLAndReactions.data = commentBodyHTMLAndReactionArr 
+        state.issue.issueDetail.timeline.commentBodyHTMLAndReactions.data = state.issue.issueDetail.timeline.commentBodyHTMLAndReactions.data.concat(commentBodyHTMLAndReactionArr) 
     },
 
     [mutationType.MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT] (state,payload) {
@@ -196,74 +203,78 @@ export default {
     },
 
     [CROSS_MUTATION_TRIGGER_LOADING](state,payload) {
-        if(payload.actionType === ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA) {
+        if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA) {
             state.code.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_README_DATA) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_README_DATA) {
             state.code.readme.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_PULSE_COMMIT_COUNT) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_PULSE_COMMIT_COUNT) {
             state.pulse.codeChanges.commitCount.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA) {
             state.pulse.codeChanges.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_BASIC_DATA) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_BASIC_DATA) {
             state.basic.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA) {
             state.community.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS) {
             state.code.codeFile.loadingUpdatedAtOfContents = payload.loading
         }
-        /* else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUES) {
+        /* else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_ISSUES) {
             state[payload.meta.issueType][payload.meta.meta].loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA) {
             state[payload.meta.issueType][payload.meta.meta].loadingAdditionalData = payload.loading
         } */
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS) {
             state[payload.meta.issueType].associatedUsers[payload.meta.meta].loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_LABELS) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_LABELS) {
             state.label.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_CONTENTS_TREE) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_CONTENTS_TREE) {
             state.code.codeFile.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH) {
             state.code.codeFile.countOfCommits.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS) {
             state.code.codeFile.fileDetail.contributors.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB) {
             state.code.codeFile.fileDetail.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA) {
             state.issue.issueDetail.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUE_BODY) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_ISSUE_BODY) {
             state.issue.issueDetail.body.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS) {
+            state.issue.issueDetail.projects.loading = payload.loading
+        }
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE) {
             state.issue.issueDetail.timeline.loading = payload.loading
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML) {
             state.issue.issueDetail.timeline.commentBodyHTML.loading = payload.loading
         }
+        
       /*   else if(payload.actionType === ACTOIN_REPOSITORY_REQUEST_ISSUE_DETAIL_ADDITIONAL_DATA) {
             state.issue.issueDetail.loadingAdditionalData = payload.loading
         } */
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_PROJECTS_DATA) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_PROJECTS_DATA) {
             if(!payload.meta.getMoreData){
                 state.projects.loading = payload.loading
             }else{
                 state.projects.loadingMore = payload.loading
             }
         }
-        else if(payload.actionType === ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_REST || payload.actionType === ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_GRAPHQL) {
+        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_REST || payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_PULSE_ISSUES_FROM_GRAPHQL) {
             if(payload.meta.issueType === 'pullRequest') {
                 if(payload.meta.state === 'closed') {
                     if(!payload.meta.getMoreData){

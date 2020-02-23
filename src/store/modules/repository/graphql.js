@@ -497,3 +497,22 @@ export const GRAPHQL_ISSUE_BODY = payload => {
     }  
   `
 }
+
+export const GRAPHQL_ISSUE_PROJECTS = payload => {
+  return `
+  {
+    repository(name: "${payload.repo}", owner: "${payload.owner}") {
+      issue(number: ${payload.number}) {
+        projectCards(first: 100) {
+          totalCount
+          nodes {
+            project {
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+  `
+}

@@ -7,6 +7,7 @@ import {
     ACTION_REPOSITORY_REQUEST_ISSUE_BODY,
     ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,
     ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS,
+    ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS,
     ACTION_REPOSITORY_REQUEST_LABELS,
     ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
     ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA,
@@ -29,7 +30,7 @@ import {
     GRAPHQL_REPOSITORY_COMMITS_COUNT_BY_BRANCH,
     GRAPHQL_REPOSITORY_PROJECTS,
     GRAPHQL_REPOSITORY_ISSUES,
-    
+    GRAPHQL_ISSUE_PROJECTS,
     GRAPHQL_REPOSITORY_GET_ISSUES_FOR_LABELS,
     GRAPHQL_ISSUE_COMMENT_BODY_AND_REACTIONS,
     GRAPHQL_ISSUE_BODY,
@@ -40,29 +41,28 @@ import {
     GRAPHQL_SEARCH_FOR_ISSUES_COUNT_BY_ASSOCIATE_USER,
     GRAPHQL_REPOSITORY_ISSUES_BY_NUMBERS,
     GRAPHQL_REPOSITORY_GET_USER_NAME_BY_LOGIN} from './graphql'
-import {
-    MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO,
-    MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST,
-    /* MUTATION_REPOSITORY_RESOLVE_ISSUES,
-    MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA, */
-    MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS,
-    MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA,
-    MUTATION_REPOSITORY_RESOLVE_ISSUE_BODY,
-    MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE,
-    MUTATION_REPOSITORY_RESOLVE_ISSUE_COMMENT_BODY_AND_REACTIONS,
-    MUTATION_REPOSITORY_RESOLVE_LABELS,
-    MUTATION_REPOSITORY_RESOLVE_PROJECTS,
-    MUTATION_REPOSITORY_RESOLVE_BASIC_DATA,
-    MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT,
-    MUTATION_REPOSITORY_RESOLVE_PULSE_ISSUES,
-    MUTATION_REPOSITORY_RESOLVE_UPDATEDAT_OF_CONTENTS,
-    MUTATION_REPOSITORY_RESOLVE_COMMUNITY_DATA,
-    MUTATION_REPOSITORY_RESOLVE_CONTENTS_TREE,
-    MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
-    MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_OF_CONTENT,
-    MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT,
-    MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH,
-    MUTATION_REPOSITORY_RESOLVE_README_DATA} from './mutationTypes'
+/* import {
+    mutationType.MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_BODY,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_COMMENT_BODY_AND_REACTIONS,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_LABELS,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_PROJECTS,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_BASIC_DATA,
+    mutationType.MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_PULSE_ISSUES,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_UPDATEDAT_OF_CONTENTS,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_COMMUNITY_DATA,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_CONTENTS_TREE,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_OF_CONTENT,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH,
+    mutationType.MUTATION_REPOSITORY_RESOLVE_README_DATA} from './mutationTypes' */
+import * as mutationType from './mutationTypes'
 import {
     API_README,API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST, 
     API_SEARCH,API_REPOSITORY_COMMUNITY, 
@@ -81,7 +81,7 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_BASIC_DATA,true)
             const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_REPOSITORY_BASIC_INFO(payload.owner,payload.repo),{cancelToken})
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_BASIC_DATA,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_BASIC_DATA,
                 data: res.data.data.repository
             })
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_BASIC_DATA,false)
@@ -98,7 +98,7 @@ export default {
 
             const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_REPOSITORY_CODE_BASIC_INFO(payload.owner,payload.repo),{cancelToken})
             context.commit({
-                type: MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO,
+                type: mutationType.MUTATION_REPOSITORY_CODE_RESOLVE_BASIC_INFO,
                 data: res.data.data.repository
             })
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA,false)
@@ -121,7 +121,7 @@ export default {
             const res_readme = await authRequiredGet(API_README(payload.owner,payload.repo),config)
 
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_README_DATA,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_README_DATA,
                 data: res_readme.data
             })
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_README_DATA,false)
@@ -166,7 +166,7 @@ export default {
             const res_rest = await authRequiredGet(url,{cancelToken})
             const linkParsed = parse(res_rest.headers.link)
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_ISSUES,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUES,
                 totalCount: res_rest.data.total_count,
                 data: res_rest.data.items,
                 pageInfo: linkParsed,
@@ -211,7 +211,7 @@ export default {
             context.commit({
                 data: dataArr,
                 ...payload,
-                type: MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUES_ADDITIONAL_DATA
             })
             
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA,false,payload)
@@ -245,7 +245,7 @@ export default {
             const res = await authRequiredGitHubGraphqlApiQuery(graphQL,{cancelToken})
 
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_PROJECTS,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_PROJECTS,
                 data: res.data.data.repository.projects,
                 totalCountOpen: res.data.data.repository.totalCountOpen.totalCount,
                 totalCountOpenWithoutSearchQuery: res.data.data.repository.totalCountOpenWithoutSearchQuery.totalCount,
@@ -267,7 +267,7 @@ export default {
             const url = API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST(payload.owner,payload.repo)
             const res = await authRequiredGet(url,{cancelToken})
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_LIST,
                 data: res.data
             })
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA,false)
@@ -289,7 +289,7 @@ export default {
             const res = await authRequiredGet(url,{cancelToken,headers:{"Accept":"application/vnd.github.cloak-preview"}})
             
             context.commit({
-                type: MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT,
+                type: mutationType.MUTATION_REPOSITORY_PULSE_RESOLVE_COMMIT_COUNT,
                 data: res.data.total_count
             })
 
@@ -344,7 +344,7 @@ export default {
 
             const res = await authRequiredGitHubGraphqlApiQuery(graphQL,{cancelToken})
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_PULSE_ISSUES,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_PULSE_ISSUES,
                 data: res.data.data.search,
                 from: 'graphql',
                 ...payload
@@ -405,7 +405,7 @@ export default {
             const res = await authRequiredGet(url,{cancelToken})
             const linkParsed = parse(res.headers.link)
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_PULSE_ISSUES,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_PULSE_ISSUES,
                 data: res.data,
                 pageInfo: linkParsed,
                 from: 'rest',
@@ -436,7 +436,7 @@ export default {
             )
             
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_COMMUNITY_DATA,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_COMMUNITY_DATA,
                 data: res.data
             })
 
@@ -456,7 +456,7 @@ export default {
 
             const res = await authRequiredGitHubGraphqlApiQuery(graphQL,{cancelToken})
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_CONTENTS_TREE,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_CONTENTS_TREE,
                 data: res.data.data.repository.object.entries
             })
 
@@ -482,7 +482,7 @@ export default {
 
             const res = await authRequiredGitHubGraphqlApiQuery(graphQL,{cancelToken})
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_UPDATEDAT_OF_CONTENTS,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_UPDATEDAT_OF_CONTENTS,
                 data: res.data.data.repository.object
             })
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_UPDATEDAT_OF_CONTENTS,false)
@@ -505,7 +505,7 @@ export default {
 
             const res = await authRequiredGitHubGraphqlApiQuery(graphQL,{cancelToken})
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_CODE_COMMITS_COUNT_BY_BRANCH,
                 data: res.data.data.repository.ref.target.history.totalCount
             })
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_COMMITS_COUNT_BY_BRANCH,false)
@@ -545,13 +545,13 @@ export default {
             })
 
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT,
                 data: res_graphQL.data.data.repository.commit.history.nodes[0]
             })
 
             if(!res_graphQL.data.data.repository.content.isBinary) {
                 context.commit({
-                    type: MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
+                    type: mutationType.MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
                     data: res_graphQL.data.data.repository.content.text,
                     meta: 'text'
                 })
@@ -564,14 +564,14 @@ export default {
                 })
                 if(res.status === 200) {
                     context.commit({
-                        type: MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
+                        type: mutationType.MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
                         data: res.data,
                         meta: 'html'
                     })
                 }
             }else{
                 context.commit({
-                    type: MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
+                    type: mutationType.MUTATION_REPOSITORY_RESOLVE_CONTENTS_BLOB,
                     data: `https://github.com/${payload.owner}/${payload.repo}/blob/${payload.branch}/${payload.path}?raw=true`,
                     meta: 'binary'
                 })
@@ -597,7 +597,7 @@ export default {
             }
 
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_OF_CONTENT,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_CONTRIBUTORS_OF_CONTENT,
                 data: contributors
             })
 
@@ -653,7 +653,7 @@ export default {
             
             context.commit({
                 ...payload,
-                type: MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUES_AVALIABLE_USERS,
                 data: withUserNameAvaliableUsers
             })
             
@@ -674,7 +674,7 @@ export default {
 
             context.commit({
                 ...payload,
-                type: MUTATION_REPOSITORY_RESOLVE_LABELS,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_LABELS,
                 data: res.data
             })
             
@@ -695,7 +695,7 @@ export default {
             let res_issue = await authRequiredGet(url_issue,{cancelToken})
 
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA,
                 data: res_issue.data
             })
 
@@ -708,6 +708,11 @@ export default {
             context.dispatch({
                 ...payload,
                 type: ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE
+            })
+
+            context.dispatch({
+                ...payload,
+                type: ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS
             })
 
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA,false,payload)
@@ -727,8 +732,8 @@ export default {
             let res = await authRequiredGitHubGraphqlApiQuery(graphql,{cancelToken})
 
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_ISSUE_BODY,
-                data: res.data.data.node.bodyHTML
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_BODY,
+                data: res.data.data
             })
 
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_BODY,false,payload)
@@ -739,10 +744,25 @@ export default {
     },
 
     async [ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE](context,payload) {
+        payload = {
+            forward: true,
+            changePage: false,
+            ...payload
+        }
         try{
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,true,payload)
 
-            let url_issueTimeline = API_ISSUE_TIMELINE(payload)
+            let url_issueTimeline
+
+            if(payload.changePage) {
+                if(payload.forward) {
+                    url_issueTimeline = context.rootState.repository.issue.issueDetail.timeline.pageInfo.next.url
+                } else {
+                    url_issueTimeline = context.rootState.repository.issue.issueDetail.timeline.pageInfo.prev.url
+                }
+            }else{
+                url_issueTimeline = API_ISSUE_TIMELINE(payload) + `?per_page=${context.rootState.repository.issue.issueDetail.timeline.perPage}`
+            }
 
             let config = {
                 headers:{
@@ -758,22 +778,29 @@ export default {
             let pageInfo = parse(res_issueTimeline.headers.link)
 
             let lastData = []
-            if(pageInfo && pageInfo.last) {
-                let res_issueTimeline_last = await authRequiredGet(pageInfo.last.url,config)
-                lastData = res_issueTimeline_last.data
+            if(!payload.changePage) {
+                if(pageInfo && pageInfo.last) {
+                    let res_issueTimeline_last = await authRequiredGet(pageInfo.last.url,config)
+                    lastData = res_issueTimeline_last.data
+                }
             }
 
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE,
                 data: res_issueTimeline.data,
                 lastData,
-                pageInfo
+                pageInfo,
+                ...payload,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_TIMELINE
             })
 
             let commentArr = []
            
-           
             res_issueTimeline.data.forEach(item => {
+                if(item.event === 'commented') {
+                    commentArr.push(item)
+                }
+            })
+            lastData.forEach(item => {
                 if(item.event === 'commented') {
                     commentArr.push(item)
                 }
@@ -782,13 +809,6 @@ export default {
                 type: ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS,
                 comments: commentArr
             })
-
-           /*  let u = "https://api.github.com/repos/pkf1994/pengithub-vue/issues/18"
-
-            let r = await authRequiredGet(u)
-
-            console.log(r)
- */
 
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,false,payload)
         }catch(e) {
@@ -806,14 +826,33 @@ export default {
             let res = await authRequiredGitHubGraphqlApiQuery(graphql)
 
             context.commit({
-                type: MUTATION_REPOSITORY_RESOLVE_ISSUE_COMMENT_BODY_AND_REACTIONS,
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_COMMENT_BODY_AND_REACTIONS,
                 data: res.data.data
             })
-
 
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS,false,payload)
         }catch(e) {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS,false,payload)
+            handleException(e,{throwNetworkErrorToComponent:true})
+        }
+    },
+    
+    async [ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS](context,payload) {
+        try{
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS,true,payload)
+            let cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS)
+            
+            let graphql = GRAPHQL_ISSUE_PROJECTS(payload)
+            
+            let res = await authRequiredGitHubGraphqlApiQuery(graphql,{cancelToken})
+
+            context.commit({
+                type: mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_PROJECTS,
+                data: res.data.data.repository.issue.projectCards.nodes
+            })
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS,false,payload)
+        }catch(e) {
+            commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS,false,payload)
             handleException(e,{throwNetworkErrorToComponent:true})
         }
     },

@@ -179,11 +179,15 @@ export default [
                 children: [
                     {
                         path: '/',
-                        component: RepositoryIssuesBrowser
+                        components: {
+                            RepositoryIssuesBrowser:RepositoryIssuesBrowser
+                        }
                     },
                     {
                         path: ':number',
-                        component: RepositoryIssueDetail
+                        components: {
+                            RepositoryIssueDetail:RepositoryIssueDetail
+                        }
                     }
                 ]
             },
