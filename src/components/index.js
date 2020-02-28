@@ -15,7 +15,9 @@ import {LoadingIcon,CommonLoadingEx,CommonLoading,CommonLoadingWrapper,LoadingIc
 import {IssuesPageMixin,IssueListItem} from './IssuesPage'
 import SelectMenuItem from './SelectMenuItem'
 import Modal from './Modal'
+import Popover from './Popover'
 import Label from './Label'
+import Progress from './Progress'
 export {
     Button,
     LogoHeader,
@@ -47,5 +49,7 @@ export {
     SummaryAndDetail,
     Breadcrumb,
     SelectMenuItem,
-    Modal
+    Modal,
+    Popover,
+    Progress
 }

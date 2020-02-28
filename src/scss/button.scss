@@ -71,3 +71,8 @@
   -moz-appearance: none;
   appearance: none;
 }
+
+.btn-link:disabled, .btn-link:disabled:hover, .btn-link[aria-disabled=true], .btn-link[aria-disabled=true]:hover {
+  color: rgba(88,96,105,.5);
+  cursor: default;
+}

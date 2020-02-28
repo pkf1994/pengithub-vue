@@ -39,10 +39,7 @@
             })
         },
         mounted() {
-            let clip = new ClipboardJS('#file-detail-copy-btn');
-            clip.on('success',e => {
-                this.$toast("Clip OK!")
-            })
+            this.initClipboard()
         },
         computed: {
             ...mapState({
@@ -55,7 +52,13 @@
         methods: {
             ...mapActions({
                 action_getBlob: ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,
-            })
+            }),
+            initClipboard() {
+                let clip = new ClipboardJS('#file-detail-copy-btn');
+                clip.on('success',e => {
+                    this.$toast("Clip OK!")
+                })
+            }
         },
         components: {
             Breadcrumb,

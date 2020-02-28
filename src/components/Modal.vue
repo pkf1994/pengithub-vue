@@ -1,8 +1,8 @@
 <template>
-    <Container class="container flex-row-center" ref="cover"
+    <Container class="container"
                 :style="{'pointer-events':show ? 'auto' : 'none'}">
         <transition name='fade'>
-            <Cover class="cover flex-row-center" v-show="show"  @click="close"></Cover>
+            <Cover class="cover" v-show="show"  @click="close"></Cover>
         </transition>
         <transition name="modal-basic">
             <Main class="main Box flex-column" v-if="show" :style="modalStyle" style="width: 640px;">

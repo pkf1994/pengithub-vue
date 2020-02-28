@@ -7,7 +7,7 @@
     import styled from 'vue-styled-components'
     export default {
         components: {
-            Container: styled.span``
+            Container: styled.div``
         }
     }
 </script>

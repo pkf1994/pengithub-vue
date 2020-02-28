@@ -6,9 +6,10 @@
     flex-shrink: 0!important;
 }
 
-.text-bold {
-    font-weight: 600!important;
+.flex-auto {
+    flex: auto!important;
 }
+
 
 .flex-wrap {
     flex-wrap: wrap!important;
@@ -45,4 +46,8 @@
 /* typography */
 .no-underline {
     text-decoration: none!important;
+}
+
+.float-left {
+    float: left!important;
 }

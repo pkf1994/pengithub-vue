@@ -152,7 +152,7 @@ export default {
         }
     },
 
-    [mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA] (state,payload) {
+   /*  [mutationType.MUTATION_REPOSITORY_RESOLVE_ISSUE_DETAIL_DATA] (state,payload) {
         state.issue.issueDetail.data = payload.data
     },
 
@@ -180,7 +180,7 @@ export default {
             commentBodyHTMLAndReactionArr.push(payload.data[key])
         }
         state.issue.issueDetail.timeline.commentBodyHTMLAndReactions.data = state.issue.issueDetail.timeline.commentBodyHTMLAndReactions.data.concat(commentBodyHTMLAndReactionArr) 
-    },
+    }, */
 
     [mutationType.MUTATION_REPOSITORY_RESOLVE_LAST_COMMIT_OF_CONTENT] (state,payload) {
         state.code.codeFile.fileDetail.lastCommit.data = payload.data
@@ -248,7 +248,7 @@ export default {
         else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB) {
             state.code.codeFile.fileDetail.loading = payload.loading
         }
-        else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA) {
+       /*  else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA) {
             state.issue.issueDetail.loading = payload.loading
         }
         else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_ISSUE_BODY) {
@@ -262,7 +262,7 @@ export default {
         }
         else if(payload.actionType === actionType.ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML) {
             state.issue.issueDetail.timeline.commentBodyHTML.loading = payload.loading
-        }
+        } */
         
       /*   else if(payload.actionType === ACTOIN_REPOSITORY_REQUEST_ISSUE_DETAIL_ADDITIONAL_DATA) {
             state.issue.issueDetail.loadingAdditionalData = payload.loading

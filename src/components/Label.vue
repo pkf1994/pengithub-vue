@@ -1,5 +1,5 @@
 <template>
-    <span @click="clickHandler" class="d-inline-block label" :style="{color:fontColor,background:`#${color}`}">
+    <span class="d-inline-block label" :style="{color:fontColor,background:color}">
         {{name}}
     </span>
 </template>
@@ -16,15 +16,11 @@
             color: {
                 type: String,
                 required: true
-            },
-            routerLink: {
-                type: String,
-                required: false
-            },
+            }
         },
         computed: {
             fontColor() {
-                let isLight = util_color.isLight(`#${this.color}`)
+                let isLight = util_color.isLight(this.color)
                 if(isLight) return 'black'
                 else return 'white'
             }

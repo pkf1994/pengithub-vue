@@ -45,13 +45,15 @@
             computeHeight() {
                 if(!this.$refs.content) return 
                 this.height = this.$refs.content.$el.offsetHeight
-                let computeHeightEvent = document.createEvent('HTMLEvents')
-                computeHeightEvent.initEvent("compute-height",true,false)
-                this.$refs.content.$el.dispatchEvent(computeHeightEvent)
+               
+                setTimeout(() => {
+                    let computeHeightEvent = document.createEvent('HTMLEvents')
+                    computeHeightEvent.initEvent("compute-height",true,false)
+                    this.$refs.content && this.$refs.content.$el.dispatchEvent(computeHeightEvent)
+                },400)
             },
             subComputeHeightEventHandler(event) {
                 if(event.target == this.$refs.content.$el) return 
-                console.log("compute-event")
                 util_throttle.throttleByDelay(() => this.computeHeight(),50,this.randomMeta)
             }
         },

@@ -53,7 +53,10 @@ export function cancelAndUpdateAxiosCancelTokenSource(meta) {
     }catch(e) {
         console.log(e)
     }
-    return  axiosCancelTokenSourceStore[meta].token
+    return  {
+        cancelToken:axiosCancelTokenSourceStore[meta].token,
+        source:axiosCancelTokenSourceStore[meta],
+    }
 }
 
 export const axiosCancelTokenSourceStore = {

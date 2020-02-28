@@ -117,7 +117,7 @@ export default {
         return fmt
     },
 
-    getDateDiffOrDateFormatDependOnGap: function(fmt,date,gap)  {
+    getDateDiffOrDateFormatDependOnGap: function(fmt,date,gap = 1000 * 60 * 60 * 24 * 30)  {
         let dateTimeStamp
         if(date instanceof Date) {
             dateTimeStamp = Date.parse(date)

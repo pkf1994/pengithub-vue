@@ -15,7 +15,7 @@
                         {{data.actor.login}}
                     </router-link>
                     <slot name="action"></slot>
-                    <span class="no-wrap">{{dateStampGap > dataStampGapThreshold && 'on'}} {{createdAtFormat}}</span>
+                    <span class="no-wrap">{{dateStampGap > dataStampGapThreshold ? 'on' : ''}} {{createdAtFormat}}</span>
                 </WhoDidWhat>
                 <slot name="additional">
                 </slot>

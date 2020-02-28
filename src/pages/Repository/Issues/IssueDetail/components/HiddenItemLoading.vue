@@ -4,8 +4,10 @@
             <button class="text-gray pt-2 px-4 bg-white border-0" @click="dataGetter">
                 <slot></slot> hidden items
             </button>
-            <button class="ajax-pagination-btn no-underline pb-1 pt-0 px-4 mt-0 mb-1 bg-white border-0" @click="dataGetter">
-                {{loading ? 'Loading...' : 'Load more...'}}
+            <button class="ajax-pagination-btn no-underline pb-1 pt-0 px-4 mt-0 mb-1 bg-white border-0"
+                    :class="{'loading-animation':loading}"
+                    @click="dataGetter">
+                {{loading ? 'Loading...' : 'Load more'}}
             </button>
         </Main>
     </Container>
@@ -49,6 +51,20 @@
     background-position: 0;
     background-size: 32px;
 }
+.loading-animation{
+    animation: kf-loading 2s infinite;
+}
 
+@keyframes kf-loading {
+    0%{
+        opacity: 0;
+    }
+    50%{
+        opacity: 1;
+    }
+    100%{
+        opacity: 0;
+    }
+}
 
 </style>

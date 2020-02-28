@@ -4,10 +4,10 @@ import {
     /* ACTION_REPOSITORY_REQUEST_ISSUES,
     ACTION_REPOSITORY_REQUEST_ISSUES_ADDITIONAL_DATA, */
     ACTION_REPOSITORY_REQUEST_ISSUES_AVALIABLE_USERS,
-    ACTION_REPOSITORY_REQUEST_ISSUE_BODY,
+   /*  ACTION_REPOSITORY_REQUEST_ISSUE_BODY,
     ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,
     ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS,
-    ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS,
+    ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS, */
     ACTION_REPOSITORY_REQUEST_LABELS,
     ACTION_REPOSITORY_REQUEST_PROJECTS_DATA,
     ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA,
@@ -685,7 +685,7 @@ export default {
         }
     },
 
-    async [ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA](context,payload) {
+   /*  async [ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA](context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA,true,payload)
             const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA)
@@ -720,9 +720,9 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA,false,payload)
             handleException(e,{throwNetworkErrorToComponent:true})
         }
-    },
+    }, */
 
-    async [ACTION_REPOSITORY_REQUEST_ISSUE_BODY](context,payload) {
+    /* async [ACTION_REPOSITORY_REQUEST_ISSUE_BODY](context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_BODY,true,payload)
             const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUE_BODY)
@@ -741,9 +741,9 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_BODY,false,payload)
             handleException(e,{throwNetworkErrorToComponent:true})
         }
-    },
+    }, */
 
-    async [ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE](context,payload) {
+    /* async [ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE](context,payload) {
         payload = {
             forward: true,
             changePage: false,
@@ -815,9 +815,9 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE,false,payload)
             handleException(e,{throwNetworkErrorToComponent:true})
         }
-    },
+    }, */
 
-    async [ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS](context,payload) {
+    /* async [ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS](context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS,true,payload)
             
@@ -835,9 +835,9 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE_COMMENT_BODY_HTML_AND_REACTIONS,false,payload)
             handleException(e,{throwNetworkErrorToComponent:true})
         }
-    },
+    }, */
     
-    async [ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS](context,payload) {
+    /* async [ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS](context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS,true,payload)
             let cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS)
@@ -855,5 +855,5 @@ export default {
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_ISSUE_PROJECTS,false,payload)
             handleException(e,{throwNetworkErrorToComponent:true})
         }
-    },
+    }, */
 }
