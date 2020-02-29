@@ -69,7 +69,7 @@
                     <LoadingIconEx/>
                 </LoadingWrapper>
 
-                <Reaction v-if="commentExtraDataHolder.viewerCanReact" class="reactions border-top">
+                <Reaction v-if="commentExtraDataHolder.viewerCanReact || withReaction" class="reactions border-top">
                     <button class="reaction-item btn-link" :disabled="!commentExtraDataHolder.viewerCanReact" v-if="reactionStatistic.THUMBS_UP > 0">
                         <span class="emoj mr-1">👍</span>        
                         {{reactionStatistic.THUMBS_UP}}
@@ -230,7 +230,7 @@
                 return commentExtraDataHolder
             },
             createdAt() {
-                return util_dateFormat.getDateDiffOrDateFormatDependOnGap('dd zzz yyyy',new Date(this.data.created_at),this.dataStampGapThreshold)
+                return util_dateFormat.getDateDiffOrDateFormatDependOnGap('d zzz yyyy',new Date(this.data.created_at),this.dataStampGapThreshold)
             },
             reactionStatistic() {
                 let reactionStatistic
@@ -251,6 +251,17 @@
                     }
                 }
                 return reactionStatistic 
+            },
+            withReaction() {
+                for(let key in this.reactionStatistic) {
+                    switch(this.reactionStatistic[key]) {
+                        case 0:
+                            break
+                        default:
+                            return true
+                    }
+                }
+                return false
             },
             withEditHistory() {
                 return this.commentExtraDataHolder.userContentEdits && this.commentExtraDataHolder.userContentEdits.totalCount > 0

@@ -112,7 +112,7 @@
                 <TimelineItem v-for="(item,index) in mergedTimelineData(timeline.lastData)" :data="item" :key="(item.id || '') + index"/>
         </transition-group>
 
-        <Editor v-if="data.id" class="pt-3 mb-5" style="border-top: 2px solid #e1e4e8;" :locked="data.locked" :lockedReason="extraData.data.activeLockReason"></Editor>
+        <Editor v-if="data.id" class="pt-3 mb-5" style="border-top: 2px solid #e1e4e8;" :locked="viewerCannotComment" :lockedReason="extraData.data.activeLockReason"></Editor>
 
 
         <InfoBottom v-if="data.id">
@@ -122,13 +122,14 @@
                     Assignees
                     <svg v-if="data.assignees && data.assignees.length > 0" class="octicon octicon-gear" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path></svg>
                 </InfoBottomItemTitle>
-                <div style="margin-bottom:10px" v-for="item in data.assignees" :key="item.id">
+                <div style="margin-bottom:10px" v-for="item in data.assignees.slice(0,21)" :key="item.id">
                     <router-link to="/">
                         <img class="avatar" :src="item.avatar_url" width="20" height="20" :alt="`@${item.login}`"> 
                         <span class="assignee-login">{{item.login}}</span>    
                     </router-link> 
                 </div>
                 <span v-if="!(data.assignees && data.assignees.length > 0)">No one assigneed</span>    
+                <span v-if="data.assignees.length > 21">and others</span>    
             </InfoBottomItem>
 
              <!-- labels -->
@@ -137,10 +138,11 @@
                     Labels
                     <svg v-if="data.labels && data.labels.length > 0" class="octicon octicon-gear" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path></svg>
                 </InfoBottomItemTitle>
-                <router-link class="d-block mt-1" to="/" v-for="item in data.labels" :key="item.id">
+                <router-link class="d-block mt-1" to="/" v-for="item in data.labels.slice(0,21)" :key="item.id">
                     <Label class="width-full" :name="item.name" :color="`#${item.color}`"></Label>      
                 </router-link> 
                 <span v-if="!(data.labels && data.labels.length > 0)">None yet</span>    
+                <span v-if="data.labels.length > 21">and others</span> 
             </InfoBottomItem>
 
              <!-- projects -->
@@ -149,8 +151,47 @@
                     Projects
                     <svg v-if="projects.length > 0" class="octicon octicon-gear" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path></svg>
                 </InfoBottomItemTitle>
-                <ProjectCard v-for="item in projects" :key="item.id" :data="item"></ProjectCard>
-                <span v-if="!(projects.length > 0)">None yet</span>    
+                <ProjectCard v-for="item in projects.slice(0,21)" :key="item.id" :data="item"></ProjectCard>
+                <span v-if="!(projects.length > 0)">None yet</span>  
+                <span v-if="projects.length > 21">and others</span>   
+            </InfoBottomItem>
+
+             <!-- milestones -->
+            <InfoBottomItem class="info-bottom-item">
+                <InfoBottomItemTitle class="info-bottom-item-title">
+                    Milestone
+                    <svg v-if="data.milestone" class="octicon octicon-gear" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path></svg>
+                </InfoBottomItemTitle>
+                <Progress v-if="data.milestone" :donePercent="data.milestone.closed_issues / (data.milestone.closed_issues + data.milestone.open_issues)"></Progress>
+                <router-link to="/" v-if="data.milestone" class="link-gray mt-1 d-block text-bold css-truncate">
+                    <strong class="d-inline-block v-align-text-top css-truncate-target">{{data.milestone.title}}</strong>
+                </router-link>
+                <span v-else>No milestone</span>    
+            </InfoBottomItem>
+
+             <!-- notifications -->
+            <InfoBottomItem class="info-bottom-item">
+                <InfoBottomItemTitle class="info-bottom-item-title d-flex flex-justify-between">
+                    Notifications
+                    <span class="text-normal">Customize</span>
+                </InfoBottomItemTitle>
+               <button type="submit" class="btn btn-block btn-sm d-block width-full" data-disable-with="">
+                    <svg class="octicon octicon-mute" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2.81v10.38c0 .67-.81 1-1.28.53L3 10H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h2l3.72-3.72C7.19 1.81 8 2.14 8 2.81zm7.53 3.22l-1.06-1.06-1.97 1.97-1.97-1.97-1.06 1.06L11.44 8 9.47 9.97l1.06 1.06 1.97-1.97 1.97 1.97 1.06-1.06L13.56 8l1.97-1.97z"></path></svg> Unsubscribe
+                </button>
+                <span class="mt-1 d-inline-block" v-if="extraData.data.viewerSubscription">You're {{extraData.data.viewerSubscription.toLowerCase()}} to this thread.</span>
+            </InfoBottomItem>
+
+            <!-- participants -->
+            <InfoBottomItem class="info-bottom-item">
+                <InfoBottomItemTitle class="info-bottom-item-title">
+                    {{extraData.data.participants && extraData.data.participants.totalCount}} participants
+                </InfoBottomItemTitle>
+                <div style="margin-bottom:10px" class="d-flex flex-wrap">
+                    <router-link to="/" v-for="item in extraData.data.participants ? extraData.data.participants.nodes : []" :key="item.id" class="mt-1 ml-1">
+                        <img class="avatar" :src="item.avatarUrl" width="26" height="26" :alt="`@${item.login}`"> 
+                    </router-link> 
+                </div>
+                <span v-if="extraData.data.participants && (extraData.data.participants.totalCount > 21)">and others</span>    
             </InfoBottomItem>
         </InfoBottom>
 
@@ -159,27 +200,56 @@
                             :preventClickEvent="false"
                             :position="loading ? 'center' : 'corner'"/>
         </transition>  
+
+        <transition name="fade" appear>
+            <StickyTop v-if="scrollTop > 300" class="sticky-top px-3 py-2">
+                <StickyTopContent class="d-flex flex-items-center flex-justify-between">
+                    <span class="State State--green mr-2 flex-shrink-0" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}">
+                        <svg height="16" class="octicon octicon-issue-opened" viewBox="0 0 14 16" version="1.1" width="14" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg> 
+                        <span style="text-transform: Capitalize">{{data.state}}</span>    
+                    </span>
+
+                    <div class="min-width-0">
+                        <h1 class="d-flex text-bold f5">
+                            <router-link to="/" class="css-truncate css-truncate-target link-gray-dark width-fit">
+                                {{data.title}}
+                            </router-link>
+                            <span class="text-gray-light pl-1 no-wrap text-normal">#{{data.number}}</span>
+                        </h1>
+                        <div class="meta text-gray-light css-truncate css-truncate-target d-block width-fit f6">
+                            <router-link to="/" class="text-bold link-gray">{{data.user && data.user.login}}</router-link>  opened this issue
+                            <span class="no-wrap">{{createdAt}}</span>
+                            · {{data.comments}} {{data.comments > 1 ? 'comments' : 'comment'}}
+                        </div>
+                    </div> 
+
+                </StickyTopContent>
+            </StickyTop>
+        </transition>     
+        
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading,Label,AnimatedHeightWrapper,LoadingIconEx} from '../../../../components'
+    import {CommonLoading,Label,AnimatedHeightWrapper,LoadingIconEx,Progress} from '@/components'
+    import {ScrollTopListenerMixin} from '@/mixins'
     import {TimelineItem,Comment,HiddenItemLoading,Editor,ProjectCard} from './components'
-    import {util_dateFormat} from '../../../../util'
+    import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
         authRequiredGitHubGraphqlApiQuery,
         cancelAndUpdateAxiosCancelTokenSource} from '@/network'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
-    import {ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA, ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE} from '../../../../store/modules/repository/actionTypes'
+    import {ACTION_REPOSITORY_REQUEST_ISSUE_DETAIL_DATA, ACTION_REPOSITORY_REQUEST_ISSUE_TIMELINE} from '@/store/modules/repository/actionTypes'
     import {mapState,mapActions} from 'vuex'
     var parse = require('parse-link-header');
     var parse = require('parse-link-header');
     export default {
         name: 'issueDetail',
         inject: ['owner','repo'],
+        mixins: [ScrollTopListenerMixin],
         provide() {
             return {
                 commentExtraGraphqlDataGetter: () => this.timeline.commentExtraGraphqlData.data,
@@ -306,6 +376,7 @@
         },
        
         computed: {
+           
             number() {
                 return this.$route.params.number
             },
@@ -314,6 +385,9 @@
             },
             updatedAt() {
                 return util_dateFormat.dateFormat('dd zzz yyyy', new Date(this.data.updated_at))
+            },
+            viewerCannotComment() {
+                return this.data.locked && !this.extraData.data.viewerCanUpdate
             },
             hiddenItemCount() {
                 let alreadyCount = 0
@@ -333,8 +407,10 @@
                 })
                 
                 return this.timeline.count.data - alreadyCount
-            }
-           
+            },
+            /* subscriptionNotice() {
+                return this.extraData.viewerSubscription.toLowerCase()
+            } */
         },
         created() {
             this.network_getData()
@@ -428,7 +504,7 @@
                     let config = {
                         cancelToken:cancelTokenAndSource.cancelToken,
                         headers:{
-                            'Accept': 'application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json,application/vnd.github.VERSION.html'
+                            'Accept': 'application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json'
                         }   
                     }
                     
@@ -606,6 +682,22 @@
                             }
                             lastOne = item
                             break
+                        case 'commented': 
+                            if(lastOne.event === 'commented' && lastOne.user.login === item.user.login && lastOne.body === item.body) {
+                                mergedTimelineData.push({
+                                    id: item.id,
+                                    event:'similar_comment',
+                                    comments: [item]
+                                })
+                                lastOne = mergedTimelineData[mergedTimelineData.length - 1]
+                            }else if(lastOne.event === 'similar_comment' && lastOne.comments[0].user.login === item.user.login && lastOne.comments[0].body === item.body){
+                                mergedTimelineData[mergedTimelineData.length - 1].comments.push(item)
+                                lastOne = mergedTimelineData[mergedTimelineData.length - 1]
+                            }else{
+                                mergedTimelineData.push(item)
+                                lastOne = item
+                            }
+                            break
                         default:
                             mergedTimelineData.push(item)
                             lastOne = item
@@ -615,7 +707,7 @@
             },
             cancelNetwork() {
                 this.cancelTokenArr_timeline.forEach(item => {
-                    item.cancel()
+                    item.source.cancel()
                 })
             }
         },
@@ -639,6 +731,7 @@
             LoadingIconEx,
             AnimatedHeightWrapper,
             Editor,
+            Progress,
             ProjectCard,
             Container: styled.div``,
             Header: styled.div``,
@@ -653,6 +746,8 @@
             InfoBottom: styled.div``,
             InfoBottomItem: styled.div``,
             InfoBottomItemTitle: styled.div``,
+            StickyTop: styled.div``,
+            StickyTopContent: styled.div``,
         }
     }
 </script>
@@ -716,5 +811,16 @@
             font-size: 12px;
         }
     
+}
+
+.sticky-top{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 109;
+    display: block;
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0,0,0,.15);
 }
 </style>

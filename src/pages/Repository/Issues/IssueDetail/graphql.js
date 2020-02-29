@@ -11,6 +11,17 @@ export const GRAPHQL_ISSUE_BODY_HTML_AND_REACTIONS_AND_PROJECTS = payload => {
             viewerCanUpdate
             viewerCanSubscribe
             viewerCanReact
+            userContentEdits {
+              totalCount
+            }
+            participants(first: 21) {
+              totalCount
+              nodes {
+                avatarUrl
+                id
+                login
+              }
+            }
             projectCards(first: 100) {
               totalCount
               nodes {

@@ -4,17 +4,17 @@
             scrollTop:0
         }),
         mounted() {
-            window.addEventListener('scroll',this.recordScrollTop,false)
+            let scrollEl = document.getElementById('app-container')
+            scrollEl.addEventListener('scroll',this.recordScrollTop,false)
         },
         destroyed() {
-            window.removeEventListener('scroll',this.recordScrollTop,false)
-        },
-        created(){
-            this.action_getData()
+            let scrollEl = document.getElementById('app-container')
+            scrollEl.removeEventListener('scroll',this.recordScrollTop,false)
         },
         methods: {
             recordScrollTop(event) {
-                let scrollTop = document.documentElement.scrollTop || document.body.scrollTop
+                let scrollEl = document.getElementById('app-container')
+                let scrollTop = scrollEl.scrollTop
                 this.scrollTop = scrollTop
             }
         }

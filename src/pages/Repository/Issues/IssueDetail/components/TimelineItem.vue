@@ -1,6 +1,8 @@
 <template>
     <Container>
         <Comment v-if="data.event === 'commented'" :data="data"></Comment>
+        <!-- similar_comment -->
+        <SimilarComments v-else-if="data.event === 'similar_comment'" :data="data"></SimilarComments>
         <!-- pinned  -->
         <Other v-else-if="data.event === 'pinned'" :data="data">
             <template v-slot:icon>
@@ -19,13 +21,32 @@
                  unpinned this issue
             </template>
         </Other>
+        <!-- added_to_project  -->
+        <Other v-else-if="data.event === 'added_to_project'" :data="data">
+            <template v-slot:icon>
+                <svg class="octicon" :class="{'loading-animation':loading}" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 12h3V2h-3v10zm-4-2h3V2H6v8zm-4 4h3V2H2v12zm-1 1h13V1H1v14zM14 0H1a1 1 0 00-1 1v14a1 1 0 001 1h13a1 1 0 001-1V1a1 1 0 00-1-1z"></path></svg>
+            </template>
+            <template v-slot:action>
+                added this to <strong>{{data.project_card.column_name}}</strong> in <strong>{{project.name}}</strong>
+            </template>
+        </Other>
+        <!-- removed_from_project  -->
+        <Other v-else-if="data.event === 'removed_from_project'" :data="data">
+            <template v-slot:icon>
+                <svg class="octicon" :class="{'loading-animation':loading}" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 12h3V2h-3v10zm-4-2h3V2H6v8zm-4 4h3V2H2v12zm-1 1h13V1H1v14zM14 0H1a1 1 0 00-1 1v14a1 1 0 001 1h13a1 1 0 001-1V1a1 1 0 00-1-1z"></path></svg>
+            </template>
+            <template v-slot:action>
+                removed this from <strong>{{data.project_card.column_name}}</strong> in <strong>{{project.name}}</strong>
+            </template>
+        </Other>
+        
         <!-- moved_columns_in_project  -->
         <Other v-else-if="data.event === 'moved_columns_in_project'" :data="data">
             <template v-slot:icon>
                 <svg class="octicon" :class="{'loading-animation':loading}" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 12h3V2h-3v10zm-4-2h3V2H6v8zm-4 4h3V2H2v12zm-1 1h13V1H1v14zM14 0H1a1 1 0 00-1 1v14a1 1 0 001 1h13a1 1 0 001-1V1a1 1 0 00-1-1z"></path></svg>
             </template>
             <template v-slot:action>
-                moved this from <strong>{{data.project_card.previous_column_name}}</strong> to <strong>{{data.project_card.column_name}}</strong> in <!-- {{project.name}} -->
+                moved this from <strong>{{data.project_card.previous_column_name}}</strong> to <strong>{{data.project_card.column_name}}</strong> in {{project.name}}
             </template>
         </Other>
         <!-- assigned  -->
@@ -93,7 +114,7 @@
                 mentioned this issue
             </template>
             <template v-slot:additional>
-                <SourceIssue class="mt-2 flex">
+                <SourceIssue class="mt-2 flex flex-justify-between">
                     <IssueTitle>
                         <router-link to="/" class="text-bold f4 link-gray-dark">
                             {{data.source.issue.title}}
@@ -121,7 +142,7 @@
             </template>
             <template v-slot:additional>
                 <AnimatedHeightWrapper class="mt-2" :stretch="pullRequest.id !== undefined">
-                     <SourceIssue class="flex">
+                     <SourceIssue class="flex flex-justify-between">
                         <IssueTitle>
                             <router-link to="/" class="text-bold f4 link-gray-dark">
                                 {{data.source.issue.title}}
@@ -140,7 +161,7 @@
                     
                     <TaskProgress class="task-progress" v-if="pullRequestTaskProgress">
                         <svg class="octicon octicon-checklist" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M16 8.5l-6 6-3-3L8.5 10l1.5 1.5L14.5 7 16 8.5zM5.7 12.2l.8.8H2c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h7c.55 0 1 .45 1 1v6.5l-.8-.8c-.39-.39-1.03-.39-1.42 0L5.7 10.8a.996.996 0 000 1.41v-.01zM4 4h5V3H4v1zm0 2h5V5H4v1zm0 2h3V7H4v1zM3 9H2v1h1V9zm0-2H2v1h1V7zm0-2H2v1h1V5zm0-2H2v1h1V3z"></path></svg>
-                        <span class="task-progress-counts">6 of 13 tasks complete</span>
+                        <span class="task-progress-counts">{{pullRequestTaskProgress.checked}} of {{pullRequestTaskProgress.all}} tasks complete</span>
                         <ProgressBar class="progress-bar v-align-middle">
                             <span class="progress" :style="{width: pullRequestTaskProgress.checked/pullRequestTaskProgress.all}"></span>
                         </ProgressBar>
@@ -161,7 +182,7 @@
                 <SourceCommit class="mt-3 flex">
                     <img class="mr-2" :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" height="20" width="20">
 
-                    <code class="d-inline-block mr-1 flex-grow-1">
+                    <code class="d-inline-block mr-1 flex-grow-1 mr-3">
                         <router-link to="/" class="link-gray" v-html="referenceHighlightMessageOfCommit"></router-link>
                     </code>
 
@@ -206,7 +227,7 @@
             </template>
             <template v-slot:action>
                 added the
-                <Label :name="data.label.name" :color="data.label.color"/>
+                <Label :name="data.label.name" :color="`#${data.label.color}`"/>
                 label
             </template>
         </Other>
@@ -217,7 +238,7 @@
             </template>
             <template v-slot:action>
                 removed the
-                <Label :name="data.label.name" :color="data.label.color"/>
+                <Label :name="data.label.name" :color="`#${data.label.color}`"/>
                 label
             </template>
         </Other>
@@ -229,12 +250,12 @@
             <template v-slot:action>
                 <span v-if="data.labels_added">
                     add
-                    <Label v-for="item in data.labels_added" :key="item.name" :name="item.name" :color="item.color"></Label>
+                    <Label class="mr-1" v-for="item in data.labels_added" :key="item.name" :name="item.name" :color="`#${item.color}`"></Label>
                 </span>
                 <span v-if="data.labels_added && data.labels_removed">and</span>
                 <span v-if="data.labels_removed">
                     removed
-                    <Label v-for="item in data.labels_removed" :key="item.name" :name="item.name" :color="item.color"></Label>
+                    <Label class="mr-1" v-for="item in data.labels_removed" :key="item.name" :name="item.name" :color="`#${item.color}`"></Label>
                 </span>
                 labels
             </template>
@@ -379,6 +400,7 @@
     import styled from 'vue-styled-components'
     import Comment from './Comment'
     import Other from './Other'
+    import SimilarComments from './SimilarComments'
     import {Label,AnimatedHeightWrapper} from '../../../../../components'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '../../../../../store/modules/network'
     export default {
@@ -392,7 +414,7 @@
         data() {
             return {
                 loading: false,
-                project: {},
+                project: {}, //adde_to_proj
                 lockReason: '', //locked
                 commit: {}, // referenced closed
                 transferredFrom: '', //transferred
@@ -419,6 +441,7 @@
                         message = message.replace(item,`<a href="/"><strong>${repoFullName}${commitNumber}</strong></a>`)
                     })
                 }
+                message = message.replace(`#${this.issueNumber}`,`<strong>#${this.issueNumber}</strong>`)
                 return message
             },
             pullRequestTaskProgress() {
@@ -429,8 +452,8 @@
                 let checkedCheckboxMatches =this.pullRequest.bodyHTML.match(reg_checkedCheckboxInput)
                 if((!checkedCheckboxMatches) && (!checkboxMatches)) return undefined
                 return {
-                    checked: checkedCheckboxMatches.length,
-                    all: checkboxMatches.length,
+                    checked: checkedCheckboxMatches ? checkedCheckboxMatches.length : 0,
+                    all: checkboxMatches ? checkboxMatches.length : 0,
                 }
             }
         },
@@ -440,40 +463,44 @@
             }
         },
         mounted() {
-            try{
-                switch(this.data.event){
-                    case "added_to_project":
-                    case "moved_columns_in_project":
-                    case "removed_from_project":
-                        this.getRelevantProject()
-                        break
-                    case "locked":
-                        this.getLockReason()
-                        break
-                    case "referenced":
-                    case "closed":
-                        this.getRelevantCommit()
-                        break
-                    case "transferred":
-                        this.getTransferredFrom()
-                        break
-                    case "user_blocked":
-                        this.getBlockedUser()
-                        break
-                    case "cross-referenced":
-                        if(this.data.source.issue.pull_request) {
-                            this.getRelevantPullRequest()
-                        }
-                        break
-                    default:
-                }
-            }catch(e) {
-                console.log(e)
-                this.loading = false
-            }
+            this.getAdditionalData()
+           
             
         },
         methods: {
+            getAdditionalData() {
+                 try{
+                    switch(this.data.event){
+                        case "added_to_project":
+                        case "moved_columns_in_project":
+                        case "removed_from_project":
+                            this.getRelevantProject()
+                            break
+                        case "locked":
+                            this.getLockReason()
+                            break
+                        case "referenced":
+                        case "closed":
+                            this.getRelevantCommit()
+                            break
+                        case "transferred":
+                            this.getTransferredFrom()
+                            break
+                        case "user_blocked":
+                            this.getBlockedUser()
+                            break
+                        case "cross-referenced":
+                            if(this.data.source.issue.pull_request) {
+                                this.getRelevantPullRequest()
+                            }
+                            break
+                        default:
+                    }
+                }catch(e) {
+                    console.log(e)
+                    this.loading = false
+                }
+            },
             async getRelevantCommit() {
                 if(!this.data.commit_url || this.data.commit_url === null ) return
                 this.loading = true
@@ -502,10 +529,10 @@
                 this.loading = false
             },
             async getRelevantProject() {
-                if(!this.data.project_card || !this.data.project_card.url ) return
+                if(!this.data.project_card || !this.data.project_card.project_url ) return
                 this.loading = true
                 let res = await authRequiredGet(
-                    this.data.project_card.url,
+                    this.data.project_card.project_url,
                     {
                         headers: {
                             "Accept": "application/vnd.github.inertia-preview+json"
@@ -576,6 +603,7 @@
             Other,
             Label,
             AnimatedHeightWrapper,
+            SimilarComments,
             Container: styled.div``,
             SourceIssue: styled.div``,
             IssueTitle: styled.div``,

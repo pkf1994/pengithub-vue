@@ -1,6 +1,6 @@
 <template>
     <Container style="overflow: hidden;transition: height .4s" :style="{height: stretch ? `${height}px` : 0}">
-        <Inner ref="content" v-on:compute-height="subComputeHeightEventHandler">
+        <Inner ref="content" v-on:compute-height="subComputeHeightEventHandler" >
             <slot></slot>
         </Inner>
     </Container>
@@ -15,11 +15,11 @@
             stretch: {
                 type: Boolean,
                 default: true
-            },
-            delay: {
+            }
+            /* delay: {
                 type: Number,
                 default: 0
-            }
+            } */
         },
         data() {
             return {
@@ -32,11 +32,19 @@
         },
         updated() {
             this.computeHeight()
-            if(this.delay !== 0) {
+
+            //处理图片加载问题
+            let imgArr = this.$refs.content.$el.getElementsByTagName('img')
+            imgArr.forEach((item) => {
+                item.onload = () => {
+                    this.computeHeight()
+                }
+            })
+           /*  if(this.delay !== 0) {
                 setTimeout(() => {
                     this.computeHeight()
                 },this.delay)
-            }
+            } */
         },
         activated() {
             this.computeHeight()
