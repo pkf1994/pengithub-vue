@@ -29,7 +29,9 @@ const RepositoryIssueDetail = () => import('../pages/Repository/Issues/IssueDeta
 /* const RepositoryIssuesOpen = () => import('../pages/Repository/Issues/Open.vue')
 const RepositoryIssuesClosed = () => import('../pages/Repository/Issues/Closed.vue')
 const RepositoryIssuesYours = () => import('../pages/Repository/Issues/Yours.vue') */
-const RepositoryPullRequests = () => import('../pages/Repository/PullRequests/PullRequests.vue')
+const RepositoryPullRequestsBrowser = () => import('../pages/Repository/PullRequests/PullRequestsBrowser.vue')
+const RepositoryPullRequestDetail = () => import('../pages/Repository/PullRequests/PullRequestDetail/PullRequestDetail.vue')
+const RepositoryPullRequestConversation = () => import('../pages/Repository/PullRequests/PullRequestDetail/Conversation.vue')
 /* const RepositoryPullRequestsOpen = () => import('../pages/Repository/PullRequests/Open.vue')
 const RepositoryPullRequestsClosed = () => import('../pages/Repository/PullRequests/Closed.vue')
 const RepositoryPullRequestsYours = () => import('../pages/Repository/PullRequests/Yours.vue') */
@@ -193,21 +195,17 @@ export default [
             },
             {
                 path: 'pulls',
-                component: RepositoryPullRequests
-                /* children: [
+                component: RepositoryPullRequestsBrowser,
+            },
+            {   
+                path: 'pull/:number',
+                component: RepositoryPullRequestDetail,
+                children: [
                     {
                         path: '/',
-                        component: RepositoryPullRequestsOpen
-                    },
-                    {
-                        path: 'closed',
-                        component: RepositoryPullRequestsClosed
-                    },
-                    {
-                        path: 'yours',
-                        component: RepositoryPullRequestsYours
-                    },
-                ] */
+                        component: RepositoryPullRequestConversation
+                    }
+                ]
             },
             {
                 path: 'projects',

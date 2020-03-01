@@ -23,7 +23,7 @@ import {
     MUTATION_SEARCH_RESOLVE_COUNT_OF_RESULT_GROUP_BY_SEARCH_TYPE,
     MUTATION_SEARCH_RESOLVE_FIRST_TOPIC,
     MUTATION_SEARCH_RESOLVE_RELATED_TOPICS,
-    MUTATION_SEARCH_RESOLVE_REPOSITORIES_TOPICS, 
+    MUTATION_SEARCH_RESOLVE_REPOSITORIES_ADDITIONAL_DATA, 
     MUTATION_SEARCH_RESOLVE_REPOSITORY_COUNT_BY_TOPICS,
     MUTATION_SEARCH_RESOLVE_SEARCH_RESULT, 
     MUTATION_SEARCH_RESOLVE_VIEWER_HAS_STARRED_TOPICS,
@@ -36,7 +36,7 @@ import {
     GRAPHQL_COUNT_OF_REPOSITORY_BY_TOPICS,
     GRAPHQL_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE, 
     GRAPHQL_RELATIVE_TOPICS_OF_TOPICS,
-    GRAPHQL_TOPICS_AND_LANGUAGE_COLOR_AND_HELP_WANTED_ISSUES_COUNT_OF_REPOSITORIES,
+    GRAPHQL_HELP_WANTED_ISSUES_COUNT_OF_REPOSITORIES,
     GRAPHQL_NAME_BIO_LOCATION_EMAIL_FOLLOWSHIP_OF_USERS,
     GRAPHQL_COUNT_OF_USER_GROUP_BY_LANGUAGE
 } from "./graphql";
@@ -158,19 +158,13 @@ export const actions = {
         try{
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA,true)
             const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA)
-            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_TOPICS_AND_LANGUAGE_COLOR_AND_HELP_WANTED_ISSUES_COUNT_OF_REPOSITORIES(payload),{cancelToken})
-            const topics = {}
-            const languageColors = {}
+            const res = await authRequiredGitHubGraphqlApiQuery(GRAPHQL_HELP_WANTED_ISSUES_COUNT_OF_REPOSITORIES(payload),{cancelToken})
             const helpWantedIssuesCount = {}
             for(let key in res.data.data) {
-                topics[res.data.data[key].nameWithOwner] = res.data.data[key].repositoryTopics.nodes
-                languageColors[res.data.data[key].nameWithOwner] = res.data.data[key].languages.nodes[0] && res.data.data[key].languages.nodes
                 helpWantedIssuesCount[res.data.data[key].nameWithOwner] = res.data.data[key].issues.totalCount
             }
             context.commit({
-                type: MUTATION_SEARCH_RESOLVE_REPOSITORIES_TOPICS,
-                data: topics,
-                languageColors,
+                type: MUTATION_SEARCH_RESOLVE_REPOSITORIES_ADDITIONAL_DATA,
                 helpWantedIssuesCount
             })
             commitTriggerLoadingMutation(context,ACTION_SEARCH_REQUEST_REPOSITORIES_ADDITIONAL_DATA,false)

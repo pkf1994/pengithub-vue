@@ -3,7 +3,7 @@ import {
 } from "../crossMutation";
 import {
     MUTATION_SEARCH_RESOLVE_COUNT_OF_REPOSITORY_GROUP_BY_LANGUAGE,
-    MUTATION_SEARCH_RESOLVE_REPOSITORIES_TOPICS,
+    MUTATION_SEARCH_RESOLVE_REPOSITORIES_ADDITIONAL_DATA,
     MUTATION_SEARCH_RESOLVE_SEARCH_RESULT,
     MUTATION_SEARCH_SYNC_SEARCH_QUERY,
     MUTATION_SEARCH_RESOLVE_FIRST_TOPIC,
@@ -41,11 +41,9 @@ export default {
         state.searchResult[payload.searchType].pageInfo = payload.pageInfo || {}
     },
 
-    [MUTATION_SEARCH_RESOLVE_REPOSITORIES_TOPICS] (state,payload) {
+    [MUTATION_SEARCH_RESOLVE_REPOSITORIES_ADDITIONAL_DATA] (state,payload) {
         state.searchResult.repositories.data.forEach((item,index) => {
             Vue.set(state.searchResult.repositories.data,index, Object.assign({},item,{
-                topics: payload.data[item.full_name],
-                languageColor: payload.languageColors[item.full_name],
                 helpWantedIssuesCount: payload.helpWantedIssuesCount[item.full_name]
             }))
         })

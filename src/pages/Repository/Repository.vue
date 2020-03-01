@@ -63,6 +63,9 @@
                     {
                         label: TAB_PULLS,
                         routerLink: `${path}/pulls`,
+                        extraActiveRouterLinks: [
+                            `${path}/pull`
+                        ],
                          meta: this.topTabCountData.pullRequests && this.topTabCountData.pullRequests.totalCount
                     },
                     {

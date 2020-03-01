@@ -18,6 +18,7 @@ import Modal from './Modal'
 import Popover from './Popover'
 import Label from './Label'
 import Progress from './Progress'
+import IssueIcon from './IssueIcon'
 export {
     Button,
     LogoHeader,
@@ -51,5 +52,6 @@ export {
     SelectMenuItem,
     Modal,
     Popover,
-    Progress
+    Progress,
+    IssueIcon
 }

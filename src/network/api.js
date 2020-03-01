@@ -61,3 +61,7 @@ export const API_ISSUE = (payload) => {
 export const API_ISSUE_TIMELINE = (payload) => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/timeline`
 }
+
+export const API_PULLREQUEST = (payload) => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}`
+}

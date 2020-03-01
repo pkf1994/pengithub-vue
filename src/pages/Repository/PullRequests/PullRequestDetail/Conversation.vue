@@ -1,99 +1,79 @@
 <template>
-    <Container class="px-3 pt-3 bg-white flex-grow-1">
+    <Container class="pt-3 flex-grow-1">
         <AnimatedHeightWrapper>
-            <Header v-if="data.id">
-                <HeaderActions class="flex flex-justify-between flex-items-center mb-3">
-                    <router-link to="/" class="btn btn-primary d-inline-block btn-sm">
-                        New issue
-                    </router-link>
-
-                    <a href="javascript:return false">Jump to bottom</a>
-                </HeaderActions>
-
-                <HeaderTitle class="title f1">
-                    {{data.title}}
-                    <span class="number">#{{data.number}}</span>
-                </HeaderTitle>
-
-                <HeaderMeta class="flex mt-2 mb-3 flex-items-center header-meta">
-                    <State class="State State--green mr-2 d-inline-flex flex-items-center" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize;">
+            <Header v-if="data.id" class="px-3 bg-white ">
+                <HeaderActions class="flex flex-justify-between flex-items-center">
+                   <State class="State State--green mr-2 d-inline-flex flex-items-center" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize;">
                         <IssueIcon color="#fff" :issue="data"></IssueIcon>
                         &nbsp;{{data.state}}
                     </State>   
 
-                    <MetaContent class="meta-content">
-                        <router-link to="/" class="text-bold link-gray">{{data.user && data.user.login}}</router-link>
-                        {{data.state}} this issue
-                        <span class="no-wrap">on {{createdAt}}</span>&nbsp;· {{data.comments}} {{data.comments > 1 ? 'comments' : 'comment'}} 
-                    </MetaContent>
-                </HeaderMeta>
+                    <a href="javascript:return false">Jump to bottom</a>
+                </HeaderActions>
+
+                <HeaderTitle class="title" style="font-weight: bold; margin-top:10px">
+                    {{data.title}}
+                    <span class="text-normal text-gray">#{{data.number}}</span>
+                </HeaderTitle>
+
+                <Branch class="branch">
+                    <span class="inner">
+                        <svg class="octicon octicon-git-branch" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 5c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v.3c-.02.52-.23.98-.63 1.38-.4.4-.86.61-1.38.63-.83.02-1.48.16-2 .45V4.72a1.993 1.993 0 00-1-3.72C.88 1 0 1.89 0 3a2 2 0 001 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-.53-.2-1-.53-1.36.09-.06.48-.41.59-.47.25-.11.56-.17.94-.17 1.05-.05 1.95-.45 2.75-1.25S8.95 7.77 9 6.73h-.02C9.59 6.37 10 5.73 10 5zM2 1.8c.66 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2C1.35 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2zm0 12.41c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm6-8c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
+                        {{data.head && data.head.label}}
+                    </span>    
+                </Branch>
+
+                <AuthorAndLastEdit class="author-and-last-edit d-flex">
+                    <div class="flex-auto">
+                        <div class="avatar-parent-child float-left">
+                            <img class="avatar" :src="data.user && data.user.avatar_url" width="32" height="32" :alt="`@${data.user && data.user.login}`">
+                        </div>
+
+                        <div style="margin-left:42px;">
+                            <router-link :to="`/${data.user && data.user.login}`">
+                                <strong>{{data.user && data.user.login}}</strong>
+                            </router-link>  
+                            {{editHistory}}
+                        </div>
+                    </div> 
+
+                    <div class="ml-2">
+                        <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
+                    </div>  
+                </AuthorAndLastEdit>
+
             </Header>
         </AnimatedHeightWrapper>
         
 
-        <Info   class="border-bottom border-top pt-3 mt-3" 
-                v-if="(data.assignees && data.assignees.length !== 0) || (data.labels && data.labels.length !== 0) || (projects.length > 0) || (data.milestone && data.milestone !== null)"
+        <Info  class="pt-3 px-3 bg-white " 
+                v-if="data.labels && data.labels.length !== 0"
                 >
-            <!-- assignee -->
-                 <div class="flex pb-3" v-if="data.assignees && data.assignees.length !== 0">
-                    <span class="text-gray text-bold flex-shrink-0 col-3 f6">Assignees</span>    
-                    <div class="min-width-0 flex flex-wrap mt-n1 flex-wrap">
-                        <img class="avatar mr-1" v-for="item in data.assignees" 
-                        :key="item.id" :src="item.avatar_url" height="20" width="20"> 
-                    </div>
-                </div> 
-           
-            <!-- label -->
-            <AnimatedHeightWrapper>
-                <div class="flex pb-3" v-if="data.labels && data.labels.length !== 0">
-                    <span class="text-gray text-bold flex-shrink-0 col-3 f6">Labels</span>    
-                    <div class="min-width-0 flex flex-wrap mt-n1">
-                        <router-link to="/" v-for="item in data.labels" :key="item.name">
-                            <Label  class="mr-1 mt-1"
-                                    :name="item.name"
-                                    :color="`#${item.color}`"></Label> 
-                        </router-link>
-                      
-                    </div>
-                </div> 
-            </AnimatedHeightWrapper>
-            <!-- project -->
-            <AnimatedHeightWrapper>
-                <div class="flex pb-3" v-if="projects.length !== 0">
-                    <span class="text-gray text-bold flex-shrink-0 col-3 f6">Projects</span>    
-                    <div class="min-width-0 flex flex-wrap mt-n1 f6">
-                        <router-link v-for="item in projects" :key="item.project.name" to="/" class="d-inline-block text-bold mr-2 link-gray-dark">
-                            <svg class="octicon octicon-project text-gray p-0" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 12h3V2h-3v10zm-4-2h3V2H6v8zm-4 4h3V2H2v12zm-1 1h13V1H1v14zM14 0H1a1 1 0 00-1 1v14a1 1 0 001 1h13a1 1 0 001-1V1a1 1 0 00-1-1z"></path></svg>
-                            {{item.project.name}}
-                        </router-link> 
-                    </div>
-                </div> 
-            </AnimatedHeightWrapper>
-            <!-- milestone -->
-            <AnimatedHeightWrapper>
-                <div class="flex pb-3" v-if="data.milestone && data.milestone !== null">
-                    <span class="text-gray text-bold flex-shrink-0 col-3 f6">Milestone</span>    
-                    <div class="min-width-0 flex flex-wrap mt-n1 f6">
-                        <router-link to="/" class="d-inline-block text-bold mr-2 link-gray-dark">
-                            <svg class="octicon octicon-milestone text-gray" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2H6V0h2v2zm4 5H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h10l2 2-2 2zM8 4H6v2h2V4zM6 16h2V8H6v8z"></path></svg>
-                            {{data.milestone.title}}
-                        </router-link> 
-                    </div>
+            <!-- label --> 
+            <AnimatedHeightWrapper class=" border-bottom">
+                <div class="pb-3" v-if="data.labels && data.labels.length !== 0">
+                    <div class="my-1 f6">Labels</div>    
+                    <router-link to="/" v-for="item in data.labels" :key="item.name">
+                        <Label  class="mr-1 mt-1"
+                                :style="{height:'18px',fontSize:'10px'}"
+                                :name="item.name"
+                                :color="`#${item.color}`"></Label> 
+                    </router-link>
                 </div> 
             </AnimatedHeightWrapper>
         </Info>
 
-        <Comment    :data="data"
+        <PullRequestBody   :data="data"
+                    class="bg-white "
                     v-if="data.user" 
-                    style="padding-top:0px!important;margin-top:16px;"
-                    :headerStyle="{
-                        backgroundColor:'#f1f8ff',
-                        borderBottomColor:'#c0d3eb'}"
+                    :headerStyle="{display: 'none'}"
                     :extraData="extraData.data" 
                     :loading="extraData.loading"/>
 
         <transition-group tag="div" appear name="fade">
-            <TimelineItem v-for="(item,index) in mergedTimelineData(timeline.data)" :data="item" :key="(item.id || '') + index"/>
+            <div v-for="(item,index) in timeline.data" :key="(item.id || '') + index">
+                <TimelineItem :data="item" class="border-top"/>
+            </div> 
         </transition-group>
 
         <AnimatedHeightWrapper :stretch="timeline.loading && (timeline.data.length === 0)">
@@ -109,66 +89,14 @@
         </HiddenItemLoading>
 
         <transition-group tag="div" appear name="fade">
-                <TimelineItem v-for="(item,index) in mergedTimelineData(timeline.lastData)" :data="item" :key="(item.id || '') + index"/>
+                <TimelineItem v-for="(item,index) in timeline.lastData" :data="item" :key="(item.id || '') + index"/>
         </transition-group>
 
-        <Editor v-if="data.id" class="pt-3 mb-5" style="border-top: 2px solid #e1e4e8;" :locked="viewerCannotComment" :lockedReason="extraData.data.activeLockReason"></Editor>
+        <Editor v-if="data.id" class="pt-3 mb-5" :locked="viewerCannotComment" :lockedReason="extraData.data.activeLockReason"></Editor>
 
 
         <InfoBottom v-if="data.id">
-            <!-- assignee -->
-            <InfoBottomItem class="info-bottom-item">
-                <InfoBottomItemTitle class="info-bottom-item-title">
-                    Assignees
-                    <svg v-if="data.assignees && data.assignees.length > 0" class="octicon octicon-gear" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path></svg>
-                </InfoBottomItemTitle>
-                <div style="margin-bottom:10px" v-for="item in data.assignees.slice(0,21)" :key="item.id">
-                    <router-link to="/">
-                        <img class="avatar" :src="item.avatar_url" width="20" height="20" :alt="`@${item.login}`"> 
-                        <span class="assignee-login">{{item.login}}</span>    
-                    </router-link> 
-                </div>
-                <span v-if="!(data.assignees && data.assignees.length > 0)">No one assigneed</span>    
-                <span v-if="data.assignees.length > 21">and others</span>    
-            </InfoBottomItem>
-
-             <!-- labels -->
-            <InfoBottomItem class="info-bottom-item">
-                <InfoBottomItemTitle class="info-bottom-item-title">
-                    Labels
-                    <svg v-if="data.labels && data.labels.length > 0" class="octicon octicon-gear" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path></svg>
-                </InfoBottomItemTitle>
-                <router-link class="d-block mt-1" to="/" v-for="item in data.labels.slice(0,21)" :key="item.id">
-                    <Label class="width-full" :name="item.name" :color="`#${item.color}`"></Label>      
-                </router-link> 
-                <span v-if="!(data.labels && data.labels.length > 0)">None yet</span>    
-                <span v-if="data.labels.length > 21">and others</span> 
-            </InfoBottomItem>
-
-             <!-- projects -->
-            <InfoBottomItem class="info-bottom-item">
-                <InfoBottomItemTitle class="info-bottom-item-title">
-                    Projects
-                    <svg v-if="projects.length > 0" class="octicon octicon-gear" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path></svg>
-                </InfoBottomItemTitle>
-                <ProjectCard v-for="item in projects.slice(0,21)" :key="item.id" :data="item"></ProjectCard>
-                <span v-if="!(projects.length > 0)">None yet</span>  
-                <span v-if="projects.length > 21">and others</span>   
-            </InfoBottomItem>
-
-             <!-- milestones -->
-            <InfoBottomItem class="info-bottom-item">
-                <InfoBottomItemTitle class="info-bottom-item-title">
-                    Milestone
-                    <svg v-if="data.milestone" class="octicon octicon-gear" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path></svg>
-                </InfoBottomItemTitle>
-                <Progress v-if="data.milestone" :donePercent="data.milestone.closed_issues / (data.milestone.closed_issues + data.milestone.open_issues)"></Progress>
-                <router-link to="/" v-if="data.milestone" class="link-gray mt-1 d-block text-bold css-truncate">
-                    <strong class="d-inline-block v-align-text-top css-truncate-target">{{data.milestone.title}}</strong>
-                </router-link>
-                <span v-else>No milestone</span>    
-            </InfoBottomItem>
-
+        
              <!-- notifications -->
             <InfoBottomItem class="info-bottom-item">
                 <InfoBottomItemTitle class="info-bottom-item-title d-flex flex-justify-between">
@@ -181,18 +109,6 @@
                 <span class="mt-1 d-inline-block" v-if="extraData.data.viewerSubscription">You're {{extraData.data.viewerSubscription.toLowerCase()}} to this thread.</span>
             </InfoBottomItem>
 
-            <!-- participants -->
-            <InfoBottomItem class="info-bottom-item">
-                <InfoBottomItemTitle class="info-bottom-item-title">
-                    {{extraData.data.participants && extraData.data.participants.totalCount}} participants
-                </InfoBottomItemTitle>
-                <div style="margin-bottom:10px" class="d-flex flex-wrap">
-                    <router-link to="/" v-for="item in extraData.data.participants ? extraData.data.participants.nodes : []" :key="item.id" class="mt-1 ml-1">
-                        <img class="avatar" :src="item.avatarUrl" width="26" height="26" :alt="`@${item.login}`"> 
-                    </router-link> 
-                </div>
-                <span v-if="extraData.data.participants && (extraData.data.participants.totalCount > 21)">and others</span>    
-            </InfoBottomItem>
         </InfoBottom>
 
         <transition name="fade" appear>
@@ -234,7 +150,7 @@
     import styled from 'vue-styled-components'
     import {CommonLoading,Label,AnimatedHeightWrapper,LoadingIconEx,Progress,IssueIcon} from '@/components'
     import {ScrollTopListenerMixin} from '@/mixins'
-    import {TimelineItem,Comment,HiddenItemLoading,Editor,ProjectCard} from './components'
+    import {TimelineItem,Comment,HiddenItemLoading,Editor,ProjectCard,PullRequestBody} from './components'
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
@@ -246,7 +162,7 @@
     var parse = require('parse-link-header');
     var parse = require('parse-link-header');
     export default {
-        name: 'issueDetail',
+        name: 'pullRequestDetail',
         inject: ['owner','repo'],
         mixins: [ScrollTopListenerMixin],
         provide() {
@@ -280,7 +196,6 @@
                         loading: false
                     }
                 },
-                projects: [],
                 timelineTypes: [
                     {
                         graphql:'CROSS_REFERENCED_EVENT',
@@ -380,7 +295,8 @@
                 return this.$route.params.number
             },
             createdAt() {
-                return util_dateFormat.dateFormat('dd zzz yyyy', new Date(this.data.created_at))
+                let dateStr = util_dateFormat.getDateDiffOrDateFormatDependOnGap('on dd zzz yyyy', new Date(this.data.created_at), 1000 * 60 * 60 * 24 * 365)
+                return dateStr
             },
             updatedAt() {
                 return util_dateFormat.dateFormat('dd zzz yyyy', new Date(this.data.updated_at))
@@ -407,6 +323,9 @@
                 
                 return this.timeline.count.data - alreadyCount
             },
+            editHistory() {
+                return `opened this pull request ${this.createdAt}`
+            }
             /* subscriptionNotice() {
                 return this.extraData.viewerSubscription.toLowerCase()
             } */
@@ -426,33 +345,31 @@
                 try{
                     let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name).cancelToken
 
-                    //获取issue基本数据
+                    //获取基本数据
                     this.loading = true
-                    let url_issue = api.API_ISSUE({
+                    let url_pullRequest = api.API_PULLREQUEST({
                         repo: this.repo,
                         owner: this.owner,
                         number: this.number
                     })
-                    let res_issue = await authRequiredGet(url_issue,{cancelToken})
-                    this.data = res_issue.data
+                    let res_pullRequest = await authRequiredGet(url_pullRequest,{cancelToken})
+                    this.data = res_pullRequest.data
                     this.loading = false
 
-                    //获取issue timeline(异步)
+                    //获取timeline(异步)
                     this.network_getTimeline()
-
                     
 
-                    //获取issue bodyHTML & projects
+                    //获取bodyHTML
                     this.extraData.loading = true
-                    let graphql_extraData = graphql.GRAPHQL_ISSUE_BODY_HTML_AND_REACTIONS_AND_PROJECTS({nodeId:res_issue.data.node_id})
+                    let graphql_extraData = graphql.GRAPHQL_PR_BODY_HTML_AND_REACTIONS({nodeId:res_pullRequest.data.node_id})
                     let res_extraData = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
                     this.extraData.data = res_extraData.data.data.node
-                    this.projects = res_extraData.data.data.node.projectCards.nodes
                     this.extraData.loading = false
 
                     //获取issue projects
                   /*   this.projects.loading = true
-                    let graphql_projects = graphql.GRAPHQL_ISSUE_PROJECTS({
+                    let graphql_projects = graphql.GRAPHQL_PR_PROJECTS({
                         repo: this.repo,
                         owner: this.owner,
                         number: this.number
@@ -493,7 +410,7 @@
                     let cancelTokenAndSource = cancelAndUpdateAxiosCancelTokenSource(this.name + '_timeline_' + url_timeline)
                     this.cancelTokenArr_timeline = [
                         ...(this.cancelTokenArr_timeline || []),
-                        cancelTokenAndSource
+                        cancelTokenAndSource.cancelToken
                     ]
 
                     let config = {
@@ -545,7 +462,7 @@
                         }
                     })
 
-                    let graphql_issueCommentBodyAndReactions = graphql.GRAPHQL_ISSUE_COMMENT_BODY_AND_REACTIONS(comments)
+                    let graphql_issueCommentBodyAndReactions = graphql.GRAPHQL_PR_COMMENT_BODY_AND_REACTIONS(comments)
                     let res_issueCommentBodyAndReactions = await authRequiredGitHubGraphqlApiQuery(graphql_issueCommentBodyAndReactions,{cancelToken:cancelTokenAndSource.cancelToken})
 
                     if(!payload.changePage) this.timeline.commentExtraGraphqlData.data = []
@@ -569,7 +486,7 @@
                     this.timelineTypes.forEach(item => {
                         timelineTypes_graphql.push(item.graphql)
                     })
-                    let graphql_timelineCount = graphql.GRAPHQL_ISSUE_TIMELINE_COUNT(
+                    let graphql_timelineCount = graphql.GRAPHQL_PR_TIMELINE_COUNT(
                             {
                                 timelineTypes: timelineTypes_graphql,
                                 nodeId: this.data.node_id
@@ -727,15 +644,15 @@
             AnimatedHeightWrapper,
             Editor,
             Progress,
+            PullRequestBody,
             IssueIcon,
-            ProjectCard,
             Container: styled.div``,
             Header: styled.div``,
             HeaderActions: styled.div``,
             HeaderTitle: styled.h1``,
-            HeaderMeta: styled.div``,
+            Branch: styled.div``,
+            AuthorAndLastEdit: styled.div``,
             State: styled.div``,
-            MetaContent: styled.div``,
             Info: styled.div``,
             Labels: styled.div``,
             LoadingTimeline: styled.div``,
@@ -744,6 +661,7 @@
             InfoBottomItemTitle: styled.div``,
             StickyTop: styled.div``,
             StickyTopContent: styled.div``,
+            Body: styled.div``,
         }
     }
 </script>
@@ -751,22 +669,51 @@
 <style scoped lang="scss">
 .title{
     margin-bottom: 0;
-    font-weight: 400;
-    line-height: 1.125;
-    .number{
-        font-weight: 300;
-        color: #6a737d;
+    font-size: 16px;
+    word-wrap: break-word;
+}
+
+.branch{
+    padding: 7.5px 0;
+    margin: 0;
+    font-size: 12px;
+    color: #959da5;
+    cursor: pointer;
+    .inner{
+        position: relative;
+        display: inline-block;
+        padding-left: 20px;
+        font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+        color: #586069;
+    }
+    svg{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 16px;
+        text-align: left;
     }
 }
 
-.header-meta{
-    font-size: 14px;
+.author-and-last-edit{
+    padding: 10px 0 15px;
+    position: relative;
+    font-size: 12px;
+    line-height: 16px;
     color: #586069;
-    .meta-content{
-        word-wrap: break-word;
-        white-space: normal;
+    background-color: #fff;
+    border-bottom: 1px solid #e1e4e8;
+    a{
+        font-weight: 600;
+        color: #444d56;
     }
 }
+
+.body{
+    background: #fff;
+    border-bottom: 1px solid #dfe2e5;
+}
+
 .loading-timeline{
     height: 200px;
 }

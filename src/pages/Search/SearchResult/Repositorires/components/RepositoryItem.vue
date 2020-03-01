@@ -22,12 +22,12 @@
             </Description>
             
             <Topics>
-                <AnimatedHeightWrapper v-if="topics.length > 0">
+                <AnimatedHeightWrapper>
                     <router-link :meta="randomMeta" 
                                  :key="item + randomMeta"
                                  to="/search"
-                                 class="topic-item d-inline-block topic-tag f6 px-2 mx-0"
-                                 v-for="item in topics">
+                                 class="topic-item d-inline-block topic-tag f6 px-2 mx-0 mr-1"
+                                 v-for="item in repository.topics">
                         {{item}}
                     </router-link>
                 </AnimatedHeightWrapper>
@@ -43,7 +43,7 @@
                 </Stargazers>
                 <Language class="mr-3"  v-if="repository.language">
                     <span>
-                        <span v-if="repository.languageColor" class="repo-language-color" :style="{backgroundColor: languageColor}"></span>
+                        <span v-if="languageColor" class="repo-language-color" :style="{backgroundColor: languageColor}"></span>
                         <span>{{repository.language}}</span>
                     </span>
                 </Language>
@@ -70,6 +70,7 @@
     import styled from 'vue-styled-components'
     import {util_numberFormat, util_dateFormat, util_adjustStyle} from '../../../../../util'
     import {mapState} from "vuex";
+    import {util_analyseFileType} from '@/util'
     import {
         AnimatedHeightWrapper} from '../../../../../components'
     import {
@@ -102,24 +103,18 @@
                 return topics
             },
             languageColor: function () {
-                let color
-                this.repository.languageColor.forEach(item => {
-                    if(item.name === this.repository.language) {
-                        color = item.color
-                    }
-                })
-                return color
+                return util_analyseFileType.getColorOfLanguage(this.repository.language)
             }
         },
         mounted() {
             util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.searchQuery)
         },
         watch: {
-            topics() {
+            /* topics() {
                 this.$nextTick(() => {
                     util_adjustStyle.adjustInlineBlockStyle(`.topic-item[meta=${this.randomMeta}]`)
                 })
-            }
+            } */
         },
         components: {
             AnimatedHeightWrapper,
