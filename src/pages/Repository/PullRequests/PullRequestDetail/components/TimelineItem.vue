@@ -2,9 +2,8 @@
         <CommentWrapper v-if="data.event === 'commented'" class="p-3">
             <Comment  :data="data"></Comment>
         </CommentWrapper>
-        <CommentWrapper v-else-if="data.event === 'similar_comment'" class="p-3">
-            <SimilarComments :data="data"></SimilarComments>
-        </CommentWrapper>
+        <!-- review -->
+        <Review v-else-if="data.event === 'reviewed'" :data="data"></Review>
         <!-- committed  -->
         <SimpleTimelineItem v-else-if="data.event === 'committed'" :data="data">
             <template v-slot:icon>
@@ -125,48 +124,9 @@
                 reopened this
             </template>
         </SimpleTimelineItem>
-        <!-- cross-referenced (by issue) -->
-        <Referenced v-else-if="data.event === 'cross-referenced' && (!data.source.issue.pull_request)" :data="data">
+        <!-- cross-referenced -->
+        <Referenced v-else-if="data.event === 'cross-referenced'" :data="data">
         </Referenced>
-
-        <!-- cross-referenced (by pullRequest) -->
-        <SimpleTimelineItem v-else-if="data.event === 'cross-referenced' && data.source.issue.pull_request" :data="data">
-            <template v-slot:icon>
-                <svg class="octicon" :class="{'loading-animation':loading}" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 14.002a.998.998 0 01-.998.998H1.001A1 1 0 010 13.999V13c0-2.633 4-4 4-4s.229-.409 0-1c-.841-.62-.944-1.59-1-4 .173-2.413 1.867-3 3-3s2.827.586 3 3c-.056 2.41-.159 3.38-1 4-.229.59 0 1 0 1s4 1.367 4 4v1.002z"></path></svg>
-            </template>
-            <template v-slot:action>
-                mentioned this issue
-            </template>
-            <template v-slot:additional>
-                <AnimatedHeightWrapper class="mt-2" :stretch="pullRequest.id !== undefined">
-                     <SourceIssue class="flex flex-justify-between">
-                        <IssueTitle>
-                            <router-link to="/" class="text-bold f4 link-gray-dark">
-                                {{data.source.issue.title}}
-                                <span class="text-normal text-gray">#{{data.source.issue.number}}</span>
-                            </router-link>
-                        </IssueTitle>
-
-                        <IssueState class="flex-shrink-0 ml-3">
-                            <span class="issue-state State--small  State" :class="{'State--green':pullRequest.state === 'open','State--purple':pullRequest.merged === true,'State--red':(pullRequest.merged === false && pullRequest.state === 'closed')}">
-                                <svg v-if="pullRequest.merged" height="14" class="octicon octicon-git-merge" viewBox="0 0 12 16" version="1.1" width="10" aria-hidden="true"><path fill-rule="evenodd" d="M10 7c-.73 0-1.38.41-1.73 1.02V8C7.22 7.98 6 7.64 5.14 6.98c-.75-.58-1.5-1.61-1.89-2.44A1.993 1.993 0 002 .99C.89.99 0 1.89 0 3a2 2 0 001 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2a1.993 1.993 0 001-3.72V7.67c.67.7 1.44 1.27 2.3 1.69.86.42 2.03.63 2.97.64v-.02c.36.61 1 1.02 1.73 1.02 1.11 0 2-.89 2-2 0-1.11-.89-2-2-2zm-6.8 6c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm8 6c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
-                                <svg v-else height="14" class="octicon octicon-git-pull-request" viewBox="0 0 12 16" version="1.1" width="10" aria-hidden="true"><path fill-rule="evenodd" d="M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0010 15a1.993 1.993 0 001-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v6.56A1.993 1.993 0 002 15a1.993 1.993 0 001-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
-                                {{pullRequest.merged ? 'merged' : pullRequest.state}}
-                            </span>
-                        </IssueState>
-                    </SourceIssue>
-                    
-                    <TaskProgress class="task-progress" v-if="pullRequestTaskProgress">
-                        <svg class="octicon octicon-checklist" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M16 8.5l-6 6-3-3L8.5 10l1.5 1.5L14.5 7 16 8.5zM5.7 12.2l.8.8H2c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h7c.55 0 1 .45 1 1v6.5l-.8-.8c-.39-.39-1.03-.39-1.42 0L5.7 10.8a.996.996 0 000 1.41v-.01zM4 4h5V3H4v1zm0 2h5V5H4v1zm0 2h3V7H4v1zM3 9H2v1h1V9zm0-2H2v1h1V7zm0-2H2v1h1V5zm0-2H2v1h1V3z"></path></svg>
-                        <span class="task-progress-counts">{{pullRequestTaskProgress.checked}} of {{pullRequestTaskProgress.all}} tasks complete</span>
-                        <ProgressBar class="progress-bar v-align-middle">
-                            <span class="progress" :style="{width: pullRequestTaskProgress.checked/pullRequestTaskProgress.all}"></span>
-                        </ProgressBar>
-                    </TaskProgress>
-
-                </AnimatedHeightWrapper>
-            </template>
-        </SimpleTimelineItem>
         <!-- referenced  -->
         <SimpleTimelineItem v-else-if="data.event === 'referenced'" :data="data" :showActorAvatar="false">
             <template v-slot:icon>
@@ -398,6 +358,7 @@
     import SimpleTimelineItem from './SimpleTimelineItem'
     import SimilarComments from './SimilarComments'
     import Referenced from './Referenced'
+    import Review from './Review'
     import {Label,AnimatedHeightWrapper} from '../../../../../components'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '../../../../../store/modules/network'
     export default {
@@ -416,7 +377,7 @@
                 commit: {}, // referenced closed committed
                 transferredFrom: '', //transferred
                 blockedUser: {}, //user blocked
-                pullRequest: {} //cross-referenced
+                //pullRequest: {} //cross-referenced
             }
         },
         computed: {
@@ -487,11 +448,11 @@
                         case "user_blocked":
                             this.getBlockedUser()
                             break
-                        case "cross-referenced":
+                       /*  case "cross-referenced":
                             if(this.data.source.issue.pull_request) {
                                 this.getRelevantPullRequest()
                             }
-                            break
+                            break */
                         default:
                     }
                 }catch(e) {
@@ -509,7 +470,7 @@
                 this.commit = res.data
                 this.loading = false
             },
-            async getRelevantPullRequest() {
+            /* async getRelevantPullRequest() {
                 this.loading = true
                 let graphql = `
                     {
@@ -526,7 +487,7 @@
                 let res = await authRequiredGitHubGraphqlApiQuery(graphql)
                 this.pullRequest = res.data.data.node
                 this.loading = false
-            },
+            }, */
             async getRelevantProject() {
                 if(!this.data.project_card || !this.data.project_card.project_url ) return
                 this.loading = true
@@ -604,6 +565,7 @@
             AnimatedHeightWrapper,
             SimilarComments,
             Referenced,
+            Review,
             CommentWrapper: styled.div``,
             SourceIssue: styled.div``,
             IssueTitle: styled.div``,

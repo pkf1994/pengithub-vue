@@ -1,12 +1,12 @@
 <template>
     <span class="d-inline-block label" :style="{color:fontColor,background:color}">
-        {{name}}
+        {{emojiHandledName}}
     </span>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_color} from '../util'
+    import {util_color,util_emoji} from '../util'
     export default {
         props: {
             name: {
@@ -18,18 +18,24 @@
                 required: true
             }
         },
+        
         computed: {
             fontColor() {
                 let isLight = util_color.isLight(this.color)
                 if(isLight) return 'black'
                 else return 'white'
+            },
+            emojiHandledName(){
+                return util_emoji.parse(this.name)
             }
         },
+        
         methods: {
             clickHandler() {
                 if(this.routerLink) this.$router.push(this.routerLink)
-            }
+            },
         },
+     
         components: {
             Container: styled.span``
         }

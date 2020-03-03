@@ -252,7 +252,7 @@
         provide() {
             return {
                 commentExtraGraphqlDataGetter: () => this.timeline.commentExtraGraphqlData.data,
-                issueGetter: () => this.data
+                issueGetter: () => Object.assign({},this.data,this.extraData.data)
             }
         },
         data() {

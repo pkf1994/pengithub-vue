@@ -83,13 +83,16 @@
         </AnimatedHeightWrapper>   
 
         <HiddenItemLoading v-if="(timeline.pageInfo) && (timeline.pageInfo.next) && (timeline.pageInfo.next.page < timeline.pageInfo.last.page - 1) && (timeline.data.length !== 0)"
+                            class="border-top"
                             :loading="timeline.loading"
                             :dataGetter="loadingMore">
-            {{hiddenItemCount}}
+            {{hiddenItemCount}} item{{hiddenItemCount > 1 ? 's' : ''}} not shown.
         </HiddenItemLoading>
 
         <transition-group tag="div" appear name="fade">
-                <TimelineItem v-for="(item,index) in timeline.lastData" :data="item" :key="(item.id || '') + index"/>
+                <div v-for="(item,index) in timeline.lastData" :key="(item.id || '') + index">
+                    <TimelineItem :data="item" class="border-top"/>
+                </div> 
         </transition-group>
 
         <Editor v-if="data.id" class="pt-3 mb-5" :locked="viewerCannotComment" :lockedReason="extraData.data.activeLockReason"></Editor>
@@ -112,7 +115,7 @@
         </InfoBottom>
 
         <transition name="fade" appear>
-            <CommonLoading v-if="loading || timeline.loading || timeline.commentExtraGraphqlData.loading"
+            <CommonLoading v-if="loading || timeline.loading || timeline.commentsAndReviewsExtraGraphqlData.loading"
                             :preventClickEvent="false"
                             :position="loading ? 'center' : 'corner'"/>
         </transition>  
@@ -167,7 +170,7 @@
         mixins: [ScrollTopListenerMixin],
         provide() {
             return {
-                commentExtraGraphqlDataGetter: () => this.timeline.commentExtraGraphqlData.data,
+                commentsAndReviewsExtraGraphqlDataGetter: () => this.timeline.commentsAndReviewsExtraGraphqlData.data,
                 issueGetter: () => this.data
             }
         },
@@ -184,7 +187,7 @@
                 timeline: {
                     data: [],
                     loading: false,
-                    commentExtraGraphqlData: {
+                    commentsAndReviewsExtraGraphqlData: {
                         data: [],
                         loading: false
                     },
@@ -284,6 +287,10 @@
                     {
                         graphql:'USER_BLOCKED_EVENT',
                         rest:'user_blocked',
+                    },
+                    {
+                        graphql:'PULL_REQUEST_REVIEW',
+                        rest:'reviewed',
                     }
                 ]
             }
@@ -324,7 +331,7 @@
                 return this.timeline.count.data - alreadyCount
             },
             editHistory() {
-                return `opened this pull request ${this.createdAt}`
+                return `opened this pull request ${this.createdAt} ${this.extraData.data.userContentEdits && this.extraData.data.userContentEdits.totalCount > 0 ? ' • edited ' + util_dateFormat.getDateDiff(this.extraData.data.userContentEdits.nodes[0].editedAt) : ''}`
             }
             /* subscriptionNotice() {
                 return this.extraData.viewerSubscription.toLowerCase()
@@ -448,32 +455,33 @@
                     this.timeline.loading = false
 
                     //获取comment bodyHTML 以及 comment reactions
-                    this.timeline.commentExtraGraphqlData.loading = true
+                    //获取 review: bodyHTML reactions comments
+                    this.timeline.commentsAndReviewsExtraGraphqlData.loading = true
                        
-                    let comments = []
+                    let commentsAndReviews = []
                     this.timeline.data.forEach(item => {
-                        if(item.event === 'commented') {
-                            comments.push(item)
+                        if(item.event === 'commented' || item.event === 'reviewed') {
+                            commentsAndReviews.push(item)
                         }
                     })
                     this.timeline.lastData.forEach(item => {
-                        if(item.event === 'commented') {
-                            comments.push(item)
+                        if(item.event === 'commented' || item.event === 'reviewed') {
+                            commentsAndReviews.push(item)
                         }
                     })
 
-                    let graphql_issueCommentBodyAndReactions = graphql.GRAPHQL_PR_COMMENT_BODY_AND_REACTIONS(comments)
-                    let res_issueCommentBodyAndReactions = await authRequiredGitHubGraphqlApiQuery(graphql_issueCommentBodyAndReactions,{cancelToken:cancelTokenAndSource.cancelToken})
+                    let graphql_commentsAndReviewExtraData = graphql.GRAPHQL_PR_COMMENT_AND_REVIEW_EXTRA_DATA(commentsAndReviews)
+                    let res_commentsAndReviewExtraData = await authRequiredGitHubGraphqlApiQuery(graphql_commentsAndReviewExtraData,{cancelToken:cancelTokenAndSource.cancelToken})
 
-                    if(!payload.changePage) this.timeline.commentExtraGraphqlData.data = []
-                    for(let key in res_issueCommentBodyAndReactions.data.data) {
-                        this.timeline.commentExtraGraphqlData.data.push(res_issueCommentBodyAndReactions.data.data[key])
+                    if(!payload.changePage) this.timeline.commentsAndReviewsExtraGraphqlData.data = []
+                    for(let key in res_commentsAndReviewExtraData.data.data) {
+                        this.timeline.commentsAndReviewsExtraGraphqlData.data.push(res_commentsAndReviewExtraData.data.data[key])
                     }
 
-                    this.timeline.commentExtraGraphqlData.loading = false
+                    this.timeline.commentsAndReviewsExtraGraphqlData.loading = false
                 }catch(e){
                     this.timeline.loading = false
-                    this.timeline.commentExtraGraphqlData.loading = false
+                    this.timeline.commentsAndReviewsExtraGraphqlData.loading = false
                     console.log(e)
                 }
             },

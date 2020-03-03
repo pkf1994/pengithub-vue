@@ -6,7 +6,7 @@
                     {{data.actor.login}}
                 </router-link>
                 <strong>referenced</strong>
-                this pull request from another {{data.source.type}}
+                this pull request from another {{data.source.issue.pull_request ? 'pull request' : 'issue'}}
             </Header>
 
             <AnimatedHeightWrapper>
@@ -29,10 +29,8 @@
     import {mapState} from 'vuex'
     import ClipboardJS from 'clipboard';
     export default {
-        inject: ['commentExtraGraphqlDataGetter','issueGetter'],
         data() {
             return {
-                showMinimized: false,
                 popoverStyle: {
                     top: '100%',
                     right: '-6px'
