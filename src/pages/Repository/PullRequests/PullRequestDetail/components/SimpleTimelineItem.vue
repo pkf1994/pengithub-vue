@@ -42,12 +42,17 @@
             showActorAvatar: {
                 type: Boolean,
                 default: true
+            },
+            date: {
+                type: String,
+                required: false
             }
         },
     
         computed: {
             createdAt() {
-                return util_dateFormat.getDateDiff(this.data.created_at)
+                if(this.date) return util_dateFormat.getDateDiff(this.date)
+                if(this.data.created_at) return util_dateFormat.getDateDiff(this.data.created_at)
             }
         },
         components: {
@@ -72,7 +77,6 @@
 .container{
     padding: 15px;
     font-size: 13px;
-    line-height: 16px;
     color: #586069;
 }
 

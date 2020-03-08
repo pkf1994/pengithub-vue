@@ -7,7 +7,9 @@
     import IssuesPageTemplate from './IssuesPageTemplate.vue'
     import {mapState, mapActions} from 'vuex'
     import { ACTION_HOME_REQUEST_ISSUES } from '../../store/modules/home/actionTypes'
+    import {RouteUpdateAwareMixin} from '@/mixins'
     export default {
+        mixins: [RouteUpdateAwareMixin],
         data() {
             return {
                 type: 'issue',
@@ -49,11 +51,13 @@
             },
         },
         created() {
+            //console.log(this.$route)
             this.action_getData({
                 issueType: this.type,
                 belongTo: this.belongTo,
                 q: this.query
             })
+            this.routerMeta = this.generateRouterMeta()
         },
         watch: {
             query() {
@@ -65,6 +69,13 @@
             }
         },
         methods: {
+            routeUpdateHook() {
+                 this.action_getData({
+                    issueType: this.type,
+                    belongTo: this.belongTo,
+                    q: this.query
+                })
+            },
             ...mapActions({
                 action_getData: ACTION_HOME_REQUEST_ISSUES
             }),

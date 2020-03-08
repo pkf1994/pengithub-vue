@@ -12,7 +12,7 @@ import {
     AnimatedWidthWrapper} from "./AnimatedSizeWrapper";
 import LoadingAndCatchErrorTemplate from './LoadingAndCatchErrorTemplate'
 import {LoadingIcon,CommonLoadingEx,CommonLoading,CommonLoadingWrapper,LoadingIconEx} from './Loading'
-import {IssuesPageMixin,IssueListItem} from './IssuesPage'
+import {IssuesPageMixin,IssueListItem,IssuesPageTemplate} from './IssuesPage'
 import SelectMenuItem from './SelectMenuItem'
 import Modal from './Modal'
 import Popover from './Popover'
@@ -53,5 +53,6 @@ export {
     Modal,
     Popover,
     Progress,
-    IssueIcon
+    IssueIcon,
+    IssuesPageTemplate
 }

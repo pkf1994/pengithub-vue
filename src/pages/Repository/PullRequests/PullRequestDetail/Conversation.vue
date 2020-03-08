@@ -95,24 +95,9 @@
                 </div> 
         </transition-group>
 
-        <Editor v-if="data.id" class="pt-3 mb-5" :locked="viewerCannotComment" :lockedReason="extraData.data.activeLockReason"></Editor>
+        <Editor v-if="data.id"></Editor>
 
-
-        <InfoBottom v-if="data.id">
-        
-             <!-- notifications -->
-            <InfoBottomItem class="info-bottom-item">
-                <InfoBottomItemTitle class="info-bottom-item-title d-flex flex-justify-between">
-                    Notifications
-                    <span class="text-normal">Customize</span>
-                </InfoBottomItemTitle>
-               <button type="submit" class="btn btn-block btn-sm d-block width-full" data-disable-with="">
-                    <svg class="octicon octicon-mute" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2.81v10.38c0 .67-.81 1-1.28.53L3 10H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h2l3.72-3.72C7.19 1.81 8 2.14 8 2.81zm7.53 3.22l-1.06-1.06-1.97 1.97-1.97-1.97-1.06 1.06L11.44 8 9.47 9.97l1.06 1.06 1.97-1.97 1.97 1.97 1.06-1.06L13.56 8l1.97-1.97z"></path></svg> Unsubscribe
-                </button>
-                <span class="mt-1 d-inline-block" v-if="extraData.data.viewerSubscription">You're {{extraData.data.viewerSubscription.toLowerCase()}} to this thread.</span>
-            </InfoBottomItem>
-
-        </InfoBottom>
+        <Notifications v-if="data.id"></Notifications>
 
         <transition name="fade" appear>
             <CommonLoading v-if="loading || timeline.loading || timeline.commentsAndReviewsExtraGraphqlData.loading"
@@ -153,7 +138,7 @@
     import styled from 'vue-styled-components'
     import {CommonLoading,Label,AnimatedHeightWrapper,LoadingIconEx,Progress,IssueIcon} from '@/components'
     import {ScrollTopListenerMixin} from '@/mixins'
-    import {TimelineItem,Comment,HiddenItemLoading,Editor,ProjectCard,PullRequestBody} from './components'
+    import {TimelineItem,Comment,HiddenItemLoading,Editor,ProjectCard,PullRequestBody,Notifications} from './components'
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
@@ -162,6 +147,7 @@
     import * as api from '@/network/api'
     import * as graphql from './graphql'
     import {mapState,mapActions} from 'vuex'
+    import { authRequiredPost } from '../../../../store/modules/network'
     var parse = require('parse-link-header');
     var parse = require('parse-link-header');
     export default {
@@ -171,7 +157,7 @@
         provide() {
             return {
                 commentsAndReviewsExtraGraphqlDataGetter: () => this.timeline.commentsAndReviewsExtraGraphqlData.data,
-                issueGetter: () => this.data
+                pullRequestGetter: () => Object.assign({},this.data,this.extraData.data)
             }
         },
         data() {
@@ -332,7 +318,8 @@
             },
             editHistory() {
                 return `opened this pull request ${this.createdAt} ${this.extraData.data.userContentEdits && this.extraData.data.userContentEdits.totalCount > 0 ? ' • edited ' + util_dateFormat.getDateDiff(this.extraData.data.userContentEdits.nodes[0].editedAt) : ''}`
-            }
+            },
+
             /* subscriptionNotice() {
                 return this.extraData.viewerSubscription.toLowerCase()
             } */
@@ -355,8 +342,8 @@
                     //获取基本数据
                     this.loading = true
                     let url_pullRequest = api.API_PULLREQUEST({
-                        repo: this.repo,
-                        owner: this.owner,
+                        repo: this.repo(),
+                        owner: this.owner(),
                         number: this.number
                     })
                     let res_pullRequest = await authRequiredGet(url_pullRequest,{cancelToken})
@@ -365,7 +352,6 @@
 
                     //获取timeline(异步)
                     this.network_getTimeline()
-                    
 
                     //获取bodyHTML
                     this.extraData.loading = true
@@ -374,18 +360,6 @@
                     this.extraData.data = res_extraData.data.data.node
                     this.extraData.loading = false
 
-                    //获取issue projects
-                  /*   this.projects.loading = true
-                    let graphql_projects = graphql.GRAPHQL_PR_PROJECTS({
-                        repo: this.repo,
-                        owner: this.owner,
-                        number: this.number
-                    })
-                    let res_projects = await authRequiredGitHubGraphqlApiQuery(graphql_projects,{cancelToken})
-                    this.projects.data = res_projects.data.data.repository.issue.projectCards.nodes
-                    this.projects.loading = false */
-                    
-                    
                 }catch(e){
                     this.loading = false
                     this.extraData.loading = false
@@ -408,8 +382,8 @@
                         url_timeline = this.timeline.pageInfo.next.url
                     } else {
                         url_timeline = api.API_ISSUE_TIMELINE({
-                            repo: this.repo,
-                            owner: this.owner,
+                            repo: this.repo(),
+                            owner: this.owner(),
                             number: this.number
                         }) + `?per_page=${this.timeline.perPage}`
                     }
@@ -417,7 +391,7 @@
                     let cancelTokenAndSource = cancelAndUpdateAxiosCancelTokenSource(this.name + '_timeline_' + url_timeline)
                     this.cancelTokenArr_timeline = [
                         ...(this.cancelTokenArr_timeline || []),
-                        cancelTokenAndSource.cancelToken
+                        cancelTokenAndSource
                     ]
 
                     let config = {
@@ -651,6 +625,7 @@
             LoadingIconEx,
             AnimatedHeightWrapper,
             Editor,
+            Notifications,
             Progress,
             PullRequestBody,
             IssueIcon,

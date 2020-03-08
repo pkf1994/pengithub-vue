@@ -1,19 +1,20 @@
 <template>
     <Container>
         <TopTabContainer class="px-3 pt-3 flex">
-            <router-link to='/issues' class="subnav-item flex-1 text-center" :class="{'active':searchQueryQualifierMeta === 'author'}">Created</router-link>
-            <router-link to='/issues/assigned' class="subnav-item flex-1 text-center" :class="{'active':searchQueryQualifierMeta === 'assignee'}">Assigned</router-link>
-            <router-link to='/issues/mentioned' class="subnav-item flex-1 text-center" :class="{'active':searchQueryQualifierMeta === 'mentions'}">Mentioned</router-link>
+            <router-link :to='`/${routerPathFragment}`' class="subnav-item flex-1 text-center" :class="{'active':searchQueryQualifierMeta === 'author'}">Created</router-link>
+            <router-link :to='`/${routerPathFragment}/assigned`' class="subnav-item flex-1 text-center" :class="{'active':searchQueryQualifierMeta === 'assignee'}">Assigned</router-link>
+            <router-link :to='`/${routerPathFragment}/mentioned`' class="subnav-item flex-1 text-center" :class="{'active':searchQueryQualifierMeta === 'mentions'}">Mentioned</router-link>
         </TopTabContainer>
-        <IssuesPageTemplate :data="data" 
+         <IssuesPageTemplate :data="data" 
+                        :extraData="extraData"
                         :type="type"
                         v-model="searchQuery"
                         :loading="loading" 
-                        :loadingCountOfIssueByState="loadingCountOfIssueByState" 
-                        :countInfo="countInfo"
-                        :query="query"
                         :issueItemShowRepoFullName="true"
-                        :loadingAdditionalData="loadingAdditionalData">
+                        :countByState="processedCountByState"
+                        :baseQuery='`is:open is:${type} author:${login} archived:false`'
+                        :resetRouterLink="`/${routerPathFragment}`"
+                        :query="query">
             <template v-slot:searchInput>
                 <IconSearchInput v-model="searchQuery" 
                                 :search="search" 
@@ -29,7 +30,8 @@
             <SimplePagination   v-if="pageInfo && (pageInfo.next || pageInfo.prev)"   
                                 :pageInfo="pageInfo" 
                                 scrollElSelector="fix-full-scrollable"
-                                :dataGetter="paginationDataGetter"></SimplePagination>
+                                :goPrev="goPrev"
+                                :goNext="goNext"></SimplePagination>
 
             
         </IssuesPageTemplate>
@@ -68,33 +70,61 @@
             </reactions>
         </Modal>
 
-
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {IssuesPageMixin,SelectMenuItem,Modal} from '../../../components'
-    import {mapState, mapActions} from 'vuex'
-    import { ACTION_ISSUES_REQUEST_ISSUES } from '../../../store/modules/issues/actionTypes'
+    import {IssuesPageTemplate,SelectMenuItem,Modal,IconSearchInput} from '@/components'
+    import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
+    import {mapState} from 'vuex'
+    import * as api from '@/network/api'
+    import * as graphql from './graphql'
+    var parse = require('parse-link-header');
+    import {RouteUpdateAwareMixin} from '@/mixins'
     export default {
-        mixins: [IssuesPageMixin],
+        mixins: [RouteUpdateAwareMixin],
+        props: {
+            type: {
+                type: String,
+                default: 'issue'
+            },
+            routerPathFragment: {
+                type: String,
+                default: 'issues'
+            }
+        },
         data() {
             return {
-                type: 'issue',
-                belongTo: 'home',
+                searchQuery: '',
+                data: [],
+                loading: false,
+                extraData: {
+                    data: [],
+                    loading: false
+                },
+                totalCount: 0,
+                countByState: {
+                    data: undefined,
+                    loading: false
+                },
+                perPage: 25,
+                currentPage: 0,
+              
+                pageInfo: {
+                    next: undefined,
+                    last: undefined,
+                    first: undefined,
+                    prev: undefined
+                },
             }
         },
         computed: {
-            ...mapState({
-                loading: state => state.issues.home.issue.loading,
-                loadingAdditionalData: state => state.issues.home.issue.loadingAdditionalData,
-                loadingCountOfIssueByState: state => state.issues.home.issue.loadingCountOfIssueByState,
-                data: state => state.issues.home.issue.data,
-                pageInfo: state => state.issues.home.issue.pageInfo,
-                _countInfo: state => state.issues.home.issue.countInfo
+             ...mapState({
+                login: state => state.oauth.viewerInfo.login,
             }),
-            countInfo() {
+            processedCountByState() {
+                if(!this.countByState.data) return undefined
                 let currentIssueState = ''
                 if(this.query.indexOf('is:open') > -1) currentIssueState = 'open'
                 else if(this.query.indexOf('is:closed') > -1) currentIssueState = 'closed'
@@ -102,10 +132,10 @@
                 let toOpenQuery = 'is:open ' + this.query.replace(/(is:closed|is:open)/g,'').trim()
                 let toClosedQuery = 'is:closed ' + this.query.replace(/(is:closed|is:open)/g,'').trim()
                 return {
-                    ...this._countInfo,
+                    ...this.countByState.data,
                     currentIssueState,
-                    toOpen: `/issues?q=${toOpenQuery}`,
-                    toClosed: `/issues?q=${toClosedQuery}`,
+                    toOpen: `/${this.routerPathFragment}?q=${toOpenQuery}`,
+                    toClosed: `/${this.routerPathFragment}?q=${toClosedQuery}`,
                 }
             },
             searchQueryQualifierMeta() {
@@ -116,39 +146,39 @@
             },
             visibilityModalRouterLink() {
                 return {
-                    private: '/issues?q=' + this.query.replace(/is:(private|public)/g,'').trim() + ' is:private',
-                    public: '/issues?q=' + this.query.replace(/is:(private|public)/g,'').trim() + ' is:public',
+                    private: '/${this.routerPathFragment}?q=' + this.query.replace(/is:(private|public)/g,'').trim() + ' is:private',
+                    public: '/${this.routerPathFragment}?q=' + this.query.replace(/is:(private|public)/g,'').trim() + ' is:public',
                 }
             },
             sortModalRouterLink() {
                 return [
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:created-desc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:created-desc',
                         label: 'Newest',
                         queryFragment: 'sort:created-desc'
                     },
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:created-asc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:created-asc',
                         label: 'Oldest',
                         queryFragment: 'sort:created-asc'
                     },
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:comments-desc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:comments-desc',
                         label: 'Most commented',
                         queryFragment: 'sort:comments-desc'
                     },
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:comments-asc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:comments-asc',
                         label: 'Least commented',
                         queryFragment: 'sort:comments-asc'
                     },
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:updated-desc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:updated-desc',
                         label: 'Recently updated',
                         queryFragment: 'sort:updated-desc'
                     },
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:updated-asc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:updated-asc',
                         label: 'Least recently updated',
                         queryFragment: 'sort:updated-asc'
                     },
@@ -157,66 +187,153 @@
             sortModalReactionRouterLink() {
                 return [
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-%2B1-desc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-%2B1-desc',
                         label: '👍',
                         queryFragment: 'sort:reactions-+1-desc'
                     },
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions--1-desc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions--1-desc',
                         label: '👎',
                         queryFragment: 'sort:reactions--1-desc'
                     },
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-smile-desc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-smile-desc',
                         label: '😄',
                         queryFragment: 'sort:reactions-smile-desc'
                     },
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-tada-desc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-tada-desc',
                         label: '🎉',
                         queryFragment: 'sort:reactions-tada-desc'
                     },
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-thinking_face-desc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-thinking_face-desc',
                         label: '😕',
                         queryFragment: 'sort:reactions-thinking_face-desc'
                     },
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-heart-desc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-heart-desc',
                         label: '❤️',
                         queryFragment: 'sort:reactions-heart-desc'
                     },
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-rocket-desc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-rocket-desc',
                         label: '🚀',
                         queryFragment: 'sort:reactions-rocket-desc'
                     },
                     {
-                        routerLink: '/issues?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-eyes-desc',
+                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-eyes-desc',
                         label: '👀',
                         queryFragment: 'sort:reactions-eyes-desc'
                     },
                 ]
-            }
+            },
+            meta() {
+                return this.$route.params.meta
+            },
+            query() {
+                if(this.meta) {
+                    switch(this.meta) {
+                        case 'assigned':
+                            this.searchQuery = `is:open is:${this.type} assignee:${this.login} archived:false`
+                            return `is:open is:${this.type} assignee:${this.login} archived:false`
+                        case 'mentioned':
+                            this.searchQuery = `is:open is:${this.type} mentions:${this.login} archived:false`
+                            return `is:open is:${this.type} mentions:${this.login} archived:false`
+                        default:
+                            return ''
+                    }
+                }
+                if(!this.$route.query.q){
+                    this.searchQuery = `is:open is:${this.type} author:${this.login} archived:false`
+                }else{
+                    this.searchQuery = this.$route.query.q
+                }
+                return this.$route.query.q || `is:open is:${this.type} author:${this.login} archived:false`
+            },
+        },
+        created() {
+            this.network_getData()  
         },
         methods: {
-            ...mapActions({
-                action_getData: ACTION_ISSUES_REQUEST_ISSUES
-            }),
+             async network_getData(payload) {
+                try{
+                    this.loading = true
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(`${this.name} get_data`)
+                    let url 
+                    if(payload && payload.url) {
+                        url = payload.url
+                    } else {
+                         url = api.API_SEARCH(
+                            'issues',
+                            {
+                                q: this.query,
+                                per_page: this.perPage
+                            }
+                        )
+                    }
+                    let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
+                    this.data = res.data.items
+                    this.totalCount = res.data.total_count
+                    this.pageInfo = parse(res.headers.link)
+
+                    //获取其他数据
+                    if(res.data.items.length > 0)this.network_getExtraData(res.data.items)
+                    if(!payload || !payload.url)this.network_getIssueCountByState()
+                    this.loading = false
+                }catch(e) {
+                    this.loading = false
+                    console.log(e)
+                }
+            },  
+            async network_getExtraData(issues) {
+                try{
+                    this.extraData.loading = true
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(`${this.name} get_extra_data`)
+                    let graphql_issueExtraData =  graphql.GRAPHQL_GET_ISSUES(issues)
+                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_issueExtraData,{cancelToken:sourceAndCancelToken.cancelToken})
+
+                    let issueArr = []
+                    for(let key in res.data.data){
+                        issueArr.push(res.data.data[key])
+                    }
+                    this.extraData.data = this.extraData.data.concat(issueArr)
+
+                    this.extraData.loading = false
+                }catch(e) {
+                    this.extraData.loading = false
+                    console.log(e)
+                }
+            },
+            async network_getIssueCountByState() {
+                try{
+                    this.countByState.loading = true
+
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(`${this.name} get_issue_count_by_state`)
+                    let graphql_issueCountByState =  graphql.GRAPHQL_COUNT_OF_ISSUE_BY_STATE(this.query)
+                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_issueCountByState,{cancelToken:sourceAndCancelToken.cancelToken})
+                    this.countByState.data = res.data.data
+
+                    this.countByState.loading = false
+                }catch(e) {
+                    this.countByState.loading = false
+                    console.log(e)
+                }
+            },
             search() {
                 this.searchQuery = this.searchQuery.replace(/is:(issue|pr)/g,'is:issue')
                 switch(this.searchQuery) {
                     case `is:open is:${this.type} author:${this.login} archived:false`:
-                        this.$router.replace(`/issues`) 
+                        this.$router.replace(`/${this.routerPathFragment}`) 
                         break
                     case `is:open is:${this.type} assignee:${this.login} archived:false`:
-                        this.$router.replace(`/issues/assigned`) 
+                        this.$router.replace(`/${this.routerPathFragment}/assigned`) 
                         break
                     case `is:open is:${this.type} mentions:${this.login} archived:false`:
-                        this.$router.replace(`/issues/mentioned`) 
+                        this.$router.replace(`/${this.routerPathFragment}/mentioned`) 
                         break
                     default:
-                        this.$router.replace(`/issues?q=${this.searchQuery}`)
+                        this.$router.replace(`/${this.routerPathFragment}?q=${this.searchQuery}`)
                 }
             },
             triggerModel(meta) {
@@ -229,18 +346,35 @@
                         break
                 }
             },
-            async paginationDataGetter(payload) {
-                await this.action_getData({
-                    ...payload,
-                    issueType:this.type,
-                    q:this.query,
-                    belongTo:this.belongTo
+             async goNext() {
+                if(this.loading) return
+                await this.network_getData({
+                    url: this.pageInfo.next.url
                 })
-            }
+            },
+            async goPrev() {
+                if(this.loading) return
+                await this.network_getData({
+                    url: this.pageInfo.prev.url
+                })
+            },
+            routeUpdateHook() {
+                this.network_getData()
+                this.closeModal()
+            },
+            routeResetHook() {
+                Object.assign(this.$data, this.$options.data())
+            },
+            closeModal() {
+                this.$refs.sortModal.show = false
+                this.$refs.visibilityModal.show = false
+            },
         },
         components: {
             SelectMenuItem,
             Modal,
+            IssuesPageTemplate,
+            IconSearchInput,
             Container: styled.div``,
             TopTabContainer: styled.div``,
             EntriesFilterItem: styled.div``,

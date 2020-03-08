@@ -2,7 +2,10 @@
     <router-link v-if="!issueIsEmpty" :to="PRRouterLink" class="flex relative container Box-row p-0">
         <Icon class="flex-shrink-0 pt-2 pl-3">
             <span class="relative">
-                <IssueIcon :issue="issue"></IssueIcon>
+                <IssueIcon :issue="{
+                    ...issue,
+                    ...issueExtraData
+                }"></IssueIcon>
             </span>
         </Icon>
         
@@ -10,7 +13,7 @@
             <!-- <Meta class="meta">
                 #{{issue.number}}
             </Meta> -->
-            <Title class="h4 text-gray-dark">
+            <Title class="h4 text-gray-dark d-block">
                 <span class="pr-2" v-if="showRepoFullName">{{repoFullName}}</span>{{issue.title}}
             </Title>
            
@@ -26,8 +29,8 @@
                 <Byline v-if="issue.state.toLowerCase() === 'open'" class="byline">
                 #{{issue.number}} opened {{formatDate}} by {{issue.author ? issue.author.login : issue.user.login}}
                 </Byline>
-                <Byline v-if="issue.timelineItems && (issue.state.toLowerCase() === 'closed' || issue.state.toLowerCase() === 'merged') " class="byline">
-                #{{issue.number}} closed {{formatClosedDate}} by {{issue.timelineItems.nodes[0].actor.login}} 
+                <Byline v-if="issueExtraData && issueExtraData.timelineItems && (issue.state.toLowerCase() === 'closed' || issue.state.toLowerCase() === 'merged') " class="byline">
+                #{{issue.number}} closed {{formatClosedDate}} by {{issueExtraData && issueExtraData.timelineItems.nodes[0].actor.login}} 
                 </Byline>
             </AnimatedHeightWrapper>
         </Main>
@@ -43,6 +46,7 @@
     import {WithRandomMetaMixin} from '../../mixins'
     export default {
         mixins: [WithRandomMetaMixin],
+        inject: ['extraData'],
         props: {
             issue: {
                 type: Object,
@@ -84,7 +88,12 @@
             type() {
                 if(this.issue.pull_request) return 'pr'
                 else return 'issue'
-            }
+            },
+            issueExtraData() {
+                return this.extraData().filter( item => {
+                    return item.id === this.issue.node_id
+                })[0]
+            },
         },
         mounted() {
             setTimeout(() => {

@@ -1,5 +1,5 @@
 <template>
-    <Container style="overflow: hidden;transition: height .4s" :style="{height: stretch ? `${height}px` : 0}">
+    <Container style="overflow-y: hidden;transition: height .4s" :style="{height: stretch ? `${height}px` : 0}">
         <Inner ref="content" v-on:compute-height="subComputeHeightEventHandler" >
             <slot></slot>
         </Inner>

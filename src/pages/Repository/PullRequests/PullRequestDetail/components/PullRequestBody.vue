@@ -28,7 +28,7 @@
     import Reaction from './Reaction'
     import ClipboardJS from 'clipboard';
     export default {
-        inject: ['commentsAndReviewsExtraGraphqlDataGetter','issueGetter'],
+        inject: ['commentsAndReviewsExtraGraphqlDataGetter','pullRequestGetter'],
         data() {
             return {
                 showMinimized: false,
@@ -118,7 +118,7 @@
                 if(this.commentExtraDataHolder.authorAssociation && this.commentExtraDataHolder.authorAssociation !== "NONE"){
                     return this.commentExtraDataHolder.authorAssociation.toLowerCase()
                 }
-                if(this.issueGetter().user.login === this.data.user.login) return 'author'
+                if(this.pullRequestGetter().user.login === this.data.user.login) return 'author'
                 return undefined
             },
             dateStampGap() {

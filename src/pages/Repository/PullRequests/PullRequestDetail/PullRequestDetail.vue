@@ -21,7 +21,7 @@
                 return this.$route.params.number
             },
             tabs() {
-                let basePath = `/${this.owner}/${this.repo}/pull/${this.number}`
+                let basePath = `/${this.owner()}/${this.repo()}/pull/${this.number}`
               return [
                     { 
                         label: 'Conversation',

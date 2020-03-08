@@ -1,16 +1,16 @@
 <template>
     <Container class="container pagination flex-row-center">
-        <Left class="flex-grow-1 flex-row-center width-full"
-              :class="{disable: !pageInfo.prev || loading}"
-              @click="goPrev">Previous</Left>
+        <Left   class="flex-grow-1 flex-row-center width-full"
+                :disabled="!pageInfo.prev || loading"
+                 @click="_goPrev">Previous</Left>
         <PageInfo >
             <strong style="color: #586069;">
                 {{currentPage}} of {{pageInfo.last ? pageInfo.last.page : currentPage}}
             </strong>
         </PageInfo>
-        <Right class="flex-grow-1 flex-row-center width-full"
-               :class="{disable: !pageInfo.next || loading}"
-               @click="goNext">Next</Right>
+        <Right  class="flex-grow-1 flex-row-center width-full"
+                :disabled="!pageInfo.next || loading"
+                @click="_goNext">Next</Right>
     </Container>
 </template>
 
@@ -27,9 +27,13 @@
                 type: Object,
                 required: true
             },
-            dataGetter: {
+            goNext: {
                 type: Function,
-                default: () => {console.log('get data')}
+                default: () => {console.log('go next')}
+            },
+            goPrev: {
+                type: Function,
+                default: () => {console.log('go prev')}
             },
             scrollTargetSelector: {
                 type: String,
@@ -52,20 +56,14 @@
             }
         },
         methods: {
-            async goNext() {
+            async _goNext() {
                 if(this.loading) return
-                await this.dataGetter({
-                    changePage: true,
-                    forward: true
-                })
+                await this.goNext()
                 this.scrollToTitle()
             },
-            async goPrev() {
+            async _goPrev() {
                 if(this.loading) return
-                await this.dataGetter({
-                    changePage: true,
-                    forward: false
-                })
+                await this.Prev()
                 this.scrollToTitle()
             },
             scrollToTitle() {
@@ -84,8 +82,8 @@
         },
         components: {
             Container:styled.div``,
-            Right: styled.div``,
-            Left: styled.div``,
+            Right: styled.button``,
+            Left: styled.button``,
             PageInfo: styled.div``
         }
     }

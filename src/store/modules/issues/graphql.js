@@ -36,8 +36,8 @@ export const GRAPHQL_GET_ISSUES_BY_REPO_AND_NUMBERS = (payload) => {
 `}
 
 export const GRAPHQL_COUNT_OF_ISSUE_BY_STATE = (payload) => {
-  let openQuery = payload.q.replace(/is:(open|closed)/g,'is:open')
-  let closedQuery = payload.q.replace(/is:(open|closed)/g,'is:closed')
+  let openQuery = payload.replace(/is:(open|closed)/g,'is:open')
+  let closedQuery = payload.replace(/is:(open|closed)/g,'is:closed')
   return `
   {
     open:search(query:"${openQuery}", type:ISSUE){

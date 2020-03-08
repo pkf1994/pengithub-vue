@@ -28,8 +28,8 @@
         },
         provide() {
             return {
-                owner: this.owner,
-                repo: this.repo
+                owner: () => this.owner,
+                repo: () =>this.repo
             }
         },
         computed: {

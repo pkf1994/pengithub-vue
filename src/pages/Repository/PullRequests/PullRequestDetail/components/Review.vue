@@ -8,7 +8,7 @@
            
             <WhoDidWhat>
                 <router-link :to="`/${data.user.login}`" class="d-inline-block">
-                        <img :src="data.user.avatar_url" :alt="`@${data.user.login}`" class="avatar" height="20" width="20">
+                        <img :src="data.user.avatar_url" :alt="`@${data.user.login}`" class="avatar mr-1" height="16" width="16">
                 </router-link>
                 <router-link  :to="`/${data.user.login}`" class="text-bold link-gray-dark">
                     {{data.user.login}}
@@ -29,16 +29,19 @@
 
         </Body>
 
-        
-
-        <LoadingWrapper v-else class="loading-wrapper flex flex-justify-center flex-items-center">
+        <LoadingWrapper v-if="extraDataHolder.bodyHTML === undefined" class="loading-wrapper flex flex-justify-center flex-items-center">
             <LoadingIconEx/>
         </LoadingWrapper>
 
-        <ReviewComment v-for="item in comments.data" :key="item.id" :data="item">
+        <transition-group name="fade" appear>
+            <ReviewComment v-for="item in comments.data" :key="item.id" :data="item"/>
+        </transition-group>
+        
 
-        </ReviewComment>
-
+        <HiddenItemLoading v-if="comments.pageInfo.hasNextPage" style="padding-bottom:0px!important" :loading="comments.loading" :dataGetter="network_getComment">
+            {{comments.totalCount - comments.data.length}} {{comments.totalCount - comments.data.length > 1 ? 'comments' : 'comment'}} remained.
+        </HiddenItemLoading>
+      
     </Container>
 </template>
 
@@ -48,6 +51,7 @@
     import {util_dateFormat} from '@/util'
     import Reaction from './Reaction'
     import ReviewComment from './ReviewComment'
+    import HiddenItemLoading from './HiddenItemLoading'
     import * as graphql from '../graphql'
 import { authRequiredGitHubGraphqlApiQuery } from '../../../../../store/modules/network'
     export default {
@@ -73,7 +77,7 @@ import { authRequiredGitHubGraphqlApiQuery } from '../../../../../store/modules/
         },
         computed: {
             createdAt() {
-                return util_dateFormat.getDateDiff(this.data.created_at)
+                return util_dateFormat.getDateDiff(this.data.submitted_at)
             },
             extraDataHolder() {
                 let extraDataHolder = this.commentsAndReviewsExtraGraphqlDataGetter().filter(item => {
@@ -137,12 +141,11 @@ import { authRequiredGitHubGraphqlApiQuery } from '../../../../../store/modules/
                     })
 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_reviewComments)
-                    this.comments.data = res.data.data.node.comments.nodes
+                    this.comments.data =  this.comments.data.concat(res.data.data.node.comments.nodes)
                     this.comments.pageInfo = res.data.data.node.comments.pageInfo
                     this.comments.totalCount = res.data.data.node.comments.totalCount
-                    console.log(res.data)
 
-                    this.comments.loading = true
+                    this.comments.loading = false
                 }catch(e) {
                     this.comments.loading = false
                     console.log(e)
@@ -155,6 +158,7 @@ import { authRequiredGitHubGraphqlApiQuery } from '../../../../../store/modules/
             Popover,
             Reaction,
             ReviewComment,
+            HiddenItemLoading,
             Container: styled.div``,
             Inner: styled.div``,
             WhoDidWhat: styled.div``,

@@ -112,7 +112,11 @@
                 <TimelineItem v-for="(item,index) in mergedTimelineData(timeline.lastData)" :data="item" :key="(item.id || '') + index"/>
         </transition-group>
 
-        <Editor v-if="data.id" class="pt-3 mb-5" style="border-top: 2px solid #e1e4e8;" :locked="viewerCannotComment" :lockedReason="extraData.data.activeLockReason"></Editor>
+        <Editor v-if="data.id" 
+                class="pt-3 mb-5" 
+                style="border-top: 2px solid #e1e4e8;" 
+                :locked="viewerCannotComment" 
+                :lockedReason="extraData.data.activeLockReason"></Editor>
 
 
         <InfoBottom v-if="data.id">
@@ -429,8 +433,8 @@
                     //获取issue基本数据
                     this.loading = true
                     let url_issue = api.API_ISSUE({
-                        repo: this.repo,
-                        owner: this.owner,
+                        repo: this.repo(),
+                        owner: this.owner(),
                         number: this.number
                     })
                     let res_issue = await authRequiredGet(url_issue,{cancelToken})
@@ -439,8 +443,6 @@
 
                     //获取issue timeline(异步)
                     this.network_getTimeline()
-
-                    
 
                     //获取issue bodyHTML & projects
                     this.extraData.loading = true
@@ -453,8 +455,8 @@
                     //获取issue projects
                   /*   this.projects.loading = true
                     let graphql_projects = graphql.GRAPHQL_ISSUE_PROJECTS({
-                        repo: this.repo,
-                        owner: this.owner,
+                        repo: this.repo(),
+                        owner: this.owner(),
                         number: this.number
                     })
                     let res_projects = await authRequiredGitHubGraphqlApiQuery(graphql_projects,{cancelToken})
@@ -484,8 +486,8 @@
                         url_timeline = this.timeline.pageInfo.next.url
                     } else {
                         url_timeline = api.API_ISSUE_TIMELINE({
-                            repo: this.repo,
-                            owner: this.owner,
+                            repo: this.repo(),
+                            owner: this.owner(),
                             number: this.number
                         }) + `?per_page=${this.timeline.perPage}`
                     }

@@ -58,7 +58,7 @@
     import ClipboardJS from 'clipboard';
     import Reaction from './Reaction'
     export default {
-        inject: ['commentsAndReviewsExtraGraphqlDataGetter','issueGetter'],
+        inject: ['commentsAndReviewsExtraGraphqlDataGetter'],
         data() {
             return {
                 showMinimized: false,

@@ -1,53 +1,68 @@
 <template> 
     <Container class="bubble bg-white" style="margin-top:15px">
         <FileHeader class="file-header">
+            <button class="btn-link text-gray float-right f6 d-block" v-if="data.outdated" @click="triggerShowOutdated">
+                <svg class="octicon octicon-fold position-relative mr-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 9l3 3H8v3H6v-3H4l3-3zm3-6H8V0H6v3H4l3 3 3-3zm4 2c0-.55-.45-1-1-1h-2.5l-1 1h3l-2 2h-7l-2-2h3l-1-1H1c-.55 0-1 .45-1 1l2.5 2.5L0 10c0 .55.45 1 1 1h2.5l1-1h-3l2-2h7l2 2h-3l1 1H13c.55 0 1-.45 1-1l-2.5-2.5L14 5z"></path></svg>
+                {{showOutdated ? 'Hide outdated' : 'Show outdated'}}
+            </button> 
             <router-link to="/" class="link-gray-dark">
-                {{data.path}}
-            </router-link>
+                {{path}}
+            </router-link> 
+               
         </FileHeader>
 
-        <DiffView class="diff-view">
-            <div class="d-inline-block">
-                 <LinesNotShown class="text-shadow-light flex width-full" v-if="diffHunkEntries.hidden.length > 0">
-                    <BlobNum class="blob-num position-sticky bg-white"  style="left:0px" data-line-number="..."></BlobNum>
-                    <BlobNum class="blob-num position-sticky bg-white" style="left:26px" data-line-number="..."></BlobNum>
-                    <BlobCode class="blob-code" >{{diffHunkEntries.hidden.length}} lines not shown</BlobCode>
-                </LinesNotShown>
-                 <CodeLine v-for="(item,index) in diffHunkEntries.showDefault" :key="index" class="flex width-full">
-                    <BlobNum class="blob-num position-sticky"  style="left:0px" :data-line-number="item.deletionLineIndex" :class="{'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context','blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0}"></BlobNum>
-                    <BlobNum class="blob-num position-sticky" style="left:26px" :data-line-number="item.additionLineIndex" :class="{'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context','blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0}"></BlobNum>
-                    <BlobCode class="blob-code" :class="{'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context','blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0}">{{item.code}}</BlobCode>
-                </CodeLine>
-            </div>
-        </DiffView>
-
-        <Comment class="px-3 pt-3 pb-2">
-            <WhoDidWhatAt class="d-flex flex-row">
-                <div class="flex-auto">
-                    <router-link :to="`/${data.author.login}`" class="d-inline-block">
-                        <img :src="data.author.avatarUrl" :alt="`@${data.author.login}`" width="16" height="16">
-                    </router-link>
-                    <router-link :to="`/${data.author.login}`" class="f5 text-bold link-gray-dark">{{data.author.login}}</router-link> 
-                    <span class="text-gray"> • {{createdAt}}</span>
+        <AnimatedHeightWrapper :stretch="!data.outdated || showOutdated">
+                
+            <DiffView class="diff-view">
+                <div class="d-inline-block">
+                    <LinesNotShown class="text-shadow-light flex width-full" v-if="diffHunkEntries.hidden.length > 0 && !showHiddenDiffHunk" @click="triggerShowHiddenDiffHunk">
+                        <BlobNum class="blob-num position-sticky bg-white"  style="left:0px" data-line-number="..."></BlobNum>
+                        <BlobNum class="blob-num position-sticky bg-white" style="left:26px" data-line-number="..."></BlobNum>
+                        <BlobCode class="blob-code" >{{diffHunkEntries.hidden.length}} lines not shown</BlobCode>
+                    </LinesNotShown>
+                    
+                    <CodeLine v-for="(item,index) in showHiddenDiffHunk ? diffHunkEntries.hidden : []" :key="index + 'hidden'" class="flex width-full">
+                        <BlobNum class="blob-num position-sticky"  style="left:0px" :data-line-number="item.deletionLineIndex" :class="{'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context','blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}"></BlobNum>
+                        <BlobNum class="blob-num position-sticky" style="left:26px" :data-line-number="item.additionLineIndex" :class="{'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context','blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}"></BlobNum>
+                        <BlobCode class="blob-code" :class="{'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context','blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}">{{item.code}}</BlobCode>
+                    </CodeLine>
+                    <CodeLine v-for="(item,index) in diffHunkEntries.showDefault" :key="index + 'showDefault'" class="flex width-full">
+                        <BlobNum class="blob-num position-sticky"  style="left:0px" :data-line-number="item.deletionLineIndex" :class="{'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context','blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}"></BlobNum>
+                        <BlobNum class="blob-num position-sticky" style="left:26px" :data-line-number="item.additionLineIndex" :class="{'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context','blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}"></BlobNum>
+                        <BlobCode class="blob-code" :class="{'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context','blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}">{{item.code}}</BlobCode>
+                    </CodeLine>
                 </div>
+            </DiffView>
 
-                <div class="ml-2 btn-link height-full">
-                    <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
-                </div>
-            </WhoDidWhatAt>
+            <Comment class="px-3 pt-3 pb-2">
+                <WhoDidWhatAt class="d-flex flex-row">
+                    <div class="flex-auto">
+                        <router-link :to="`/${data.author.login}`" class="d-inline-block">
+                            <img :src="data.author.avatarUrl" :alt="`@${data.author.login}`" width="16" height="16">
+                        </router-link>
+                        <router-link :to="`/${data.author.login}`" class="f5 text-bold link-gray-dark">{{data.author.login}}</router-link> 
+                        <span class="text-gray"> • {{createdAt}}</span>
+                    </div>
 
-            <CommentBody v-html="data.bodyHTML" class="markdown-body p-0 pt-2 f5">
+                    <div class="ml-2 btn-link height-full">
+                        <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
+                    </div>
+                </WhoDidWhatAt>
 
-            </CommentBody>
+                <CommentBody v-html="data.bodyHTML" class="markdown-body p-0 pt-2 f5">
 
-            <Reaction class="mt-2" :data="reactionStatistic" :disabled="!data.viewerCanReact">
+                </CommentBody>
 
-            </Reaction>
-        </Comment>
+                <Reaction class="mt-2" :data="reactionStatistic" :disabled="!data.viewerCanReact">
 
-        <Reply class="border-top reply btn-link text-bold text-left muted-link btn-block">
-            Reply...
-        </Reply>
+                </Reaction>
+            </Comment>
+
+            <Reply class="border-top reply btn-link text-bold text-left muted-link btn-block">
+                Reply...
+            </Reply>
+        </AnimatedHeightWrapper>
+
        
     </Container>
 </template>
@@ -60,13 +75,15 @@
     import ClipboardJS from 'clipboard';
     import Reaction from './Reaction'
     export default {
-        inject: ['commentsAndReviewsExtraGraphqlDataGetter','issueGetter'],
+        inject: ['commentsAndReviewsExtraGraphqlDataGetter'],
         data() {
             return {
                 popoverStyle: {
                     top: '100%',
                     right: '-6px'
-                }
+                },
+                showHiddenDiffHunk: false,
+                showOutdated: false
             }
         },
         props: {
@@ -121,8 +138,9 @@
             },
             diffHunkEntries() {
                 let hunkStatistic = (this.data.diffHunk.split('@@')[1]).replace(/@/g,'').trim().split(' ')
-                let deletionLineIndex = parseInt(hunkStatistic[0].split(',')[0].replace(/[-|\+]/g,''))
-                let addititonLineIndex = parseInt(hunkStatistic[1].split(',')[0].replace(/[-|\+]/g,''))
+                let deletionLineIndex,deletionStartLineIndex,addititonLineIndex,additionStartLineIndex
+                deletionLineIndex = deletionStartLineIndex = parseInt(hunkStatistic[0].split(',')[0].replace(/[-|\+]/g,''))
+                addititonLineIndex = additionStartLineIndex = parseInt(hunkStatistic[1].split(',')[0].replace(/[-|\+]/g,''))
                 let lines = this.data.diffHunk.split(/\n/)
                 let diffHunkEntries = []
                 lines.forEach(item => {
@@ -155,18 +173,21 @@
                     }
                 }) 
                 let showDefault = diffHunkEntries.reverse().slice(0,16).reverse()
-                let hidden = diffHunkEntries.slice(16,diffHunkEntries.length)
+                let hidden = diffHunkEntries.slice(16,diffHunkEntries.length).reverse()
                 
                 return {
                         showDefault,
-                        hidden
+                        hidden,
+                        deletionStartLineIndex,
+                        additionStartLineIndex,
                     }
+            },
+            path() {
+                if(this.data.path.match(/\//g).length <= 3) return this.data.path
+                return `...${this.data.path.match(/(\/(([^\/])+)){3}$/g)[0]}`
             }
         },
         methods: {
-            triggerShowMinimized() {
-                this.showMinimized = !this.showMinimized
-            },
             showActionPopover() {
                 this.$refs.actionPopover.show = true
             },
@@ -175,6 +196,12 @@
                 clip.on('success',e => {
                     this.$toast("Clip OK!")
                 })
+            },
+            triggerShowHiddenDiffHunk() {
+                this.showHiddenDiffHunk = true
+            },
+            triggerShowOutdated() {
+                this.showOutdated = !this.showOutdated
             }
         },
         components: {
@@ -183,6 +210,7 @@
             Popover,
             Reaction,
             Container: styled.div``,
+            Main: styled.div``,
             FileHeader: styled.div``,
             DiffView: styled.div``,
             LinesNotShown: styled.div``,
@@ -220,7 +248,7 @@
 
 .blob-num{
     min-width: 26px;
-    padding: 0 3px;
+    padding: 2px 3px;
     font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
     font-size: 12px;
     line-height: 18px;
@@ -242,6 +270,7 @@
     padding-right: 10px;
     padding-left: 10px;
     word-wrap: normal;
+    font-size: 12px;
     flex: auto;
     padding-right: 10px;
     padding-left: 10px;

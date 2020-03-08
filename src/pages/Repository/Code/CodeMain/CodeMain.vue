@@ -21,7 +21,7 @@
 
         <ActionPane class="bubble flex mt-3 mb-3">
             <StarItOrNot class="flex-auto text-center">
-                <button class="px-2">
+                <button class="px-2" @click="test">
                     <svg class="v-align-text-bottom d-inline-block" fill="currentColor" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74L14 6z"></path></svg>
                     {{data.viewerHasStarred ? "Unstar" : "Star"}}   
                     <AnimatedWidthWrapper class="v-align-bottom">
@@ -125,12 +125,15 @@
             async getReadme() {
                 try{
                     this.readme404 = false
-                    await this.action_getReadme({owner:this.owner,repo:this.repo})
+                    await this.action_getReadme({owner:this.owner(),repo:this.repo()})
                 } catch (e) {
                     if(e.response && e.response.status === 404) {
                         this.readme404 = true
                     }
                 }
+            },
+            test() {
+                this.$router.push('/vuejs/vue/pulls')
             }
         },
         components: {

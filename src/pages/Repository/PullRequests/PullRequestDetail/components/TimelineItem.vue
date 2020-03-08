@@ -5,7 +5,7 @@
         <!-- review -->
         <Review v-else-if="data.event === 'reviewed'" :data="data"></Review>
         <!-- committed  -->
-        <SimpleTimelineItem v-else-if="data.event === 'committed'" :data="data">
+        <SimpleTimelineItem v-else-if="data.event === 'committed'" :data="data" :date="data.committer.date">
             <template v-slot:icon>
                 <svg class="octicon octicon-repo-push" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 3H3V2h1v1zM3 5h1V4H3v1zm4 0L4 9h2v7h2V9h2L7 5zm4-5H1C.45 0 0 .45 0 1v12c0 .55.45 1 1 1h4v-1H1v-2h4v-1H2V1h9.02L11 10H9v1h2v2H9v1h2c.55 0 1-.45 1-1V1c0-.55-.45-1-1-1z"></path></svg>
             </template>
@@ -14,13 +14,40 @@
             </template>
             <template v-slot:additional>
                 <Commit class="py-1 d-flex" style="margin-top:7.5px">
-                    <router-link :to="`/${commit.author && commit.author.login}`" class="pr-2">
-                        <img class="avatar" width="16" height="16" :src="commit.author && commit.author.avatar_url" :alt="`@${commit.author && commit.author.login}`">
-                    </router-link>
-                    <router-link :to="`/${owner}/${repo}/commit/${commit.sha}`" class="link-gray" style="word-break: break-word;">
-                        {{data.message && data.message.replace(/[\n\r]{2}[\S\s]*/g,'')}}
-                    </router-link> 
+                    <div class="d-flex">
+                        <router-link :to="`/${commit.author && commit.author.login}`" class="pr-2">
+                            <img class="avatar" width="16" height="16" :src="commit.author && commit.author.avatar_url" :alt="`@${commit.author && commit.author.login}`">
+                        </router-link>
+                        <router-link :to="`/${owner}/${repo}/commit/${commit.sha}`" class="link-gray" style="word-break: break-word;">
+                            {{data.message && parseEmoji(data.message.replace(/[\n\r]{2}[\S\s]*/g,''))}}
+                        </router-link> 
+                    </div> 
+                    
+                    <CommitMeta class="commit-meta flex-grow-1 flex-shrink-0 text-right" >
+                        <svg v-if="commitStatus === 'FAILURE'" class="text-red octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
+                        <svg v-if="commitStatus === 'SUCCESS'" class="text-green octicon octicon-check" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
+                    </CommitMeta>
                 </Commit>
+            </template>
+        </SimpleTimelineItem>
+        <!-- head_ref_deleted  -->
+        <SimpleTimelineItem v-else-if="data.event === 'head_ref_deleted'" :data="data">
+            <template v-slot:icon>
+                <svg class="octicon octicon-repo-push" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 3H3V2h1v1zM3 5h1V4H3v1zm4 0L4 9h2v7h2V9h2L7 5zm4-5H1C.45 0 0 .45 0 1v12c0 .55.45 1 1 1h4v-1H1v-2h4v-1H2V1h9.02L11 10H9v1h2v2H9v1h2c.55 0 1-.45 1-1V1c0-.55-.45-1-1-1z"></path></svg>
+            </template>
+            <template v-slot:action>
+                deleted the 
+                <code class="css-truncate css-truncate-target text-bold v-align-middle" style="max-width:165px;font-size:13px">{{headRefName}}</code>
+                branch
+            </template>
+        </SimpleTimelineItem>
+        <!-- head_ref_force_pushed  -->
+        <SimpleTimelineItem v-else-if="data.event === 'head_ref_force_pushed'" :data="data">
+            <template v-slot:icon>
+                <svg class="octicon octicon-repo-push" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 3H3V2h1v1zM3 5h1V4H3v1zm4 0L4 9h2v7h2V9h2L7 5zm4-5H1C.45 0 0 .45 0 1v12c0 .55.45 1 1 1h4v-1H1v-2h4v-1H2V1h9.02L11 10H9v1h2v2H9v1h2c.55 0 1-.45 1-1V1c0-.55-.45-1-1-1z"></path></svg>
+            </template>
+            <template v-slot:action>
+                force pushed changes to this branch
             </template>
         </SimpleTimelineItem>
         <!-- pinned  -->
@@ -108,7 +135,7 @@
         <!-- closed  -->
         <SimpleTimelineItem v-else-if="data.event === 'closed'" :data="data" :badgeStyle="{color:'#fff',backgroundColor:'#d73a49'}">
             <template v-slot:icon>
-                <svg class="octicon octicon-circle-slash" :class="{'loading-animation':loading}" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm0 1.3c1.3 0 2.5.44 3.47 1.17l-8 8A5.755 5.755 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zm0 11.41c-1.3 0-2.5-.44-3.47-1.17l8-8c.73.97 1.17 2.17 1.17 3.47 0 3.14-2.56 5.7-5.7 5.7z"></path></svg>
+                <svg class="octicon octicon-circle-slash text-red" :class="{'loading-animation':loading}" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm0 1.3c1.3 0 2.5.44 3.47 1.17l-8 8A5.755 5.755 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zm0 11.41c-1.3 0-2.5-.44-3.47-1.17l8-8c.73.97 1.17 2.17 1.17 3.47 0 3.14-2.56 5.7-5.7 5.7z"></path></svg>
             </template>
             <template v-slot:action>
                 closed this
@@ -356,13 +383,13 @@
     import styled from 'vue-styled-components'
     import Comment from './Comment'
     import SimpleTimelineItem from './SimpleTimelineItem'
-    import SimilarComments from './SimilarComments'
     import Referenced from './Referenced'
     import Review from './Review'
+    import {util_emoji} from '@/util'
     import {Label,AnimatedHeightWrapper} from '../../../../../components'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '../../../../../store/modules/network'
     export default {
-        inject: ['owner','repo'],
+        inject: ['owner','repo','pullRequestGetter'],
         props: {
             data: {
                 type: Object,
@@ -377,7 +404,8 @@
                 commit: {}, // referenced closed committed
                 transferredFrom: '', //transferred
                 blockedUser: {}, //user blocked
-                //pullRequest: {} //cross-referenced
+                commitStatus: undefined, //committed
+                headRefName: '', //HeadRefDeletedEvent
             }
         },
         computed: {
@@ -413,6 +441,9 @@
                     checked: checkedCheckboxMatches ? checkedCheckboxMatches.length : 0,
                     all: checkboxMatches ? checkboxMatches.length : 0,
                 }
+            },
+            isTheLatestCommit() {
+                return this.pullRequestGetter().statuses_url.replace(/https:\/\/api\.github\.com\/repos\/[\S\s]+?\/[\S\s]+?\/statuses\//i,'') === this.data.sha
             }
         },
         watch: {
@@ -422,8 +453,6 @@
         },
         mounted() {
             this.getAdditionalData()
-           
-            
         },
         methods: {
             getAdditionalData() {
@@ -441,12 +470,16 @@
                         case "closed":
                         case "committed":
                             this.getRelevantCommit()
+                           
                             break
                         case "transferred":
                             this.getTransferredFrom()
                             break
                         case "user_blocked":
                             this.getBlockedUser()
+                            break
+                        case "head_ref_deleted":
+                            this.getHeadRefDeletedName(this.data.node_id)
                             break
                        /*  case "cross-referenced":
                             if(this.data.source.issue.pull_request) {
@@ -468,6 +501,9 @@
                     url.replace('/git','')
                 )
                 this.commit = res.data
+                if(this.data.event === 'committed') {
+                    await this.getCommitStatus(res.data.node_id)
+                }
                 this.loading = false
             },
             /* async getRelevantPullRequest() {
@@ -556,6 +592,47 @@
                 )
                 this.lockReason = res.data.data.node.lockReason
                 this.loading = false
+            },
+            async getHeadRefDeletedName(nodeId) {
+                try{
+
+                    let res = await authRequiredGitHubGraphqlApiQuery(`
+                        {
+                            node(id: "${nodeId}") {
+                                ... on HeadRefDeletedEvent {
+                                   headRefName
+                                }
+                            }
+                        }
+                    `)
+                    this.headRefName = res.data.data.node.headRefName
+
+                }catch(e) {
+                    console.log(e)
+                }
+            },
+            async getCommitStatus(nodeId) {
+                try{
+
+                    let res = await authRequiredGitHubGraphqlApiQuery(`
+                        {
+                            node(id: "${nodeId}") {
+                                ... on Commit {
+                                    status {
+                                        state
+                                    }
+                                }
+                            }
+                        }
+                    `)
+                    this.commitStatus = res.data.data.node.status && res.data.data.node.status.state
+
+                }catch(e) {
+                    console.log(e)
+                }
+            },
+            parseEmoji(raw) {
+                return util_emoji.parse(raw)
             }
         },
         components: {
@@ -563,7 +640,6 @@
             SimpleTimelineItem,
             Label,
             AnimatedHeightWrapper,
-            SimilarComments,
             Referenced,
             Review,
             CommentWrapper: styled.div``,
@@ -573,7 +649,8 @@
             SourceCommit: styled.div``,
             TaskProgress: styled.div``,
             ProgressBar: styled.span``,
-            Commit: styled.div` `
+            Commit: styled.div` `,
+            CommitMeta: styled.div` `,
         }
     }
 </script>
@@ -612,6 +689,12 @@
         height: 100%;
         background-color: #ccc;
     }
+}
+
+.commit-meta{
+    padding: 4px 0;
+    width: 36px;
+    text-align: right;
 }
 
 .loading-animation{

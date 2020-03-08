@@ -17,7 +17,7 @@
     export default {
         inject: ['owner','repo'],
         created() {
-            this.action_getData({repo:this.repo,owner:this.owner})
+            this.action_getData({repo:this.repo(),owner:this.owner()})
         },
         methods: {
             ...mapActions({

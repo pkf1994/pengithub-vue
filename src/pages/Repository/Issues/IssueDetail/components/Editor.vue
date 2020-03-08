@@ -1,6 +1,5 @@
 <template>
     <Container>
-
         <Tab class="mx-0 mt-0 no-wrap d-flex flex-auto">
             <TabItem class="btn-link tabnav-tab px-3 flex-1" :disabled="locked" @click="() => switchTab('Write')" :class="{'tab-selected':selectedTab === 'Write'}">Write</TabItem>
             <TabItem class="btn-link tabnav-tab px-3 flex-1" :disabled="locked" @click="() => switchTab('Preview')" :class="{'tab-selected':selectedTab === 'Preview'}">Preview</TabItem>

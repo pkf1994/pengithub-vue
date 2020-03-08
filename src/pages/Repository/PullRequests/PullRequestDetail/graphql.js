@@ -187,12 +187,13 @@ export const GRAPHQL_PR_BODY_HTML_AND_REACTIONS = payload => {
     {
       node(id: "${payload.nodeId}") {
         ... on PullRequestReview {
-          comments(first: ${payload.perPage}${payload.after ? ',after' + payload.after : ''}) {
+          comments(first: ${payload.perPage}${payload.after ? ',after:"' + payload.after +'"' : ''}) {
             totalCount
             nodes {
               id
               path
               position
+              outdated
               diffHunk
               createdAt
               bodyHTML

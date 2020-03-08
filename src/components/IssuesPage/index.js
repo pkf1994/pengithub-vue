@@ -1,3 +1,4 @@
 import IssuesPageMixin from './IssuesPageMixin.vue'
 import IssueListItem from './IssueItem.vue'
-export {IssuesPageMixin,IssueListItem}
+import IssuesPageTemplate from './IssuesPageTemplate.vue'
+export {IssuesPageMixin,IssueListItem,IssuesPageTemplate}
