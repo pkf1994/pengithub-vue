@@ -10,6 +10,7 @@
             }
         },
         created() {
+           // console.log(this.$route)
             this.routerMeta = this.generateRouterMeta()
         },
         beforeRouteEnter (to, from, next) {
@@ -35,10 +36,11 @@
                 return JSON.stringify(this.$route.params) + JSON.stringify(this.$route.query) 
             },
             routeUpdateHook(){
-                console.log('routeUpdateHook')
+                this.network_getData()
             },
             routeResetHook(){
-                console.log('routeResetHook')
+               // console.log('routeResetHook')
+                Object.assign(this.$data,this.$options.data())
             },
             cancelUntimelyAxios() {
                 this.cancelSources.forEach(item => {

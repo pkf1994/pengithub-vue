@@ -1,7 +1,7 @@
 <template>
-    <Container class="pt-3 flex-grow-1">
-        <AnimatedHeightWrapper>
-            <Header v-if="data.id" class="px-3 bg-white ">
+    <Container class="flex-grow-1">
+        <AnimatedHeightWrapper class="pt-3 bg-white">
+            <Header v-if="data.id" class="px-3">
                 <HeaderActions class="flex flex-justify-between flex-items-center">
                    <State class="State State--green mr-2 d-inline-flex flex-items-center" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize;">
                         <IssueIcon color="#fff" :issue="data"></IssueIcon>
@@ -137,7 +137,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {CommonLoading,Label,AnimatedHeightWrapper,LoadingIconEx,Progress,IssueIcon} from '@/components'
-    import {ScrollTopListenerMixin} from '@/mixins'
+    import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
     import {TimelineItem,Comment,HiddenItemLoading,Editor,ProjectCard,PullRequestBody,Notifications} from './components'
     import {util_dateFormat} from '@/util'
     import {
@@ -153,7 +153,7 @@
     export default {
         name: 'pullRequestDetail',
         inject: ['owner','repo'],
-        mixins: [ScrollTopListenerMixin],
+        mixins: [ScrollTopListenerMixin,RouteUpdateAwareMixin],
         provide() {
             return {
                 commentsAndReviewsExtraGraphqlDataGetter: () => this.timeline.commentsAndReviewsExtraGraphqlData.data,
@@ -337,7 +337,8 @@
             async network_getData() {
                
                 try{
-                    let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name).cancelToken
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name)
+                    this.cancelSources.push(sourceAndCancelToken.source)
 
                     //获取基本数据
                     this.loading = true
@@ -346,7 +347,7 @@
                         owner: this.owner(),
                         number: this.number
                     })
-                    let res_pullRequest = await authRequiredGet(url_pullRequest,{cancelToken})
+                    let res_pullRequest = await authRequiredGet(url_pullRequest,{cancelToken:sourceAndCancelToken.cancelToken})
                     this.data = res_pullRequest.data
                     this.loading = false
 
@@ -356,7 +357,7 @@
                     //获取bodyHTML
                     this.extraData.loading = true
                     let graphql_extraData = graphql.GRAPHQL_PR_BODY_HTML_AND_REACTIONS({nodeId:res_pullRequest.data.node_id})
-                    let res_extraData = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
+                    let res_extraData = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken:sourceAndCancelToken.cancelToken})
                     this.extraData.data = res_extraData.data.data.node
                     this.extraData.loading = false
 
@@ -389,10 +390,7 @@
                     }
 
                     let cancelTokenAndSource = cancelAndUpdateAxiosCancelTokenSource(this.name + '_timeline_' + url_timeline)
-                    this.cancelTokenArr_timeline = [
-                        ...(this.cancelTokenArr_timeline || []),
-                        cancelTokenAndSource
-                    ]
+                    this.cancelSources.push(cancelTokenAndSource.source)
 
                     let config = {
                         cancelToken:cancelTokenAndSource.cancelToken,
@@ -462,7 +460,8 @@
             async network_getTimelineCount() {
                 try{
                     this.timeline.count.loading = true
-                    let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name + '_timeline_count').cancelToken
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name + '_timeline_count')
+                    this.cancelSources.push(sourceAndCancelToken.source)
                     
                     let timelineTypes_graphql = []
                     this.timelineTypes.forEach(item => {
@@ -475,7 +474,7 @@
                             }
                         )
 
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_timelineCount,{cancelToken})
+                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_timelineCount,{cancelToken:sourceAndCancelToken.cancelToken})
 
                     let timelineCount = 0
 
@@ -599,21 +598,11 @@
                 })
                 return mergedTimelineData
             },
-            cancelNetwork() {
-                this.cancelTokenArr_timeline.forEach(item => {
-                    item.source.cancel()
-                })
-            }
-        },
-        watch: {
-            repo() {
-                this.cancelNetwork()
+            routeUpdateHook() {
+                this.network_getData()
             },
-            owner() {
-                this.cancelNetwork()
-            },
-            number() {
-                this.cancelNetwork()
+            routeResetHook() {
+                Object.assign(this.$data, this.$options.data())
             }
         },
         components: {

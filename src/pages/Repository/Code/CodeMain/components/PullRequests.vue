@@ -1,6 +1,6 @@
 <template>
-    <ComplexBubble :loading="loading" 
-                    :disableFlag="pullRequests.length === 0 && !loading" 
+    <ComplexBubble :loading="!codeBasicInfo().id" 
+                    :disableFlag="pullRequests.totalCount === 0 && codeBasicInfo().id" 
                     disableNotice="There are no recent pull request"
                     :delay="1500">
         <template v-slot:title>
@@ -11,9 +11,10 @@
         </template>
 
         <Content class="bubble-content p-0">
-           <IssueItem v-for="item in pullRequests" 
+           <IssueItem v-for="item in pullRequests.nodes || []" 
                     :key="item.id" 
                     :issue="item" 
+                    :showLabels="true"
                     :showRepoFullName="false"
                         type="pullRequest"></IssueItem>    
         </Content>
@@ -27,27 +28,17 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../../components'
+    import {ComplexBubble} from '../../../../../components'
     import {IssueItem} from '../../../components'
     import {WithRandomMetaMixin} from '../../../../../mixins'
-    import {util_dateFormat,util_color,util_adjustStyle} from '../../../../../util'
+    import {util_dateFormat,util_color} from '../../../../../util'
     export default {
-        props: {
-            loading: {
-                type: Boolean,
-                default: false
-            },
-            totalCount: {
-                type: Number,
-                default: 0
-            },
-            pullRequests: {
-                type: Array,
-                default: () => ([])
-            }
-        },
+        inject: ['codeBasicInfo'],
+        
         computed: {
-           
+            pullRequests() {
+                return this.codeBasicInfo().pullRequests || {}
+            },
         },
         methods: {
             dateFormat(dataStr) {
@@ -59,16 +50,9 @@
         },
         components: {
             ComplexBubble,
-            AnimatedHeightWrapper,
             IssueItem,
             Title: styled.div``,
             Content: styled.div``,
-            Number: styled.span``,
-            PullRequestTitle: styled.strong``,
-            Byline: styled.span``,
-            Labels: styled.span``,
-            Inner: styled.div``,
-            Footer: styled.div``
         }
     }
 </script>

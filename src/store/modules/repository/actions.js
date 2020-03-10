@@ -90,7 +90,10 @@ export default {
             handleException(e)
         }
     },
-
+    //deprecated
+    //deprecated
+    //deprecated
+    //deprecated
     async [ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA] (context,payload) {
         try{
             const cancelToken = cancelAndUpdateAxiosCancelTokenSource(ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA)
@@ -515,6 +518,10 @@ export default {
         }
     },
 
+    //deprecated
+    //deprecated
+    //deprecated
+    //deprecated
     async [ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB](context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,true)
@@ -583,6 +590,10 @@ export default {
         }
     },
 
+    //deprecated
+    //deprecated
+    //deprecated
+    //deprecated
     async [ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS](context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_CONTENT_CONTRIBUTORS,true)

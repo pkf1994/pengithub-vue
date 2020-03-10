@@ -23,7 +23,7 @@
         </AnimatedHeightWrapper>
 
         <AnimatedHeightWrapper :stretch="stretchLabels">
-            <Labels v-if="false" class="labels relative" style="padding-top:2px">
+            <Labels v-if="showLabels" class="labels relative" style="padding-top:2px">
                 <span v-for="item in issue.labels.nodes" :meta="randomMeta" class=" v-align-text-top label d-inline-block" :key="item.id" :style="{color: isLight(`#${item.color}`) ? 'black' : 'white', background: `#${item.color}`}">
                     {{item.name}}
                 </span>

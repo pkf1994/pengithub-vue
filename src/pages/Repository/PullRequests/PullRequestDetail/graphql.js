@@ -11,6 +11,7 @@ export const GRAPHQL_PR_BODY_HTML_AND_REACTIONS = payload => {
             viewerCanUpdate
             viewerCanSubscribe
             viewerCanReact
+          
             userContentEdits(first:1) {
               totalCount
               nodes {

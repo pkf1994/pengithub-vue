@@ -153,7 +153,7 @@ export default [
         children: [
             {
                 path: '/',
-                component: RepositoryCode,
+                components: {RepositoryCode},
                 children: [
                     {
                         path: '/',
@@ -162,13 +162,13 @@ export default [
                         }
                     },
                     {
-                        path: 'tree/:branch/(\.*)?',
+                        path: 'tree/(\.*)+',
                         components: {
                             RepositoryCodeFileBrowser: RepositoryCodeFileBrowser
                         }
                     },
                     {
-                        path: 'blob/:branch/(\.*)?',
+                        path: 'blob/(\.*)+',
                         components: {
                             RepositoryCodeFileDetail: RepositoryCodeFileDetail
                         }
@@ -177,7 +177,7 @@ export default [
             },
             {
                 path: 'issues',
-                component: RepositoryIssues,
+                components: {RepositoryIssues},
                 children: [
                     {
                         path: '/',
@@ -195,11 +195,11 @@ export default [
             },
             {
                 path: 'pulls',
-                component: RepositoryPullRequestsBrowser,
+                components: {RepositoryPullRequestsBrowser},
             },
             {   
                 path: 'pull/:number',
-                component: RepositoryPullRequestDetail,
+                components: {RepositoryPullRequestDetail},
                 children: [
                     {
                         path: '/',
@@ -209,15 +209,15 @@ export default [
             },
             {
                 path: 'projects',
-                component: RepositoryProjects,
+                components: {RepositoryProjects},
             },
             {
                 path: 'pulse',
-                component: RepositoryPulse,
+                components: {RepositoryPulse},
             },
             {
                 path: 'community',
-                component: RepositoryCommunity,
+                components: {RepositoryCommunity},
             }
         ]
     },

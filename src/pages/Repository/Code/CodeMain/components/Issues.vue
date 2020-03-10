@@ -1,6 +1,6 @@
 <template>
-    <ComplexBubble :loading="loading"
-                    :disableFlag="issues.length === 0 && !loading" 
+    <ComplexBubble :loading="!codeBasicInfo().id"
+                    :disableFlag="codeBasicInfo().issues && codeBasicInfo().issues.nodes.length === 0 && codeBasicInfo().id" 
                     disableNotice="There are no recent issues"
                     :delay="1500">
         <template v-slot:title>
@@ -11,12 +11,12 @@
         </template>
 
         <Content class="bubble-content p-0">
-            <IssueItem v-for="item in issues" 
+            <IssueItem v-for="item in codeBasicInfo().issues ? codeBasicInfo().issues.nodes : []" 
                         :key="item.id" 
                         :issue="item" 
                         type="issue" 
+                        :showLabels="true"
                         :showRepoFullName="false">
-
             </IssueItem>
 
 
@@ -31,47 +31,16 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../../components'
+    import {ComplexBubble} from '../../../../../components'
     import {IssueItem} from '../../../components'
     import {util_dateFormat,util_color} from '../../../../../util'
     export default {
-        props: {
-            loading: {
-                type: Boolean,
-                default: false
-            },
-            totalCount: {
-                type: Number,
-                default: 0
-            },
-            issues: {
-                type: Array,
-                default: () => ([])
-            }
-        },
-        computed: {
-           
-        },
-        methods: {
-            dateFormat(dataStr) {
-                return util_dateFormat.getDateDiff(new Date(dataStr))
-            },
-            isLight(colorStr) {
-                return util_color.isLight(colorStr)
-            }
-        },
+        inject: ['codeBasicInfo'],
         components: {
             ComplexBubble,
             IssueItem,
-            AnimatedHeightWrapper,
             Title: styled.div``,
             Content: styled.div``,
-            Number: styled.span``,
-            IssueTitle: styled.strong``,
-            Byline: styled.span``,
-            Labels: styled.span``,
-            Inner: styled.div``,
-            Footer: styled.div``
         }
     }
 </script>

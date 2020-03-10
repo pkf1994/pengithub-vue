@@ -16,10 +16,6 @@
                 type: Boolean,
                 default: true
             }
-            /* delay: {
-                type: Number,
-                default: 0
-            } */
         },
         data() {
             return {
@@ -52,7 +48,11 @@
         methods: {
             computeHeight() {
                 if(!this.$refs.content) return 
+                if(this.height === this.$refs.content.$el.offsetHeight) return
+                //console.log("this.height" + this.height)
+                //console.log("this.$refs.content.$el.offsetHeight" + this.$refs.content.$el.offsetHeight)
                 this.height = this.$refs.content.$el.offsetHeight
+
                
                 setTimeout(() => {
                     let computeHeightEvent = document.createEvent('HTMLEvents')

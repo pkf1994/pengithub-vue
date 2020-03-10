@@ -26,6 +26,15 @@ export const GRAPHQL_GET_ISSUES = (payload) => {
                 closedAt
                 merged
                 id
+                commits(last: 1) {
+                  nodes {
+                    commit {
+                      status {
+                        state
+                      }
+                    }
+                  }
+                }
                 timelineItems(last: 1, itemTypes: CLOSED_EVENT) {
                     nodes {
                       ... on ClosedEvent {

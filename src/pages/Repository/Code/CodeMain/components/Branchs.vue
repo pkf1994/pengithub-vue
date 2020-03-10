@@ -1,6 +1,6 @@
 <template>
-    <ComplexBubble :loading="loading" 
-                    :disableFlag="!defaultBranch && !loading" 
+    <ComplexBubble :loading="!codeBasicInfo().id" 
+                    :disableFlag="!codeBasicInfo().defaultBranchRef && !codeBasicInfo.id" 
                     disableNotice="No branch yet">
         <template v-slot:title>
             <Title  class="bubble-title">
@@ -8,7 +8,7 @@
                     <svg class="branch-icon" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 5c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v.3c-.02.52-.23.98-.63 1.38-.4.4-.86.61-1.38.63-.83.02-1.48.16-2 .45V4.72a1.993 1.993 0 00-1-3.72C.88 1 0 1.89 0 3a2 2 0 001 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-.53-.2-1-.53-1.36.09-.06.48-.41.59-.47.25-.11.56-.17.94-.17 1.05-.05 1.95-.45 2.75-1.25S8.95 7.77 9 6.73h-.02C9.59 6.37 10 5.73 10 5zM2 1.8c.66 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2C1.35 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2zm0 12.41c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm6-8c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
                     <SummaryAndDetail>
                         <template v-slot:summary>
-                             <span>{{defaultBranch && defaultBranch.name}}</span>
+                             <span>{{codeBasicInfo().defaultBranchRef && codeBasicInfo().defaultBranchRef.name}}</span>
                         </template>
                         <router-link to="/" class="branch-item d" v-for="item in activeBranchList" :key="item.name">
                             {{item.name}}
@@ -18,8 +18,8 @@
             </Title>   
         </template>
 
-        <Content class="bubble-content" v-if="defaultBranch && defaultBranch.target">
-            Last commit by <strong>{{defaultBranch.target.history.nodes[0].author.user.login}}</strong> {{commitAt}}
+        <Content class="bubble-content" v-if="codeBasicInfo().defaultBranchRef && codeBasicInfo().defaultBranchRef.target">
+            Last commit by <strong>{{codeBasicInfo().defaultBranchRef.target.history.nodes[0].author.user.login}}</strong> {{commitAt}}
         </Content>
 
         <template v-slot:footer>
@@ -37,25 +37,42 @@
     import {util_dateFormat} from '../../../../../util'
     import { mapState, mapGetters } from 'vuex'
     export default {
-        inject: ['owner','repo'],
+        inject: ['owner','repo','codeBasicInfo'],
         data() {
             return {
                 stretch: false
             }
         },
         computed: {
+            //deprecated
             ...mapState({
                 loading: state => state.repository.code.loading,
                 defaultBranch: state => state.repository.code.data.defaultBranchRef,
             }),
-            ...mapGetters([
+            /* ...mapGetters([
                 'activeBranchList'
-            ]),
+            ]), */
             commitAt: function() {
-                return this.defaultBranch.target && util_dateFormat.getDateDiff(new Date(this.defaultBranch.target.history.nodes[0].authoredDate))
+                if(this.codeBasicInfo().defaultBranchRef){
+                    return this.codeBasicInfo().defaultBranchRef.target && util_dateFormat.getDateDiff(new Date(this.codeBasicInfo().defaultBranchRef.target.history.nodes[0].authoredDate))
+                }
             },
             codeFileBrowserRouterLink() {
-                return `/${this.owner}/${this.repo}/tree/${this.defaultBranch.name}`
+                if(this.codeBasicInfo().defaultBranchRef){
+                    return `/${this.owner()}/${this.repo()}/tree/${this.codeBasicInfo().defaultBranchRef.name}`
+                }
+            },
+            activeBranchList() {
+                let activeBranchList = []
+                if(this.codeBasicInfo().refs) {
+                    this.codeBasicInfo().refs.nodes.forEach(item => {
+                        let lastCommitDate = new Date(item.target.history.nodes[0].committedDate)
+                        if(Date.parse(new Date()) - Date.parse(lastCommitDate) < 90 * 24 * 3600000 ) {
+                            activeBranchList.push(item)
+                        }
+                    })
+                }
+                return activeBranchList
             }
         },
         methods: {

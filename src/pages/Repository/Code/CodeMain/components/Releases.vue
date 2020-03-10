@@ -1,6 +1,7 @@
 <template>
-    <ComplexBubble :loading="loading" 
-                    :disableFlag="releases.length === 0 && !loading"
+    <ComplexBubble :loading="!codeBasicInfo().id" 
+                    v-if="codeBasicInfo().releases && codeBasicInfo().releases.totalCount > 0 || !codeBasicInfo().id"
+                    :disableFlag="releases.totalCount === 0 && !loading"
                     :delay="1500">
         <template v-slot:title>
             <Title class="bubble-title" style="font-weight: 700">
@@ -27,31 +28,24 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../../components'
+    import {ComplexBubble} from '../../../../../components'
     import {util_dateFormat} from '../../../../../util'
     export default {
-        props: {
-            loading: {
-                type: Boolean,
-                default: false
-            },
-            releases: {
-                type: Object,
-                default: () => ({})
-            }
-        },
+        inject: ['codeBasicInfo'],
         computed: {
+            releases() {
+                return  this.codeBasicInfo().releases || {}
+            },
             publishedAt: function() {
-                return this.releases.nodes && this.releases.nodes[0] && util_dateFormat.getDateDiff(new Date(this.releases.nodes[0].publishedAt))
+                if(this.codeBasicInfo().releases){
+                    return this.codeBasicInfo().releases.nodes && this.codeBasicInfo().releases.nodes[0] && util_dateFormat.getDateDiff(new Date(this.codeBasicInfo().releases.nodes[0].publishedAt))
+                }
             }
         },
         components: {
             ComplexBubble,
-            AnimatedHeightWrapper,
             Title: styled.div``,
             Content: styled.div``,
-            Inner: styled.div``,
-            Footer: styled.div``
         }
     }
 </script>

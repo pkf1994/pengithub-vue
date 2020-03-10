@@ -3,7 +3,7 @@
         <span v-for="(item,index) in pathArr"
                 class="text-gray"
                 :key="item + index">
-                <router-link  v-if="index < pathArr.length - 1" class="text-gray" :to="item.to" >{{item.fragment}}</router-link><span v-if="index === pathArr.length - 1" class="text-gray">{{item.fragment}}</span><span v-if="index < pathArr.length - 1">/</span>
+                <router-link  class="text-gray" :to="item.routePath" >{{item.fragment}}</router-link><span v-if="index < pathArr.length - 1">{{spaceArround ? ' / ':'/'}}</span>
         </span>
     </Container>
 </template>
@@ -12,44 +12,57 @@
     import styled from 'vue-styled-components'
     export default {
         props: {
-            startIndex: {
-                type: Number,
-                default: 0
-            },
             spaceArround: {
                 type: Boolean,
                 default: false
             },
-            customFragment: {
-                type: Array,
-                default: () => []
+            path: {
+                type: String,
+                required: false
             },
-            disableLastFragment: {
-                type: Boolean,
-                default: true
+            routePath:{
+                type: String,
+                required: false
             }
         },
         computed: {
             pathArr(){
+                if(!this.path) return
+                let _path = this.path
+                //去前后/
+                let _regExp = new RegExp('^\/')
+                let regExp_ = new RegExp('\/$')
+                let execResult 
+                while(_path.match(_regExp) != null) {
+                    _path = _path.replace(_regExp,'')
+                }
+                while(_path.match(regExp_) != null) {
+                    _path = _path.replace(regExp_,'')
+                }
+
+                let fragmentArr = []
+                
+                _path.split('/').reverse().forEach((item,index) => {
+                    if(index === 0) fragmentArr.push({
+                        fragment: item,
+                        fragmentAggregate: ''
+                    })
+                    if(index > 0) fragmentArr.push({
+                        fragment: item,
+                        fragmentAggregate: `${fragmentArr[index - 1].fragment}/${fragmentArr[index - 1].fragmentAggregate}`
+                    })
+                })
+
                 let pathArr = []
-                let fragmentArr = this.$route.path.split('/')
-                fragmentArr = fragmentArr.slice(1,fragmentArr.length)
-                this.customFragment.forEach(item => {
-                    fragmentArr[item.index] = item.fragment
-                })
-                fragmentArr.forEach((item,index) => {
-                    if(index > this.startIndex - 1) {
-                        let to = ''
-                        for(let i=0; i<=index; i++){
-                            to = to + '/' + fragmentArr[i] 
-                        }
-                        pathArr.push({
-                            to: to,
-                            fragment: this.spaceArround ? ` ${item} ` : item
-                        })
-                    } 
-                })
-                return pathArr
+                fragmentArr.forEach(item => {
+                    let fragmentAggregate = item.fragmentAggregate.replace(/^\//,'').replace(/\/$/,'')
+                    pathArr.push({
+                        fragment: item.fragment,
+                        routePath:(this.routePath ? this.routePath : this.$route.path).replace(fragmentAggregate,'').replace(/\/\//g,'/')
+                    })
+                }) 
+
+                return pathArr.reverse()
             }
         },
         components: {

@@ -15,6 +15,12 @@
             </Meta> -->
             <Title class="h4 text-gray-dark d-block">
                 <span class="pr-2" v-if="showRepoFullName">{{repoFullName}}</span>{{issue.title}}
+                <transition appear name="fade">
+                    <svg v-if="lastCommitState === 'SUCCESS'" class="octicon octicon-check v-align-middle text-green" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
+                </transition>
+                <transition appear name="fade">
+                    <svg v-if="lastCommitState === 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
+                </transition>
             </Title>
            
             <AnimatedHeightWrapper :stretch="stretchLabels">
@@ -94,6 +100,11 @@
                     return item.id === this.issue.node_id
                 })[0]
             },
+            lastCommitState() {
+                if(!this.issueExtraData || !this.issueExtraData.commits || !this.issueExtraData.commits.nodes[0]) return undefined
+                if(!this.issueExtraData.commits.nodes[0].commit.status) return undefined
+                return this.issueExtraData.commits.nodes[0].commit.status.state
+            }
         },
         mounted() {
             setTimeout(() => {

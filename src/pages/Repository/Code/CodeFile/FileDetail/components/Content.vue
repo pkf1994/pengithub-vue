@@ -1,5 +1,5 @@
 <template>
-    <ComplexBubble :loading="loading" :delay="2000">
+    <ComplexBubble :loading="loading()" :delay="2000">
         <template v-slot:title>
             <AnimatedHeightWrapper>
                 <Header class="Box-header py-2 d-flex flex-column flex-shrink-0">
@@ -25,7 +25,7 @@
                         </button>
                     </EditOrDelete>
                     </Pane>
-                    <LineAndSize v-show="!loading && !(fileDetailRows.length === 0)" class="text-mono f6 flex-auto pt-2 pr-3 text-normal">
+                    <LineAndSize v-show="!loading() && !(fileDetailRows.length === 0)" class="text-mono f6 flex-auto pt-2 pr-3 text-normal">
                     {{fileDetailRows.length}} lines 
                     </LineAndSize>
 
@@ -41,10 +41,10 @@
             </div>
         </Content>
 
-        <Content class="Box-body p-0 content" v-else-if="isBook" v-html="html">
+        <Content class="Box-body p-0 content" v-else-if="isBook" v-html="html()">
         </Content>
 
-        <Content class="Box-body p-3 content text-center" v-else-if="isSvg" v-html="data">
+        <Content class="Box-body p-3 content text-center" v-else-if="isSvg" v-html="data()">
         </Content>
 
          <Content class="Box-body p-0 content" v-else>
@@ -63,22 +63,26 @@
     import {mapState,mapGetters} from 'vuex'
     import {util_analyseFileType} from '../../../../../../util'
     export default {
+        inject: ['data','html','loading'],
         data() {
             return {
             }
         },
         created() {
-            console.log(this.$route)
         },
         computed: {
-            ...mapState({
+           /*  ...mapState({
                 loading: state => state.repository.code.codeFile.fileDetail.loading,
                 data: state => state.repository.code.codeFile.fileDetail.data,
                 html: state => state.repository.code.codeFile.fileDetail.html
-            }),
-            ...mapGetters([
+            }), */
+           /*  ...mapGetters([
                 'fileDetailRows'
-            ]),
+            ]), */
+            fileDetailRows() {
+                let rows = this.data() && this.data().split(/\n/)
+                return rows || []
+            },
             isBook() {
                 let fileName = this.$route.path.replace(/.*?\//gi,'')
                 if(util_analyseFileType.analyseContentTypeByFileName(fileName) === 'book') {

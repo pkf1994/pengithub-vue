@@ -1,4 +1,5 @@
 export default {
+    //deprecated
     activeBranchList: state => {
         let activeBranchList = []
         if(state.code.data.refs) {
@@ -11,6 +12,7 @@ export default {
         }
         return activeBranchList
     },
+    //deprecated
     sortedContents: state => {
         let sortedContents = state.code.codeFile.data
         sortedContents.sort((a,b) => {
@@ -20,6 +22,7 @@ export default {
         })
         return sortedContents
     },
+    //deprecated
     fileDetailRows: state => {
         let rows = state.code.codeFile.fileDetail.data && state.code.codeFile.fileDetail.data.split(/\n/)
         return rows || []
