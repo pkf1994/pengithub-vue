@@ -1,7 +1,7 @@
 <template> 
     <Container class="bubble bg-white" style="margin-top:15px">
         <FileHeader class="file-header">
-            <button class="btn-link text-gray float-right f6 d-block" v-if="data.outdated" @click="triggerShowOutdated">
+            <button class="btn-link text-gray float-right f6 d-block" v-if="reviewComment.outdated" @click="triggerShowOutdated">
                 <svg class="octicon octicon-fold position-relative mr-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 9l3 3H8v3H6v-3H4l3-3zm3-6H8V0H6v3H4l3 3 3-3zm4 2c0-.55-.45-1-1-1h-2.5l-1 1h3l-2 2h-7l-2-2h3l-1-1H1c-.55 0-1 .45-1 1l2.5 2.5L0 10c0 .55.45 1 1 1h2.5l1-1h-3l2-2h7l2 2h-3l1 1H13c.55 0 1-.45 1-1l-2.5-2.5L14 5z"></path></svg>
                 {{showOutdated ? 'Hide outdated' : 'Show outdated'}}
             </button> 
@@ -11,7 +11,7 @@
                
         </FileHeader>
 
-        <AnimatedHeightWrapper :stretch="!data.outdated || showOutdated">
+        <AnimatedHeightWrapper :stretch="!reviewComment.outdated || showOutdated">
                 
             <DiffView class="diff-view">
                 <div class="d-inline-block">
@@ -35,13 +35,14 @@
             </DiffView>
 
             <Comment class="px-3 pt-3 pb-2">
+
                 <WhoDidWhatAt class="d-flex flex-row">
                     <div class="flex-auto">
-                        <router-link :to="`/${data.author.login}`" class="d-inline-block">
-                            <img :src="data.author.avatarUrl" :alt="`@${data.author.login}`" width="16" height="16">
+                        <router-link :to="`/${reviewComment.author.login}`" class="d-inline-block">
+                            <img :src="reviewComment.author.avatarUrl" :alt="`@${reviewComment.author.login}`" width="16" height="16">
                         </router-link>
-                        <router-link :to="`/${data.author.login}`" class="f5 text-bold link-gray-dark">{{data.author.login}}</router-link> 
-                        <span class="text-gray"> • {{createdAt}}</span>
+                        <router-link :to="`/${reviewComment.author.login}`" class="f5 text-bold link-gray-dark">{{reviewComment.author.login}}</router-link> 
+                        <span class="text-gray"> • {{dateFormat(reviewComment.createdAt)}}</span>
                     </div>
 
                     <div class="ml-2 btn-link height-full">
@@ -49,14 +50,40 @@
                     </div>
                 </WhoDidWhatAt>
 
-                <CommentBody v-html="data.bodyHTML" class="markdown-body p-0 pt-2 f5">
-
+                <CommentBody v-html="reviewComment.bodyHTML" class="markdown-body p-0 pt-2 f5">
                 </CommentBody>
-
-                <Reaction class="mt-2" :data="reactionStatistic" :disabled="!data.viewerCanReact">
-
+                <Reaction class="mt-2" :data="reviewComment" :disabled="!reviewComment.viewerCanReact">
                 </Reaction>
+
             </Comment>
+
+            <!-- replies -->
+             <Comment class="px-3 pt-3 pb-2" v-for="item in replies.slice(0,repliesExtraData.cursor)" :key="item.id">
+
+                <WhoDidWhatAt class="d-flex flex-row">
+                    <div class="flex-auto">
+                        <router-link :to="`/${item.user.login}`" class="d-inline-block">
+                            <img :src="item.user.avatar_url" :alt="`@${item.user.login}`" width="16" height="16">
+                        </router-link>
+                        <router-link :to="`/${item.user.login}`" class="f5 text-bold link-gray-dark">{{item.user.login}}</router-link> 
+                        <span class="text-gray"> • {{dateFormat(item.created_at)}}</span>
+                    </div>
+
+                    <div class="ml-2 btn-link height-full">
+                        <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
+                    </div>
+                </WhoDidWhatAt>
+
+                <CommentBody v-if="repliesExtraData.data.filter(i => {return i.id === item.node_id})[0]" v-html="repliesExtraData.data.filter(i => {return i.id === item.node_id})[0].bodyHTML" class="markdown-body p-0 pt-2 f5">
+                </CommentBody>
+                <Reaction class="mt-2" v-if="repliesExtraData.data.filter(i => {return i.id === item.node_id})[0]" :data="repliesExtraData.data.filter(i => {return i.id === item.node_id})[0]" :disabled="!reviewComment.viewerCanReact">
+                </Reaction>
+
+            </Comment>
+
+            <HiddenItemLoading v-if="repliesExtraData.cursor < replies.length" style="padding-bottom:0px!important" :loading="repliesExtraData.loading" :dataGetter="network_getData">
+                {{replies.length - repliesExtraData.cursor}} {{replies.length - repliesExtraData.cursor > 1 ? 'replies' : 'reply'}} remained.
+            </HiddenItemLoading>
 
             <Reply class="border-top reply btn-link text-bold text-left muted-link btn-block">
                 Reply...
@@ -71,23 +98,27 @@
     import styled from 'vue-styled-components'
     import {util_dateFormat} from '../../../../../util'
     import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '../../../../../components'
+    import HiddenItemLoading from './HiddenItemLoading'
     import {mapState} from 'vuex'
     import ClipboardJS from 'clipboard';
     import Reaction from './Reaction'
+    import * as graphql from '../graphql'
+    import { authRequiredGitHubGraphqlApiQuery } from '@/network'
     export default {
-        inject: ['commentsAndReviewsExtraGraphqlDataGetter'],
+        inject: ['commentsAndReviewsExtraGraphqlDataGetter','reviewCommentReplies'],
         data() {
             return {
-                popoverStyle: {
-                    top: '100%',
-                    right: '-6px'
-                },
                 showHiddenDiffHunk: false,
-                showOutdated: false
+                showOutdated: false,
+                repliesExtraData: {
+                    cursor: 0,
+                    data: [],
+                    loading: false
+                }
             }
         },
         props: {
-            data: {
+            reviewComment: {
                 type: Object,
                 required: true
             },
@@ -96,40 +127,7 @@
             ...mapState({
                 //commentBodyHTMLAndReactions: state => state.repository.issue.issueDetail.timeline.commentBodyHTMLAndReactions.data
             }),
-            createdAt() {
-                return util_dateFormat.getDateDiff(this.data.createdAt)
-            },
-            reactionStatistic() {
-                let reactionStatistic
-                for(let key in this.data) {
-                    switch(key) {
-                        case 'THUMBS_UP':
-                        case 'THUMBS_DOWN':
-                        case 'LAUGH':
-                        case 'HOORAY':
-                        case 'CONFUSED':
-                        case 'HEART':
-                        case 'ROCKET':
-                        case 'EYES':
-                            if(!reactionStatistic)reactionStatistic = {}
-                            reactionStatistic[key] = this.data[key].totalCount
-                            break
-                        default:
-                    }
-                }
-                return reactionStatistic 
-            },
-            withReaction() {
-                for(let key in this.reactionStatistic) {
-                    switch(this.reactionStatistic[key]) {
-                        case 0:
-                            break
-                        default:
-                            return true
-                    }
-                }
-                return false
-            },
+          
             withEditHistory() {
                 return this.commentExtraDataHolder.userContentEdits && this.commentExtraDataHolder.userContentEdits.totalCount > 0
             },
@@ -137,11 +135,11 @@
                 return location
             },
             diffHunkEntries() {
-                let hunkStatistic = (this.data.diffHunk.split('@@')[1]).replace(/@/g,'').trim().split(' ')
+                let hunkStatistic = (this.reviewComment.diffHunk.split('@@')[1]).replace(/@/g,'').trim().split(' ')
                 let deletionLineIndex,deletionStartLineIndex,addititonLineIndex,additionStartLineIndex
                 deletionLineIndex = deletionStartLineIndex = parseInt(hunkStatistic[0].split(',')[0].replace(/[-|\+]/g,''))
                 addititonLineIndex = additionStartLineIndex = parseInt(hunkStatistic[1].split(',')[0].replace(/[-|\+]/g,''))
-                let lines = this.data.diffHunk.split(/\n/)
+                let lines = this.reviewComment.diffHunk.split(/\n/)
                 let diffHunkEntries = []
                 lines.forEach(item => {
                     switch(item[0]) {
@@ -183,9 +181,18 @@
                     }
             },
             path() {
-                if(this.data.path.match(/\//g).length <= 3) return this.data.path
-                return `...${this.data.path.match(/(\/(([^\/])+)){3}$/g)[0]}`
+                if((this.reviewComment.path.match(/\//g) || []).length <= 3) return this.reviewComment.path
+                return `...${this.reviewComment.path.match(/(\/(([^\/])+)){3}$/g)[0]}`
+            },
+            replies() {
+                let replies = this.reviewCommentReplies().filter(item => {
+                    return item.in_reply_to_id == this.reviewComment.resourcePath.match(/[0-9]+$/)[0]
+                })
+                return replies || []
             }
+        },
+        created() {
+            this.network_getData()
         },
         methods: {
             showActionPopover() {
@@ -202,6 +209,31 @@
             },
             triggerShowOutdated() {
                 this.showOutdated = !this.showOutdated
+            },
+            async network_getData() {
+                if(this.repliesExtraData.loading || this.replies.length === 0) return
+                if(this.repliesExtraData.cursor >= this.replies.length) return
+                let nodeIds = []
+                this.replies.forEach(i => nodeIds.push(i.node_id))
+                try{
+                    this.repliesExtraData.loading = true
+                    let graphql_replies = graphql.GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID({nodeIds:nodeIds.slice(this.repliesExtraData.cursor,this.repliesExtraData.cursor + 5)})
+                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_replies)
+                    this.repliesExtraData.data = this.repliesExtraData.data.concat(res.data.data.nodes)
+                    this.repliesExtraData.cursor += 5
+                    this.repliesExtraData.loading = false
+                }catch(e) {
+                    console.log(e)
+                    this.repliesExtraData.loading = false
+                }
+            },
+            dateFormat(date) {
+                return util_dateFormat.getDateDiff(date)
+            }
+        },
+        watch: {
+            replies(newValue,oldValue) {
+                if(newValue.length > 0 && oldValue.length === 0) this.network_getData()
             }
         },
         components: {
@@ -209,6 +241,7 @@
             AnimatedHeightWrapper,
             Popover,
             Reaction,
+            HiddenItemLoading,
             Container: styled.div``,
             Main: styled.div``,
             FileHeader: styled.div``,

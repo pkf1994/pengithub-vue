@@ -3,7 +3,7 @@
             <Comment  :data="data"></Comment>
         </CommentWrapper>
         <!-- review -->
-        <Review v-else-if="data.event === 'reviewed'" :data="data"></Review>
+        <Review v-else-if="data.event === 'reviewed'" :review="data"></Review>
         <!-- committed  -->
         <SimpleTimelineItem v-else-if="data.event === 'committed'" :data="data" :date="data.committer.date">
             <template v-slot:icon>

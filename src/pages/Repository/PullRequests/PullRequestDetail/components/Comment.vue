@@ -180,6 +180,13 @@
     }
 </script>
 
+<style lang="scss">
+.user-mention {
+    font-weight: 600;
+    color: #24292e;
+}
+</style>
+
 <style scoped lang="scss">
 .header{
     position: relative;

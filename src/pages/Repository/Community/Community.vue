@@ -49,33 +49,48 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA} from '../../../store/modules/repository/actionTypes'
-    import { mapActions, mapState } from 'vuex'
     import {ComplexBubble} from '../../../components'
     import CheckItem from './CheckItem'
+    import {RouteUpdateAwareMixin} from '@/mixins'
+    import * as api from '@/network/api'
+    import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet } from '@/network'
     export default {
+        mixins: [RouteUpdateAwareMixin],
+        name: 'repository_commuity_page',
         inject: ['owner','repo'],
         data() {
             return {
-               
+               data: {},
+               loading: false
             }
         },
-        computed: {
-            ...mapState({
-                loading: state => state.repository.community.loading,
-                data: state => state.repository.community.data
-            }),
-        },
         created() {
-            this.action_getData({
-                repo:this.repo,
-                owner:this.owner
-            })
+            this.network_getData()
         },
         methods: {
-            ...mapActions({
-                action_getData: ACTION_REPOSITORY_REQUEST_COMMUNITY_DATA
-            }),
+            async network_getData() {
+                try{
+                    this.loading = true
+
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name)
+                    this.cancelSources.push(sourceAndCancelToken.source)
+
+                    const url = api.API_REPOSITORY_COMMUNITY(this.owner(),this.repo())
+                    const res = await authRequiredGet(url,
+                        {
+                            cancelToken:sourceAndCancelToken.cancelToken,
+                            headers:{
+                                "Accept":"application/vnd.github.black-panther-preview+json"
+                            }
+                        }
+                    )
+                    this.data = res.data
+                    this.loading = false
+                }catch(e) {
+                    this.loading = false
+                    console.log(e)
+                }
+            }
         },
         components: {
             ComplexBubble,

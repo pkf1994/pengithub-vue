@@ -5,12 +5,11 @@
             </ProjectTitle>
             <ProjectUpdateAt class="f6 b-2 mb-2 md-0 text-gray-light">
                 <svg class=" v-align-text-bottom d-inline-block" fill="currentColor" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 8h3v2H7c-.55 0-1-.45-1-1V4h2v4zM7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7z"></path></svg>
-                Updated {{updatedAt}}
+                Updated on {{updatedAt}}
             </ProjectUpdateAt>
             <ProjectProgress v-if="showProgressBar" class="mt-1 pr-5 mb-2 mb-md-0">
                 <ProjectProgressInner class="d-block position-relative overflow-hidden round-1 progress-bar" style="height: 10px">
-                    <span class="bg-green height-full d-inline-block v-align-top" :style="{width:donePercent + '%'}"></span>
-                    <span class="bg-purple height-full d-inline-block v-align-top" :style="{width:inProgressPercent + '%'}"></span>
+                    <span class="bg-green height-full d-inline-block v-align-top" :style="{width:donePercent + '%'}"></span><span class="bg-purple height-full d-inline-block v-align-top" :style="{width:inProgressPercent + '%'}"></span>
                 </ProjectProgressInner>    
             </ProjectProgress>
             <ProjectDescription class="text-gray-light markdown-body">
@@ -32,7 +31,7 @@
         },
         computed: {
             updatedAt() {
-                return util_dateFormat.dateFormat("zzz dd, yyyy",new Date(this.project.updatedAt))
+                return util_dateFormat.dateFormat("dd zzz, yyyy",new Date(this.project.updatedAt))
             },
             description() {
                 if(!this.project.body || this.project.body === "") return 'No description'

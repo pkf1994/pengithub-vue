@@ -32,6 +32,7 @@ const RepositoryIssuesYours = () => import('../pages/Repository/Issues/Yours.vue
 const RepositoryPullRequestsBrowser = () => import('../pages/Repository/PullRequests/PullRequestsBrowser.vue')
 const RepositoryPullRequestDetail = () => import('../pages/Repository/PullRequests/PullRequestDetail/PullRequestDetail.vue')
 const RepositoryPullRequestConversation = () => import('../pages/Repository/PullRequests/PullRequestDetail/Conversation.vue')
+const RepositoryPullRequestCommits = () => import('../pages/Repository/PullRequests/PullRequestDetail/Commits.vue')
 /* const RepositoryPullRequestsOpen = () => import('../pages/Repository/PullRequests/Open.vue')
 const RepositoryPullRequestsClosed = () => import('../pages/Repository/PullRequests/Closed.vue')
 const RepositoryPullRequestsYours = () => import('../pages/Repository/PullRequests/Yours.vue') */
@@ -204,7 +205,11 @@ export default [
                     {
                         path: '/',
                         component: RepositoryPullRequestConversation
-                    }
+                    },
+                    {
+                        path: 'commits',
+                        component: RepositoryPullRequestCommits
+                    },
                 ]
             },
             {

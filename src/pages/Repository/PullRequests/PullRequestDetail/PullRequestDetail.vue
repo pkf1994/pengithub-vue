@@ -12,6 +12,11 @@
     import {PageTopTab} from '@/components'
     export default {
         inject: ['owner','repo'],
+        provide() {
+            return {
+                number:() => this.number
+            }
+        },
         data() {
             return {
             }

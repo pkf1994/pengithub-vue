@@ -1,17 +1,17 @@
 <template>
-    <ComplexBubble :loading="loading" 
-                    :disableFlag="data.length === 0 && !loading" 
+    <ComplexBubble :loading="pullsProposed().data.length === 0 && pullsProposed().loading" 
+                    :disableFlag="pullsProposed().data.length === 0 && !pullsProposed().loading" 
                     disableNotice="There are no recent pull request been proposed">
         <template v-slot:title>
             <Title  class="bubble-title" style="font-weight: 700">
                 <svg class="v-align-text-bottom d-inline-block bubble-title-icon" fill="currentColor" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0010 15a1.993 1.993 0 001-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v6.56A1.993 1.993 0 002 15a1.993 1.993 0 001-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
-                {{totalCount}} Pull Requests proposed
+                {{pullsProposed().totalCount}} Pull Requests proposed
             </Title>   
         </template>
 
         <Content class="bubble-content p-0">
             <IssueItem
-                v-for="item in data" 
+                v-for="item in pullsProposed().data" 
                 :key="item.id"
                 :issue="item"
                 :showLabels="false"
@@ -20,7 +20,7 @@
             ></IssueItem>
         </Content>
         <template v-slot:footer>
-            <LoadMore v-if="hasNextPage" @click="() => getMoreData(loadingMore)" :class="{'text-gray':loadingMore}" class="text-center p-3 text-blue">
+            <LoadMore v-if="pullsProposed().pageInfo.hasNextPage" @click="() => getMoreData(loadingMore)" :class="{'text-gray':loadingMore}" class="text-center p-3 text-blue">
             {{loadingMore ? 'Loading...' : 'Load more...'}}
             </LoadMore>
         </template>
@@ -35,7 +35,7 @@
     import {util_dateFormat} from '../../../../util'
     import {mapState,mapActions} from 'vuex'
     export default {
-        inject: ['owner','repo'],
+        inject: ['owner','repo','pullsProposed'],
         props: {
             getMoreData: {
                 type: Function,
@@ -43,13 +43,9 @@
             }
         },
         computed: {
-           ...mapState({
-                loading: state => state.repository.pulse.pullsProposed.loading,
-                data: state => state.repository.pulse.pullsProposed.data,
-                loadingMore: state => state.repository.pulse.pullsProposed.loadingMore,
-                hasNextPage: state => state.repository.pulse.pullsProposed.pageInfo.next,
-                totalCount: state => state.repository.pulse.pullsProposed.totalCount,
-           })
+            loadingMore() {
+               return this.pullsProposed().loading && this.pullsProposed().data.length !== 0
+           }
         },
         methods: {
              dateFormat(dataStr) {

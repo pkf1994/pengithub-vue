@@ -100,7 +100,7 @@
         <Notifications v-if="data.id"></Notifications>
 
         <transition name="fade" appear>
-            <CommonLoading v-if="loading || timeline.loading || timeline.commentsAndReviewsExtraGraphqlData.loading"
+            <CommonLoading v-if="loading || timeline.loading || timeline.commentsAndReviewsExtraGraphqlData.loading || reviewCommentReplies.loading"
                             :preventClickEvent="false"
                             :position="loading ? 'center' : 'corner'"/>
         </transition>  
@@ -157,7 +157,8 @@
         provide() {
             return {
                 commentsAndReviewsExtraGraphqlDataGetter: () => this.timeline.commentsAndReviewsExtraGraphqlData.data,
-                pullRequestGetter: () => Object.assign({},this.data,this.extraData.data)
+                pullRequestGetter: () => Object.assign({},this.data,this.extraData.data),
+                reviewCommentReplies: () => this.reviewCommentReplies.data
             }
         },
         data() {
@@ -168,6 +169,10 @@
                 //bodyHTML reactions viewerAssociation
                 extraData: {
                     data: {},
+                    loading: false
+                },
+                reviewCommentReplies: {
+                    data: [],
                     loading: false
                 },
                 timeline: {
@@ -354,13 +359,16 @@
                     //获取timeline(异步)
                     this.network_getTimeline()
 
+                    //获取review comment replies
+                    this.network_getReviewCommentReplies()
+
                     //获取bodyHTML
                     this.extraData.loading = true
                     let graphql_extraData = graphql.GRAPHQL_PR_BODY_HTML_AND_REACTIONS({nodeId:res_pullRequest.data.node_id})
                     let res_extraData = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken:sourceAndCancelToken.cancelToken})
                     this.extraData.data = res_extraData.data.data.node
                     this.extraData.loading = false
-
+                    
                 }catch(e){
                     this.loading = false
                     this.extraData.loading = false
@@ -487,6 +495,32 @@
                     this.timeline.count.loading = false
                 }catch(e){
                     this.timeline.count.loading = false
+                    console.log(e)
+                }
+            },
+            async network_getReviewCommentReplies() {
+               
+                try{
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name + ' get_review_comment_replies')
+                    this.cancelSources.push(sourceAndCancelToken.source)
+
+                    this.reviewCommentReplies.loading = true
+                    let url_reviewComment = api.API_PULL_REQUEST_REVIEW_COMMENT({
+                        repo: this.repo(),
+                        owner: this.owner(),
+                        number: this.number,
+                        perPage: 100
+                    })
+                    let res_pullRequest = await authRequiredGet(url_reviewComment,{cancelToken:sourceAndCancelToken.cancelToken})
+
+                    let replies = []
+                    res_pullRequest.data.forEach(item => {
+                        if(item.in_reply_to_id) replies.push(item)
+                    })
+                    this.reviewCommentReplies.data = replies
+                    this.reviewCommentReplies.loading = false
+                }catch(e){
+                    this.reviewCommentReplies.loading = false
                     console.log(e)
                 }
             },

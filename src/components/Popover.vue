@@ -1,6 +1,6 @@
 <template>
     <transition name="popover-basic">
-        <Container   class="container py-2 top-triangle" ref="cover"  v-if="show"
+        <Container   class="container top-triangle" ref="cover"  v-if="show"
                     :style="[popoverStyle,{width:`${width}px`}]">
             <Cover class="cover" v-show="show"  @click.stop="close"></Cover>
                 <Main class="main bg-white">

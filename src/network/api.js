@@ -65,3 +65,7 @@ export const API_ISSUE_TIMELINE = (payload) => {
 export const API_PULLREQUEST = (payload) => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}`
 }
+
+export const API_PULL_REQUEST_REVIEW_COMMENT = (payload) => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/comments?sort=created&direction=asc${payload.perPage ? '&per_page=' + payload.perPage : ''}`
+}

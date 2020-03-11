@@ -5,7 +5,7 @@
                 <slot name="title"></slot>
             </Title>
 
-            <AnimatedHeightWrapper :delay="delay">
+            <AnimatedHeightWrapper>
                 <slot v-if="!disableFlag && !loading"></slot>
                 <BubbleDisable v-else-if="disable" class="bubble-content text-center">
                     <p style="margin-block-start: 1em;margin-block-end: 1em;">{{disableNotice}}</p>

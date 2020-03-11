@@ -1,5 +1,5 @@
 <template>
-    <ComplexBubble :loading="contributorsStatistic().loading || commitCount().loading"
+    <ComplexBubble :loading="loading || loadingCommitCount"
                     disableNotice="There are no recent code change">
         <template v-slot:title>
             <Title  class="bubble-title" style="font-weight: 700">
@@ -10,7 +10,7 @@
 
         <Content class="bubble-content">
             <p class="mb-3">
-                <strong>{{commitCount()}} commits</strong> have been push to all branches. 
+                <strong>{{commitCount}} commits</strong> have been push to all branches. 
                 On {{defaultBranch}},
                 <strong>{{defaultBranchStatistic.authorCount}} authors </strong> have push
                 <strong>{{defaultBranchStatistic.commitCount}} commits</strong>,
@@ -36,10 +36,10 @@
 
 <script>
     import styled from 'vue-styled-components'
+      import { mapActions, mapState } from 'vuex'
     import {ComplexBubble,AnimatedHeightWrapper} from '../../../../components'
     import {util_numberFormat} from '../../../../util'
     export default {
-        inject: ['contributorsStatistic','commitCount','repoBasicInfo'],
         props: {
            
         },
@@ -50,16 +50,22 @@
             }
         },
         computed: {
-            defaultBranch() {
-                return this.repoBasicInfo().defaultBranchRef ? this.repoBasicInfo().defaultBranchRef.name : ""
-            },
+            ...mapState({
+                loading: state => state.repository.pulse.codeChanges.loading,
+                contributors: state => state.repository.pulse.codeChanges.data,
+                commitCount: state => state.repository.pulse.codeChanges.commitCount.data,
+                loadingCommitCount: state => state.repository.pulse.codeChanges.commitCount.loading,
+                defaultBranch: state =>{ 
+                    return state.repository.basic.data.defaultBranchRef ? state.repository.basic.data.defaultBranchRef.name : ""
+                }
+            }),
             defaultBranchStatistic() {
                 let authorCount = 0
                 let commitCount = 0
                 let additionCount = 0
                 let deletionCount = 0
                 let authorRank = []
-                this.contributorsStatistic().data.forEach(item => {
+                this.contributors.forEach(item => {
                     let lastWeekData = item.weeks[item.weeks.length - 1]
                     if(lastWeekData.c > 0){
                         if(!this.maxCommitCountBySingleAuthor || lastWeekData.c > this.maxCommitCountBySingleAuthor) {

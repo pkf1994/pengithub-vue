@@ -262,6 +262,10 @@ export default {
         }
     },
 
+    //deprecated
+    //deprecated
+    //deprecated
+    //deprecated
     async [ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA](context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_PULSE_CODE_STATISTIC_DATA,true)
@@ -279,7 +283,10 @@ export default {
             handleException(e,{throwNetworkErrorToComponent:true})
         }
     },
-
+    //deprecated
+    //deprecated
+    //deprecated
+    //deprecated
     async [ACTION_REPOSITORY_REQUEST_PULSE_COMMIT_COUNT](context,payload) {
         try{
             commitTriggerLoadingMutation(context,ACTION_REPOSITORY_REQUEST_PULSE_COMMIT_COUNT,true)

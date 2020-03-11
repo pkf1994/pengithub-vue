@@ -1,17 +1,17 @@
 <template>
-    <ComplexBubble :loading="loading" 
-                    :disableFlag="data.length === 0 && !loading" 
+    <ComplexBubble :loading="issuesOpened().length === 0 && issuesOpened().loading" 
+                    :disableFlag="issuesOpened().length === 0 && !issuesOpened().loading" 
                     disableNotice="There are no recent issue been opened">
         <template v-slot:title>
             <Title  class="bubble-title" style="font-weight: 700">
                 <svg class="v-align-text-bottom d-inline-block bubble-title-icon" fill="currentColor"  viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 10h2v2H7v-2zm2-6H7v5h2V4zm1.5 1.5l-1 1L12 9l4-4.5-1-1L12 7l-1.5-1.5zM8 13.7A5.71 5.71 0 012.3 8c0-3.14 2.56-5.7 5.7-5.7 1.83 0 3.45.88 4.5 2.2l.92-.92A6.947 6.947 0 008 1C4.14 1 1 4.14 1 8s3.14 7 7 7 7-3.14 7-7l-1.52 1.52c-.66 2.41-2.86 4.19-5.48 4.19v-.01z"></path></svg>
-                {{totalCount}} Issues opened
+                {{issuesOpened().totalCount}} Issues opened
             </Title>   
         </template>
 
         <Content class="bubble-content p-0">
             <IssueItem
-                v-for="item in data" 
+                v-for="item in issuesOpened().data" 
                 :key="item.id"
                 :issue="item"
                 :showLabels="false"
@@ -20,7 +20,7 @@
             ></IssueItem>
         </Content>
         <template v-slot:footer>
-            <LoadMore v-if="hasNextPage" @click="() => getMoreData(loadingMore)" :class="{'text-gray':loadingMore}" class="text-center p-3 text-blue">
+            <LoadMore v-if="issuesOpened().pageInfo.hasNextPage" @click="() => getMoreData(loadingMore)" :class="{'text-gray':loadingMore}" class="text-center p-3 text-blue">
             {{loadingMore ? 'Loading...' : 'Load more...'}}
             </LoadMore>
         </template>
@@ -35,7 +35,7 @@
     import {util_dateFormat} from '../../../../util'
     import {mapState,mapActions} from 'vuex'
     export default {
-        inject: ['owner','repo'],
+        inject: ['owner','repo','issuesOpened'],
         props: {
             getMoreData: {
                 type: Function,
@@ -43,13 +43,9 @@
             }
         },
         computed: {
-           ...mapState({
-                loading: state => state.repository.pulse.issuesOpened.loading,
-                data: state => state.repository.pulse.issuesOpened.data,
-                loadingMore: state => state.repository.pulse.issuesOpened.loadingMore,
-                hasNextPage: state => state.repository.pulse.issuesOpened.pageInfo.next,
-                totalCount: state => state.repository.pulse.issuesOpened.totalCount,
-           })
+           loadingMore() {
+               return this.issuesOpened().loading && this.issuesOpened().data.length !== 0
+           }
         },
         methods: {
              dateFormat(dataStr) {

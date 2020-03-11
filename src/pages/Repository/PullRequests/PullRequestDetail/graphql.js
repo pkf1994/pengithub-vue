@@ -199,6 +199,7 @@ export const GRAPHQL_PR_BODY_HTML_AND_REACTIONS = payload => {
               createdAt
               bodyHTML
               viewerCanReact
+              resourcePath
               author {
                 login
                 avatarUrl
@@ -238,3 +239,94 @@ export const GRAPHQL_PR_BODY_HTML_AND_REACTIONS = payload => {
     }
     `
   }
+
+  export const GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID = payload => {
+    return `
+    {
+      nodes(ids:${JSON.stringify(payload.nodeIds)}) {
+        ... on PullRequestReviewComment {
+          id
+          path
+          position
+          outdated
+          diffHunk
+          createdAt
+          bodyHTML
+          viewerCanReact
+          author {
+            login
+            avatarUrl
+          }
+          THUMBS_UP :reactions(content: THUMBS_UP) {
+            totalCount
+          }
+          THUMBS_DOWN :reactions(content: THUMBS_DOWN) {
+              totalCount
+          }
+          LAUGH :reactions(content: LAUGH) {
+              totalCount
+          }
+          HOORAY :reactions(content: HOORAY) {
+              totalCount
+          }
+          CONFUSED :reactions(content: CONFUSED) {
+              totalCount
+          }
+          HEART :reactions(content: HEART) {
+              totalCount
+          }
+          ROCKET :reactions(content: ROCKET) {
+              totalCount
+          }
+          EYES :reactions(content: EYES) {
+              totalCount
+          }
+        }
+      }
+    }
+    `
+  }
+
+  export const GRAPHQL_PULLS_COMMITS = (payload) => {
+    payload = {
+      perPage: 100,
+      ...payload
+    }
+    return `
+  {
+    repository(name: "${payload.repo}", owner: "${payload.owner}") {
+      pullRequest(number: 265) {
+        commits(first:${payload.perPage}${payload.after ? ',after:' + payload.after : ''}) {
+          nodes {
+            commit {
+              committer {
+                date
+                avatarUrl
+                user {
+                  avatarUrl
+                  login
+                }
+              }
+              authoredByCommitter
+              author {
+                avatarUrl
+                user {
+                  login
+                }
+              }
+              abbreviatedOid
+              messageHeadlineHTML
+            }
+          }
+          totalCount
+          pageInfo {
+            endCursor
+            hasNextPage
+            hasPreviousPage
+            startCursor
+          }
+        }
+      }
+    }
+  }
+  `}

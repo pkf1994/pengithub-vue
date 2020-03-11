@@ -7,11 +7,11 @@
             </div>
            
             <WhoDidWhat>
-                <router-link :to="`/${data.user.login}`" class="d-inline-block">
-                        <img :src="data.user.avatar_url" :alt="`@${data.user.login}`" class="avatar mr-1" height="16" width="16">
+                <router-link :to="`/${review.user.login}`" class="d-inline-block">
+                        <img :src="review.user.avatar_url" :alt="`@${review.user.login}`" class="avatar mr-1" height="16" width="16">
                 </router-link>
-                <router-link  :to="`/${data.user.login}`" class="text-bold link-gray-dark">
-                    {{data.user.login}}
+                <router-link  :to="`/${review.user.login}`" class="text-bold link-gray-dark">
+                    {{review.user.login}}
                 </router-link>
                 {{statusAction}}
                 <span class="no-wrap">{{createdAt}}</span>
@@ -34,7 +34,7 @@
         </LoadingWrapper>
 
         <transition-group name="fade" appear>
-            <ReviewComment v-for="item in comments.data" :key="item.id" :data="item"/>
+            <ReviewComment v-for="item in comments.data" :key="item.id" :reviewComment="item"/>
         </transition-group>
         
 
@@ -57,7 +57,7 @@ import { authRequiredGitHubGraphqlApiQuery } from '../../../../../store/modules/
     export default {
         inject: ['commentsAndReviewsExtraGraphqlDataGetter'],
         props: {
-            data: {
+            review: {
                 type: Object,
                 required: true
             },
@@ -77,11 +77,11 @@ import { authRequiredGitHubGraphqlApiQuery } from '../../../../../store/modules/
         },
         computed: {
             createdAt() {
-                return util_dateFormat.getDateDiff(this.data.submitted_at)
+                return util_dateFormat.getDateDiff(this.review.submitted_at)
             },
             extraDataHolder() {
                 let extraDataHolder = this.commentsAndReviewsExtraGraphqlDataGetter().filter(item => {
-                    return item.id === this.data.node_id
+                    return item.id === this.review.node_id
                 })[0] || {}
                 if(extraDataHolder.bodyHTML) {
                     let pattern = /href="https:\/\/github\.com\/(\S+)"/g
@@ -114,7 +114,7 @@ import { authRequiredGitHubGraphqlApiQuery } from '../../../../../store/modules/
             },
             statusAction() {
                 let status = 'approved'
-                switch(this.data.state) {
+                switch(this.review.state) {
                     case 'changes_requested':
                         status = 'request changes'
                         break
@@ -135,7 +135,7 @@ import { authRequiredGitHubGraphqlApiQuery } from '../../../../../store/modules/
                     this.comments.loading = true
 
                     let graphql_reviewComments = graphql.GRAPHQL_PR_REVIEW_COMMENTS({
-                        nodeId: this.data.node_id,
+                        nodeId: this.review.node_id,
                         after: this.comments.pageInfo.hasNextPage ? this.comments.pageInfo.endCursor : undefined,
                         perPage: this.comments.perPage
                     })
