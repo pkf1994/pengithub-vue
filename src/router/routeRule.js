@@ -39,6 +39,7 @@ const RepositoryPullRequestsYours = () => import('../pages/Repository/PullReques
 const RepositoryProjects = () => import('../pages/Repository/Projects/Projects.vue')
 const RepositoryPulse = () => import('../pages/Repository/Pulse/Pulse.vue')
 const RepositoryCommunity = () => import('../pages/Repository/Community/Community.vue')
+const RepositoryCommit = () => import('../pages/Repository/Commit/Commit.vue')
 const Logout = () => import('../pages/Logout/Logout.vue')
 
 export const ROUTE_HOME = 'route-home'
@@ -223,7 +224,11 @@ export default [
             {
                 path: 'community',
                 components: {RepositoryCommunity},
-            }
+            },
+            {
+                path: 'commit/:sha',
+                components: {RepositoryCommit},
+            },
         ]
     },
     

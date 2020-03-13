@@ -18,7 +18,7 @@
                         <router-link :to="`/${commit.author && commit.author.login}`" class="pr-2">
                             <img class="avatar" width="16" height="16" :src="commit.author && commit.author.avatar_url" :alt="`@${commit.author && commit.author.login}`">
                         </router-link>
-                        <router-link :to="`/${owner}/${repo}/commit/${commit.sha}`" class="link-gray" style="word-break: break-word;">
+                        <router-link :to="`/${owner()}/${repo()}/commit/${commit.sha}`" class="link-gray" style="word-break: break-word;">
                             {{data.message && parseEmoji(data.message.replace(/[\n\r]{2}[\S\s]*/g,''))}}
                         </router-link> 
                     </div> 
@@ -139,7 +139,7 @@
             </template>
             <template v-slot:action>
                 closed this
-                <router-link to="/" v-if="data.commit_id">in {{`${owner}/${repo}@${commit.sha && commit.sha.substring(0,7)}`}}</router-link>
+                <router-link to="/" v-if="data.commit_id">in {{`${owner()}/${repo()}@${commit.sha && commit.sha.substring(0,7)}`}}</router-link>
             </template>
         </SimpleTimelineItem>
         <!-- reopened  -->

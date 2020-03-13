@@ -2,6 +2,7 @@
     <Container class="container flex-column">
         <HeaderDetachTopTab :tabs="tabs" :activeTab="activeTab"></HeaderDetachTopTab>
         <router-view name="RepositoryPullRequestDetail"></router-view>
+        <router-view name="RepositoryCommit"></router-view>
         <keep-alive>
             <router-view name="RepositoryCode"></router-view>
         </keep-alive>

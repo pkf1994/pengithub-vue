@@ -1,26 +1,44 @@
 <template>
     <Container>
-        <Commit v-for="item in committedDateMarkedData" :key="item.commit.abbreviatedOid">
-            <CommittedDate class="committed-date" v-if="!item.someCommittedDateWithPrevOne">
-                <span>{{formatDate(item.commit.committer.date)}}</span>
-            </CommittedDate>
-            <CommitInfo class="commit-info-item bg-white">
-                <img :src="item.commit.committer.user ? item.commit.committer.avatarUrl : item.commit.author.avatarUrl" width="20" height="20" :alt="item.commit.committer.user ? item.commit.committer.user.login : item.commit.author.user.login" class="avatar">
-                <Title class="title">
-                    <router-link to="/" v-html="item.commit.messageHeadlineHTML">
-                    </router-link>
-                </Title>
-                <Meta class="meta">
-                    committed by {{item.commit.committer.user ? item.commit.committer.user.login : item.commit.author.user.login}} ⋅ <router-link to="/">{{item.commit.abbreviatedOid}}</router-link>
-                </Meta>
-            </CommitInfo>
-        </Commit>
+
+        <CutOffNotice class="cut-off-notice" v-if="totalCount > 250">
+            This pull request is big! We’re only showing the most recent 250 commits.
+        </CutOffNotice>
+        <transition-group name="slide-up" appear >
+            <Commit v-for="item in committedDateMarkedData" :key="item.commit.abbreviatedOid">
+                <CommittedDate class="committed-date" v-if="!item.someCommittedDateWithPrevOne">
+                    <span>{{formatDate(item.commit.committer.date)}}</span>
+                </CommittedDate>
+                <CommitInfo class="commit-info-item bg-white">
+                    <img :src="item.commit.committer.user ? item.commit.committer.avatarUrl : item.commit.author.avatarUrl" width="20" height="20" :alt="item.commit.committer.user ? item.commit.committer.user.login : item.commit.author.user.login" class="avatar">
+                    <Title class="title">
+                        <router-link :to="item.commit.commitResourcePath" v-html="item.commit.messageHeadlineHTML">
+                        </router-link>
+                    </Title>
+                    <Meta class="meta">
+                        committed by {{item.commit.committer.user ? item.commit.committer.user.login : item.commit.author.user.login}} ⋅ <router-link to="/">{{item.commit.abbreviatedOid}}</router-link>
+                    </Meta>
+                </CommitInfo>
+            </Commit>
+        </transition-group>
+        
+        <HiddenItemLoading v-if="data.length > 0 && pageInfo.hasNextPage" :loading="loading" :dataGetter="network_getData">
+            {{(totalCount > 250 ? 250 : totalCount) - data.length}} {{(totalCount > 250 ? 250 : totalCount) - data.length > 1 ? 'commits' : 'commit'}} remained
+        </HiddenItemLoading>
+        
+        <transition name="fade" appear>
+            <CommonLoading v-if="loading"
+                            :preventClickEvent="false"
+                            :position="loading ? 'center' : 'corner'"/>
+        </transition> 
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
+    import {CommonLoading} from '@/components'
+    import {HiddenItemLoading} from './components'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery } from '@/network'
     import {util_dateFormat,util_emoji} from '@/util'
     import * as graphql from './graphql'
@@ -72,7 +90,6 @@
                         after: this.pageInfo.endCursor
                     })
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_commits,{cancelToken:sourceAndCancelToken.cancelToken})
-                    console.log(res.data.data)
                     this.data = this.data.concat(res.data.data.repository.pullRequest.commits.nodes)
                     this.totalCount = res.data.data.repository.pullRequest.commits.totalCount
                     this.pageInfo = res.data.data.repository.pullRequest.commits.pageInfo
@@ -84,7 +101,10 @@
             }
         },
         components: {
+            CommonLoading,
+            HiddenItemLoading,
             Container: styled.div``,
+            CutOffNotice: styled.div``,
             Commit: styled.div``,
             CommittedDate: styled.div``,
             CommitInfo: styled.div``,
@@ -95,6 +115,17 @@
 </script>
 
 <style scoped lang="scss">
+.cut-off-notice{
+    padding: 8px 0;
+    margin: 5px 2px;
+    font-weight: 600;
+    color: #4c4a42;
+    text-align: center;
+    background-color: #fff9ea;
+    border: 1px solid #dfd8c2;
+    border-radius: 3px;
+}
+
 .committed-date {
     position: relative;
     padding: 7px 15px;
@@ -121,16 +152,15 @@
         left: 15px;
         border-radius: 3px;
     }
-    a{
-        color: #24292e;
-    }
     .title{
         margin: 0 0 5px;
         font-size: 13px;
         font-weight: 600;
         line-height: 1.2;
-        color: #0366d6;
         word-break: break-word;
+        a{
+            color: #24292e;
+        }
     }
     .meta{
         display: block;
