@@ -80,13 +80,52 @@
             </DiffStatus>
         </AnimatedHeightWrapper>
 
-        <transition-group appear name="fade">
-            <DiffEx v-for="item in data.files || []" :key="item.raw_url" :file="item" :viewStyle="viewStyle"></DiffEx>
-        </transition-group>
+        <div v-if="showDiff">
+            <transition-group appear name="fade">
+                <Diff v-for="item in data.files || []" :key="item.raw_url" :file="item" :viewStyle="viewStyle"></Diff>
+            </transition-group>
+        </div>     
+
+
+        <h4 v-if="showDiff">
+            {{comments.totalCount}} {{comments.totalCount > 1 ? 'comments' : 'comment'}} on commit <code class="commit-sha">{{data.sha && data.sha.substring(0,7)}}</code> 
+        </h4>
+
+        <AnimatedHeightWrapper :stretch="comments.loading && (comments.data.length === 0)">
+            <div style="height:200px" class="flex flex-items-center flex-justify-center">
+                <LoadingIconEx/>
+            </div> 
+        </AnimatedHeightWrapper>   
+
+        <CommentWrapper v-for="item in comments.data" :key="item.id" class="comment-wrapper py-3 relative">
+            <Comment :data="item">
+
+            </Comment>
+        </CommentWrapper>
+
+        <HiddenItemLoading v-if="(comments.pageInfo) && (comments.pageInfo.next) && (comments.pageInfo.next.page < comments.pageInfo.last.page - 1) && (comments.data.length !== 0)"
+                            :loading="comments.loading"
+                            :dataGetter="network_getComments">
+            {{comments.totalCount - comments.data.length - comments.latestData.data.length}}
+        </HiddenItemLoading>
+
+        <CommentWrapper v-for="item in comments.latestData.data" :key="item.id" class="comment-wrapper py-3 relative">
+            <Comment :data="item">
+
+            </Comment>
+        </CommentWrapper>
+
+         <Editor v-if="showDiff" 
+                class="pt-3 mb-5" 
+                style="border-top: 2px solid #e1e4e8;" 
+                :locked="viewerCannotComment" 
+                :lockedReason="extraData.data.activeLockReason"></Editor>
+
 
   
         <transition name="fade" appear>
-            <CommonLoading v-if="loading || extraData.loading"
+            <CommonLoading v-if="loading || extraData.loading || !showDiff || comments.loading"
+                            :position="(loading  || extraData.loading) ? 'center' : 'corner'"
                             :preventClickEvent="false"/>
         </transition>  
     </Container>
@@ -95,9 +134,8 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading,AnimatedHeightWrapper} from '@/components'
-    import Diff from './Diff'
-    import DiffEx from './DiffEx'
+    import {CommonLoading,AnimatedHeightWrapper,LoadingIconEx,HiddenItemLoading,Editor} from '@/components'
+    import {Diff,Comment} from './components'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery } from '@/network'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
@@ -106,6 +144,11 @@
         name: 'commit_page',
         mixins: [RouteUpdateAwareMixin],
         inject: ['owner','repo'],
+        provide() {
+            return {
+                commit: () => Object.assign({},this.data,this.extraData.data)
+            }
+        },
         data() {
             return {
                 data: {},
@@ -114,7 +157,20 @@
                 extraData: {
                     data: {},
                     loading: false
-                }
+                },
+                comments: {
+                    data: [],
+                    loading: false,
+                    latestData: {
+                        data: [],
+                        loading: false
+                    },
+                    perPage: 10,
+                    reactionStatistic: {},
+                    pageInfo: {},
+                    totalCount: 0
+                },
+                showDiff: false
             }
         },
         computed: {
@@ -165,7 +221,10 @@
             },
             viewStyle() {
                 return this.$route.query.diff || 'unified'
-            }
+            },
+            viewerCannotComment() {
+                return this.data.locked && !this.data.viewerCanUpdate
+            },
         },
         created() {
             this.network_getData()
@@ -207,9 +266,61 @@
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken:sourceAndCancelToken.cancelToken})
                     this.extraData.data = res.data.data.node
                     this.associatedPulls = res.data.data.node.associatedPullRequests.nodes
+
+                    this.network_getComments()
+
+                    setTimeout(() => {
+                        this.showDiff = true
+                    },400)
+                    
                     this.extraData.loading = false
                 }catch(e) {
                     this.extraData.loading = false
+                    console.log(e)
+                }
+            },
+            async network_getComments() {
+                try{
+                    this.comments.loading = true
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name + ' get_comments')
+                    this.cancelSources.push(sourceAndCancelToken.source)
+
+                    let graphql_comments = graphql.GRAPHQL_COMMIT_COMMENTS(
+                        {
+                            nodeId: this.data.node_id,
+                            after: this.comments.pageInfo.endCursor,
+                            perPage: this.comments.perPage
+                        }
+                    )
+
+                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_comments,{cancelToken:sourceAndCancelToken.cancelToken})
+
+                    //尝试获取末端数据
+                    if(this.comments.data.length == 0) {
+                        if(res.data.data.node.comments.totalCount > this.comments.perPage) {
+                            let itemCountRemained = res.data.data.node.comments.totalCount - this.comments.perPage
+                            let lastPageScale = itemCountRemained > this.comments.perPage ? this.comments.perPage : itemCountRemained
+
+                            let graphql_commentsLatest = graphql.GRAPHQL_COMMIT_COMMENTS(
+                                {
+                                    nodeId: this.data.node_id,
+                                    perPage: lastPageScale,
+                                    forward: false
+                                }
+                            )
+
+                            let res_commentsLatest = await authRequiredGitHubGraphqlApiQuery(graphql_commentsLatest,{cancelToken:sourceAndCancelToken.cancelToken})
+                            this.comments.latestData.data = res_commentsLatest.data.data.node.comments.nodes
+                        }
+                    }
+
+                    this.comments.data = this.comments.data.concat(res.data.data.node.comments.nodes)
+                    this.comments.pageInfo = res.data.data.node.comments.pageInfo
+                    this.comments.totalCount = res.data.data.node.comments.totalCount
+                    
+                    this.comments.loading = false
+                }catch(e) {
+                    this.comments.loading = false
                     console.log(e)
                 }
             }
@@ -218,7 +329,10 @@
             CommonLoading,
             AnimatedHeightWrapper,
             Diff,
-            DiffEx,
+            Comment,
+            LoadingIconEx,
+            HiddenItemLoading,
+            Editor,
             Container: styled.div``,
             BasicInfo: styled.div``,
             Status: styled.span``,
@@ -230,6 +344,7 @@
             ParentInfo: styled.div``,
             DiffStatus: styled.div``,
             DiffStyleBtn: styled.div``,
+            CommentWrapper: styled.div``,
         }
     }
 </script>
@@ -316,5 +431,26 @@
         outline: none;
         box-shadow: none;
     }
+}
+
+.commit-sha{
+    padding: .2em .4em;
+    font-size: 90%;
+    font-weight: 400;
+    background-color: #f6f8fa;
+    border: 1px solid #eaecef;
+    border-radius: .2em;
+    font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+}
+
+.comment-wrapper:before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 16px;
+    display: block;
+    width: 2px;
+    content: "";
+    background-color: #e1e4e8;
 }
 </style>

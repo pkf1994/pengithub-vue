@@ -631,7 +631,7 @@
     }
     svg{
         color: #ccc;
-    vertical-align: bottom;
+        vertical-align: bottom;
         margin-right: 5px;
     }
 }

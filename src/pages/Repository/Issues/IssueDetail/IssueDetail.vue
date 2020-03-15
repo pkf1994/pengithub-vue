@@ -236,9 +236,9 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading,Label,AnimatedHeightWrapper,LoadingIconEx,Progress,IssueIcon} from '@/components'
+    import {CommonLoading,Label,AnimatedHeightWrapper,LoadingIconEx,Progress,IssueIcon,Editor,HiddenItemLoading} from '@/components'
     import {ScrollTopListenerMixin} from '@/mixins'
-    import {TimelineItem,Comment,HiddenItemLoading,Editor,ProjectCard} from './components'
+    import {TimelineItem,Comment,ProjectCard} from './components'
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,

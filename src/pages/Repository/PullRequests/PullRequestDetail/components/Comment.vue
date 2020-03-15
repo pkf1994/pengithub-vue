@@ -36,14 +36,13 @@
                 </BodyHTML>
 
                 <Reaction   v-if="(commentExtraDataHolder.viewerCanReact || withReaction) && !commentExtraDataHolder.isMinimized" 
-                            :data="reactionStatistic" 
+                            :data="commentExtraDataHolder" 
                             :disabled="!commentExtraDataHolder.viewerCanReact"></Reaction>
             </Body>
 
             <LoadingWrapper v-else class="loading-wrapper flex flex-justify-center flex-items-center">
                 <LoadingIconEx/>
             </LoadingWrapper>
-            
                
              
         </AnimatedHeightWrapper>
@@ -52,9 +51,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_dateFormat} from '../../../../../util'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '../../../../../components'
-    import {mapState} from 'vuex'
+    import {util_dateFormat} from '@/util'
+    import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '@/components'
     import ClipboardJS from 'clipboard';
     import Reaction from './Reaction'
     export default {
@@ -83,9 +81,6 @@
             }
         },
         computed: {
-            ...mapState({
-                //commentBodyHTMLAndReactions: state => state.repository.issue.issueDetail.timeline.commentBodyHTMLAndReactions.data
-            }),
             commentExtraDataHolder() {
                 let commentExtraDataHolder = this.commentsAndReviewsExtraGraphqlDataGetter().filter(item => {
                     return item.id === this.data.node_id
@@ -105,9 +100,8 @@
             editedAt() {
                 return util_dateFormat.getDateDiff(this.commentExtraDataHolder.userContentEdits.nodes[0].editedAt)
             },
-            reactionStatistic() {
-                let reactionStatistic
-                for(let key in this.commentExtraDataHolder) {
+            withReaction() {
+                 for(let key in this.commentExtraDataHolder) {
                     switch(key) {
                         case 'THUMBS_UP':
                         case 'THUMBS_DOWN':
@@ -117,21 +111,10 @@
                         case 'HEART':
                         case 'ROCKET':
                         case 'EYES':
-                            if(!reactionStatistic)reactionStatistic = {}
-                            reactionStatistic[key] = this.commentExtraDataHolder[key].totalCount
+                            if(this.commentExtraDataHolder[key].totalCount > 0) return true
+                            if(this.commentExtraDataHolder[key] > 0) return true
                             break
                         default:
-                    }
-                }
-                return reactionStatistic 
-            },
-            withReaction() {
-                for(let key in this.reactionStatistic) {
-                    switch(this.reactionStatistic[key]) {
-                        case 0:
-                            break
-                        default:
-                            return true
                     }
                 }
                 return false

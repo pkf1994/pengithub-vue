@@ -44,27 +44,6 @@
                 default: false
             },
         },
-        computed: {
-            withReaction() {
-                for(let key in this.data) {
-                    switch(key) {
-                        case 'THUMBS_UP':
-                        case 'THUMBS_DOWN':
-                        case 'LAUGH':
-                        case 'HOORAY':
-                        case 'CONFUSED':
-                        case 'HEART':
-                        case 'ROCKET':
-                        case 'EYES':
-                            if(this.data[key].totalCount > 0) return true
-                            if(this.data[key] > 0) return true
-                            break
-                        default:
-                    }
-                }
-                return false
-            },
-        },
         components: {
             Container: styled.div``,
         }
