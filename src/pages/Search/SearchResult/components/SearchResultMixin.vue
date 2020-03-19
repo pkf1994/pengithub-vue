@@ -3,146 +3,64 @@
 </template>
 
 <script>
+    import {util_numberFormat,util_queryParse} from '@/util'
+    import {CommonLoading,SimplePagination} from '@/components'
+    import {Selector,EmptyNotice} from '../components'
+    import {RouteUpdateAwareMixin} from '@/mixins'
     import styled from 'vue-styled-components'
-    import {ACTION_SEARCH_REQUEST_SEARCH_RESULT} from "../../../../store/modules/search/actionTypes";
-    import {mapActions, mapMutations, mapState} from "vuex";
-    import {SimplePagination,AnimatedHeightWrapper} from '../../../../components'
-    import Selector from './Selector.vue'
-    import SearchResultTemplate from './SearchResultTemplate.vue'
-    import {
-        MUTATION_SEARCH_SYNC_QUERY,
-        MUTATION_SEARCH_SYNC_SEARCH_SUFFIX
-    } from "../../../../store/modules/search/mutationTypes";
     export default {
+        mixins: [RouteUpdateAwareMixin],
         data() {
             return {
-                query: "",
-                language: "",
-                state: "",
-                searchType: "repositories",
-                needToGetDataWhenActivated: false,
-                errorData: {
-                    errorOccurred: false,
-                    errorMessage: "",
-                    reTryCallback: () => {}
-                }
+                searchType: 'repositories',
             }
         },
         computed: {
-            ...mapState({
-                loadingCountOfEachSearchType: state => state.search.loadingCountOfEachSearchType,
-                searchQuery: state => state.search.searchQuery,
-            }),
-            emptyResult() {
-                return this.data.length === 0 && !this.loading
+            m_query() {
+                return this.$route.query.q
             },
-            currentPage: function() {
-                return this.$route.query.p ? this.$route.query.p : 1
+            m_sort() {
+                return this.$route.query.sort
             },
-        },
-        created() {
-            this.getData({
-                searchQueryChanged: true,
-            })
-        },
-        activated() {
-            if(this.needToGetDataWhenActivated) {
-                this.getData({
-                    searchQueryChanged: true
-                })
-                this.needToGetDataWhenActivated = false
-            }
-        },
-        watch: {
-            query(newOne,oldOne) {
-                this.getData({
-                    query: newOne,
-                    qualifiers: {
-                         state: this.state,
-                        language: this.language,
-                    },
-                    searchQueryChanged: false
-                })
+            m_order() {
+                return this.$route.query.order
             },
-            language(newOne,oldOne) {
-           
-                this.getData({
-                    query: this.query,
-                    qualifiers: {
-                        state: this.state,
-                        language: newOne,
-                    },
-                    searchQueryChanged: false
-                })
+            m_state() {
+                return this.$route.query.state
             },
-            state(newOne) {
-                this.getData({
-                    query: this.query,
-                    qualifiers: {
-                        state: newOne,
-                        language: this.language,
-                    },
-                    searchQueryChanged: false
-                })
+            m_language() {
+                let language = this.$route.query.language
+                if(language == 'Any') return ''
+                return language
             },
-            searchQuery() {
-                let currentSearchChildPath = this.searchType === "repositories" ? "" : `/${this.searchType}`
-                if(this.$route.path === `/search${currentSearchChildPath}`) {
-                    this.getData({
-                        searchQueryChanged: true,
-                        query: this.query,
-                        qualifiers: {
-                            state: this.state,
-                            language: this.language,
-                        },
-                    })
-                } else {
-                    this.needToGetDataWhenActivated = true
-                }
+            m_page() {
+                return this.$route.query.p
             },
-            currentPage() {
-
+            m_formatTotalCount() {
+                return util_numberFormat.thousands(this.totalCount)
             }
         },
         methods: {
-            ...mapActions({
-                action_search_requestSearchResult: ACTION_SEARCH_REQUEST_SEARCH_RESULT
-            }),
-            syncSelectedValue({key,value}) {
-                this[key] = value
-            },
-            async getData(payload) {
-                try{
-                    this.errorData.errorOccurred = false
-                    await this.action_search_requestSearchResult({
-                        searchType: this.searchType,
-                        page: this.currentPage,
-                        ...payload
-                    })
-                }catch(e){
-                    this.errorData = {
-                        errorOccurred: true,
-                        errorMessage: e.message,
-                        reTryCallback: () => this.getData(payload)
-                    }
-                    console.log(e)
+            m_routeTo(query) {
+                query = {
+                    p: this.m_page,
+                    sort: this.m_sort,
+                    q: this.m_query,
+                    order: this.m_order,
+                    language: this.m_language,
+                    ...query
                 }
-              
+                let queryStr = util_queryParse.querify(query)
+                if(this.$route.fullPath == `/search/${this.searchType}?${queryStr}`) return 
+                this.$router.push(`/search/${this.searchType}?${queryStr}`)
             },
-            async paginationDataGetter(payload) {
-                await this.action_search_requestSearchResult({
-                    ...payload,
-                    searchType: this.searchType,
-                })
-            }
         },
         components: {
-            Selector,
-            SimplePagination,
-            SearchResultTemplate,
-            AnimatedHeightWrapper,
+            Selector,EmptyNotice,CommonLoading,SimplePagination,
+            Container: styled.div``,
+            Title: styled.h3``,
             ResultContent: styled.div``,
-            Title: styled.h3``
+
         }
     }
 </script>

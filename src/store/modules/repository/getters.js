@@ -13,7 +13,7 @@ export default {
         return activeBranchList
     },
     //deprecated
-    sortedContents: state => {
+    /* sortedContents: state => {
         let sortedContents = state.code.codeFile.data
         sortedContents.sort((a,b) => {
             let aIndex = a.type === 'tree' ? 1 : 0
@@ -21,7 +21,7 @@ export default {
             return bIndex - aIndex
         })
         return sortedContents
-    },
+    }, */
     //deprecated
     fileDetailRows: state => {
         let rows = state.code.codeFile.fileDetail.data && state.code.codeFile.fileDetail.data.split(/\n/)

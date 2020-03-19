@@ -13,6 +13,7 @@ import {
 } from "./modules"
 
 export default new Vuex.Store ({
+    strict: true,
     modules: {
         trending: trendingStore,
         oauth: oauthStore,

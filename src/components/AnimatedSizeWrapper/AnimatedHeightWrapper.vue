@@ -1,5 +1,5 @@
 <template>
-    <Container style="overflow-y: hidden;transition: height .4s" :style="{height: stretch ? `${height}px` : 0}">
+    <Container :style="{height: stretch ? `${height}px` : 0, ...containerStyle}">
         <Inner ref="content" v-on:compute-height="subComputeHeightEventHandler" >
             <slot></slot>
         </Inner>
@@ -15,20 +15,31 @@
             stretch: {
                 type: Boolean,
                 default: true
+            },
+            inactivatedFlagSignal: {
+                type: Boolean,
+                required: false
             }
         },
         data() {
             return {
-                height: 0
+                height: 0,
+                inactivatedFlag: false
             }
         },
-    
+        computed: {
+            containerStyle() {
+                return {
+                    overflowY: this.inactivatedFlag ? 'visible' : 'hidden',
+                    transition: this.inactivatedFlag ? 'none' : 'height .4s'
+                }
+            }
+        },
         mounted() {
             this.computeHeight()
         },
         updated() {
             this.computeHeight()
-
             //处理图片加载问题
             let imgArr = this.$refs.content.$el.getElementsByTagName('img')
             imgArr.forEach((item) => {
@@ -36,11 +47,7 @@
                     this.computeHeight()
                 }
             })
-           /*  if(this.delay !== 0) {
-                setTimeout(() => {
-                    this.computeHeight()
-                },this.delay)
-            } */
+          
         },
         activated() {
             this.computeHeight()
@@ -49,11 +56,8 @@
             computeHeight() {
                 if(!this.$refs.content) return 
                 if(this.height === this.$refs.content.$el.offsetHeight) return
-                //console.log("this.height" + this.height)
-                //console.log("this.$refs.content.$el.offsetHeight" + this.$refs.content.$el.offsetHeight)
                 this.height = this.$refs.content.$el.offsetHeight
 
-               
                 setTimeout(() => {
                     let computeHeightEvent = document.createEvent('HTMLEvents')
                     computeHeightEvent.initEvent("compute-height",true,false)
@@ -63,6 +67,17 @@
             subComputeHeightEventHandler(event) {
                 if(event.target == this.$refs.content.$el) return 
                 util_throttle.throttleByDelay(() => this.computeHeight(),50,this.randomMeta)
+            }
+        },
+        watch: {
+            inactivatedFlagSignal(newOne,oldOne) {
+                if(newOne && !oldOne) {
+                    setTimeout(() => {
+                        this.inactivatedFlag = true
+                    },400)
+                }else if(oldOne && !newOne) {
+                     this.inactivatedFlag = false
+                }
             }
         },
         components: {

@@ -22,57 +22,126 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexTopTab} from '../../../components'
-    import {WithSearchInputMixin} from '../../../mixins'
-    import {util_numberFormat} from '../../../util'
-    import {mapState} from "vuex";
+    import {ComplexTopTab} from '@/components'
+    import {WithSearchInputMixin,RouteUpdateAwareMixin} from '@/mixins'
+    import {util_numberFormat} from '@/util'
+    import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery } from '@/network'
+    import * as api from '@/network/api'
+    import * as graphql from './graphql'
+    import Vue from 'vue'
     export default {
-        mixins: [WithSearchInputMixin],
+        mixins: [WithSearchInputMixin,RouteUpdateAwareMixin],
+        name: 'search_result_page',
+        data() {
+            return {
+                data: {
+                    repositories: 0,
+                    code: 0,
+                    commits: 0,
+                    issues: 0,
+                    users: 0,
+                    topics: 0,
+                },
+                loading: false,
+                cachedRouteQuery: {
+                    
+                }  
+            }
+        },
         computed: {
-            ...mapState({
-                countOfRepository: state => state.search.searchResult.repositories.totalCount,
-                countOfCode: state => state.search.searchResult.code.totalCount,
-                countOfCommit: state => state.search.searchResult.commits.totalCount,
-                countOfUser: state => state.search.searchResult.users.totalCount,
-                countOfIssue: state => state.search.searchResult.issues.totalCount,
-                countOfTopic: state => state.search.searchResult.topics.totalCount,
-            }),
+            currentRoutePath() {
+                Vue.set(this.cachedRouteQuery,this.$route.path,this.$route.fullPath)
+                return this.$route.path
+            },
             tabs: function () {
                 return [
                     {
-                        to: `/search?q=${this.searchQuery}`,
+                        to: this.cachedRouteQuery['/search/repositories'] || `/search/repositories?q=${this.query}`,
                         label: 'Repositories',
-                        meta: this.countOfRepository === 0 ? undefined : util_numberFormat.thousands2K2M(this.countOfRepository,0)
+                        meta: this.data.repositories === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.repositories,0)
                     },
                     {
-                        to: `/search/code?q=${this.searchQuery}`,
+                        to: this.cachedRouteQuery['/search/code'] || `/search/code?q=${this.query}`,
                         label: 'Code',
-                        meta: this.countOfCode === 0 ? undefined : util_numberFormat.thousands2K2M(this.countOfCode,0)
+                        meta: this.data.code === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.code,0)
                     },
                     {
-                        to: `/search/commits?q=${this.searchQuery}`,
+                        to: this.cachedRouteQuery['/search/commits'] || `/search/commits?q=${this.query}`,
                         label: 'Commits',
-                        meta: this.countOfCommit === 0 ? undefined : util_numberFormat.thousands2K2M(this.countOfCommit,0)
+                        meta: this.data.commits === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.commits,0)
                     },
                     {
-                        to: `/search/issues?q=${this.searchQuery}`,
+                        to: this.cachedRouteQuery['/search/issues'] || `/search/issues?q=${this.query}`,
                         label: 'Issues',
-                        meta: this.countOfIssue === 0 ? undefined : util_numberFormat.thousands2K2M(this.countOfIssue,0)
+                        meta: this.data.issues === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.issues,0)
                     },
                     {
-                        to: `/search/users?q=${this.searchQuery}`,
+                        to: this.cachedRouteQuery['/search/users'] || `/search/users?q=${this.query}`,
                         label: 'Users',
-                        meta: this.countOfUser === 0 ? undefined : util_numberFormat.thousands2K2M(this.countOfUser,0)
+                        meta: this.data.users === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.users,0)
                     },
                     {
-                        to: `/search/topics?q=${this.searchQuery}`,
+                        to: this.cachedRouteQuery['/search/topics'] || `/search/topics?q=${this.query}`,
                         label: 'Topics',
-                        meta: this.countOfTopic === 0 ? undefined : util_numberFormat.thousands2K2M(this.countOfTopic,0)
+                        meta: this.data.topics === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.topics,0)
                     }
                 ]
-            }
+            },
+            query: function() {
+                let query = this.$route.query.q
+                this.localSearchQuery = query
+                return query
+            },
+        },
+        created() {
+            console.log(this.$route)
+            this.network_getData()
         },
         methods: {
+            async network_getData() {
+                try{
+                    this.loading = true
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
+                    this.cancelSources.push(sourceAndCancelToken.source)
+                    let graphql_itemCountBySearchResult = graphql.GRAPHQL_COUNT_GROUP_BY_SEARCH_TYPE(this.query)
+
+                    const res_graphql = await authRequiredGitHubGraphqlApiQuery(graphql_itemCountBySearchResult,{cancelToken:sourceAndCancelToken.cancelToken})
+                    
+                    let restParam = {
+                        q: this.query,
+                        page: 1,
+                        per_page: 1
+                    }
+                    const res_rest_arr = await Promise.all([
+                        authRequiredGet(api.API_SEARCH("code",restParam),{
+                            headers: {"Accept": "application/vnd.github.mercy-preview+json"},
+                            cancelToken:sourceAndCancelToken.cancelToken
+                        }),
+                        authRequiredGet(api.API_SEARCH("commits",restParam),{
+                            headers: {"Accept": "application/vnd.github.cloak-preview"},
+                            cancelToken:sourceAndCancelToken.cancelToken
+                        }),
+                        authRequiredGet(api.API_SEARCH("topics",restParam),{
+                            headers: {"Accept": "application/vnd.github.mercy-preview+json"},
+                            cancelToken:sourceAndCancelToken.cancelToken
+                        }),
+                    ])
+
+                    this.data = {
+                        repositories: res_graphql.data.data.REPOSITORY.repositoryCount,
+                        users: res_graphql.data.data.USER.userCount,
+                        issues: res_graphql.data.data.ISSUE.issueCount,
+                        code: res_rest_arr[0].data.total_count,
+                        commits: res_rest_arr[1].data.total_count,
+                        topics: res_rest_arr[2].data.total_count,
+                    }
+
+                    this.loading = false
+                }catch(e) {
+                    console.log(e)
+                    this.loading = false
+                }
+            },
             search() {
                 let path = `${this.$route.path}?q=${this.localSearchQuery}`
                 if(!this.localSearchQuery || this.localSearchQuery.trim() === "") return

@@ -6,6 +6,8 @@ export const GRAPHQL_COMMIT_EXTRA_DATA = payload => {
             id
             messageBodyHTML
             messageHeadlineHTML
+            viewerSubscription
+            viewerCanSubscribe
             status {
                 state
             }

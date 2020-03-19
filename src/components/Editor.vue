@@ -1,11 +1,11 @@
 <template>
     <Container>
         <Tab class="mx-0 mt-0 no-wrap d-flex flex-auto">
-            <TabItem class="btn-link tabnav-tab px-3 flex-1" :disabled="locked" @click="() => switchTab('Write')" :class="{'tab-selected':selectedTab === 'Write'}">Write</TabItem>
-            <TabItem class="btn-link tabnav-tab px-3 flex-1" :disabled="locked" @click="() => switchTab('Preview')" :class="{'tab-selected':selectedTab === 'Preview'}">Preview</TabItem>
+            <TabItem class="btn-link tabnav-tab px-3 flex-1" :disabled="locked && !viewerIsCollaborator().data" @click="() => switchTab('Write')" :class="{'tab-selected':selectedTab === 'Write'}">Write</TabItem>
+            <TabItem class="btn-link tabnav-tab px-3 flex-1" :disabled="locked && !viewerIsCollaborator().data" @click="() => switchTab('Preview')" :class="{'tab-selected':selectedTab === 'Preview'}">Preview</TabItem>
         </Tab>
 
-        <AnimatedHeightWrapper v-if="!locked" :style="{overflow:textareaIsFocused ? 'visible' : 'hidden' }">
+        <AnimatedHeightWrapper v-if="!locked || viewerIsCollaborator().data" :style="{overflow:textareaIsFocused ? 'visible' : 'hidden' }">
             <EditPane v-if="selectedTab === 'Write'">
                     <markdown-toolbar for="textarea" class="bg-white d-flex no-wrap flex-items-start flex-wrap px-2 pt-2">
                         <MDGroup class="d-block flex-auto">
@@ -87,22 +87,24 @@
 
         </AnimatedHeightWrapper>
 
-        <LockedNotice v-else class="locked-notice">
+        <LockedNotice v-else-if="!viewerIsCollaborator().loading" class="locked-notice">
             <svg height="32" class="octicon octicon-lock" viewBox="0 0 12 16" version="1.1" width="24" aria-hidden="true"><path fill-rule="evenodd" d="M4 13H3v-1h1v1zm8-6v7c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h1V4c0-2.2 1.8-4 4-4s4 1.8 4 4v2h1c.55 0 1 .45 1 1zM3.8 6h4.41V4c0-1.22-.98-2.2-2.2-2.2-1.22 0-2.2.98-2.2 2.2v2H3.8zM11 7H2v7h9V7zM4 8H3v1h1V8zm0 2H3v1h1v-1z"></path></svg>
             <p>This conversation has been locked as <strong>{{lockedReason}}</strong> and limited to collaborators.</p>
         </LockedNotice>
        
-        <Action class="d-flex flex-justify-end mt-2" v-if="!locked">
-            <button class="btn" v-if="issueGetter().viewerCanUpdate" :disabled="markdownRaw === ''">
-                <svg class="octicon octicon-issue-closed text-red v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 10h2v2H7v-2zm2-6H7v5h2V4zm1.5 1.5l-1 1L12 9l4-4.5-1-1L12 7l-1.5-1.5zM8 13.7A5.71 5.71 0 012.3 8c0-3.14 2.56-5.7 5.7-5.7 1.83 0 3.45.88 4.5 2.2l.92-.92A6.947 6.947 0 008 1C4.14 1 1 4.14 1 8s3.14 7 7 7 7-3.14 7-7l-1.52 1.52c-.66 2.41-2.86 4.19-5.48 4.19v-.01z"></path></svg>
-                <span class="">Close and comment</span>
-            </button>
-            <button class="btn btn-primary ml-1" :disabled="markdownRaw === ''">
-                <span class="">Comment</span>
-            </button>
+        <Action class="d-flex flex-justify-end mt-2" v-if="!locked || viewerIsCollaborator().data">
+            <slot>
+                <button class="btn" :disabled="markdownRaw === ''">
+                    <svg class="octicon octicon-issue-closed text-red v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 10h2v2H7v-2zm2-6H7v5h2V4zm1.5 1.5l-1 1L12 9l4-4.5-1-1L12 7l-1.5-1.5zM8 13.7A5.71 5.71 0 012.3 8c0-3.14 2.56-5.7 5.7-5.7 1.83 0 3.45.88 4.5 2.2l.92-.92A6.947 6.947 0 008 1C4.14 1 1 4.14 1 8s3.14 7 7 7 7-3.14 7-7l-1.52 1.52c-.66 2.41-2.86 4.19-5.48 4.19v-.01z"></path></svg>
+                    <span class="">Close and comment</span>
+                </button>
+                <button class="btn btn-primary ml-1" :disabled="markdownRaw === ''">
+                    <span class="">Comment</span>
+                </button>
+            </slot>
         </Action>
 
-        <Gidelines class="text-small text-gray my-2" v-if="!locked">
+        <Gidelines class="text-small text-gray my-2" v-if="( !locked || viewerIsCollaborator().data ) && withGidelines">
             <svg class="octicon octicon-info mr-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
             Remember, contributions to this repository should follow our
             <a href="https://help.github.com/articles/github-community-guidelines">GitHub Community Guidelines</a>
@@ -117,7 +119,7 @@
     import marked from 'marked'
     const createDOMPurify = require('dompurify');
     export default {
-        inject: ['issueGetter'],
+        inject: ['viewerIsCollaborator'],
         props: {
             locked: {
                 type: Boolean,
@@ -126,6 +128,10 @@
             lockedReason: {
                 type: String,
                 default: ''
+            },
+            withGidelines: {
+                type: Boolean,
+                default: true
             }
         },
         data() {

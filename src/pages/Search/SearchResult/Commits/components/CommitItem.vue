@@ -27,6 +27,11 @@
                 <span class="no-wrap">
                 {{committedAt}}
                 </span>
+
+                <span class="ml-1 d-inline-block">
+                    <svg v-if="status == 'FAILURE'" class="octicon octicon-x v-align-top text-red" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
+                    <svg v-else-if="status == 'SUCCESS'" class="octicon octicon-check v-align-top text-green" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
+                </span>
             </AuthoredOrCommittedAt>
         </MultiInfo>
     </Container>
@@ -46,6 +51,7 @@
     import {authRequiredGet} from "../../../../../store/modules/network";
     export default {
         mixins: [WithRandomMetaMixin],
+        inject: ['commitsExtraDataProvided','query'],
         props: {
             commit: {
                 type: Object,
@@ -59,9 +65,6 @@
             }
         },
         computed: {
-            ...mapState({
-                searchQuery: state => state.search.searchQuery
-            }),
             commitMessageFirstLine() {
                 let firstBrIndex = this.commit.commit.message.indexOf("\n")
                 if(firstBrIndex === -1){
@@ -75,10 +78,18 @@
             },
             committedAt() {
                 return util_dateFormat.dateFormat("zzz dd, yyyy",new Date(this.commit.commit.committer.date))
+            },
+            status() {
+                let statusHolder = this.commitsExtraDataProvided().filter(item => {
+                    return item.id == this.commit.node_id
+                })
+                if(statusHolder && statusHolder[0] && statusHolder[0].status){
+                    return statusHolder[0].status.state
+                }
             }
         },
         mounted() {
-            util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.searchQuery)
+            util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.query())
         },
         methods: {
             triggerShowMoreCommitMessage() {

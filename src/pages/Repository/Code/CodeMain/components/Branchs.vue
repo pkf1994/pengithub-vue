@@ -1,6 +1,7 @@
 <template>
     <ComplexBubble :loading="!codeBasicInfo().id" 
                     :disableFlag="!codeBasicInfo().defaultBranchRef && !codeBasicInfo.id" 
+                    :inactivatedFlagSignal="codeBasicInfo().id != undefined"
                     disableNotice="No branch yet">
         <template v-slot:title>
             <Title  class="bubble-title">

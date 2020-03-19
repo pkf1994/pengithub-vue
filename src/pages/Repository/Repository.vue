@@ -26,12 +26,13 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import { mapState,mapActions } from 'vuex'
+    import { mapState } from 'vuex'
     import {HeaderDetachTopTab} from '../../components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as graphql from './graphql'
+    import * as api from '@/network/api'
     import { ACTION_REPOSITORY_REQUEST_BASIC_DATA } from '../../store/modules/repository/actionTypes'
-    import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery } from '@/network'
+    import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
     const TAB_CODE = "Code"
     const TAB_ISSUES = "Issues"
     const TAB_PULLS = "Pull requests"
@@ -48,19 +49,23 @@
                 data: {},
                 loading: false,
                 activeTab: TAB_CODE,
+                viewerIsCollaborator: {
+                    data: false,
+                    loading: true
+                }
             }
         },
         provide() {
             return {
                 owner: () => this.owner,
                 repo: () => this.repo,
-                repoBasicInfo: () => this.data
+                repoBasicInfo: () => this.data,
+                viewerIsCollaborator: () => this.viewerIsCollaborator,
             }
         },
         computed: {
-            //deprecated
             ...mapState({
-                topTabCountData: state => state.repository.basic.data
+                viewerLogin: state => state.oauth.viewerInfo.login
             }),
             owner: function() {
                 return this.$attrs.owner
@@ -113,12 +118,10 @@
         },
         created() {
             this.network_getData()
+            this.network_ifViewerACollaborator()
         },
         methods: {
-            //deprecated
-            ...mapActions({
-                action_getBasicData: ACTION_REPOSITORY_REQUEST_BASIC_DATA
-            }),
+        
             //获取仓库基本信息
             async network_getData() {
                 try{
@@ -132,6 +135,25 @@
                 }catch(e) {
                     console.log(e)
                     this.loading = false
+                }
+            },
+            async network_ifViewerACollaborator() {
+                try{
+                    this.viewerIsCollaborator.loading = true
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name + ' check_if_viewer_a_collaborator')
+                    this.cancelSources.push(sourceAndCancelToken.source)
+                    let url = api.API_CHECK_IF_COLLABORATOR({
+                        login: this.viewerLogin,
+                        repo: this.repo,
+                        owner: this.owner
+                    })
+                    let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
+
+                    this.viewerIsCollaborator.data = true
+                    this.viewerIsCollaborator.loading = false
+                }catch(e) {
+                    console.log(e)
+                    this.viewerIsCollaborator.loading = false
                 }
             },
             routeUpdateHook() {

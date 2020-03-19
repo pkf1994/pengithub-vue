@@ -29,6 +29,9 @@
                     <router-link to="/search" :meta="randomMeta">{{issue.title}}</router-link>
                 </Title>
 
+                <!-- <Body class="mb-0" v-if="issue.body">
+                    {{issue.body}}
+                </Body> -->
 
                 <Labels class="text-gray">
                     <span v-for="item in issue.labels"
@@ -51,6 +54,18 @@
                         {{issue.comments}} {{issue.comments > 1 ? 'comments' : 'comment'}}
                     </CommentCount>
                 </MultiInfo>
+
+                <AnimatedHeightWrapper>
+                    <RefInfo v-if="refInfo" class="text-small text-gray d-inline mr-3">
+                        <span class="text-mono">
+                            {{refInfo.baseRefName}}
+                        </span>
+                        ←
+                        <span class="text-mono">
+                            {{refInfo.headRefName}}
+                        </span>
+                    </RefInfo>
+                </AnimatedHeightWrapper>
             </Main>
         </Container>
 </template>
@@ -60,12 +75,13 @@
     import marked from 'marked'
     import DOMPurify from 'dompurify'
     import {mapState} from "vuex";
-    import {util_dateFormat,util_color,util_adjustStyle} from '../../../../../util'
+    import {util_dateFormat,util_color,util_adjustStyle} from '@/util'
     import {
-        AnimatedHeightWrapper} from '../../../../../components'
+        AnimatedHeightWrapper} from '@/components'
     import {
-        WithRandomMetaMixin} from '../../../../../mixins'
+        WithRandomMetaMixin} from '@/mixins'
     export default {
+        inject: ['issuesExtraDataProvided'],
         mixins: [WithRandomMetaMixin],
         props: {
             issue: {
@@ -90,10 +106,14 @@
             openAt: function () {
                 return util_dateFormat.dateFormat( "zzz d, yyyy",new Date(this.issue.created_at))
             },
-          /*  bodyHTML: function () {
-                let bodyHTML = marked(this.issue.body)
-                return DOMPurify.sanitize(bodyHTML)
-            }*/
+            refInfo() {
+                if(!this.issue.pull_request) return
+                let refInfoHolder
+                refInfoHolder = this.issuesExtraDataProvided().filter(item => {
+                    return item.id == this.issue.node_id
+                })
+                return refInfoHolder[0]
+            }
         },
         created(){
         },
@@ -112,10 +132,12 @@
             Main: styled.div``,
             FullName: styled.div``,
             Title: styled.div``,
+            Body: styled.p``,
             MultiInfo: styled.div``,
             Labels: styled.div``,
             OpenByAndDate: styled.div``,
             CommentCount: styled.div``,
+            RefInfo: styled.div``,
         }
     }
 </script>

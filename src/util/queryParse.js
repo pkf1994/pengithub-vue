@@ -12,7 +12,17 @@ export default {
         let query = ""
         if(queryObj !== {})
         for(let key in queryObj) {
-            if(queryObj[key]) query = `${query}&${key}=${queryObj[key]}`
+            if(queryObj[key]){
+                let queryValueFragment = queryObj[key].toString().replace(/%/g,'%25')
+                                        .replace(/\+/g,'%2B')
+                                        .replace(/ /g,'%20')
+                                        .replace(/\//g,'%2F')
+                                        .replace(/\?/g,'%3F')
+                                        .replace(/#/g,'%23')
+                                        .replace(/&/g,'%26')
+                                        .replace(/=/g,'%3D')
+                query = `${query}&${key}=${queryValueFragment}`
+            }
         }
         return query.substring(1,query.length)
     }

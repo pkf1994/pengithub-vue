@@ -103,7 +103,7 @@
             </Comment>
         </CommentWrapper>
 
-        <HiddenItemLoading v-if="(comments.pageInfo) && (comments.pageInfo.next) && (comments.pageInfo.next.page < comments.pageInfo.last.page - 1) && (comments.data.length !== 0)"
+        <HiddenItemLoading v-if="(comments.pageInfo) && (comments.pageInfo.hasNextPage) && (comments.totalCount - comments.data.length - comments.latestData.data.length > 0)"
                             :loading="comments.loading"
                             :dataGetter="network_getComments">
             {{comments.totalCount - comments.data.length - comments.latestData.data.length}}
@@ -116,10 +116,19 @@
         </CommentWrapper>
 
          <Editor v-if="showDiff" 
+                ref="editor"
                 class="pt-3 mb-5" 
-                style="border-top: 2px solid #e1e4e8;" 
+                :withGidelines="false"
                 :locked="viewerCannotComment" 
-                :lockedReason="extraData.data.activeLockReason"></Editor>
+                :lockedReason="extraData.data.activeLockReason">
+              <button class="btn btn-primary ml-1" :disabled="$refs.editor && $refs.editor.markdownRaw === ''">
+                    <span class="">Comment on this commit</span>
+                </button>        
+        </Editor>
+
+        <Subscription v-if="showDiff" class="pb-3" :viewerSubscription="extraData.data.viewerSubscription">
+
+        </Subscription>
 
 
   
@@ -134,7 +143,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading,AnimatedHeightWrapper,LoadingIconEx,HiddenItemLoading,Editor} from '@/components'
+    import {CommonLoading,AnimatedHeightWrapper,LoadingIconEx,HiddenItemLoading,Editor,Subscription} from '@/components'
     import {Diff,Comment} from './components'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery } from '@/network'
     import * as api from '@/network/api'
@@ -165,7 +174,7 @@
                         data: [],
                         loading: false
                     },
-                    perPage: 10,
+                    perPage: 1,
                     reactionStatistic: {},
                     pageInfo: {},
                     totalCount: 0
@@ -333,6 +342,7 @@
             LoadingIconEx,
             HiddenItemLoading,
             Editor,
+            Subscription,
             Container: styled.div``,
             BasicInfo: styled.div``,
             Status: styled.span``,

@@ -78,3 +78,7 @@ export const API_COMMIT = (payload) => {
 export const API_BRANCHES_FOR_HEAD_COMMIT = (payload) => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/commits/${payload.sha}/branches-where-head`
 }
+
+export const API_CHECK_IF_COLLABORATOR = payload => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/collaborators/${payload.login}`
+}

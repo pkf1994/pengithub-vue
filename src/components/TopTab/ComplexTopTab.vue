@@ -1,9 +1,10 @@
 <template>
     <nav class="flex overflow-auto">
-        <router-link class="px-2 py-3 mr-3 router-link flex-row-center flex-shrink-0" v-for="tabItem in tabs"
-                     exact
-                     :key="tabItem.label"
-                     :to="tabItem.to">
+        <router-link class="px-2 py-3 mr-3 router-link flex-row-center flex-shrink-0" 
+                        v-for="tabItem in tabs"
+                        :exact='tabItem.exact'
+                        :key="tabItem.label"
+                        :to="tabItem.to">
             <span>{{tabItem.label}}</span>
             <AnimatedWidthWrapper>
                 <span class="ml-1 mt-1 meta no-wrap" v-if="tabItem.meta">

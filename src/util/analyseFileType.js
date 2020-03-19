@@ -131,7 +131,6 @@ export default {
         let programAggregate = PROGRAMMING_LIST.filter(item => {
             return item.name === language
         })
-        console.log(programAggregate)
         return programAggregate[0] ? programAggregate[0].color : "#f7f7f7"
     }
 }

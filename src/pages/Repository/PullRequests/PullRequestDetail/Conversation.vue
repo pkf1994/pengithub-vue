@@ -97,7 +97,10 @@
 
         <Editor v-if="data.id"></Editor>
 
-        <Notifications v-if="data.id"></Notifications>
+        <Header class="header">
+            Notifications for this thread
+        </Header>
+        <Subscription class="p-3 bg-white" v-if="extraData.data.viewerSubscription" :viewerSubscription="extraData.data.viewerSubscription"></Subscription>
 
         <transition name="fade" appear>
             <CommonLoading v-if="loading || timeline.loading || timeline.commentsAndReviewsExtraGraphqlData.loading || reviewCommentReplies.loading"
@@ -136,9 +139,9 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading,Label,AnimatedHeightWrapper,LoadingIconEx,Progress,IssueIcon} from '@/components'
+    import {CommonLoading,Label,AnimatedHeightWrapper,LoadingIconEx,Progress,IssueIcon,Subscription} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
-    import {TimelineItem,Comment,HiddenItemLoading,Editor,ProjectCard,PullRequestBody,Notifications} from './components'
+    import {TimelineItem,Comment,HiddenItemLoading,Editor,ProjectCard,PullRequestBody} from './components'
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
@@ -648,7 +651,7 @@
             LoadingIconEx,
             AnimatedHeightWrapper,
             Editor,
-            Notifications,
+            Subscription,
             Progress,
             PullRequestBody,
             IssueIcon,
@@ -771,5 +774,15 @@
     display: block;
     background-color: #fff;
     border-bottom: 1px solid rgba(0,0,0,.15);
+}
+
+.header{
+    padding: 25px 15px 7.5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #586069;
+    background-color: #f6f8fa;
+    border-top: 1px solid #dfe2e5;
+    border-bottom: 1px solid #dfe2e5;
 }
 </style>

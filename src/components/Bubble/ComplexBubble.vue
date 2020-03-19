@@ -5,7 +5,7 @@
                 <slot name="title"></slot>
             </Title>
 
-            <AnimatedHeightWrapper>
+            <AnimatedHeightWrapper :inactivatedFlagSignal="inactivatedFlagSignal">
                 <slot v-if="!disableFlag && !loading"></slot>
                 <BubbleDisable v-else-if="disable" class="bubble-content text-center">
                     <p style="margin-block-start: 1em;margin-block-end: 1em;">{{disableNotice}}</p>
@@ -15,7 +15,7 @@
                 </BubbleDisable>
             </AnimatedHeightWrapper>  
 
-            <AnimatedHeightWrapper>
+            <AnimatedHeightWrapper :inactivatedFlagSignal="inactivatedFlagSignal">
                 <Footer :class="{footer:withFooterSlot && withFooterBorderTop,'disable-filter':disable}" v-if="!loading">
                     <slot name="footer"></slot>
                 </Footer>
@@ -42,9 +42,9 @@
                 type: Boolean,
                 default: false
             },
-            delay: {
-                type: Number,
-                default: 0
+            inactivatedFlagSignal: {
+                type: Boolean,
+                default: false
             },
             withFooterBorderTop: {
                 type: Boolean,

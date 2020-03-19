@@ -1,21 +1,29 @@
 <template>
         <Container class="py-4 px-3 flex">
-            <AnimatedWidthWrapper class="mr-1" style="flex-shrink:0">
-                <img class="rounded-1 v-align-middle"
-                    :src="code.repository.owner.avatar_url"
-                    width="20"
-                    height="20">
-            </AnimatedWidthWrapper>
-            <Main style="min-width:0">
+            <img class="rounded-1 v-align-middle mr-1 flex-shrink-0"
+                :src="code.repository.owner.avatar_url"
+                width="20"
+                height="20">
+            <Main style="min-width:0" class="flex-auto">
                 <FullName class="text-small text-bold">
                     <router-link to="/search" class="link-gray">{{code.repository.full_name}}</router-link>
                 </FullName>
                 <ThePath class="f4 text-normal">
                     <router-link to="/search">{{code.path}}</router-link>
                 </ThePath>
-                <MatchesContent class="matches-content my-1 pl-4 font-mono"
-                                :meta="randomMeta"
-                                style="white-space: pre">{{matchesContent}}</MatchesContent>
+                <MatchesContent class="matches-content my-1 font-mono"
+                                :meta="randomMeta">
+                    <div v-for="(item,index) in code.text_matches || []" :key="index" class="flex-column">
+                        <div v-for="(_item,_index) in item.fragment.split('\n')" :key="_index" class="flex">
+                            <div class="blob-num">·</div>
+                            <div class="blob-code">{{_item}}</div>
+                        </div>
+                        <FlagmentDivision class="flex" v-if="index !== code.text_matches.length - 1">
+                            <div class="blob-num divider">…</div>
+                            <div class="blob-code divider flex-auto"></div>
+                        </FlagmentDivision>
+                    </div>
+                </MatchesContent>
 
                 <MultiInfo class="d-flex flex-wrap text-small text-gray">
                     <Language class="mr-3" v-if="fileTypeAndColor.type !== 'Unknow'">
@@ -27,14 +35,6 @@
                     <MatchesNumber>
                         Showing the top {{matchCount}} {{matchCount > 1 ? "matches" : "match"}}
                     </MatchesNumber>
-                    <AnimatedHeightWrapper>
-                        <LastIndexOn v-show="lastCommitAt" class="mr-3">
-                            Last indexed on
-                            <span class="no-wrap">
-                            {{lastCommitAt}}
-                        </span>
-                        </LastIndexOn>
-                    </AnimatedHeightWrapper>
                 </MultiInfo>
             </Main>
         </Container>
@@ -54,6 +54,7 @@
     import {authRequiredGet} from "../../../../../store/modules/network";
     export default {
         mixins: [WithRandomMetaMixin,CancelNetworkOnDestroyMixin],
+        inject: ['query'],
         props: {
             code: {
                 type: Object,
@@ -62,56 +63,44 @@
         },
         data() {
             return {
-                lastCommitAt: undefined,
-                loadingLastCommit: false,
-                loadingContent: false,
-                source: axios.CancelToken.source()
             }
         },
         computed: {
-            ...mapState({
-                searchQuery: state => state.search.searchQuery
-            }),
             fileTypeAndColor: function() {
                return util_analyseFileType.anaylseCodeLanguageByExtensions(this.code.path)
             },
-            lastCommitApi: function () {
-                return `https://api.github.com/repos/${this.code.repository.full_name}/commits?path=${this.code.path}&page=1&per_page=1`
-            },
             matchCount: function() {
                 let count = 0
+                if(!this.code.text_matches) return count
                 this.code.text_matches.forEach(item => {
                     count += item.matches.length
                 })
                 return count
             },
+           /*  processTextMatches() {
+                let processTextMatches = []
+                this.code.text_matches.forEach(item => {
+                    item.matches.reverse().forEach(_item => {
+                        item.fragment = `${item.fragment.substring(0,_item.indices[0])}<strong>${_item.text}</strong>${item.fragment.substring(_item.indices[1],item.fragment.length)}`
+                    })
+                    processTextMatches.push
+                })
+                return processTextMatches
+            }, */
             matchesContent: function () {
-               let content = ""
-               this.code.text_matches.forEach(item => {
-                   content = `${content}${item.fragment}`
-               })
-               return content
+                let content = ""
+                if(!this.code.text_matches) return ""
+                this.code.text_matches.forEach(item => {
+                    content = `${content}${item.fragment}`
+                })
+
+                return content.split('\n')
            }
         },
         created(){
-            this.getLastCommitNetwork()
         },
         mounted() {
-            util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.searchQuery,"background-color: #fff5b1!important;")
-        },
-        methods: {
-            async getLastCommitNetwork() {
-                try{
-                    this.loadingLastCommit = true
-                    const config = {cancelToken: this.source.token}
-                    const res = await authRequiredGet(this.lastCommitApi,config)
-                    this.lastCommitAt = util_dateFormat.dateFormat("dd zzz, yyyy",new Date(res.data[0].commit.committer.date))
-                    this.loadingLastCommit = false
-                }catch(e) {
-                    handleException(e)
-                    this.loadingLastCommit = false
-                }
-            }
+            util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.query(),"background-color: #fff5b1!important;")
         },
         components: {
             AnimatedHeightWrapper,
@@ -124,7 +113,7 @@
             MultiInfo: styled.div``,
             Language: styled.div``,
             MatchesNumber: styled.div``,
-            LastIndexOn: styled.div``,
+            FlagmentDivision: styled.div``,
         }
     }
 </script>
@@ -147,5 +136,37 @@
     overflow-y: hidden;
     line-height: 20px;
 }
-
+.blob-num{
+    min-width: 50px;
+    font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+    font-size: 12px;
+    line-height: 20px;
+    color: rgba(27,31,35,.3);
+    text-align: right;
+}
+.blob-code{
+    position: relative;
+    padding-right: 10px;
+    padding-left: 10px;
+    line-height: 20px;
+    vertical-align: top;
+    overflow: visible;
+    font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+    font-size: 12px;
+    color: #24292e;
+    word-wrap: normal;
+    white-space: pre-wrap;
+}
+.divider{
+    height: 18px;
+    padding: 0 10px;
+    line-height: 15px;
+    background-color: #f0f5fa;
+}
+.divider .blob-code{
+    padding-top: 0;
+    padding-bottom: 0;
+    cursor: default;
+    background-color: #f8fafd;
+}
 </style>

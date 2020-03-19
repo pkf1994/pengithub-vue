@@ -3,9 +3,10 @@
         <Container   class="container top-triangle" ref="cover"  v-if="show"
                     :style="[popoverStyle,{width:`${width}px`}]">
             <Cover class="cover" v-show="show"  @click.stop="close"></Cover>
-                <Main class="main bg-white">
-                    <slot></slot>
-                </Main>
+
+            <Main class="main bg-white">
+                <slot></slot>
+            </Main>
         </Container>
     </transition>
 
@@ -82,10 +83,21 @@
         position: fixed;
         bottom: 0;
         left: 0;
-        right: 0;
-        top: 0;
         z-index: -1;
     }
+
+    .cover:before {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 80;
+    display: block;
+    cursor: default;
+    content: " ";
+    background: transparent;
+}
 
     .main{
         border-radius: 6px;

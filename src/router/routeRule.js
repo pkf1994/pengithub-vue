@@ -12,7 +12,7 @@ const HomeIssues = () => import('../pages/Home/LoginedHome/Issues.vue')
 const HomeIssuesAssigned = () => import('../pages/Home/LoginedHome/Issues/Assigned.vue')
 const HomeIssuesMentioned = () => import('../pages/Home/LoginedHome/Issues/Mentioned.vue') */
 const Search = () => import('../pages/Search/Search.vue')
-const SearchResultRepositories = () => import('../pages/Search/SearchResult/Repositorires/Repositories.vue')
+const SearchResultRepositories = () => import('../pages/Search/SearchResult/Repositories/Repositories.vue')
 const SearchResultCode = () => import('../pages/Search/SearchResult/Code/Code.vue')
 const SearchResultCommit = () => import('../pages/Search/SearchResult/Commits/Commits.vue')
 const SearchResultIssues = () => import('../pages/Search/SearchResult/Issues/Issues.vue')
@@ -26,16 +26,10 @@ const RepositoryCodeFileDetail = () => import('../pages/Repository/Code/CodeFile
 const RepositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
 const RepositoryIssuesBrowser = () => import('../pages/Repository/Issues/IssuesBrowser.vue')
 const RepositoryIssueDetail = () => import('../pages/Repository/Issues/IssueDetail/IssueDetail.vue')
-/* const RepositoryIssuesOpen = () => import('../pages/Repository/Issues/Open.vue')
-const RepositoryIssuesClosed = () => import('../pages/Repository/Issues/Closed.vue')
-const RepositoryIssuesYours = () => import('../pages/Repository/Issues/Yours.vue') */
 const RepositoryPullRequestsBrowser = () => import('../pages/Repository/PullRequests/PullRequestsBrowser.vue')
 const RepositoryPullRequestDetail = () => import('../pages/Repository/PullRequests/PullRequestDetail/PullRequestDetail.vue')
 const RepositoryPullRequestConversation = () => import('../pages/Repository/PullRequests/PullRequestDetail/Conversation.vue')
 const RepositoryPullRequestCommits = () => import('../pages/Repository/PullRequests/PullRequestDetail/Commits.vue')
-/* const RepositoryPullRequestsOpen = () => import('../pages/Repository/PullRequests/Open.vue')
-const RepositoryPullRequestsClosed = () => import('../pages/Repository/PullRequests/Closed.vue')
-const RepositoryPullRequestsYours = () => import('../pages/Repository/PullRequests/Yours.vue') */
 const RepositoryProjects = () => import('../pages/Repository/Projects/Projects.vue')
 const RepositoryPulse = () => import('../pages/Repository/Pulse/Pulse.vue')
 const RepositoryCommunity = () => import('../pages/Repository/Community/Community.vue')
@@ -116,7 +110,7 @@ export default [
         },
         children: [
             {
-                path: '/',
+                path: 'repositories',
                 component: SearchResultRepositories
             },
             {

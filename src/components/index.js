@@ -20,6 +20,7 @@ import Label from './Label'
 import Progress from './Progress'
 import IssueIcon from './IssueIcon'
 import Editor from './Editor'
+import Subscription from './Subscription'
 export {
     Button,
     LogoHeader,
@@ -57,5 +58,6 @@ export {
     IssueIcon,
     IssuesPageTemplate,
     HiddenItemLoading,
-    Editor
+    Editor,
+    Subscription
 }

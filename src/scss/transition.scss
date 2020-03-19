@@ -1,11 +1,26 @@
 @import "./variables";
 .fade-enter-active,
 .fade-leave-active{
-  transition: opacity $transition-duration
+  transition: opacity $transition-duration;
 }
 
 .fade-enter,
 .fade-leave-to{
+  opacity: 0;
+}
+
+.fade-group-enter-active{
+  transition: opacity $transition-duration;
+}
+
+
+.fade-group-leave-active{
+  position: absolute;
+  opacity: 0;
+}
+
+.fade-group-enter,
+.fade-group-leave-to{
   opacity: 0;
 }
 

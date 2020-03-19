@@ -1,6 +1,6 @@
 <template>
     <ComplexBubble :loading="!codeBasicInfo().id" 
-                    :disableFlag="pullRequests.totalCount === 0 && codeBasicInfo().id" 
+                    :disableFlag="pullRequests.totalCount === 0 && codeBasicInfo().id !== undefined" 
                     disableNotice="There are no recent pull request"
                     :delay="1500">
         <template v-slot:title>

@@ -295,7 +295,7 @@ export const GRAPHQL_PR_BODY_HTML_AND_REACTIONS = payload => {
     return `
   {
     repository(name: "${payload.repo}", owner: "${payload.owner}") {
-      pullRequest(number: 265) {
+      pullRequest(number: ${payload.number}) {
         commits(first:${payload.perPage}${payload.after ? ',after:"' + payload.after  + '"': ''}) {
           nodes {
             commit {

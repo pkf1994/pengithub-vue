@@ -1,6 +1,6 @@
 <template>
-    <Container class="container pagination flex-row-center">
-        <Left   class="flex-grow-1 flex-row-center width-full"
+    <Container class="container pagination flex-row-center flex-items-stretch bg-white">
+        <Left   class="flex-grow-1 flex-row-center width-full  d-inline-block"
                 :disabled="!pageInfo.prev || loading"
                  @click="_goPrev">Previous</Left>
         <PageInfo >
@@ -8,7 +8,7 @@
                 {{currentPage}} of {{pageInfo.last ? pageInfo.last.page : currentPage}}
             </strong>
         </PageInfo>
-        <Right  class="flex-grow-1 flex-row-center width-full"
+        <Right  class="flex-grow-1 flex-row-center width-full d-inline-block"
                 :disabled="!pageInfo.next || loading"
                 @click="_goNext">Next</Right>
     </Container>
@@ -16,7 +16,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_animatedScrollTo} from '../../util'
+   
     export default {
         props: {
             loading: {
@@ -35,14 +35,6 @@
                 type: Function,
                 default: () => {console.log('go prev')}
             },
-            scrollTargetSelector: {
-                type: String,
-                default: undefined
-            },
-            scrollElSelector: {
-                type: String,
-                default: undefined
-            }
         },
      
         computed: {
@@ -56,29 +48,14 @@
             }
         },
         methods: {
-            async _goNext() {
+            _goNext() {
                 if(this.loading) return
-                await this.goNext()
-                this.scrollToTitle()
+                this.goNext()
             },
-            async _goPrev() {
+            _goPrev() {
                 if(this.loading) return
-                await this.Prev()
-                this.scrollToTitle()
+                this.goPrev()
             },
-            scrollToTitle() {
-                if(this.scrollTargetSelector && this.scrollElSelector) {
-                    util_animatedScrollTo.scrollToEl(
-                        document.querySelector(this.scrollTargetSelector),
-                        document.querySelector(this.scrollElSelector),
-                        8)
-                    return
-                }
-                if(this.scrollElSelector) {
-                    util_animatedScrollTo.scrollTo(document.querySelector(this.scrollElSelector),0,8)
-                }
-            }
-
         },
         components: {
             Container:styled.div``,
@@ -96,6 +73,9 @@
         margin-bottom: -1px;
         background-color: #fafbfc;
     }
+    .pagination{
+        border: 1px solid #e1e4e8;
+    }
     .pagination div{
         position: relative;
         float: left;
@@ -112,7 +92,7 @@
         background: #fff;
         border: 1px solid #e1e4e8;
     }
-    .disable{
+    button:disabled{
         color: #d1d5da !important;
         cursor: default !important;
         background-color: #fafbfc !important;
