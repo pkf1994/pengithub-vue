@@ -21,6 +21,7 @@ import Progress from './Progress'
 import IssueIcon from './IssueIcon'
 import Editor from './Editor'
 import Subscription from './Subscription'
+import SimpleDiffView from './SimpleDiffView'
 export {
     Button,
     LogoHeader,
@@ -59,5 +60,6 @@ export {
     IssuesPageTemplate,
     HiddenItemLoading,
     Editor,
-    Subscription
+    Subscription,
+    SimpleDiffView
 }

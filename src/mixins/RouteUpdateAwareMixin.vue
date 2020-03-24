@@ -2,6 +2,7 @@
 </template>
 
 <script>
+    import {cancelAndUpdateAxiosCancelTokenSource} from '@/network'
     export default {
         data() {
             return {
@@ -47,6 +48,11 @@
                     item.cancel()
                 })
                 this.cancelSources = []
+            },
+            cancelAndUpdateAxiosCancelTokenSource(meta) {
+                let cancelTokenAndSource = cancelAndUpdateAxiosCancelTokenSource(meta)
+                this.cancelSources.push(cancelTokenAndSource.source)
+                return cancelTokenAndSource
             }
         }
     }

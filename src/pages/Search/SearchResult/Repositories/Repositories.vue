@@ -42,7 +42,6 @@
         </ResultContent>
 
         
-        
         <SimplePagination :loading="loading"
                           class="pagination mx-3"
                            v-if="pageInfo.next || pageInfo.prev"
@@ -99,9 +98,14 @@
                         order: '',
                     },
                     {
-                        label: 'Fewest stars',
+                        label: 'Most stars',
                         sort: 'stars',
                         order: 'desc',
+                    },
+                    {
+                        label: 'Fewest stars',
+                        sort: 'stars',
+                        order: 'ase',
                     },
                     {
                         label: 'Most forks',
@@ -225,7 +229,6 @@
         watch: {
             query() {
                 this.network_getCountByLanguage()
-                //this.network_getFirstTopic()
             }
         },
         components: {

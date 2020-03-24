@@ -1,9 +1,10 @@
 export const GRAPHQL_PR_BODY_HTML_AND_REACTIONS = payload => {
     return `
       {
-        node(id: "${payload.nodeId}") {
-          ... on PullRequest {
+        repository(name: "${payload.repo}", owner: "${payload.owner}")  {
+          pullRequest(number: ${payload.number}) {
             bodyHTML
+            id
             activeLockReason
             viewerCannotUpdateReasons
             viewerDidAuthor
@@ -11,7 +12,7 @@ export const GRAPHQL_PR_BODY_HTML_AND_REACTIONS = payload => {
             viewerCanUpdate
             viewerCanSubscribe
             viewerCanReact
-          
+            locked
             userContentEdits(first:1) {
               totalCount
               nodes {
@@ -197,9 +198,14 @@ export const GRAPHQL_PR_BODY_HTML_AND_REACTIONS = payload => {
               outdated
               diffHunk
               createdAt
+              updatedAt
+              state
               bodyHTML
               viewerCanReact
               resourcePath
+              replyTo {
+                id
+              }
               author {
                 login
                 avatarUrl
@@ -332,3 +338,84 @@ export const GRAPHQL_PR_BODY_HTML_AND_REACTIONS = payload => {
     }
   }
   `}
+
+  export const GRAPHQL_PR_ALL_REVIEW_COMMENTS = payload => {
+    return `
+    {
+      repository(name:"${payload.repo}",owner:"${payload.owner}") {
+        pullRequest(number:${payload.number}){
+          id
+          timelineItems(first: 10, itemTypes: PULL_REQUEST_REVIEW) {
+            nodes {
+              ... on PullRequestReview {
+                id
+                state
+                comments(first: 100) {
+                  nodes {
+                    id
+                    author {
+                      avatarUrl
+                      login
+                    }
+                    authorAssociation
+                    path
+                    bodyHTML
+                    position
+                    originalPosition
+                    replyTo {
+                      author {
+                        login
+                      }
+                    }
+                    isMinimized
+                    minimizedReason
+                    userContentEdits {
+                      totalCount
+                    }
+                    viewerCanDelete
+                    viewerCanMinimize
+                    viewerCanReact
+                    viewerCanUpdate
+                    viewerCannotUpdateReasons
+                    viewerDidAuthor
+                    state
+                    createdAt
+                    THUMBS_UP :reactions(content: THUMBS_UP) {
+                      totalCount
+                    }
+                    THUMBS_DOWN :reactions(content: THUMBS_DOWN) {
+                        totalCount
+                    }
+                    LAUGH :reactions(content: LAUGH) {
+                        totalCount
+                    }
+                    HOORAY :reactions(content: HOORAY) {
+                        totalCount
+                    }
+                    CONFUSED :reactions(content: CONFUSED) {
+                        totalCount
+                    }
+                    HEART :reactions(content: HEART) {
+                        totalCount
+                    }
+                    ROCKET :reactions(content: ROCKET) {
+                        totalCount
+                    }
+                    EYES :reactions(content: EYES) {
+                        totalCount
+                    }
+                  }
+                }
+                userContentEdits {
+                  totalCount
+                }
+              }
+            }
+            totalCount
+          }
+        }
+      }
+    }
+    
+    `
+  }

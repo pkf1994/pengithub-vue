@@ -4,7 +4,7 @@
         <CutOffNotice class="cut-off-notice" v-if="totalCount > 250">
             This pull request is big! We’re only showing the most recent 250 commits.
         </CutOffNotice>
-        <transition-group name="slide-up" appear >
+        <transition-group name="fade-group" appear >
             <Commit v-for="item in committedDateMarkedData" :key="item.commit.abbreviatedOid">
                 <CommittedDate class="committed-date" v-if="!item.someCommittedDateWithPrevOne">
                     <span>{{formatDate(item.commit.committer.date)}}</span>
@@ -82,7 +82,7 @@
             async network_getData() {
                 try{
                     this.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name)
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
                     let graphql_commits = graphql.GRAPHQL_PULLS_COMMITS({
                         owner: this.owner(),
                         repo: this.repo(),

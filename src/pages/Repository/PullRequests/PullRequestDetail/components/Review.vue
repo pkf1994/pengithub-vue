@@ -7,39 +7,45 @@
             </div>
            
             <WhoDidWhat>
-                <router-link :to="`/${review.user.login}`" class="d-inline-block">
-                        <img :src="review.user.avatar_url" :alt="`@${review.user.login}`" class="avatar mr-1" height="16" width="16">
+                <router-link :to="`/${propsData.user.login}`" class="d-inline-block">
+                        <img :src="propsData.user.avatar_url" :alt="`@${propsData.user.login}`" class="avatar mr-1" height="16" width="16">
                 </router-link>
-                <router-link  :to="`/${review.user.login}`" class="text-bold link-gray-dark">
-                    {{review.user.login}}
+                <router-link  :to="`/${propsData.user.login}`" class="text-bold link-gray-dark">
+                    {{propsData.user.login}}
                 </router-link>
                 {{statusAction}}
                 <span class="no-wrap">{{createdAt}}</span>
             </WhoDidWhat>
+
+            <Label class="ml-1 no-wrap" :name="propsData.state" :color="propsData.state == 'pending' ? '#fffbdd' : '#ffffff'" style="font-size: 10px;color:#735c0f" ></Label>
         </Inner>
 
-        <Body class="bubble " v-if="extraDataHolder.bodyHTML" style="padding:15px;margin-top:15px">
-            <BodyHTML v-html="extraDataHolder.bodyHTML"  class="markdown-body p-0" style="font-size:15px">
 
-            </BodyHTML>
+        <AnimatedHeightWrapper style="margin-top:15px">
+             <Body class="bubble " v-if="extraData.bodyHTML" style="padding:15px;">
+                <BodyHTML v-html="extraData.bodyHTML"  class="markdown-body p-0" style="font-size:15px">
 
-             <Reaction      v-if="(extraDataHolder.viewerCanReact || withReaction)" 
-                            :data="reactionStatistic" 
-                            :disabled="!extraDataHolder.viewerCanReact"></Reaction>
+                </BodyHTML>
 
-        </Body>
+                <Reaction      v-if="(extraData.viewerCanReact || withReaction)" 
+                                :data="extraData" 
+                                :disabled="!extraData.viewerCanReact"></Reaction>
 
-        <LoadingWrapper v-if="extraDataHolder.bodyHTML === undefined" class="loading-wrapper flex flex-justify-center flex-items-center">
+            </Body>
+        </AnimatedHeightWrapper>
+       
+
+        <LoadingWrapper v-if="!extraData.id" class="loading-wrapper flex flex-justify-center flex-items-center">
             <LoadingIconEx/>
         </LoadingWrapper>
 
         <transition-group name="fade" appear>
-            <ReviewComment v-for="item in comments.data" :key="item.id" :reviewComment="item"/>
+            <ReviewComment v-for="item in data.filter(i => i.replyTo == null)" :key="item.id" :reviewComment="item"/>
         </transition-group>
         
 
-        <HiddenItemLoading v-if="comments.pageInfo.hasNextPage" style="padding-bottom:0px!important" :loading="comments.loading" :dataGetter="network_getComment">
-            {{comments.totalCount - comments.data.length}} {{comments.totalCount - comments.data.length > 1 ? 'comments' : 'comment'}} remained.
+        <HiddenItemLoading v-if="pageInfo.hasNextPage" style="padding-bottom:0px!important" :loading="loading" :dataGetter="network_getComment">
+            {{totalCount - data.length}} {{totalCount - data.length > 1 ? 'comments' : 'comment'}} remained.
         </HiddenItemLoading>
       
     </Container>
@@ -47,107 +53,103 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '@/components'
+    import {LoadingIconEx,AnimatedHeightWrapper,Popover,Label} from '@/components'
     import {util_dateFormat} from '@/util'
     import Reaction from './Reaction'
     import ReviewComment from './ReviewComment'
     import HiddenItemLoading from './HiddenItemLoading'
     import * as graphql from '../graphql'
-import { authRequiredGitHubGraphqlApiQuery } from '../../../../../store/modules/network'
+    import Comment from './Comment'
+    import { authRequiredGitHubGraphqlApiQuery } from '@/network'
     export default {
-        inject: ['commentsAndReviewsExtraGraphqlDataGetter'],
-        props: {
-            review: {
-                type: Object,
-                required: true
-            },
+        mixins: [Comment],
+        provide() {
+            return {
+                reviewProvided: () => this.propsData,
+                pendingReviewCommentRepliesProvided: () => this.pendingCommentReplies
+            }
         },
         data() {
             return {
-                comments:{
-                    data: [],
-                    pageInfo: {
+                data: [],
+                pageInfo: {
 
-                    },
-                    totalCount: 0,
-                    perPage: 5,
-                    loading: false
                 },
+                totalCount: 0,
+                perPage: 5,
+                loading: false
             }
         },
         computed: {
             createdAt() {
-                return util_dateFormat.getDateDiff(this.review.submitted_at)
-            },
-            extraDataHolder() {
-                let extraDataHolder = this.commentsAndReviewsExtraGraphqlDataGetter().filter(item => {
-                    return item.id === this.review.node_id
-                })[0] || {}
-                if(extraDataHolder.bodyHTML) {
-                    let pattern = /href="https:\/\/github\.com\/(\S+)"/g
-                    let execResult
-                    while((execResult = pattern.exec(extraDataHolder.bodyHTML)) !== null) {
-                        extraDataHolder.bodyHTML = extraDataHolder.bodyHTML.replace(execResult[0],`href="/${execResult[1]}"`)
-                    }
-                }
-                return extraDataHolder
-            },
-            reactionStatistic() {
-                let reactionStatistic
-                for(let key in this.extraDataHolder) {
-                    switch(key) {
-                        case 'THUMBS_UP':
-                        case 'THUMBS_DOWN':
-                        case 'LAUGH':
-                        case 'HOORAY':
-                        case 'CONFUSED':
-                        case 'HEART':
-                        case 'ROCKET':
-                        case 'EYES':
-                            if(!reactionStatistic)reactionStatistic = {}
-                            reactionStatistic[key] = this.extraDataHolder[key].totalCount
-                            break
-                        default:
-                    }
-                }
-                return reactionStatistic 
+                if(!this.propsData.submitted_at) return 'before long'
+                return util_dateFormat.getDateDiff(this.propsData.submitted_at)
             },
             statusAction() {
                 let status = 'approved'
-                switch(this.review.state) {
+                switch(this.propsData.state) {
                     case 'changes_requested':
                         status = 'request changes'
                         break
                     case 'commented':
-                        status = 'commented'
+                        status = 'reviewed'
                         break
+                    case 'pending':
+                        status = 'start a review'
                     default:
                 }
                 return status
+            },
+            pendingCommentReplies() {
+                return this.data.filter(i => i.replyTo != null)
             }
         },
         created() {
-            this.network_getComment()
+            this.network_getData()
         },
         methods: {
-            async network_getComment() {
+            
+            async network_getData() {
                 try{
-                    this.comments.loading = true
+                    this.loading = true
 
-                    let graphql_reviewComments = graphql.GRAPHQL_PR_REVIEW_COMMENTS({
-                        nodeId: this.review.node_id,
-                        after: this.comments.pageInfo.hasNextPage ? this.comments.pageInfo.endCursor : undefined,
-                        perPage: this.comments.perPage
-                    })
+                    let graphql_reviewComments
 
+                    if(this.propsData.state == 'pending') {
+                        graphql_reviewComments = graphql.GRAPHQL_PR_REVIEW_COMMENTS({
+                            nodeId: this.propsData.node_id,
+                            after: this.pageInfo.hasNextPage ? this.pageInfo.endCursor : undefined,
+                            perPage: 100
+                        })
+                    }else{
+                        graphql_reviewComments = graphql.GRAPHQL_PR_REVIEW_COMMENTS({
+                            nodeId: this.propsData.node_id,
+                            after: this.pageInfo.hasNextPage ? this.pageInfo.endCursor : undefined,
+                            perPage: this.perPage
+                        })
+                    }
+
+                    
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_reviewComments)
-                    this.comments.data =  this.comments.data.concat(res.data.data.node.comments.nodes)
-                    this.comments.pageInfo = res.data.data.node.comments.pageInfo
-                    this.comments.totalCount = res.data.data.node.comments.totalCount
+                    //当review的state为pending时，返回的数据中将包含review comment reply
+                    let data_temp = {}
+                    res.data.data.node.comments.nodes.forEach(i => {
+                        if(!data_temp[i.path]) data_temp[i.path] = []
+                        data_temp[i.path].push(i)
+                    })
+                    let data = []
+                    for(let key in data_temp) {
+                        data_temp[key].forEach(i => {
+                            data.push(i)
+                        })
+                    }
+                    this.data = data
+                    this.pageInfo = res.data.data.node.comments.pageInfo
+                    this.totalCount = res.data.data.node.comments.totalCount
 
-                    this.comments.loading = false
+                    this.loading = false
                 }catch(e) {
-                    this.comments.loading = false
+                    this.loading = false
                     console.log(e)
                 }
             }
@@ -159,6 +161,7 @@ import { authRequiredGitHubGraphqlApiQuery } from '../../../../../store/modules/
             Reaction,
             ReviewComment,
             HiddenItemLoading,
+            Label,
             Container: styled.div``,
             Inner: styled.div``,
             WhoDidWhat: styled.div``,

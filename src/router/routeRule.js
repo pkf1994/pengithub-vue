@@ -30,6 +30,7 @@ const RepositoryPullRequestsBrowser = () => import('../pages/Repository/PullRequ
 const RepositoryPullRequestDetail = () => import('../pages/Repository/PullRequests/PullRequestDetail/PullRequestDetail.vue')
 const RepositoryPullRequestConversation = () => import('../pages/Repository/PullRequests/PullRequestDetail/Conversation.vue')
 const RepositoryPullRequestCommits = () => import('../pages/Repository/PullRequests/PullRequestDetail/Commits.vue')
+const RepositoryPullRequestChanges = () => import('../pages/Repository/PullRequests/PullRequestDetail/Changes.vue')
 const RepositoryProjects = () => import('../pages/Repository/Projects/Projects.vue')
 const RepositoryPulse = () => import('../pages/Repository/Pulse/Pulse.vue')
 const RepositoryCommunity = () => import('../pages/Repository/Community/Community.vue')
@@ -204,6 +205,10 @@ export default [
                     {
                         path: 'commits',
                         component: RepositoryPullRequestCommits
+                    },
+                    {
+                        path: 'files',
+                        component: RepositoryPullRequestChanges
                     },
                 ]
             },

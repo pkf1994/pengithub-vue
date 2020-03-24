@@ -1,9 +1,9 @@
 <template>
         <CommentWrapper v-if="data.event === 'commented'" class="p-3">
-            <Comment  :data="data"></Comment>
+            <Comment :propsData="data"></Comment>
         </CommentWrapper>
         <!-- review -->
-        <Review v-else-if="data.event === 'reviewed'" :review="data"></Review>
+        <Review v-else-if="data.event === 'reviewed'" :propsData="data"></Review>
         <!-- committed  -->
         <SimpleTimelineItem v-else-if="data.event === 'committed'" :data="data" :date="data.committer.date">
             <template v-slot:icon>
@@ -30,6 +30,8 @@
                 </Commit>
             </template>
         </SimpleTimelineItem>
+        <!-- commit-commented -->
+        <CommitComment v-else-if="data.event === 'commit-commented'" :commitComment="data"></CommitComment>
         <!-- head_ref_deleted  -->
         <SimpleTimelineItem v-else-if="data.event === 'head_ref_deleted'" :data="data">
             <template v-slot:icon>
@@ -262,7 +264,7 @@
                 :data="data" 
                 :badgeStyle="{backgroundColor: '#24292e',color:'#fff'}">
             <template v-slot:icon>
-                <svg class="octicon octicon-key" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12.83 2.17C12.08 1.42 11.14 1.03 10 1c-1.13.03-2.08.42-2.83 1.17S6.04 3.86 6.01 5c0 .3.03.59.09.89L0 12v1l1 1h2l1-1v-1h1v-1h1v-1h2l1.09-1.11c.3.08.59.11.91.11 1.14-.03 2.08-.42 2.83-1.17S13.97 6.14 14 5c-.03-1.14-.42-2.08-1.17-2.83zM11 5.38c-.77 0-1.38-.61-1.38-1.38 0-.77.61-1.38 1.38-1.38.77 0 1.38.61 1.38 1.38 0 .77-.61 1.38-1.38 1.38z"></path></svg>
+                <svg class="octicon octicon-lock issue-event-icon issue-event-icon-unlocked text-green" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 13H3v-1h1v1zm8-6v7c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h1V4c0-2.2 1.8-4 4-4s4 1.8 4 4v2h1c.55 0 1 .45 1 1zM3.8 6h4.41V4c0-1.22-.98-2.2-2.2-2.2-1.22 0-2.2.98-2.2 2.2v2H3.8zM11 7H2v7h9V7zM4 8H3v1h1V8zm0 2H3v1h1v-1z"></path></svg>
             </template>
             <template v-slot:action>
                 {{data.actor.login === owner || data.actor.login === 'ghost' ? "Repository owner" : ''}} unlocked this conversation
@@ -386,11 +388,15 @@
     import Referenced from './Referenced'
     import Review from './Review'
     import {util_emoji} from '@/util'
-    import {Label,AnimatedHeightWrapper} from '../../../../../components'
-    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '../../../../../store/modules/network'
+    import {Label,AnimatedHeightWrapper} from '@/components'
+    import CommitComment from './CommitComment/CommitComment.vue'
+    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
     export default {
-        inject: ['owner','repo','pullRequestGetter'],
-        props: {
+        inject: ['owner','repo','pullRequestProvided'],
+        provided() {
+            timelineItemProvided: () => this.data
+        },
+        props: { 
             data: {
                 type: Object,
                 required: true,
@@ -443,7 +449,7 @@
                 }
             },
             isTheLatestCommit() {
-                return this.pullRequestGetter().statuses_url.replace(/https:\/\/api\.github\.com\/repos\/[\S\s]+?\/[\S\s]+?\/statuses\//i,'') === this.data.sha
+                return this.pullRequestProvided().statuses_url.replace(/https:\/\/api\.github\.com\/repos\/[\S\s]+?\/[\S\s]+?\/statuses\//i,'') === this.data.sha
             }
         },
         watch: {
@@ -642,6 +648,7 @@
             AnimatedHeightWrapper,
             Referenced,
             Review,
+            CommitComment,
             CommentWrapper: styled.div``,
             SourceIssue: styled.div``,
             IssueTitle: styled.div``,

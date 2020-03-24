@@ -20,6 +20,17 @@
             </Selector>
         </AnimatedHeightWrapper> -->
 
+        <Selector   :disabled="countByLanguage.loading"
+                    @change="(value) => m_routeTo({language:value,p:0})"
+                    v-if="countByLanguage.loading || countByLanguage.data.length !== 0"
+                    label="Language">
+            <option value="" :selected="m_language == '' || !m_language">Any</option>
+            <option v-for="item in countByLanguage.data"
+                    :value="item.language"
+                    :selected="m_language == item.language"
+                    :key="item.language">{{item.language}}</option>
+        </Selector>
+
         <Selector    @change="(value) => {
                 let valueObj = JSON.parse(value)
                 m_routeTo({sort:valueObj.sort,order:valueObj.order,p:1})
@@ -47,7 +58,7 @@
 
         <SimplePagination :loading="loading"
                           class="pagination mx-3"
-                          v-if="pageInfo.next"
+                          v-if="pageInfo.next || pageInfo.prev"
                           :goNext="() => m_routeTo({p:pageInfo.next.page})"
                           :goPrev="() => m_routeTo({p:pageInfo.prev.page})"
                           :pageInfo="pageInfo"/>
@@ -67,18 +78,15 @@
     import {IssueItem} from './components'
     import {AnimatedHeightWrapper} from '@/components'
     import * as api from '@/network/api'
-    import * as graphql from '../graphql'
+    import * as graphql from './graphql'
+    import {PROGRAMMING_LIST} from '@/util/analyseFileType'
     import { authRequiredGet,cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery } from '@/network';
     import {util_numberFormat} from '@/util'
     var parse = require('parse-link-header');
     export default {
         name: 'search_result_issues_page',
         mixins: [SearchResultMixin],
-        provide() {
-            return {
-                issuesExtraDataProvided: () => this.extraData.data 
-            }
-        },
+     
         data() {
             return {
                 searchType: 'issues',
@@ -124,13 +132,13 @@
                         order: 'asc',
                     },
                     {
-                        label: 'Recently updated',
+                        label: 'Most recently updated',
                         sort: 'updated',
                         order: 'desc',
                     },
                     {
                         label: 'Least recently updated',
-                        sort: 'created',
+                        sort: 'updated',
                         order: 'desc',
                     }
                 ]
@@ -148,6 +156,7 @@
         },
         created() {
             this.network_getData()
+            this.network_getCountByLanguage()
         },
         methods: {
             async network_getData() {
@@ -229,6 +238,58 @@
                     this.extraData.loading = false
                     console.log(e)
                 }
+            },
+            async network_getCountByLanguage() {
+                 try{
+                    this.countByLanguage.data = []
+                    this.countByLanguage.loading = true
+                    
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_count_by_language')
+                    this.cancelSources.push(sourceAndCancelToken.source)
+
+                    let graphql_countByLanguage = graphql.GRAPHQL_COUNT_OF_ISSUE_GROUP_BY_LANGUAGE(this.m_query,PROGRAMMING_LIST)
+                   
+
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql_countByLanguage,
+                        {
+                            cancelToken: sourceAndCancelToken.cancelToken,
+                        }
+                    )
+
+                    let countByLanguage = []
+                    let languageCursor = {}
+
+                    PROGRAMMING_LIST.forEach((item,index) => {
+                        languageCursor[`language${index}`] = item.name
+                    })
+                    for(let key in res.data.data) {
+                        if(res.data.data[key].issueCount > 0) {
+                            countByLanguage.push({
+                                language: languageCursor[key],
+                                count: res.data.data[key].issueCount
+                            })
+                        }
+                    }
+                    countByLanguage.sort((a,b) => {
+                        return b.count - a.count
+                    })
+
+                    this.countByLanguage.data = countByLanguage
+
+                    this.countByLanguage.loading = false
+                } catch(e) {
+                    this.countByLanguage.loading = false
+                    console.log(e)
+                }
+            },
+            routeUpdateHook() {
+                this.network_getData()
+            }
+        },
+        watch: {
+            m_query() {
+                this.network_getCountByLanguage()
             }
         },
         components: {

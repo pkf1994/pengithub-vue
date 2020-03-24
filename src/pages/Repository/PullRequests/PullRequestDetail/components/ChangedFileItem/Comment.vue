@@ -1,8 +1,8 @@
 <template> 
     <Container class="bubble m-0 bg-white">
-        <HideAndShowPane v-if="extraData.isMinimized" class="p-3 d-flex flex-justify-between p-3 text-gray text-small border-bottom">
+        <HideAndShowPane v-if="propsData.isMinimized" class="p-3 d-flex flex-justify-between p-3 text-gray text-small border-bottom">
             <span class="text-italic">
-                This comment was marked as {{extraData.minimizedReason}}.
+                This comment was marked as {{propsData.minimizedReason}}.
             </span>
 
             <button class="btn-link text-gray" @click="triggerShowMinimized">
@@ -10,19 +10,19 @@
                     {{showMinimized ? 'Hide' : 'Show'}}
             </button>
         </HideAndShowPane>
-        <AnimatedHeightWrapper :stretch="showMinimized || !extraData.isMinimized">
+        <AnimatedHeightWrapper :stretch="showMinimized || !propsData.isMinimized">
             <Header class="header " :style="headerStyle">
                 <Action class="float-right mt-2 ml-2">
                     <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
                 </Action>
                 
                 <Avatar class="float-left relative">
-                    <img class="avatar" height="32" width="32" :alt="`@${propsData.user && propsData.user.login}`" :src="propsData.user && propsData.user.avatar_url">
+                    <img class="avatar" height="32" width="32" :alt="`@${propsData.author && propsData.author.login}`" :src="propsData.author && propsData.author.avatarUrl">
                 </Avatar>
                 
                 <Meta class="meta">
-                    <router-link :to="`/${propsData.user && propsData.user.login}`">
-                        {{propsData.user.login}}
+                    <router-link :to="`/${propsData.author && propsData.author.login}`">
+                        {{propsData.author.login}}
                     </router-link><br v-if="!withEditHistory">
                     commented {{createdAt}}
                     <span v-if="withEditHistory"> • edited {{editedAt}}</span>    
@@ -30,17 +30,17 @@
 
             </Header>
 
-            <Body class="pb-2 p-3" v-if="extraData.bodyHTML">
-                <BodyHTML v-html="extraData.bodyHTML"  class="markdown-body f5 p-0">
+            <Body class="pb-2 p-3" v-if="propsData.bodyHTML">
+                <BodyHTML v-html="propsData.bodyHTML"  class="markdown-body f5 p-0">
 
                 </BodyHTML>
 
-                <Reaction   v-if="(extraData.viewerCanReact || withReaction) && !extraData.isMinimized" 
-                            :data="extraData" 
-                            :disabled="!extraData.viewerCanReact"></Reaction>
+                <Reaction   v-if="(propsData.viewerCanReact || withReaction) && !propsData.isMinimized" 
+                            :data="propsData" 
+                            :disabled="!propsData.viewerCanReact"></Reaction>
             </Body>
 
-            <LoadingWrapper v-if="!extraData.id" class="loading-wrapper flex flex-justify-center flex-items-center">
+            <LoadingWrapper v-if="!propsData.id" class="loading-wrapper flex flex-justify-center flex-items-center">
                 <LoadingIconEx/>
             </LoadingWrapper>
              
@@ -53,9 +53,8 @@
     import {util_dateFormat} from '@/util'
     import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '@/components'
     import ClipboardJS from 'clipboard';
-    import Reaction from './Reaction'
+    import Reaction from '../Reaction'
     export default {
-        inject: ['timelineExtraDataProvided'],
         data() {
             return {
                 showMinimized: false,
@@ -76,28 +75,15 @@
             }
         },
         computed: {
-            extraData() {
-                let extraData = this.timelineExtraDataProvided().filter(item => {
-                    return item.id === this.propsData.node_id
-                })[0] || {}
-                if(extraData.bodyHTML) {
-                    let pattern = /href="https:\/\/github\.com\/(\S+)"/g
-                    let execResult
-                    while((execResult = pattern.exec(extraData.bodyHTML)) !== null) {
-                        extraData.bodyHTML = extraData.bodyHTML.replace(execResult[0],`href="/${execResult[1]}"`)
-                    }
-                }
-                return extraData
-            },
             createdAt() {
                 return util_dateFormat.getDateDiff(this.propsData.created_at)
             },
             editedAt() {
-                if(!this.extraData.userContentEdits.nodes) return
-                return util_dateFormat.getDateDiff(this.extraData.userContentEdits.nodes[0].editedAt)
+                if(!this.propsData.userContentEdits.nodes || !this.propsData.userContentEdits.nodes[0]) return
+                return util_dateFormat.getDateDiff(this.propsData.userContentEdits.nodes[0].editedAt)
             },
             withReaction() {
-                 for(let key in this.extraData) {
+                 for(let key in this.propsData) {
                     switch(key) {
                         case 'THUMBS_UP':
                         case 'THUMBS_DOWN':
@@ -107,8 +93,8 @@
                         case 'HEART':
                         case 'ROCKET':
                         case 'EYES':
-                            if(this.extraData[key].totalCount > 0) return true
-                            if(this.extraData[key] > 0) return true
+                            if(this.propsData[key].totalCount > 0) return true
+                            if(this.propsData[key] > 0) return true
                             break
                         default:
                     }
@@ -116,7 +102,7 @@
                 return false
             },
             withEditHistory() {
-                return this.extraData.userContentEdits && this.extraData.userContentEdits.totalCount > 0
+                return this.propsData.userContentEdits && this.propsData.userContentEdits.totalCount > 0
             },
             location() {
                 return location

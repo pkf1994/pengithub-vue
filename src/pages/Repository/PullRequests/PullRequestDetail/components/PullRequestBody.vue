@@ -22,13 +22,13 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_dateFormat} from '../../../../../util'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '../../../../../components'
+    import {util_dateFormat} from '@/util'
+    import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '@/components'
     import {mapState} from 'vuex'
     import Reaction from './Reaction'
     import ClipboardJS from 'clipboard';
     export default {
-        inject: ['commentsAndReviewsExtraGraphqlDataGetter','pullRequestGetter'],
+        inject: ['timelineExtraDataProvided','pullRequestProvided'],
         data() {
             return {
                 showMinimized: false,
@@ -62,7 +62,7 @@
             }),
             commentExtraDataHolder() {
                 if(this.extraData) return this.extraData
-                let commentExtraDataHolder = this.commentsAndReviewsExtraGraphqlDataGetter().filter(item => {
+                let commentExtraDataHolder = this.timelineExtraDataProvided().filter(item => {
                     return item.id === this.data.node_id
                 })[0] || {}
                 if(commentExtraDataHolder.bodyHTML) {
@@ -118,7 +118,7 @@
                 if(this.commentExtraDataHolder.authorAssociation && this.commentExtraDataHolder.authorAssociation !== "NONE"){
                     return this.commentExtraDataHolder.authorAssociation.toLowerCase()
                 }
-                if(this.pullRequestGetter().user.login === this.data.user.login) return 'author'
+                if(this.pullRequestProvided().user.login === this.data.user.login) return 'author'
                 return undefined
             },
             dateStampGap() {

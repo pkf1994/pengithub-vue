@@ -244,9 +244,6 @@
                                 deletionLineIndex += 1
                         }
                     }) 
-                    let showDefault = entries.reverse().slice(0,16).reverse()
-                    let hidden = entries.slice(16,entries.length).reverse()
-                    //if(entries[0].code.trim() === '') entries.shift()
                     diffHunkEntries = diffHunkEntries.concat(entries.reverse())
                 })
 

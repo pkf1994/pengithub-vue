@@ -132,6 +132,22 @@ export default {
             return item.name === language
         })
         return programAggregate[0] ? programAggregate[0].color : "#f7f7f7"
+    },
+
+    isProse(fileName) {
+        let extension
+        let indexOfLastDot = fileName.lastIndexOf(".")
+        if(indexOfLastDot !== -1 && indexOfLastDot !== 0) {
+            extension = fileName.substring(indexOfLastDot)
+            if(PROSE_LIST.some(item => {
+                return item.extensions.some(_item => {
+                    return _item == extension
+                })
+            })){
+                return true
+            }
+        }
+        return false
     }
 }
 

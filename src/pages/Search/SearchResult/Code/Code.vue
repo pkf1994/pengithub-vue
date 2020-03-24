@@ -5,10 +5,9 @@
             <option v-for="item in languageSelectorModel" :key="item" :selected="item == m_language" :value="item">{{item}}</option>
         </Selector>
         <Selector @change="(value) => {
-                let valueObj = JSON.parse(value)
-                m_routeTo({sort:valueObj.sort,order:valueObj.order,p:1})
-            }"
-
+                        let valueObj = JSON.parse(value)
+                        m_routeTo({sort:valueObj.sort,order:valueObj.order,p:1})
+                    }"
                   label="Sort">
             <option v-for="item in sortSelectorModel" :key="item.label" :selected="item.sort==m_sort && item.order==m_order" :value="JSON.stringify(item)">{{item.label}}</option>
         </Selector>
@@ -40,7 +39,6 @@
                             :preventClickEvent="false"/>
         </transition>  
     </Container>
-
 </template>
 
 <script>

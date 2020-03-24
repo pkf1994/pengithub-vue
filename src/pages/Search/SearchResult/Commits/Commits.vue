@@ -48,7 +48,7 @@
     import {CommitItem} from "./components";
     import {util_numberFormat} from '@/util'
     import * as api from '@/network/api'
-    import * as graphql from '../graphql'
+    import * as graphql from './graphql'
     import { authRequiredGet,cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery } from '@/network';
     var parse = require('parse-link-header');
     import {SearchResultMixin} from '../components'
