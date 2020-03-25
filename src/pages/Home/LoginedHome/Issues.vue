@@ -1,10 +1,6 @@
 <template>
     <Container>
-        <TopTabContainer class="px-3 pt-3 flex">
-            <router-link :to='`/${routerPathFragment}`' class="subnav-item flex-1 text-center" :class="{'active':searchQueryQualifierMeta === 'author'}">Created</router-link>
-            <router-link :to='`/${routerPathFragment}/assigned`' class="subnav-item flex-1 text-center" :class="{'active':searchQueryQualifierMeta === 'assignee'}">Assigned</router-link>
-            <router-link :to='`/${routerPathFragment}/mentioned`' class="subnav-item flex-1 text-center" :class="{'active':searchQueryQualifierMeta === 'mentions'}">Mentioned</router-link>
-        </TopTabContainer>
+        <PaddingPageTopTab :tabs="topTabData"></PaddingPageTopTab>
          <IssuesPageTemplate :data="data" 
                         :extraData="extraData"
                         :type="type"
@@ -75,7 +71,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {IssuesPageTemplate,SelectMenuItem,Modal,IconSearchInput} from '@/components'
+    import {IssuesPageTemplate,SelectMenuItem,Modal,IconSearchInput,PaddingPageTopTab} from '@/components'
     import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
     import {mapState} from 'vuex'
     import * as api from '@/network/api'
@@ -117,6 +113,7 @@
                     first: undefined,
                     prev: undefined
                 },
+               
             }
         },
         computed: {
@@ -251,6 +248,25 @@
                 }
                 return this.$route.query.q || `is:open is:${this.type} author:${this.login} archived:false`
             },
+            topTabData() {
+                return [
+                    {
+                        to: `/${this.routerPathFragment}`,
+                        label: 'Created',
+                        activeFlag: this.searchQueryQualifierMeta == 'author'
+                    },
+                    {
+                        to: `/${this.routerPathFragment}/assigned`,
+                        label: 'Assigned',
+                        activeFlag: this.searchQueryQualifierMeta == 'assignee'
+                    },
+                    {
+                        to: `/${this.routerPathFragment}/mentioned`,
+                        label: 'Mentioned',
+                        activeFlag: this.searchQueryQualifierMeta == 'mentions'
+                    }
+                ]
+            }
         },
         created() {
             this.network_getData()  
@@ -374,6 +390,7 @@
             SelectMenuItem,
             Modal,
             IssuesPageTemplate,
+            PaddingPageTopTab,
             IconSearchInput,
             Container: styled.div``,
             TopTabContainer: styled.div``,

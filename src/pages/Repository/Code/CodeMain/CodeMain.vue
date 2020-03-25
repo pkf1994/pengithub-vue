@@ -46,7 +46,7 @@
             </AnimatedWidthWrapper>    
         </ActionPane>
 
-        <Branchs></Branchs>
+        <Branches></Branches>
 
         <Readme :readme="partialReadme" v-if="!readme.is404" :loading="readme.loading || !codeBasicInfo().id"/>
 
@@ -73,7 +73,7 @@
     import {
         ACTION_REPOSITORY_REQUEST_README_DATA} from '../../../../store/modules/repository/actionTypes'
     import { util_numberFormat } from '../../../../util'
-    import {Branchs,Readme,Releases,Issues,PullRequests,Notifications} from './components'
+    import {Branches,Readme,Releases,Issues,PullRequests,Notifications} from './components'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet } from '@/network'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as api from '@/network/api'
@@ -188,7 +188,7 @@
             AnimatedWidthWrapper,
             LoadingAndCatchErrorTemplate,
             ComplexBubble,
-            Branchs,
+            Branches,
             Readme,
             Releases,
             Issues,

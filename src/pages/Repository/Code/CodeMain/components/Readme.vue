@@ -7,7 +7,7 @@
             </Title>   
         </template>
 
-        <Content class="bubble-content p-0">
+        <Content class="bubble-content p-3">
             <Inner v-html="readme"/>
         </Content>
 

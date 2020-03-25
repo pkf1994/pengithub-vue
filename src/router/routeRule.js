@@ -35,6 +35,10 @@ const RepositoryProjects = () => import('../pages/Repository/Projects/Projects.v
 const RepositoryPulse = () => import('../pages/Repository/Pulse/Pulse.vue')
 const RepositoryCommunity = () => import('../pages/Repository/Community/Community.vue')
 const RepositoryCommit = () => import('../pages/Repository/Commit/Commit.vue')
+const RepositoryBranches = () => import('../pages/Repository/Branches/Branches.vue')
+const RepositoryBranchesOverview = () => import('../pages/Repository/Branches/Overview.vue')
+const RepositoryBranchesAll = () => import('../pages/Repository/Branches/All.vue')
+const RepositoryBranchesStale = () => import('../pages/Repository/Branches/Stale.vue')
 const Logout = () => import('../pages/Logout/Logout.vue')
 
 export const ROUTE_HOME = 'route-home'
@@ -150,7 +154,7 @@ export default [
         children: [
             {
                 path: '/',
-                components: {RepositoryCode},
+                component: RepositoryCode,
                 children: [
                     {
                         path: '/',
@@ -174,7 +178,7 @@ export default [
             },
             {
                 path: 'issues',
-                components: {RepositoryIssues},
+                component: RepositoryIssues,
                 children: [
                     {
                         path: '/',
@@ -192,11 +196,11 @@ export default [
             },
             {
                 path: 'pulls',
-                components: {RepositoryPullRequestsBrowser},
+                component: RepositoryPullRequestsBrowser,
             },
             {   
                 path: 'pull/:number',
-                components: {RepositoryPullRequestDetail},
+                component: RepositoryPullRequestDetail,
                 children: [
                     {
                         path: '/',
@@ -214,19 +218,37 @@ export default [
             },
             {
                 path: 'projects',
-                components: {RepositoryProjects},
+                component: RepositoryProjects,
             },
             {
                 path: 'pulse',
-                components: {RepositoryPulse},
+                component: RepositoryPulse,
             },
             {
                 path: 'community',
-                components: {RepositoryCommunity},
+                component: RepositoryCommunity,
             },
             {
                 path: 'commit/:sha',
-                components: {RepositoryCommit},
+                component: RepositoryCommit,
+            },
+            {   
+                path: 'branches',
+                component: RepositoryBranches,
+                children: [
+                    {
+                        path: '/',
+                        component: RepositoryBranchesOverview
+                    },
+                    {
+                        path: 'all',
+                        component: RepositoryBranchesAll
+                    },
+                    {
+                        path: 'stale',
+                        component: RepositoryBranchesStale
+                    },
+                ]
             },
         ]
     },

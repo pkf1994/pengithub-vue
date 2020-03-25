@@ -244,7 +244,10 @@
                                 deletionLineIndex += 1
                         }
                     }) 
-                    diffHunkEntries = diffHunkEntries.concat(entries.reverse())
+                    //let showDefault = entries.reverse().slice(0,16).reverse()
+                    //let hidden = entries.slice(16,entries.length).reverse()
+                    //if(entries[0].code.trim() === '') entries.shift()
+                    diffHunkEntries = diffHunkEntries.concat(entries)
                 })
 
                 if( diffHunkEntries[diffHunkEntries.length - 1].additionLineIndex < this.fileContentEntries.length) {
@@ -474,7 +477,7 @@
                         }
                     )
                     
-                    this.fileContent = JSON.stringify(res.data)
+                    this.fileContent = res.data
                     this.loading = false
                 }catch(e) {
                     this.loading = false

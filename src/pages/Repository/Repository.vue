@@ -1,25 +1,8 @@
 <template>
     <Container class="container flex-column">
         <HeaderDetachTopTab :tabs="tabs" :activeTab="activeTab"></HeaderDetachTopTab>
-        <router-view name="RepositoryPullRequestDetail"></router-view>
-        <router-view name="RepositoryCommit"></router-view>
         <keep-alive>
-            <router-view name="RepositoryCode"></router-view>
-        </keep-alive>
-        <keep-alive>
-            <router-view name="RepositoryIssues"></router-view>
-        </keep-alive>
-        <keep-alive>
-            <router-view name="RepositoryPullRequestsBrowser"></router-view>
-        </keep-alive>
-        <keep-alive>
-            <router-view name="RepositoryProjects"></router-view>
-        </keep-alive>
-        <keep-alive>
-            <router-view name="RepositoryPulse"></router-view>
-        </keep-alive>
-        <keep-alive>
-            <router-view name="RepositoryCommunity"></router-view>
+            <router-view></router-view>
         </keep-alive>
     </Container>
 </template>

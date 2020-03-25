@@ -24,8 +24,7 @@
                     <router-link :to="`/${propsData.author && propsData.author.login}`">
                         {{propsData.author.login}}
                     </router-link><br v-if="!withEditHistory">
-                    commented {{createdAt}}
-                    <span v-if="withEditHistory"> • edited {{editedAt}}</span>    
+                    commented
                 </Meta>
 
             </Header>

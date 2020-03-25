@@ -1,13 +1,14 @@
 <template>
     <Container class="bubble">
-        <Title class="bubble-title bg-gray" style="font-weight:700">
+        <Title class="bubble-title bg-gray" :style="headerStyle">
             {{title}}
         </Title>
 
-        <AnimatedHeightWrapper>
+        <slot v-if="disableAnimatedWrapper"></slot>
+
+        <AnimatedHeightWrapper v-else>
             <slot></slot>
         </AnimatedHeightWrapper>  
-
 
         <BubbleDisable v-if="disableFlag || loading" class="bubble-disabled bubble-content">
             <p v-if="disableFlag && !loading" style="margin-block-start: 1em;margin-block-end: 1em;">{{disableNotice}}</p>
@@ -37,6 +38,14 @@
             loading: {
                 type: Boolean,
                 default: false
+            },
+            headerStyle: {
+                type: Object,
+                required: false
+            },
+            disableAnimatedWrapper:{
+                type: Boolean,
+                default: true
             }
         },
         components: {
@@ -51,7 +60,6 @@
 </script>
 
 <style scoped>
-
     .bubble {
         padding: 0;
         margin:0 15px 15px 15px;

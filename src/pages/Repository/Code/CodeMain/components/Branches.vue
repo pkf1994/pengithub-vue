@@ -14,6 +14,9 @@
                         <router-link to="/" class="branch-item d" v-for="item in activeBranchList" :key="item.name">
                             {{item.name}}
                         </router-link>
+                        <router-link :to="`/${owner()}/${repo()}/branches`" class="branch-item d" style="font-weight: 400;">
+                            View more branches
+                        </router-link>
                     </SummaryAndDetail>
                 </Inner>
             </Title>   
@@ -69,7 +72,7 @@
                     this.codeBasicInfo().refs.nodes.forEach(item => {
                         let lastCommitDate = new Date(item.target.history.nodes[0].committedDate)
                         if(Date.parse(new Date()) - Date.parse(lastCommitDate) < 90 * 24 * 3600000 ) {
-                            activeBranchList.push(item)
+                            if(item.name != (this.codeBasicInfo().defaultBranchRef && this.codeBasicInfo().defaultBranchRef.name)) activeBranchList.push(item)
                         }
                     })
                 }

@@ -1,6 +1,5 @@
 <template>
     <Container>
-        <AnimatedHeightWrapper :stretch="changedFiles.data.length > 0">
             <Switcher class="switcher ">
                 <button class="text-left width-full btn-link text-gray-dark" @click="triggerSwitcherStretch" >
                     <svg data="stretch-icon" v-if="!switcherStretched" class="octicon octicon-chevron-down switcher-icon-open" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 11L0 6l1.5-1.5L5 8.25 8.5 4.5 10 6l-5 5z"></path></svg>
@@ -22,16 +21,15 @@
 
                 <SwitcherOptions class="switcher-options" v-show="switcherStretched">
                     <a :href="`#diff-${item.sha}`" v-for="item in changedFiles.data" :key="item.sha">
-                        <svg title="modified" class="octicon octicon-diff-modified" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 13H1V2h12v12zM4 8c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z"></path></svg>
+                        <svg :class="{modified:item.status == 'modified',added:item.status == 'added',deleted:item.status == 'deleted'}" class="octicon octicon-diff-modified" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 13H1V2h12v12zM4 8c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z"></path></svg>
                         {{item.filename}}
                     </a>
                 </SwitcherOptions>
             </Switcher>
-        </AnimatedHeightWrapper>
         
 
         <transition-group name="fade-group" appear>
-            <ChangedFileItem v-for="item in changedFiles.data" :key="item.sha" :file="item"></ChangedFileItem>
+            <ChangedFileItem :id="`diff-${item.sha}`" v-for="item in changedFiles.data" :key="item.sha" :file="item"></ChangedFileItem>
         </transition-group>
 
         <EditorHeader class="editor-header" v-if="changedFiles.data.length > 0">
@@ -40,11 +38,10 @@
         <Editor v-if="changedFiles.data.length > 0" 
                 class="m-3"
                 ref="editor">
-            <button class="btn" :disabled="!$refs.editor || $refs.editor.commentTextValue === ''">
-                <svg class="octicon octicon-issue-closed text-red v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 10h2v2H7v-2zm2-6H7v5h2V4zm1.5 1.5l-1 1L12 9l4-4.5-1-1L12 7l-1.5-1.5zM8 13.7A5.71 5.71 0 012.3 8c0-3.14 2.56-5.7 5.7-5.7 1.83 0 3.45.88 4.5 2.2l.92-.92A6.947 6.947 0 008 1C4.14 1 1 4.14 1 8s3.14 7 7 7 7-3.14 7-7l-1.52 1.52c-.66 2.41-2.86 4.19-5.48 4.19v-.01z"></path></svg>
+            <button class="btn">
                 <span>Cancel review</span>
             </button>
-            <button class="btn btn-primary ml-1" :disabled="!$refs.editor || $refs.editor.commentTextValue === ''">
+            <button class="btn btn-primary ml-1">
                 <span>Submit review</span>
             </button>
         </Editor>
@@ -109,7 +106,7 @@
                 return data
             },
         },
-        async created() {
+        created() {
             this.network_getData()
             this.network_getReviewComments()
             this.network_getChangedFiles()
@@ -269,7 +266,6 @@
         display: block;
         padding: 6px 0;
         svg{
-            color: #e3ce79;
             float: left;
             margin-left: -20px;
         }
@@ -355,5 +351,15 @@
     border: 1px solid rgba(27,31,35,.2);
     border-radius: .25em;
     appearance: none;
+}
+
+.modified{
+    color: #e3ce79;
+}
+.added{
+    color: #2cbe4e;
+}
+.deleted{
+    color: #cb2431;
 }
 </style>

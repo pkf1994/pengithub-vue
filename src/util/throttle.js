@@ -1,10 +1,10 @@
 let timerStore = {}
 
 export default {
-    throttleByDelay: (method, delay, meta) => {
-        let methodDelayTimer = method.toString() + JSON.stringify(meta)
-        clearTimeout(timerStore[methodDelayTimer])
-        timerStore[methodDelayTimer] = setTimeout(() => {
+    throttleByDelay: (method, delay, context) => {
+        let methodDelayTimer = method.toString()
+        clearTimeout(context[methodDelayTimer])
+        context[methodDelayTimer] = setTimeout(() => {
             method.call()
         },delay)
     },

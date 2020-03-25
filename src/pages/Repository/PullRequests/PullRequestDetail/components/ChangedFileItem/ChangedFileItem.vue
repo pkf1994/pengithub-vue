@@ -1,6 +1,6 @@
 <template>
     <Container class="diff">
-        <DiffHeader class="diff-header">
+        <DiffHeader class="diff-header" :class="{target:$route.hash == `#diff-${file.sha}`}">
             <div>
                 <span class="diffstat">
                     <span v-for="(statItem,index) in diffState" :key="index" :class="{'diffstat-block-deleted':statItem == 'deletion','diffstat-block-added':statItem == 'addition','diffstat-block-neutral':statItem == 'neutral'}"></span>
@@ -388,5 +388,9 @@
     border: 1px solid rgba(27,31,35,.2);
     border-radius: .25em;
     appearance: none;
+}
+.target{
+    background-color: #fff5b1;
+    background-image: none!important;
 }
 </style>
