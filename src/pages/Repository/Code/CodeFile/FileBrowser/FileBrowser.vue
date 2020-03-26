@@ -103,11 +103,13 @@ import Vue from 'vue'
                 return sortedContents
             },
             path() {
+                if(!this.$route.params.pathMatch) return
                 if(this.$route.params.pathMatch.indexOf('/') === -1) return ''
                 if(!this.currentBranch) return undefined
                 return this.$route.params.pathMatch.replace(this.currentBranch,'')
             },
             currentBranch() {
+                if(!this.$route.params.pathMatch) return 
                 if(this.$route.params.pathMatch.match(/^[^\/]+\/?$/)) return this.$route.params.pathMatch.replace('/','')
                 if(!this.codeBasicInfo().refs) return undefined
                    
@@ -141,6 +143,7 @@ import Vue from 'vue'
             }
         },
         created() {
+            console.log(this.$route)
             this.network_getData()
         },
         methods: {

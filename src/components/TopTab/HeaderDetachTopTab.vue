@@ -3,10 +3,9 @@
         <nav class="text-center reponav">
             <router-link :to="tabItem.routerLink"
                          :exact="tabItem.exact"
-                         :class="{'router-link-active':tabItem.extraActiveRouterLinks && currentPath.indexOf(tabItem.extraActiveRouterLinks) !== -1}"
+                         :class="{'router-link-active':tabItem.extraActiveRouterLinks && tabItem.extraActiveRouterLinks.indexOf(currentPath) !== -1}"
                          class="pt-1 px-2 pb-3 d-inline-block nav-item to-adjust"
-                         v-if="!tabItem.disable"
-                         v-for="tabItem in tabs"
+                         v-for="tabItem in tabs.filter(i => !i.disabled)"
                          :key="tabItem.label" >
                      <AnimatedWidthWrapper class=" v-align-bottom">
                         <span class="lh-15  no-wrap">

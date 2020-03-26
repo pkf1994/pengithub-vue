@@ -52,7 +52,7 @@
             cancelAndUpdateAxiosCancelTokenSource(meta) {
                 let cancelTokenAndSource = cancelAndUpdateAxiosCancelTokenSource(meta)
                 this.cancelSources.push(cancelTokenAndSource.source)
-                return cancelTokenAndSource
+                return cancelTokenAndSource.cancelToken
             }
         }
     }

@@ -10,7 +10,6 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import { mapState,mapActions } from 'vuex'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery} from '@/network'
     import * as graphql from './graphql'
@@ -33,14 +32,9 @@
             }
         },
         created() {
-            //deprecated
             this.network_getData()
         },
         methods: {
-            //deprecated
-            ...mapActions({
-                action_getData: ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA
-            }),
             //获取仓库文件基本信息
             async network_getData() {
                 try{

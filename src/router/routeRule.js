@@ -4,13 +4,10 @@ const Home = () => import('../pages/Home/Home.vue')
 const OauthRedirectPage = () => import('../pages/OauthRedirectPage/OauthRedirectPage.vue')
 const Dashboard = () => import('../pages/Home/LoginedHome/Dashboard/index.vue')
 const HomePullRequests = () => import('../pages/Home/LoginedHome/PullRequests.vue')
-/* const HomePullRequestsCreated = () => import('../pages/Home/LoginedHome/PullRequests/Created.vue')
-const HomePullRequestsAssigned = () => import('../pages/Home/LoginedHome/PullRequests/Assigned.vue')
-const HomePullRequestsMentioned = () => import('../pages/Home/LoginedHome/PullRequests/Mentioned.vue') */
 const HomeIssues = () => import('../pages/Home/LoginedHome/Issues.vue')
-/* const HomeIssuesCreated = () => import('../pages/Home/LoginedHome/Issues/Created.vue')
-const HomeIssuesAssigned = () => import('../pages/Home/LoginedHome/Issues/Assigned.vue')
-const HomeIssuesMentioned = () => import('../pages/Home/LoginedHome/Issues/Mentioned.vue') */
+const Explore = () => import('../pages/Explore/Explore.vue')
+const ExploreMain = () => import('../pages/Explore/ExploreMain/ExploreMain.vue')
+const ExploreTrending = () => import('../pages/Explore/Trending/Trending.vue')
 const Search = () => import('../pages/Search/Search.vue')
 const SearchResultRepositories = () => import('../pages/Search/SearchResult/Repositories/Repositories.vue')
 const SearchResultCode = () => import('../pages/Search/SearchResult/Code/Code.vue')
@@ -58,38 +55,10 @@ export default [
             {
                 path: 'pulls/:meta?',
                 component: HomePullRequests,
-                /* children: [
-                    {
-                        path: '/',
-                        component: HomePullRequestsCreated
-                    },
-                    {
-                        path: 'assigned',
-                        component: HomePullRequestsAssigned
-                    },
-                    {
-                        path: 'mentioned',
-                        component: HomePullRequestsMentioned
-                    }
-                ] */
             },
             {
                 path: 'issues/:meta?',
                 component: HomeIssues,
-               /*  children: [
-                    {
-                        path: '/',
-                        component: HomeIssuesCreated
-                    },
-                    {
-                        path: 'assigned',
-                        component: HomeIssuesAssigned
-                    },
-                    {
-                        path: 'mentioned',
-                        component: HomeIssuesMentioned
-                    }
-                ] */
             },
             {
                 path: '/',
@@ -105,6 +74,24 @@ export default [
     {
         path: '/logout',
         component: Logout
+    },
+    {
+        path: '/explore',
+        components: {
+            default: Explore,
+            header: LogoHeader,
+            footer: SimpleFooter
+        },
+        children: [
+            {
+                path: '/',
+                component: ExploreMain
+            },
+            {
+                path: 'trending/:meta?/:language?',
+                component: ExploreTrending
+            }
+        ]
     },
     {
         path: '/search',

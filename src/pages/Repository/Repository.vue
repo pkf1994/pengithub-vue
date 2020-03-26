@@ -66,12 +66,15 @@
                         extraActiveRouterLinks: [
                             `${path}/tree`,
                             `${path}/blob`,
+                            `${path}/branches`,
+                            `${path}/branches/all`,
+                            `${path}/branches/stale`,
                         ]
                     },
                     {
                         label: TAB_ISSUES,
                         routerLink: `${path}/issues`,
-                        disable: !this.data.hasIssuesEnabled,
+                        disabled: !this.data.hasIssuesEnabled,
                         meta: this.data.issues && this.data.issues.totalCount
                     },
                     {
@@ -85,8 +88,8 @@
                     {
                         label: TAB_PROJECTS,
                         routerLink: `${path}/projects`,
-                        disable: !this.data.hasProjectsEnabled,
-                         meta: this.data.projects && this.data.projects.totalCount
+                        disabled: !this.data.hasProjectsEnabled,
+                        meta: this.data.projects && this.data.projects.totalCount
                     },
                     {
                         label: TAB_PULSE,

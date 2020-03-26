@@ -1,6 +1,5 @@
 .Box-header {
     padding: 16px;
-    margin: -1px -1px 0;
     background-color: #f6f8fa;
     border-color: #d1d5da;
     border-style: solid;
@@ -33,4 +32,10 @@
 
 .Box--condensed .Box-row {
     padding: 8px 16px;
+}
+
+.Box-footer {
+    padding: 16px;
+    margin-top: -1px;
+    border-top: 1px solid #e1e4e8;
 }

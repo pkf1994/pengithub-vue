@@ -19,10 +19,6 @@
             inactivatedFlagSignal: {
                 type: Boolean,
                 required: false
-            },
-            flag:{
-                type:Boolean,
-                default: false
             }
         },
         data() {
@@ -43,7 +39,7 @@
             this.computeHeight()
         },
         updated() {
-            util_throttle.throttleByDelay(() => this.computeHeight(),50,this)
+             util_throttle.throttleByDelay(() => this.computeHeight(),50,this)
             //处理图片加载问题
             let imgArr = this.$refs.content.$el.getElementsByTagName('img')
             imgArr.forEach((item) => {
@@ -54,7 +50,7 @@
           
         },
         activated() {
-            util_throttle.throttleByDelay(() => this.computeHeight(),50,this)
+            this.computeHeight()
         },
         methods: {
             computeHeight() {
@@ -66,6 +62,7 @@
                     let computeHeightEvent = document.createEvent('HTMLEvents')
                     computeHeightEvent.initEvent("compute-height",true,false)
                     this.$refs.content && this.$refs.content.$el.dispatchEvent(computeHeightEvent)
+                    this.inactivatedFlag = this.inactivatedFlagSignal
                 },400)
             },
             subComputeHeightEventHandler(event) {
@@ -74,7 +71,7 @@
             }
         },
         watch: {
-            inactivatedFlagSignal(newOne,oldOne) {
+          /*   inactivatedFlagSignal(newOne,oldOne) {
                 if(newOne && !oldOne) {
                     setTimeout(() => {
                         this.inactivatedFlag = true
@@ -82,7 +79,7 @@
                 }else if(oldOne && !newOne) {
                      this.inactivatedFlag = false
                 }
-            }
+            } */
         },
         components: {
             Container: styled.div``,

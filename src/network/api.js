@@ -8,7 +8,10 @@ export const API_GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
 
 export const HOST = process.env.VUE_APP_HOST
 
-export const API_TRENDING = (language,since) => `https://github-trending-api.now.sh/repositories?language=${language}&since=${since}`
+export const API_TRENDING = (type,params) => {
+    let query = util_queryParse.querify(params)
+    return  `https://github-trending-api.now.sh/${type}?${query}`
+}
 
 export const API_OAUTH2 = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=${SCOPE}`
 

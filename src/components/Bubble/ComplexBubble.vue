@@ -5,7 +5,17 @@
                 <slot name="title"></slot>
             </Title>
 
-            <AnimatedHeightWrapper :inactivatedFlagSignal="inactivatedFlagSignal">
+            <div v-if="disableAnimatedWrapper">
+                <slot v-if="!disableFlag && !loading"></slot>
+                <BubbleDisable v-else-if="disable" class="bubble-content text-center">
+                    <p style="margin-block-start: 1em;margin-block-end: 1em;">{{disableNotice}}</p>
+                </BubbleDisable>
+                <BubbleDisable v-else-if="isLoading" class="bubble-content flex-row-center">
+                    <LoadingIconEx style="margin-block-start: 1em;margin-block-end: 1em;"/>
+                </BubbleDisable>
+            </div> 
+
+            <AnimatedHeightWrapper v-else :inactivatedFlagSignal="inactivatedFlagSignal">
                 <slot v-if="!disableFlag && !loading"></slot>
                 <BubbleDisable v-else-if="disable" class="bubble-content text-center">
                     <p style="margin-block-start: 1em;margin-block-end: 1em;">{{disableNotice}}</p>
@@ -47,6 +57,10 @@
                 default: false
             },
             withFooterBorderTop: {
+                type: Boolean,
+                default: true
+            },
+            disableAnimatedWrapper:{
                 type: Boolean,
                 default: true
             }

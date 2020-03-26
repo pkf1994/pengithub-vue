@@ -24,13 +24,11 @@
                 </transition>
             </Title>
            
-            <AnimatedHeightWrapper :stretch="stretchLabels">
-                <Labels v-if="showLabels" class="labels relative" style="padding-top:2px">
-                    <span v-for="item in issue.labels" :meta="randomMeta" class="  v-align-middle label d-inline-block" :key="item.id" :style="{color: isLight(`#${item.color}`) ? 'black' : 'white', background: `#${item.color}`}">
-                        {{item.name}}
-                    </span>
-                </Labels>
-            </AnimatedHeightWrapper>
+            <Labels v-if="showLabels" class="labels relative" style="padding-top:2px">
+                <span v-for="item in issue.labels" :meta="randomMeta" class="  v-align-middle label d-inline-block" :key="item.id" :style="{color: isLight(`#${item.color}`) ? 'black' : 'white', background: `#${item.color}`}">
+                    {{item.name}}
+                </span>
+            </Labels>
 
              <AnimatedHeightWrapper>
                 <Byline v-if="issue.state.toLowerCase() === 'open'" class="byline">
@@ -70,7 +68,6 @@
         },
         data() {
             return {
-                stretchLabels:false
             }
         },
         computed: {
@@ -106,11 +103,6 @@
                 if(!this.issueExtraData.commits.nodes[0].commit.status) return undefined
                 return this.issueExtraData.commits.nodes[0].commit.status.state
             }
-        },
-        mounted() {
-            setTimeout(() => {
-                this.stretchLabels = true
-            },400) 
         },
         updated() {
             util_adjustStyle.adjustInlineBlockStyle(`.labels .label[meta=${this.randomMeta}]`)
