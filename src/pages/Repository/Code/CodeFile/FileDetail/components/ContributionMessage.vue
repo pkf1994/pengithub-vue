@@ -3,9 +3,9 @@
                     :withFooterBorderTop=false>
         <LastUpdateMessage class="bg-blue-light Box-body d-flex py-2 px-3 flex-column flex-justify-between">
             <CommitterAndMessage class="f6">
-                <img class="avatar" width="20" height="20" :src="lastCommit().committer && lastCommit().committer.avatarUrl" :alt="`@${lastCommit().committer && lastCommit().committer.user.login}`">
+                <img class="avatar" width="20" height="20" :src="lastCommit().author && lastCommit().author.avatarUrl" :alt="`@${lastCommit().author && lastCommit().author.user && lastCommit().author.user.login}`">
                 <router-link to="/" class="text-bold link-gray-dark lh-default v-align-middle">
-                    {{lastCommit().committer && lastCommit().committer.user.login}}
+                    {{lastCommit().author && lastCommit().author.user && lastCommit().author.user.login}}
                 </router-link>
                 <Message class="lh-default v-align-middle">
                     {{lastCommit().message}}

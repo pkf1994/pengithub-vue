@@ -1,10 +1,10 @@
 <template>
-    <nav class="px-3 mx-auto">
+    <nav class="px-3 mx-auto bg-white">
         <Inner class="d-flex flex-wrap flex-items-center flex-justify-center text-center">
             <router-link to="/explore" active-class="explore-selected" class="explore-link subnav-link d-inline-block f5 py-0 mt-2 mr-0 no-underline">Explore</router-link>
-            <router-link to="/topics" class="d-inline-block py-2 mr-3 no-underline subnav-link">Topics</router-link>
-            <router-link to="/trending" class="d-inline-block py-2 mr-3 no-underline subnav-link">Trending</router-link>
-            <router-link to="/collections" class="d-inline-block py-2 mr-3 no-underline subnav-link">Collections</router-link>
+            <router-link to="/explore/topics" class="d-inline-block py-2 mr-3 no-underline subnav-link">Topics</router-link>
+            <router-link to="/explore/trending" class="d-inline-block py-2 mr-3 no-underline subnav-link">Trending</router-link>
+            <router-link to="/explore/collections" class="d-inline-block py-2 no-underline subnav-link">Collections</router-link>
         </Inner>   
     </nav>
 </template>
@@ -21,6 +21,9 @@
 <style scoped>
 nav{
     box-shadow: 0 1px 0 rgba(0,0,0,.1);
+    position: sticky;
+    top: 0px;
+    z-index: 9;
 }
 .explore-link{
     flex-basis: 100%;

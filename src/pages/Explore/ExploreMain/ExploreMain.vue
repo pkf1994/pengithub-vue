@@ -31,23 +31,26 @@
         </Viewer> -->
 
         <transition appear name="fade">
-            <Jumbotron class="text-center mt-6 mb-7" v-if="trendingRepoToday.data.length > 0">
-                <div class="col-2 mx-auto">
-                    <img src="https://github.githubassets.com/images/icons/emoji/tada.png" alt="tada" class="width-full">
-                </div>
-                <h2 class="lh-condensed my-2 headline" style="font-size:22px">
-                    That's everything we found for you, for now.
-                </h2>
-                <p class="f4">
-                    Come back soon to see what we find next,
-                    <span>
-                        or
-                        <a href="/explore/email" data-ga-click="Explore, go to Explore email newsletter, location:explore feed">
-                            get email updates.
-                        </a>
-                    </span>
-                </p>
-            </Jumbotron>
+            <AnimatedHeightWrapper class="mt-6 mb-7">
+                <Jumbotron class="text-center" v-if="trendingRepoToday.data.length > 0">
+                    <div class="col-2 mx-auto">
+                        <img src="https://github.githubassets.com/images/icons/emoji/tada.png" alt="tada" class="width-full">
+                    </div>
+                    <h2 class="lh-condensed my-2 headline" style="font-size:22px">
+                        That's everything we found for you, for now.
+                    </h2>
+                    <p class="f4">
+                        Come back soon to see what we find next,
+                        <span>
+                            or
+                            <a href="/explore/email" data-ga-click="Explore, go to Explore email newsletter, location:explore feed">
+                                get email updates.
+                            </a>
+                        </span>
+                    </p>
+                </Jumbotron>
+            </AnimatedHeightWrapper>
+            
         </transition>
 
         <transition appear name="fade">
@@ -108,7 +111,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,CommonLoading} from '@/components'
+    import {ComplexBubble,CommonLoading,AnimatedHeightWrapper} from '@/components'
     import {RepoListItem,DeveloperListItem} from './components'
     import {commonGet} from '@/network'
     import {mapState} from 'vuex'
@@ -171,6 +174,7 @@
             RepoListItem,
             DeveloperListItem,
             CommonLoading,
+            AnimatedHeightWrapper,
             Container: styled.div``,
           /*   Viewer: styled.div``,
             ViewerBasicInfo: styled.div``,

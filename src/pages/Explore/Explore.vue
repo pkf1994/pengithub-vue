@@ -1,6 +1,6 @@
 <template>
     <Container>
-        <TopTab></TopTab>
+        <TopTab class="border-bottom"></TopTab>
         <keep-alive>
             <router-view></router-view>
         </keep-alive>

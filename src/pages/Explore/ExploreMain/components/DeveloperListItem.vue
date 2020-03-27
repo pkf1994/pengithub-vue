@@ -7,8 +7,8 @@
 
             <Info class="col-9 mx-2">
                 <LoginAndName class="f4 text-bold lh-condensed mb-2">
-                    <router-link :to="`/${developer.username}`">{{developer.username}}</router-link>
-                    <span class="d-block text-normal text-gray">{{developer.name}}</span>
+                    <router-link :to="`/${developer.username}`">{{developer.name}}</router-link>
+                    <span class="d-block text-normal text-gray">{{developer.username}}</span>
                 </LoginAndName>
 
                 <p class="f6 mb-0">

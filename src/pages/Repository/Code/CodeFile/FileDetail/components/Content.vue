@@ -41,7 +41,7 @@
             </div>
         </Content>
 
-        <Content class="Box-body p-0 content" v-else-if="isBook" v-html="html()">
+        <Content class="Box-body py-3 px-4 content" v-else-if="isBook" v-html="html()">
         </Content>
 
         <Content class="Box-body p-3 content text-center" v-else-if="isSvg" v-html="data()">

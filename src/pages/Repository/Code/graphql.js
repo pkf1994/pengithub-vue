@@ -192,7 +192,7 @@ export const GRAPHQL_REPOSITORY_CONTENT_AND_LAST_COMMIT_AND_COMMIT_HISTORY = pay
           nodes {
             message
             abbreviatedOid
-            committer {
+            author {
               avatarUrl
               user {
                 login
@@ -207,13 +207,6 @@ export const GRAPHQL_REPOSITORY_CONTENT_AND_LAST_COMMIT_AND_COMMIT_HISTORY = pay
       ... on Commit {
         history(first: 100, path: "${path}") {
           nodes {
-            authoredByCommitter
-            committer {
-              avatarUrl
-              user {
-                login
-              }
-            }
             author {
               avatarUrl
               user {

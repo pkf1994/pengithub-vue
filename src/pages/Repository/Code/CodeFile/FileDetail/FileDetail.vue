@@ -117,11 +117,8 @@
                     //根据提交历史提取contributors
                     let contributors = []
                     res.data.data.repository.commitHistory.history.nodes.forEach(item => {
-                        if(!(contributors.some(_item => _item.user.login === item.author.user.login))) {
+                        if(!(contributors.some(_item => item.author.user && _item.user && _item.user.login === item.author.user.login)) && item.author.user) {
                             contributors.push(item.author)
-                        }
-                        if(!(contributors.some(_item => _item.user.login === item.committer.user.login))) {
-                            contributors.push(item.committer)
                         }
                     })
                     this.contributors.data = contributors

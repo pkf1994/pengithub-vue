@@ -1,32 +1,32 @@
 <template>
     <Container class="pb-3">
-        <Inner class="bubble mb-0" style="overflow:visible" :class="{'bubble-disabled':disable || loading}">
-            <Title :class="{'disable-filter':disable}">
+        <Inner class="bubble mb-0" style="overflow:visible" :class="{'bubble-disabled':disabled || loading}">
+            <Title :class="{'disabled-filter':disabled}">
                 <slot name="title"></slot>
             </Title>
 
-            <div v-if="disableAnimatedWrapper">
-                <slot v-if="!disableFlag && !loading"></slot>
-                <BubbleDisable v-else-if="disable" class="bubble-content text-center">
-                    <p style="margin-block-start: 1em;margin-block-end: 1em;">{{disableNotice}}</p>
-                </BubbleDisable>
-                <BubbleDisable v-else-if="isLoading" class="bubble-content flex-row-center">
+            <div v-if="disabledAnimatedWrapper">
+                <slot v-if="!disabledFlag && !loading"></slot>
+                <BubbleDisabled v-else-if="disabled" class="bubble-content text-center">
+                    <p style="margin-block-start: 1em;margin-block-end: 1em;">{{disabledNotice}}</p>
+                </BubbleDisabled>
+                <BubbleDisabled v-else-if="isLoading" class="bubble-content flex-row-center">
                     <LoadingIconEx style="margin-block-start: 1em;margin-block-end: 1em;"/>
-                </BubbleDisable>
+                </BubbleDisabled>
             </div> 
 
             <AnimatedHeightWrapper v-else :inactivatedFlagSignal="inactivatedFlagSignal">
-                <slot v-if="!disableFlag && !loading"></slot>
-                <BubbleDisable v-else-if="disable" class="bubble-content text-center">
-                    <p style="margin-block-start: 1em;margin-block-end: 1em;">{{disableNotice}}</p>
-                </BubbleDisable>
-                <BubbleDisable v-else-if="isLoading" class="bubble-content flex-row-center">
+                <slot v-if="!disabledFlag && !loading"></slot>
+                <BubbleDisabled v-else-if="disabled" class="bubble-content text-center">
+                    <p style="margin-block-start: 1em;margin-block-end: 1em;">{{disabledNotice}}</p>
+                </BubbleDisabled>
+                <BubbleDisabled v-else-if="isLoading" class="bubble-content flex-row-center">
                     <LoadingIconEx style="margin-block-start: 1em;margin-block-end: 1em;"/>
-                </BubbleDisable>
+                </BubbleDisabled>
             </AnimatedHeightWrapper>  
 
             <AnimatedHeightWrapper :inactivatedFlagSignal="inactivatedFlagSignal">
-                <Footer :class="{footer:withFooterSlot && withFooterBorderTop,'disable-filter':disable}" v-if="!loading">
+                <Footer :class="{footer:withFooterSlot && withFooterBorderTop,'disabled-filter':disabled}" v-if="!loading">
                     <slot name="footer"></slot>
                 </Footer>
             </AnimatedHeightWrapper>    
@@ -40,11 +40,11 @@
     import {AnimatedHeightWrapper} from '../AnimatedSizeWrapper'
     export default {
         props: {
-            disableNotice: {
+            disabledNotice: {
                 type: String,
                 default: "nothing here"
             },
-            disableFlag: {
+            disabledFlag: {
                 type: Boolean,
                 default: false
             },
@@ -60,18 +60,18 @@
                 type: Boolean,
                 default: true
             },
-            disableAnimatedWrapper:{
+            disabledAnimatedWrapper:{
                 type: Boolean,
                 default: true
             }
         },
       
         computed: {
-            disable() {
-                return this.disableFlag && !this.loading
+            disabled() {
+                return this.disabledFlag && !this.loading
             },
             isLoading() {
-                return this.loading && !this.disableFlag
+                return this.loading && !this.disabledFlag
             },
             withFooterSlot() {
                 return this.$slots.footer
@@ -82,9 +82,9 @@
             AnimatedHeightWrapper,
             Container: styled.div``,
             Inner: styled.div``,
-            Title: styled.h3``,
+            Title: styled.div``,
             Footer: styled.div``,
-            BubbleDisable: styled.div``,
+            BubbleDisabled: styled.div``,
             LoadingContainer: styled.div``
         }
     }
