@@ -9,6 +9,7 @@ import util_analyseFileType from './analyseFileType'
 import util_string from './stringUtil'
 import util_throttle from './throttle'
 import util_emoji from './emoji'
+import util_markdownParse from './markdownParse'
 import './protoExtend'
 
 export {
@@ -22,4 +23,5 @@ export {
     util_string,
     util_throttle,
     util_emoji,
+    util_markdownParse,
     util_adjustStyle}

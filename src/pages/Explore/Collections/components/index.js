@@ -1,4 +1,5 @@
 import CollectionListItem from './CollectionListItem.vue'
-import CollectionAvatarListItem from './CollectionAvatarListItem.vue'
+import CollectionHighlightListItem from './CollectionHighlightListItem.vue'
+import RepoListItem from './RepoListItem.vue'
 
-export {CollectionListItem,CollectionAvatarListItem}
+export {CollectionListItem,CollectionHighlightListItem,RepoListItem}

@@ -1,16 +1,16 @@
 <template>
     <Container class="d-flex border-bottom border-gray-light pb-4 mb-5">
         <AvatarColumn class="col-2 mr-3">
-            <DefaultAvatar v-if="!collection.avatar" class="bg-blue-light f4 text-gray-light text-bold rounded-1 flex-shrink-0 text-center" style="height:64px; line-height:64px;">#</DefaultAvatar>
-            <img v-else class="width-full" :src="collection.avatar" :alt="`@${collection.displayName}`">
+            <DefaultAvatar v-if="!topic.avatar" class="bg-blue-light f4 text-gray-light text-bold rounded-1 flex-shrink-0 text-center" style="height:64px; line-height:64px;">#</DefaultAvatar>
+            <img v-else class="width-full" :src="topic.avatar" :alt="`@${topic.displayName}`">
         </AvatarColumn>
         <Main class="col-10">
             <h2 class="h3">
-                <router-link :to="`/explore/collections/${collection.name}`">
-                    {{collection.displayName}}
+                <router-link :to="`/explore/topics/${topic.name}`" class="link-gray-dark">
+                    {{topic.displayName}}
                 </router-link>
             </h2>
-            {{collection.description}}
+            {{topic.description}}
         </Main>
     </Container>
 </template>
@@ -19,7 +19,7 @@
     import styled from 'vue-styled-components'
     export default {
         props: {
-            collection: {
+            topic: {
                 type: Object,
                 required: true
             }

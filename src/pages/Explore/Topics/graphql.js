@@ -1,7 +1,7 @@
-export const GRAPHQL_COLLECTIONS_ROSTER = `
+export const GRAPHQL_TOPICS_ROSTER = `
   {
     repository(name: "explore", owner: "github") {
-      object(expression: "master:collections") {
+      object(expression: "master:topics") {
         ... on Tree {
           entries {
             type
@@ -14,13 +14,13 @@ export const GRAPHQL_COLLECTIONS_ROSTER = `
   
 `
 
-export const GRAPHQL_COLLECTIONS_SKETCH = payload => {
+export const GRAPHQL_TOPICS_SKETCH = payload => {
   let graphql = ''
 
   payload.forEach((item,index) => {
     graphql = `
       ${graphql}
-      object${index}: object(expression: "master:collections/${item.name}") {
+      object${index}: object(expression: "master:topics/${item.name}") {
         ... on Tree {
           entries {
             type
@@ -40,7 +40,7 @@ export const GRAPHQL_COLLECTIONS_SKETCH = payload => {
   `
 }
 
-export const GRAPHQL_COLLECTIONS = payload => {
+export const GRAPHQL_TOPICS = payload => {
   let graphql = ''
 
   payload.forEach((item,index) => {
@@ -63,10 +63,10 @@ export const GRAPHQL_COLLECTIONS = payload => {
   `
 }
 
-export const GRAPHQL_COLLECTION_SKETCH_AND_RAW = payload => `
+export const GRAPHQL_TOPIC_SKETCH_AND_RAW = payload => `
 {
   repository(name: "explore", owner: "github") {
-    sketch:object(expression: "master:collections/${payload}") {
+    sketch:object(expression: "master:topics/${payload}") {
       ... on Tree {
         entries {
           type
@@ -74,7 +74,7 @@ export const GRAPHQL_COLLECTION_SKETCH_AND_RAW = payload => `
         }
       }
     }
-    raw: object(expression: "master:collections/${payload}/index.md") {
+    raw: object(expression: "master:topics/${payload}/index.md") {
       ... on Blob {
         text
       }

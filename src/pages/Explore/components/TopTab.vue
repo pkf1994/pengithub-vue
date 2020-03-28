@@ -1,7 +1,7 @@
 <template>
     <nav class="px-3 mx-auto bg-white">
         <Inner class="d-flex flex-wrap flex-items-center flex-justify-center text-center">
-            <router-link to="/explore" active-class="explore-selected" class="explore-link subnav-link d-inline-block f5 py-0 mt-2 mr-0 no-underline">Explore</router-link>
+            <router-link to="/explore" exact active-class="explore-selected" class="explore-link subnav-link d-inline-block f5 py-0 mt-2 mr-0 no-underline">Explore</router-link>
             <router-link to="/explore/topics" class="d-inline-block py-2 mr-3 no-underline subnav-link">Topics</router-link>
             <router-link to="/explore/trending" class="d-inline-block py-2 mr-3 no-underline subnav-link">Trending</router-link>
             <router-link to="/explore/collections" class="d-inline-block py-2 no-underline subnav-link">Collections</router-link>
