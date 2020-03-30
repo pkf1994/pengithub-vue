@@ -19,7 +19,7 @@
             {{repository.description}}
         </p>    
 
-        <Meta class="f6 text-gray mt-2">
+        <TheMeta class="f6 text-gray mt-2">
 
             <span class="muted-link d-inline-block mr-3">
                 <svg height="16" class="octicon octicon-star" aria-label="star" viewBox="0 0 14 16" version="1.1" width="14" aria-hidden="true"><path fill-rule="evenodd" d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74L14 6z"></path></svg>
@@ -36,7 +36,7 @@
                 <span>{{repository.languages.nodes[0].name}}</span>
             </span>
 
-        </Meta>
+        </TheMeta>
     </Container>
 </template>
 
@@ -62,12 +62,13 @@
             Container: styled.div``,
             StarBtn: styled.span``,
             FullName: styled.div``,
-            Meta: styled.div``
+            TheMeta: styled.div``,
         }
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/box/index.scss';
 .repo-language-color{
     position: relative;
     top: 1px;

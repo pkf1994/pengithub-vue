@@ -10,6 +10,8 @@ const ExploreMain = () => import('../pages/Explore/ExploreMain/ExploreMain.vue')
 const ExploreTrending = () => import('../pages/Explore/Trending/Trending.vue')
 const ExploreCollections = () => import('../pages/Explore/Collections/Collections.vue')
 const ExploreTopics = () => import('../pages/Explore/Topics/Topics.vue')
+const ExploreTopicsBrowser = () => import('../pages/Explore/Topics/TopicsBrowser.vue')
+const ExploreTopicDetail = () => import('../pages/Explore/Topics/TopicDetail.vue')
 const Search = () => import('../pages/Search/Search.vue')
 const SearchResultRepositories = () => import('../pages/Search/SearchResult/Repositories/Repositories.vue')
 const SearchResultCode = () => import('../pages/Search/SearchResult/Code/Code.vue')
@@ -102,8 +104,12 @@ export default [
                 component: ExploreCollections,
             },
             {
-                path: 'topics/:topic?',
-                component: ExploreTopics,
+                path: 'topics',
+                component: ExploreTopicsBrowser,
+            },
+            {
+                path: 'topics/:topic',
+                component: ExploreTopicDetail,
             }
         ]
     },

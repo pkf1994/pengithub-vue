@@ -47,7 +47,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/forms/index.scss';
 .input{
     min-height: 34px;
     padding: 6px 8px;

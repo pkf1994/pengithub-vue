@@ -90,7 +90,7 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang='scss'>
 
     .bubble {
         padding: 0;

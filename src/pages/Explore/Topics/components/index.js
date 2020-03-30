@@ -1,4 +1,4 @@
 import TopicListItem from './TopicListItem.vue'
 import TopicHighlightListItem from './TopicHighlightListItem.vue'
-
-export {TopicListItem,TopicHighlightListItem}
+import RepoListItem from './RepoListItem'
+export {TopicListItem,TopicHighlightListItem,RepoListItem}

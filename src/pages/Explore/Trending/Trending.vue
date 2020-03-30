@@ -48,7 +48,7 @@
              <div v-if="filterSpokenLanguageList.loading" class="flex-row-center height-full">
                 <LoadingIconEx></LoadingIconEx>
             </div>
-            <div class="select-menu-text-filter p-3">
+            <div v-else class="select-menu-text-filter p-3">
                 <input type="text" v-model="filterText.spokenLanguage" class="form-control" placeholder="Filter spoken languages" autofocus="" autocomplete="off"/>
             </div>
             <router-link :to='clearSpokenLanguageRouterLink'>
@@ -183,7 +183,10 @@
                 return  spokenLanguageHolder["name"]
             },
             language() {
-                return this.$route.params.language || 'Any'
+                if(!this.$route.params.language) return 'Any'
+                if(this.filterLanguageList.data.length == 0) return this.$route.params.language
+                let languageHolder = this.filterLanguageList.data.filter(i => i.urlParam == this.$route.params.language)[0]
+                return languageHolder ? languageHolder.name : 'Unknow'
             },
             since() {
                 return this.$route.query.since || 'daily'
@@ -362,7 +365,6 @@
             },
             triggerModal(ref) {
                 this.$refs[ref].show =true
-                
             },
             routeUpdateHook() {
                 this.$refs.spokenLanguageModal.show = false
@@ -394,7 +396,10 @@
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/box/index.scss';
 .select-menu-text-filter{
+    position: sticky;
+    top: 0px;
     background-color: #f6f8fa;
     border-bottom: 1px solid #dfe2e5;
     input {

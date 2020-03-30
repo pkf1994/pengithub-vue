@@ -114,8 +114,8 @@
     }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/forms/index.scss';
     .router-link{
         flex:1;
         display: table-cell;

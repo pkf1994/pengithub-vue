@@ -16,7 +16,7 @@
         },
         beforeRouteEnter (to, from, next) {
             next(vm => {
-                if(vm.routerMeta && vm.routerMeta !== vm.generateRouterMeta()) {
+                if(vm.routerMeta && vm.routerMeta != vm.generateRouterMeta()) {
                     vm.cancelUntimelyAxios()
                     vm.routeResetHook()
                     vm.routeUpdateHook()
@@ -26,7 +26,7 @@
         },
         beforeRouteUpdate (to, from, next) {
             next()
-            if(this.routerMeta !== this.generateRouterMeta()) {
+            if(this.routerMeta != this.generateRouterMeta()) {
                 this.cancelUntimelyAxios()
                 this.routeUpdateHook()
                 this.routerMeta = this.generateRouterMeta()

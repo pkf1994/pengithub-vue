@@ -33,7 +33,6 @@
 </script>
 
 <style scoped lang="scss">
-
     .container{
         top: 0;
         bottom: 0;

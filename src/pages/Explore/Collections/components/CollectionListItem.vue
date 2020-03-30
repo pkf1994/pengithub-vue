@@ -33,6 +33,6 @@
     }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/layout/index.scss';
 </style>

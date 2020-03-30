@@ -15,12 +15,12 @@
             <router-link :to="`/${repository.author}/${repository.name}`" class="text-bold">{{repository.name}}</router-link>
         </h1>
 
-        <p class="col-9 text-gray my-1 pr-4">
+        <p class="text-gray my-1">
             {{repository.description}}
         </p>    
 
-        <Meta class="f6 text-gray mt-2">
-            <span class="d-inline-block ml-0 mr-3">
+        <Meta class="f6 text-gray mt-2 meta">
+            <span class="d-inline-block ml-0 mr-3" v-if="repository.language">
                 <span class="repo-language-color" :style="{'backgroundColor': repository.languageColor}"></span>
                 <span>{{repository.language}}</span>
             </span>
@@ -96,7 +96,9 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/avatars/index.scss';
+
 .repo-language-color{
     position: relative;
     top: 1px;
@@ -104,5 +106,11 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
+}
+.meta{
+    span{
+        margin-top:2px;
+        margin-bottom:1px;
+    }
 }
 </style>

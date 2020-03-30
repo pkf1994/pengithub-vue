@@ -16,7 +16,7 @@
             <transition-group name="fade-group" appear>
                 <CollectionListItem v-for="item in data.filter(i => i.content)" :key="item.displayName" :collection="item"></CollectionListItem>
             </transition-group>
-            <button v-if="data.filter(i => i.content).length > 0 &&  cursor <= data.length" @click="network_getData" class="btn mt-4 mb-3 py-2 btn-outline border-gray-dark f6 width-full">{{loading ? 'Loadding more…' : 'Load more…'}}</button>
+            <LoadingMore v-if="data.filter(i => i.content).length > 0 &&  cursor <= data.length" :loading="loading" :dataGetter="network_getData"/>
         </Main>
 
         <transition name="fade" appear>
@@ -27,7 +27,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {Jumbotron} from '../components'
+    import {Jumbotron,LoadingMore} from '../components'
     import {CollectionListItem,CollectionHighlightListItem} from './components'
     import {CommonLoading} from '@/components'
     import * as graphql from './graphql'
@@ -148,6 +148,7 @@
         },
         components: {
             Jumbotron,
+            LoadingMore,
             CollectionListItem,
             CollectionHighlightListItem,
             CommonLoading,

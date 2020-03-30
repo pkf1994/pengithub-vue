@@ -13,7 +13,7 @@
             <transition-group name="fade-group" appear>
                 <TopicListItem v-for="item in data.filter(i => i.content)" :key="item.displayName" :topic="item"></TopicListItem>
             </transition-group>
-            <button v-if="data.filter(i => i.content).length > 0 &&  cursor <= data.length" @click="network_getData" class="btn mt-4 mb-3 py-2 btn-outline border-gray-dark f6 width-full">{{loading ? 'Loadding more…' : 'Load more…'}}</button>
+            <LoadingMore v-if="data.filter(i => i.content).length > 0 &&  cursor <= data.length" :loading="loading" :dataGetter="network_getData"/>
         </Main>
 
         <transition name="fade" appear>
@@ -24,13 +24,18 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {Jumbotron} from '../components'
+    import {Jumbotron,LoadingMore} from '../components'
     import {TopicListItem,TopicHighlightListItem} from './components'
     import {CommonLoading} from '@/components'
     import * as graphql from './graphql'
     import {authRequiredGitHubGraphqlApiQuery} from '@/network'
     import Vue from 'vue'
     export default {
+        provide() {
+            return {
+                viewerHasStarredProvided: () => this.viewerHasStarred
+            }
+        },
         data() {
             return {
                 data: [],
@@ -41,7 +46,8 @@
                     loading: false
                 },
                 perPage: 10,
-                cursor: 0
+                cursor: 0,
+                viewerHasStarred: []
             }
         },
         created() {
@@ -55,6 +61,7 @@
 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_topicsSketchRoster)
                     let topicsSketchRoster = res.data.data.repository.object.entries
+                    console.log(topicsSketchRoster)
 
                     let graphql_topicsSketch = graphql.GRAPHQL_TOPICS_SKETCH(topicsSketchRoster)
                     let res_topicsSketch = await authRequiredGitHubGraphqlApiQuery(graphql_topicsSketch)
@@ -103,6 +110,19 @@
                     })
 
                     this.cursor += this.perPage
+
+                    let showingTopics = this.data.filter(i => i.content)
+
+                    let graphql_viewerHasStarred = graphql.GRAPHQL_TOPICS_VIEWER_HAS_STARRED(showingTopics)
+                    let res_viewerHasStarred = await authRequiredGitHubGraphqlApiQuery(graphql_viewerHasStarred)
+
+                    let viewerHasStarredArr = []
+                    for(let key in  res_viewerHasStarred.data.data) {
+                        viewerHasStarredArr.push(res_viewerHasStarred.data.data[key])
+                    }
+
+                    this.viewerHasStarred = this.viewerHasStarred.concat(viewerHasStarredArr)
+
                     this.loading = false
                 }catch(e) {
                     console.log(e)
@@ -138,6 +158,14 @@
 
                     this.highlight.data = topicsSketchRosterToLoad
 
+                    let graphql_viewerHasStarred = graphql.GRAPHQL_TOPICS_VIEWER_HAS_STARRED(topicsSketchRosterToLoad)
+                    let res_viewerHasStarred = await authRequiredGitHubGraphqlApiQuery(graphql_viewerHasStarred)
+
+                    for(let key in  res_viewerHasStarred.data.data) {
+                        let item = res_viewerHasStarred.data.data[key]
+                        if(this.viewerHasStarred.indexOf(item) == -1) this.viewerHasStarred.push(item)
+                    }
+
                     this.highlight.loading = false
                 }catch(e) {
                     console.log(e)
@@ -147,6 +175,7 @@
         },
         components: {
             Jumbotron,
+            LoadingMore,
             TopicListItem,
             TopicHighlightListItem,
             CommonLoading,
@@ -157,6 +186,6 @@
     }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/buttons/index.scss';
 </style>

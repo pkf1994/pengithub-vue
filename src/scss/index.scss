@@ -1,4 +1,4 @@
-@import './themes';
+/* @import './themes';
 @import "./button";
 @import "./colors";
 @import "./border";
@@ -21,9 +21,13 @@
 @import "./octicon";
 @import "./layout";
 @import "./github-light.scss";
-@import "./truncate.scss";
+@import "./truncate.scss"; */
+@import "./transition";
+@import './custom_global.scss';
 @import '../../node_modules/@primer/css/utilities/index.scss';
-@import '../../node_modules/@primer/css/layout/index.scss';
+@import '../../node_modules/@primer/css/base/index.scss';
+@import '../../node_modules/@primer/css/buttons/index.scss';
+/* @import '../../node_modules/@primer/css/layout/index.scss';
 @import '../../node_modules/@primer/css/support/index.scss';
 //@import '../../node_modules/@primer/css/box/index.scss';
 @import '../../node_modules/@primer/css/buttons/index.scss';
@@ -36,11 +40,4 @@
 @import '../../node_modules/@primer/css/navigation/index.scss';
 @import './primerAdj.scss';
 
-
-@include with-theme();
-@include init-titleFontSize();
-@include init-paragraphFontSize();
-@include init-fontWeight();
-@include init-lineHeight();
-@include init-margin();
-@include init-padding();
+ */

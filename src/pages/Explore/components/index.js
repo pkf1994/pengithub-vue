@@ -1,4 +1,5 @@
 import TopTab from './TopTab.vue'
 import Jumbotron from './Jumbotron.vue'
+import LoadingMore from './LoadingMore.vue'
 
-export {TopTab,Jumbotron}
+export {TopTab,Jumbotron,LoadingMore}

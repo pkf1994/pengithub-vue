@@ -31,7 +31,7 @@
         </Viewer> -->
 
         <transition appear name="fade">
-            <AnimatedHeightWrapper class="mt-6 mb-7">
+            <AnimatedHeightWrapper class="my-6">
                 <Jumbotron class="text-center" v-if="trendingRepoToday.data.length > 0">
                     <div class="col-2 mx-auto">
                         <img src="https://github.githubassets.com/images/icons/emoji/tada.png" alt="tada" class="width-full">
@@ -188,7 +188,10 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/layout/index.scss';
+@import 'node_modules/@primer/css/box/index.scss';
+
 .title{
     font-size: 16px;
 }

@@ -59,7 +59,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+
     .bubble {
         padding: 0;
         margin:0 15px 15px 15px;

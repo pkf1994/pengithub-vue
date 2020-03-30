@@ -68,6 +68,7 @@
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/forms/index.scss';
 .container{
     border-radius: 3px;
     button{

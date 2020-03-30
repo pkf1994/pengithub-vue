@@ -80,6 +80,9 @@ export const GRAPHQL_TOPIC_SKETCH_AND_RAW = payload => `
       }
     }
   }
+  topic: topic(name: "${payload}") {
+    viewerHasStarred
+  }
 }
 `
 
@@ -115,5 +118,42 @@ export const GRAPHQL_REPOS = payload => {
     {
       ${graphql}
     }
+  `
+}
+
+export const GRAPHQL_TOPICS_VIEWER_HAS_STARRED = payload => {
+  let graphql = ''
+  payload.forEach((item,index) => {
+    graphql = `
+      ${graphql}
+      topic${index}:topic(name: "${item.name}") {
+        viewerHasStarred
+        name
+      }
+    `
+  })
+
+  return `
+    {
+      ${graphql}
+    }
+  `
+}
+
+export const GRAPHQL_TOPIC_REPOS = payload => {
+  let ids = []
+  payload.forEach(item => {
+    ids.push(item.node_id)
+  })
+  return `
+  {
+    nodes(ids: ${JSON.stringify(ids)}){
+      ... on Repository{
+      id
+      openGraphImageUrl
+      viewerHasStarred
+    }
+  }
+}
   `
 }

@@ -60,7 +60,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/forms/index.scss';
 .input{
     padding-left: 30px;
     color: #586069;
