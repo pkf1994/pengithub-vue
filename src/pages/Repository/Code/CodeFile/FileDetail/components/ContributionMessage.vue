@@ -66,7 +66,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/avatars/index.scss';
 .avatar-link{
     margin-top: 1px;
     margin-bottom: 1px;

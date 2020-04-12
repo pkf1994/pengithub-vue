@@ -2,14 +2,13 @@ import {SimpleFooter,LogoHeader,RepoHeader,LabelsFooter} from '../components'
 
 const Home = () => import('../pages/Home/Home.vue')
 const OauthRedirectPage = () => import('../pages/OauthRedirectPage/OauthRedirectPage.vue')
-const Dashboard = () => import('../pages/Home/LoginedHome/Dashboard/index.vue')
+const Dashboard = () => import('../pages/Home/LoginedHome/Dashboard/Dashboard.vue')
 const HomePullRequests = () => import('../pages/Home/LoginedHome/PullRequests.vue')
 const HomeIssues = () => import('../pages/Home/LoginedHome/Issues.vue')
 const Explore = () => import('../pages/Explore/Explore.vue')
 const ExploreMain = () => import('../pages/Explore/ExploreMain/ExploreMain.vue')
 const ExploreTrending = () => import('../pages/Explore/Trending/Trending.vue')
 const ExploreCollections = () => import('../pages/Explore/Collections/Collections.vue')
-const ExploreTopics = () => import('../pages/Explore/Topics/Topics.vue')
 const ExploreTopicsBrowser = () => import('../pages/Explore/Topics/TopicsBrowser.vue')
 const ExploreTopicDetail = () => import('../pages/Explore/Topics/TopicDetail.vue')
 const Search = () => import('../pages/Search/Search.vue')
@@ -19,6 +18,8 @@ const SearchResultCommit = () => import('../pages/Search/SearchResult/Commits/Co
 const SearchResultIssues = () => import('../pages/Search/SearchResult/Issues/Issues.vue')
 const SearchResultTopics = () => import('../pages/Search/SearchResult/Topics/Topics.vue')
 const SearchResultUsers = () => import('../pages/Search/SearchResult/Users/Users.vue')
+const User = () => import('../pages/User/User.vue')
+const UserOverview = () => import('../pages/User/Overview.vue')
 const Repository = () => import('../pages/Repository/Repository.vue')
 const RepositoryCode = () => import('../pages/Repository/Code/Code.vue')
 const RepositoryCodeMain = () => import('../pages/Repository/Code/CodeMain/CodeMain.vue')
@@ -41,6 +42,7 @@ const RepositoryBranchesOverview = () => import('../pages/Repository/Branches/Ov
 const RepositoryBranchesAll = () => import('../pages/Repository/Branches/All.vue')
 const RepositoryBranchesStale = () => import('../pages/Repository/Branches/Stale.vue')
 const Logout = () => import('../pages/Logout/Logout.vue')
+const Notifications = () => import('../pages/Notifications/Notifications.vue')
 
 export const ROUTE_HOME = 'route-home'
 export const ROUTE_OAUTH_REDIRECT = 'route-oauthRedirect'
@@ -78,6 +80,14 @@ export default [
     {
         path: '/logout',
         component: Logout
+    },
+    {
+        path: '/notifications',
+        components: {
+            default: Notifications,
+            header: LogoHeader,
+            footer: SimpleFooter
+        },
     },
     {
         path: '/explore',
@@ -259,5 +269,20 @@ export default [
             },
         ]
     },
+    {
+        path: '/:login',
+        components: {
+            default: User,
+            header: LogoHeader,
+            footer: SimpleFooter
+        },
+        children: [
+            {
+                path: '/',
+                component: UserOverview
+            }
+        ]
+    },
+  
     
 ]

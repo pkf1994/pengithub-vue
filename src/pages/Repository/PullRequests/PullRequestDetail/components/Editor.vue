@@ -2,7 +2,7 @@
     <Container class="container flex-column flex-items-stretch">
         <textarea  rows="6" 
                     :placeholder="placeholder"
-                    class="d-block  form-control" 
+                    class="d-block form-control" 
                     id="textarea"
                     :disabled="locked" 
                     v-model="commentTextValue"
@@ -70,7 +70,7 @@
 </script>
 
 <style scoped lang='scss'>
-   
+@import 'node_modules/@primer/css/forms/index.scss';
 .header{
     padding: 25px 15px 7.5px;
     font-size: 12px;
@@ -89,7 +89,7 @@
     min-height: 100px;
     padding: 8px;
     resize: vertical;
-    max-width: 100%;
+    width: 100%;
     margin: 0;
     line-height: 1.6;
     background-color: #fafbfc;

@@ -4,8 +4,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import Hola from './Hola'
-    import LoginedHome from './LoginedHome'
+    import Hola from './Hola/Hola.vue'
+    import LoginedHome from './LoginedHome/LoginedHome.vue'
 
     import {mapState} from "vuex";
     const LOGINED_HOME = "LoginedHome"

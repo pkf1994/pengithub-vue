@@ -34,13 +34,13 @@
         </transition>
 
         <transition name="fade" appear>
-              <Title v-if="repositories.totalCount > 0 && rawContent" class="text-gray repositories-title">
+              <Title v-if="rawContent" class="text-gray repositories-title">
                     Here are {{formatRepositoyCount}} public repositories matching this topic...
             </Title>
         </transition>
        
         <transition name="fade" appear>
-            <FilterRow v-if="repositories.totalCount > 0  && rawContent" class="mt-2 mr-3">
+            <FilterRow v-if="rawContent" class="mt-2 mr-3">
                 <button class="btn btn-sm  end-with-triangle" @click="() => triggerModal('languageModal')">
                     <span class="text-normal">Language:</span>
                     <span>{{language || 'Any'}}&nbsp;</span>
@@ -48,7 +48,7 @@
             </FilterRow>
         </transition>
         <transition name="fade" appear>
-            <FilterRow v-if="repositories.totalCount > 0  && rawContent" class="mt-2 mr-3">
+            <FilterRow v-if="rawContent" class="mt-2 mr-3">
                 <button class="btn btn-sm  end-with-triangle"  @click="() => triggerModal('sortModal')">
                     <span class="text-normal">Sort:</span>
                     <span>{{sort}}&nbsp;</span>
@@ -63,6 +63,15 @@
         <LoadingMore v-if="repositories.pageInfo.next  && rawContent" :loading="repositories.loading" :dataGetter="() => network_getRepositories(true)"/>
 
         <transition name="fade" appear>
+            <RelatedTopics v-if="relatedTopics && relatedTopics.length > 0 && rawContent" class="mb-4">
+                    <Title  class="text-gray repositories-title mb-2">
+                        Related Ttopics
+                    </Title>
+                    <router-link v-for="item in relatedTopics" :key="item" :to="`/explore/topics/${item}`" class="f6 my-1 topic-tag">{{item}}</router-link>
+            </RelatedTopics>
+        </transition>
+
+        <transition name="fade" appear>
             <CommonLoading v-if="loading || repositories.loading || repositories.extraData.loading" :position="loading ? 'center' : 'corner'"></CommonLoading>
         </transition>
 
@@ -73,7 +82,7 @@
             <div class="select-menu-text-filter p-3">
                 <input type="text" v-model="repositories.filterLanguageList.filterText" class="form-control" placeholder="Filter spoken languages" autofocus="" autocomplete="off"/>
             </div>
-            <router-link :to='clearLanguageRouterLink'>
+            <router-link v-if="language" :to='clearLanguageRouterLink'>
                 <SelectMenuItem>
                     <template v-slot:icon>
                         <svg height="16" class="octicon octicon-x select-menu-item-icon mr-2" class_names="select-menu-item-icon" viewBox="0 0 12 16" version="1.1" width="12" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
@@ -91,7 +100,7 @@
         </Modal>
 
         <Modal ref="sortModal" title="Sort by" :modalStyle="{height:'80vh'}">
-            <router-link :to='`/explore/topics/${topic}`'>
+            <router-link v-if="`/explore/topics/${topic}` != $route.fullPath" :to='`/explore/topics/${topic}`'>
                 <SelectMenuItem>
                     <template v-slot:icon>
                         <svg height="16" class="octicon octicon-x select-menu-item-icon mr-2" class_names="select-menu-item-icon" viewBox="0 0 12 16" version="1.1" width="12" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
@@ -169,6 +178,11 @@
             descriptionHTML() {
                 let descriptionMarkdownRaw = this.rawContent.split('---').pop().replace('\n','')
                 return util_markdownParse.markdownToHTML(descriptionMarkdownRaw)
+            },
+            relatedTopics() {
+                let magicArr = this.rawContent.split('\n')
+                let relatedTopicsHolder = magicArr.filter(i => i.match(/^related:/) != null)[0]
+                return relatedTopicsHolder && relatedTopicsHolder.replace("related: ","").split(', ')
             },
             language() {
                 if(!this.$route.query.language) return
@@ -336,7 +350,7 @@
                             }
                         }
                     )
-                    this.repositories.pageInfo = parse(res.headers.link)
+                    this.repositories.pageInfo = parse(res.headers.link) || {}
                     
                     if(!loadingMoreFlag) {
                         this.repositories.data = res.data.items
@@ -395,7 +409,8 @@
             DescriptionAvatar: styled.div``,
             DescriptionHTML: styled.div``,
             Repositories: styled.div``,
-            FilterRow: styled.div``
+            FilterRow: styled.div``,
+            RelatedTopics: styled.div``,
         }
     }
 </script>
@@ -427,5 +442,14 @@
         border: 1px solid #dfe2e5;
         border-radius: 3px;
     }
+}
+
+.topic-tag {
+    display: inline-block;
+    padding: .3em .9em;
+    margin: 0 .5em .5em 0;
+    white-space: nowrap;
+    background-color: #f1f8ff;
+    border-radius: 3px;
 }
 </style>

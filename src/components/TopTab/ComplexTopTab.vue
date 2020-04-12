@@ -1,6 +1,7 @@
 <template>
-    <nav class="flex overflow-auto">
+    <nav class="d-flex overflow-auto">
         <router-link class="px-2 py-3 mr-3 router-link flex-row-center flex-shrink-0" 
+                        :style="tabStyle"
                         v-for="tabItem in tabs"
                         :exact='tabItem.exact'
                         :key="tabItem.label"
@@ -22,6 +23,10 @@
             tabs: {
                 type: Array,
                 required: true
+            },
+            tabStyle: {
+                type: Object,
+                required: false
             }
         },
         components: {

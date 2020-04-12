@@ -16,7 +16,7 @@
                         </router-link>
                     </BtnGroup>
                         
-                    <EditOrDelete class="flex">
+                    <EditOrDelete class="d-flex">
                         <button class="d-block btn-octicon">
                             <svg viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M0 12v3h3l8-8-3-3-8 8zm3 2H1v-2h1v1h1v1zm10.3-9.3L12 6 9 3l1.3-1.3a.996.996 0 011.41 0l1.59 1.59c.39.39.39 1.02 0 1.41z"></path></svg>
                         </button>
@@ -48,9 +48,9 @@
         </Content>
 
          <Content class="Box-body p-0 content" v-else>
-            <BlobRow class="flex" v-for="(item,index) in fileDetailRows" :key="item + index">
+            <BlobRow class="d-flex" v-for="(item,index) in fileDetailRows" :key="item + index">
                 <BlobNumber class="blob-num">{{index + 1}}</BlobNumber>
-                <BlobCode class=" blob-code">{{item}}</BlobCode>
+                <BlobCode class="blob-code">{{item}}</BlobCode>
             </BlobRow>
         </Content>
 
@@ -59,9 +59,9 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../../../components'
+    import {ComplexBubble,AnimatedHeightWrapper} from '@/components'
     import {mapState,mapGetters} from 'vuex'
-    import {util_analyseFileType} from '../../../../../../util'
+    import {util_analyseFileType} from '@/util'
     export default {
         inject: ['data','html','loading'],
         data() {
@@ -126,6 +126,7 @@
 </script>
 
 <style scoped lang='scss'>
+@import 'node_modules/@primer/css/box/index.scss';
 button{
     svg{
         display: block;

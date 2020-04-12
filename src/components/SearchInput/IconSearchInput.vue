@@ -1,5 +1,5 @@
 <template>
-    <Container class="relative">
+    <Container class="position-relative">
         <input  :placeholder="placeholder"
                 ref="input"
                 :value="value"
@@ -62,6 +62,7 @@
 
 <style scoped lang="scss">
 @import 'node_modules/@primer/css/forms/index.scss';
+@import 'node_modules/@primer/css/navigation/index.scss';
 .input{
     padding-left: 30px;
     color: #586069;

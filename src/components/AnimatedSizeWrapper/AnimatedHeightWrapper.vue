@@ -59,18 +59,26 @@
                 this.height = this.$refs.content.$el.offsetHeight
 
                 setTimeout(() => {
-                    let computeHeightEvent = document.createEvent('HTMLEvents')
-                    computeHeightEvent.initEvent("compute-height",true,false)
-                    this.$refs.content && this.$refs.content.$el.dispatchEvent(computeHeightEvent)
-                    this.inactivatedFlag = this.inactivatedFlagSignal
+                    this.emitComputeHeightEvent()
                 },400)
             },
             subComputeHeightEventHandler(event) {
                 if(event.target == this.$refs.content.$el) return 
                 util_throttle.throttleByDelay(() => this.computeHeight(),50,this)
+            },
+            emitComputeHeightEvent() {
+                 let computeHeightEvent = document.createEvent('HTMLEvents')
+                computeHeightEvent.initEvent("compute-height",true,false)
+                this.$refs.content && this.$refs.content.$el.dispatchEvent(computeHeightEvent)
+                this.inactivatedFlag = this.inactivatedFlagSignal
             }
         },
         watch: {
+            stretch() {
+                 setTimeout(() => {
+                    this.emitComputeHeightEvent()
+                },400)
+            }
           /*   inactivatedFlagSignal(newOne,oldOne) {
                 if(newOne && !oldOne) {
                     setTimeout(() => {

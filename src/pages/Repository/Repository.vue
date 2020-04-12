@@ -50,6 +50,7 @@
             ...mapState({
                 viewerLogin: state => state.oauth.viewerInfo.login
             }),
+            
             owner: function() {
                 return this.$attrs.owner
             },
@@ -107,7 +108,6 @@
             this.network_ifViewerACollaborator()
         },
         methods: {
-        
             //获取仓库基本信息
             async network_getData() {
                 try{
@@ -142,8 +142,8 @@
                     this.viewerIsCollaborator.loading = false
                 }
             },
-            routeUpdateHook() {
-                this.network_getData()
+            generateRouterMeta() {
+                return `${this.$route.params.owner}/${this.$route.params.repo}`
             },
         },
         components: {

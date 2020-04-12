@@ -177,7 +177,8 @@
 </script>
 
 <style scoped lang='scss'>
-.tabnav-tab{
+@import 'node_modules/@primer/css/navigation/index.scss';
+ .tabnav-tab{
     display: inline-block;
     padding: 8px 12px;
     font-size: 14px;
@@ -190,7 +191,7 @@
 }
 .tabnav-tab:first-child{
     border-left: 1px solid #e1e4e8;
-}
+} 
 .tab-selected{
     border-bottom: 0;
     background-color: #fff;

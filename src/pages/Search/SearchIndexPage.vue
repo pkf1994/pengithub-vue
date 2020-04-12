@@ -31,7 +31,7 @@
                            spellcheck="false"
                            type="text"/>
                     </InputWrapper>
-                    <button class="btn mt-2" ref="searchButton" type="submit" @click="search">Search</button>
+                    <button class="btn width-full mt-2" ref="searchButton" type="submit" @click="search">Search</button>
             </SearchPane>
 
             <ProTip>
@@ -126,7 +126,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/forms/index.scss';
 .title{
     font-size: 24px;
 }

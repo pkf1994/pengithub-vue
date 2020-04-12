@@ -1,7 +1,7 @@
 <template>
     <Container class="position-relative bg-white">
         <SearchInput v-if="!noData" class="position-relative m-3 flex-self-stretch">
-            <input class="form-control form-control input-contrast width-full" 
+            <input class="form-control input-contrast width-full" 
                     v-model="searchQuery"
                     @keydown.enter="search"
                     ref="input"
@@ -271,6 +271,7 @@
 </style>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/forms/index.scss';
 .search-icon{
     top: 10px;
     font-size: 14px;

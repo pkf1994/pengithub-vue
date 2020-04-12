@@ -12,7 +12,7 @@ export default {
         let query = ""
         if(queryObj !== {})
         for(let key in queryObj) {
-            if(queryObj[key]){
+            if(queryObj[key] !== undefined){
                 let queryValueFragment = queryObj[key].toString().replace(/%/g,'%25')
                                         .replace(/\+/g,'%2B')
                                         .replace(/ /g,'%20')

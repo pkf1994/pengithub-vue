@@ -1,20 +1,33 @@
 <template>
-  <Container id="app-container" class="flex flex-column flex-grow-1">
+  <Container id="app-container" class="d-flex flex-column flex-grow-1">
     <router-view class="router-view header" name="header"></router-view>
-    <router-view class="router-view flex-grow-1"/>
+    <keep-alive>
+      <router-view class="router-view flex-grow-1"/>
+    </keep-alive>
     <router-view class="router-view footer" name="footer"/>
   </Container>
 </template>
 
 <script>
 import styled from 'vue-styled-components'
+import {mapState,mapActions} from 'vuex'
+import {ACTION_GET_UNREAD_NOTIFICATIONS_COUNT} from '@/store/modules/notifications/actionTypes.js'
 export default {
-
+  created() {
+    try{
+      this.action_getNotificationsCount()
+    }catch(e) {
+      this.$toast(e.message,{type:"error"})
+    }
+  },
+  methods: {
+    ...mapActions({
+        action_getNotificationsCount: ACTION_GET_UNREAD_NOTIFICATIONS_COUNT
+    }),
+  },
   components: {
       Container: styled.div``
   },
- 
-  
 }
 </script>
 

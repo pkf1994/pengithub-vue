@@ -1,5 +1,5 @@
 <template>
-    <Container class="py-4 mx-3 flex flex-justify-start">
+    <Container class="py-4 mx-3 d-flex flex-justify-start">
         
         <IconColumn class="flex-shrink-0 mr-2">
             <svg height="16"
@@ -66,15 +66,16 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_numberFormat, util_dateFormat, util_adjustStyle} from '../../../../../util'
+    import {util_numberFormat, util_dateFormat, util_adjustStyle} from '@/util'
     import {mapState} from "vuex";
     import {util_analyseFileType} from '@/util'
     import {
-        AnimatedHeightWrapper} from '../../../../../components'
+        AnimatedHeightWrapper} from '@/components'
     import {
-        WithRandomMetaMixin} from '../../../../../mixins'
+        WithRandomMetaMixin} from '@/mixins'
     export default {
         mixins: [WithRandomMetaMixin],
+        inject: ['queryProvided'],
         props: {
             repository: {
                 type: Object,
@@ -82,9 +83,6 @@
             }
         },
         computed: {
-            ...mapState({
-                searchQuery: state => state.search.searchQuery
-            }),
             stars: function () {
                 return util_numberFormat.thousands2K2M(this.repository.stargazers_count)
             },
@@ -105,7 +103,7 @@
             }
         },
         mounted() {
-            util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.searchQuery)
+            util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.queryProvided())
         },
         watch: {
             /* topics() {

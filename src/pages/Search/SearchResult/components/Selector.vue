@@ -36,6 +36,8 @@
 </script>
 
 <style lang="scss">
+@import 'node_modules/@primer/css/forms/index.scss';
+@import 'node_modules/@primer/css/layout/index.scss';
 .disabled{
     color: #DDDDDD;
 }

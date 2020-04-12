@@ -43,6 +43,6 @@
     }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/box/index.scss';
 </style>

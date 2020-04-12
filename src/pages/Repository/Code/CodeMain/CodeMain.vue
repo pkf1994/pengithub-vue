@@ -20,7 +20,7 @@
         </AnimatedHeightWrapper>  
 
          <transition name="fade" appear>
-             <ActionPane v-if="codeBasicInfo().id" class="bubble flex mt-3 mb-3">
+             <ActionPane v-if="codeBasicInfo().id" class="bubble d-flex mt-3 mb-3 flex-items-stretch">
                 <StarItOrNot class="flex-auto text-center">
                     <button class="px-2" @click="test">
                         <svg class="v-align-text-bottom d-inline-block" fill="currentColor" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74L14 6z"></path></svg>
@@ -37,14 +37,12 @@
                         {{subscriptionActionStr}}
                     </button>
                 </WatchItOrNot>
-                <AnimatedWidthWrapper>
-                    <Sponsor v-if="codeBasicInfo().fundingLinks && (codeBasicInfo().fundingLinks.length > 0)" class="flex-auto no-wrap text-center" style="border-left: 1px solid #d1d5da;">
-                        <button  class="px-2">
-                            <svg class="v-align-text-bottom text-pink d-inline-block" fill="currentColor" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M9 2c-.97 0-1.69.42-2.2 1-.51.58-.78.92-.8 1-.02-.08-.28-.42-.8-1-.52-.58-1.17-1-2.2-1-1.632.086-2.954 1.333-3 3 0 .52.09 1.52.67 2.67C1.25 8.82 3.01 10.61 6 13c2.98-2.39 4.77-4.17 5.34-5.33C11.91 6.51 12 5.5 12 5c-.047-1.69-1.342-2.913-3-3z"></path></svg>
-                            Sponsor
-                        </button>  
-                    </Sponsor>
-                </AnimatedWidthWrapper>    
+                <Sponsor v-if="codeBasicInfo().fundingLinks && (codeBasicInfo().fundingLinks.length > 0)" class="flex-auto no-wrap text-center" style="border-left: 1px solid #d1d5da;">
+                    <button  class="px-2 height-full">
+                        <svg class="v-align-text-bottom text-pink d-inline-block" fill="currentColor" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M9 2c-.97 0-1.69.42-2.2 1-.51.58-.78.92-.8 1-.02-.08-.28-.42-.8-1-.52-.58-1.17-1-2.2-1-1.632.086-2.954 1.333-3 3 0 .52.09 1.52.67 2.67C1.25 8.82 3.01 10.61 6 13c2.98-2.39 4.77-4.17 5.34-5.33C11.91 6.51 12 5.5 12 5c-.047-1.69-1.342-2.913-3-3z"></path></svg>
+                        Sponsor
+                    </button>  
+                </Sponsor>
             </ActionPane>
         </transition> 
 
@@ -200,11 +198,24 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/labels/index.scss';
 .repository-meta{
     font-size: 13px;
     color: #586069;
 }
+
+.bubble {
+  padding: 0;
+  overflow: hidden;
+  word-break: break-word;
+  word-wrap: break-word;
+  white-space: normal;
+  background: #fff;
+  border: 1px solid #d1d5da;
+  border-radius: 3px;
+}
+
 button{
     padding: 10px 15px;
     font-weight: 500;

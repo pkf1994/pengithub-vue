@@ -1,6 +1,6 @@
 <template>
     <Container class="flex-column flex-items-stretch px-3">
-        <select class="form-select my-3" v-model="selectedValue" style="font-family: Arial;">
+        <select class="form-select my-3 width-full" v-model="selectedValue" style="font-family: Arial;">
             <option value="weekly">
                 Past week
             </option>
@@ -287,6 +287,6 @@
     }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/forms/index.scss';
 </style>

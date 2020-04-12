@@ -106,6 +106,14 @@
                     let graphql_itemCountBySearchResult = graphql.GRAPHQL_COUNT_GROUP_BY_SEARCH_TYPE(this.query)
 
                     const res_graphql = await authRequiredGitHubGraphqlApiQuery(graphql_itemCountBySearchResult,{cancelToken:sourceAndCancelToken.cancelToken})
+
+                    this.data = {
+                        ...this.data,
+                        repositories: res_graphql.data.data.REPOSITORY.repositoryCount,
+                        users: res_graphql.data.data.USER.userCount,
+                        issues: res_graphql.data.data.ISSUE.issueCount,
+                    }
+
                     
                     let restParam = {
                         q: this.query,
@@ -128,9 +136,7 @@
                     ])
 
                     this.data = {
-                        repositories: res_graphql.data.data.REPOSITORY.repositoryCount,
-                        users: res_graphql.data.data.USER.userCount,
-                        issues: res_graphql.data.data.ISSUE.issueCount,
+                       ...this.data,
                         code: res_rest_arr[0].data.total_count,
                         commits: res_rest_arr[1].data.total_count,
                         topics: res_rest_arr[2].data.total_count,

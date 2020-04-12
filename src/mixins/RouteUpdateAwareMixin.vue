@@ -14,8 +14,12 @@
            // console.log(this.$route)
             this.routerMeta = this.generateRouterMeta()
         },
+        
         beforeRouteEnter (to, from, next) {
             next(vm => {
+                if(vm.routeUpdateAwareMixinDebugFlag) {
+                    console.log('beforeRouteEnter')
+                }
                 if(vm.routerMeta && vm.routerMeta != vm.generateRouterMeta()) {
                     vm.cancelUntimelyAxios()
                     vm.routeResetHook()

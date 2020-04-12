@@ -3,6 +3,7 @@
         <PaddingPageTopTab :tabs="topTabData"></PaddingPageTopTab>
          <IssuesPageTemplate :data="data" 
                         :extraData="extraData"
+                        v-on:click-label.native="clickLabelHandler"
                         :type="type"
                         v-model="searchQuery"
                         :loading="loading" 
@@ -78,6 +79,8 @@
     import * as graphql from './graphql'
     var parse = require('parse-link-header');
     import {RouteUpdateAwareMixin} from '@/mixins'
+    import {util_parseQuery} from '@/util' 
+import { util_queryParse } from '../../../util'
     export default {
         mixins: [RouteUpdateAwareMixin],
         props: {
@@ -131,6 +134,7 @@
                 return {
                     ...this.countByState.data,
                     currentIssueState,
+                    loading: this.countByState.loading,
                     toOpen: `/${this.routerPathFragment}?q=${toOpenQuery}`,
                     toClosed: `/${this.routerPathFragment}?q=${toClosedQuery}`,
                 }
@@ -326,10 +330,23 @@
                     this.countByState.loading = true
 
                     let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(`${this.name} get_issue_count_by_state`)
-                    let graphql_issueCountByState =  graphql.GRAPHQL_COUNT_OF_ISSUE_BY_STATE(this.query)
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_issueCountByState,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.countByState.data = res.data.data
+                    let url_issueCountOpen = api.API_SEARCH('issues',{
+                        q: this.query.replace(/is:(open|closed)/g,'').replace(/state:(open:closed)/g,'').trim() + ' is:open',
+                        per_page: 1
+                    })
+                    let url_issueCountClosed = api.API_SEARCH('issues',{
+                        q: this.query.replace(/is:(open|closed)/g,'').replace(/state:(open:closed)/g,'').trim() + ' is:closed',
+                        per_page: 1
+                    })
+                    let resArr = await Promise.all([authRequiredGet(url_issueCountOpen),authRequiredGet(url_issueCountClosed)])
 
+                    this.countByState.data = {
+                        open: resArr[0].data.total_count,
+                        closed: resArr[1].data.total_count,
+                    }
+                   /*  let graphql_issueCountByState =  graphql.GRAPHQL_COUNT_OF_ISSUE_BY_STATE(this.query)
+                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_issueCountByState,{cancelToken:sourceAndCancelToken.cancelToken})
+                    this.countByState.data = res.data.data */
                     this.countByState.loading = false
                 }catch(e) {
                     this.countByState.loading = false
@@ -374,17 +391,17 @@
                     url: this.pageInfo.prev.url
                 })
             },
-            routeUpdateHook() {
-                this.network_getData()
-                this.closeModal()
-            },
-            routeResetHook() {
-                Object.assign(this.$data, this.$options.data())
-            },
             closeModal() {
                 this.$refs.sortModal.show = false
                 this.$refs.visibilityModal.show = false
             },
+            clickLabelHandler(event) {
+                let targetLabel = event.target.attributes.label.value
+                let query = util_queryParse.querify({
+                    q: this.query.replace(/label:"[\S\s]*"/g,'').trim() + ` label:"${targetLabel}"`
+                })
+                this.$router.push(`/issues?${query}`)
+            }
         },
         components: {
             SelectMenuItem,
@@ -402,6 +419,7 @@
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/select-menu/index.scss';
 .subnav-item:first-child {
     border-top-left-radius: 3px;
     border-bottom-left-radius: 3px;

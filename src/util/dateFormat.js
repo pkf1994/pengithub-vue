@@ -64,11 +64,11 @@ export default {
         }else if (hourC >= 1 && hourC < 2) {
             return parseInt(hourC) + " hour ago";
         } else if (hourC >= 1) {
-            return "about " + parseInt(hourC) + " hours ago";
+            return parseInt(hourC) + " hours ago";
         }else if (minC >= 1 && minC < 2) {
             return parseInt(minC) + " minute ago";
         } else if (minC >= 1) {
-            return "about " + parseInt(minC) + " minutes ago";
+            return parseInt(minC) + " minutes ago";
         }
         return 'before long';
     },
@@ -103,6 +103,21 @@ export default {
             11: 'Nov',
             12: 'Dec'
         }
+
+        var fullMonthMapping = {
+            1: 'January',
+            2: 'February',
+            3: 'March',
+            4: 'April',
+            5: 'May',
+            6: 'June',
+            7: 'July',
+            8: 'August',
+            9: 'September',
+            10: 'October',
+            11: 'November',
+            12: 'December'
+        }
         if (/(y+)/.test(fmt)) {
             fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))
         }
@@ -113,6 +128,10 @@ export default {
         }
         if(/(z+)/.test(fmt) && RegExp.$1.length === 3) {
             fmt = fmt.replace(RegExp.$1,  monthMapping[date.getMonth() + 1])
+        }
+
+        if(/(Z+)/.test(fmt) && RegExp.$1.length === 3) {
+            fmt = fmt.replace(RegExp.$1,  fullMonthMapping[date.getMonth() + 1])
         }
         return fmt
     },

@@ -1,5 +1,5 @@
 <template>
-        <Container class="py-4 px-3 flex">
+        <Container class="py-4 px-3 d-flex">
             <img class="rounded-1 v-align-middle mr-1 flex-shrink-0"
                 :src="code.repository.owner.avatar_url"
                 width="20"
@@ -14,11 +14,11 @@
                 <MatchesContent class="matches-content my-1 font-mono"
                                 :meta="randomMeta">
                     <div v-for="(item,index) in code.text_matches || []" :key="index" class="flex-column">
-                        <div v-for="(_item,_index) in item.fragment.split('\n')" :key="_index" class="flex">
+                        <div v-for="(_item,_index) in item.fragment.split('\n')" :key="_index" class="d-flex">
                             <div class="blob-num">·</div>
                             <div class="blob-code">{{_item}}</div>
                         </div>
-                        <FlagmentDivision class="flex" v-if="index !== code.text_matches.length - 1">
+                        <FlagmentDivision class="d-flex" v-if="index !== code.text_matches.length - 1">
                             <div class="blob-num divider">…</div>
                             <div class="blob-code divider flex-auto"></div>
                         </FlagmentDivision>
@@ -44,14 +44,14 @@
     import styled from 'vue-styled-components'
     import axios from 'axios'
     import {mapState} from "vuex";
-    import {util_dateFormat,util_analyseFileType,util_adjustStyle} from '../../../../../util'
+    import {util_dateFormat,util_analyseFileType,util_adjustStyle} from '@/util'
     import {
-        AnimatedHeightWrapper,AnimatedWidthWrapper} from '../../../../../components'
+        AnimatedHeightWrapper,AnimatedWidthWrapper} from '@/components'
     import {
         WithRandomMetaMixin,
-        CancelNetworkOnDestroyMixin} from '../../../../../mixins'
-    import {handleException} from "../../../../../store/modules/util";
-    import {authRequiredGet} from "../../../../../store/modules/network";
+        CancelNetworkOnDestroyMixin} from '@/mixins'
+    import {handleException} from "@/store/modules/util";
+    import {authRequiredGet} from "@/store/modules/network";
     export default {
         mixins: [WithRandomMetaMixin,CancelNetworkOnDestroyMixin],
         inject: ['query'],

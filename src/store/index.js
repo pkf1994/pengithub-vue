@@ -4,23 +4,23 @@ import createPersistedState from "vuex-persistedstate";
 Vue.use(Vuex)
 
 import {
-    trendingStore,
     oauthStore,
     homeStore,
     searchStore,
     repositoryStore,
-    issuesStore
+    issuesStore,
+    notificationsStore
 } from "./modules"
 
 export default new Vuex.Store ({
     strict: true,
     modules: {
-        trending: trendingStore,
         oauth: oauthStore,
         home: homeStore,
         search: searchStore,
         repository: repositoryStore,
         issues: issuesStore,
+        notifications: notificationsStore
     },
     plugins: [
         createPersistedState({

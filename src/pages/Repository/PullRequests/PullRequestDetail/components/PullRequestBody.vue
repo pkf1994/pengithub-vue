@@ -164,7 +164,11 @@
     }
 </script>
 
+<style lang="scss">
+@import 'node_modules/@primer/css/markdown/index.scss';
+</style>
 <style scoped lang="scss">
+
 .header{
     position: relative;
     padding: 10px 15px;

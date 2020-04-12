@@ -6,17 +6,23 @@ export default {
     thousands2K2M: function (number,reservedDecimal = 2) {
         if(number >= 1000000) {
             let numberString = (number/1000000).toString()
-            let formattedString = numberString.substring(0,numberString.indexOf('.') + reservedDecimal + 1) + 'M'
+            let formattedString = numberString.substring(0, numberString.indexOf('.') + reservedDecimal + 1) + 'M'
             if(formattedString.endsWith('0M') && reservedDecimal + 1 > 0){
-                formattedString = formattedString.substring(0,formattedString.length - 3) + 'M'
+                formattedString = formattedString.substring(0, formattedString.length - 3) + 'M'
+            }
+            if(formattedString.endsWith('.M')){
+                formattedString = formattedString.substring(0, formattedString.length - 2) + 'M'
             }
             return formattedString
         }
         if(number >= 1000) {
             let numberString = (number/1000).toString()
-            let formattedString = numberString.substring(0,numberString.indexOf('.') + reservedDecimal + 1) + 'K'
+            let formattedString = numberString.substring(0, numberString.indexOf('.') + reservedDecimal + 1) + 'K'
             if(formattedString.endsWith('0K') && reservedDecimal + 1 > 0){
-                formattedString = formattedString.substring(0,formattedString.length - 3) + 'K'
+                formattedString = formattedString.substring(0, formattedString.length - 3) + 'K'
+            }
+            if(formattedString.endsWith('.K')){
+                formattedString = formattedString.substring(0, formattedString.length - 2) + 'K'
             }
             return formattedString
         }

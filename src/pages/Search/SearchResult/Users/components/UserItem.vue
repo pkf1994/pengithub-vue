@@ -1,5 +1,5 @@
 <template>
-        <Container class="py-4 mx-3 flex">
+        <Container class="py-4 mx-3 d-flex">
             <AvatarColumn class="flex-shrink-0 mr-1">
                 <router-link to="/search">
                     <img :src="user.avatar_url" 
@@ -10,9 +10,9 @@
                
             </AvatarColumn>
             <Main class="ml-1  flex-grow-1">
-                <NameLoginStarBtn class="f4 text-normal flex">
+                <NameLoginStarBtn class="f4 text-normal d-flex">
                     <NameLogin>
-                        <AnimatedWidthWrapper class=" v-align-text-top">
+                        <AnimatedWidthWrapper class="v-align-text-top">
                             <router-link to="/search"  
                                         v-if="extraData.name && extraData.name.trim() !== ''" 
                                         :meta="randomMeta" 

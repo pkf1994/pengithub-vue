@@ -10,6 +10,11 @@
     import styled from 'vue-styled-components'
     export default {
         mixins: [RouteUpdateAwareMixin],
+        provide() {
+            return {
+                queryProvided: () => this.m_query
+            }
+        }, 
         data() {
             return {
                 searchType: 'repositories',

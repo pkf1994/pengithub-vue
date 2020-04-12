@@ -1,8 +1,8 @@
 <template>
     <Container class="px-3 pt-3 bg-white flex-grow-1">
         <AnimatedHeightWrapper>
-            <Header v-if="data.id">
-                <HeaderActions class="flex flex-justify-between flex-items-center mb-3">
+            <Header v-if="data.id" @click="() => {$router.push('/vuejs/vue/issues/11256')}">
+                <HeaderActions class="d-flex flex-justify-between flex-items-center mb-3">
                     <router-link to="/" class="btn btn-primary d-inline-block btn-sm">
                         New issue
                     </router-link>
@@ -15,7 +15,7 @@
                     <span class="number">#{{data.number}}</span>
                 </HeaderTitle>
 
-                <HeaderMeta class="flex mt-2 mb-3 flex-items-center header-meta">
+                <HeaderMeta class="d-flex mt-2 mb-3 flex-items-center header-meta">
                     <State class="State State--green mr-2 d-inline-flex flex-items-center" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize;">
                         <IssueIcon color="#fff" :issue="data"></IssueIcon>
                         &nbsp;{{data.state}}
@@ -35,9 +35,9 @@
                 v-if="(data.assignees && data.assignees.length !== 0) || (data.labels && data.labels.length !== 0) || (projects.length > 0) || (data.milestone && data.milestone !== null)"
                 >
             <!-- assignee -->
-                 <div class="flex pb-3" v-if="data.assignees && data.assignees.length !== 0">
+                 <div class="d-flex pb-3" v-if="data.assignees && data.assignees.length !== 0">
                     <span class="text-gray text-bold flex-shrink-0 col-3 f6">Assignees</span>    
-                    <div class="min-width-0 flex flex-wrap mt-n1 flex-wrap">
+                    <div class="min-width-0 d-flex flex-wrap mt-n1 flex-wrap">
                         <img class="avatar mr-1" v-for="item in data.assignees" 
                         :key="item.id" :src="item.avatar_url" height="20" width="20"> 
                     </div>
@@ -45,9 +45,9 @@
            
             <!-- label -->
             <AnimatedHeightWrapper>
-                <div class="flex pb-3" v-if="data.labels && data.labels.length !== 0">
+                <div class="d-flex pb-3" v-if="data.labels && data.labels.length !== 0">
                     <span class="text-gray text-bold flex-shrink-0 col-3 f6">Labels</span>    
-                    <div class="min-width-0 flex flex-wrap mt-n1">
+                    <div class="min-width-0 d-flex flex-wrap mt-n1">
                         <router-link to="/" v-for="item in data.labels" :key="item.name">
                             <Label  class="mr-1 mt-1"
                                     :name="item.name"
@@ -59,9 +59,9 @@
             </AnimatedHeightWrapper>
             <!-- project -->
             <AnimatedHeightWrapper>
-                <div class="flex pb-3" v-if="projects.length !== 0">
+                <div class="d-flex pb-3" v-if="projects.length !== 0">
                     <span class="text-gray text-bold flex-shrink-0 col-3 f6">Projects</span>    
-                    <div class="min-width-0 flex flex-wrap mt-n1 f6">
+                    <div class="min-width-0 d-flex flex-wrap mt-n1 f6">
                         <router-link v-for="item in projects" :key="item.project.name" to="/" class="d-inline-block text-bold mr-2 link-gray-dark">
                             <svg class="octicon octicon-project text-gray p-0" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 12h3V2h-3v10zm-4-2h3V2H6v8zm-4 4h3V2H2v12zm-1 1h13V1H1v14zM14 0H1a1 1 0 00-1 1v14a1 1 0 001 1h13a1 1 0 001-1V1a1 1 0 00-1-1z"></path></svg>
                             {{item.project.name}}
@@ -71,9 +71,9 @@
             </AnimatedHeightWrapper>
             <!-- milestone -->
             <AnimatedHeightWrapper>
-                <div class="flex pb-3" v-if="data.milestone && data.milestone !== null">
+                <div class="d-flex pb-3" v-if="data.milestone && data.milestone !== null">
                     <span class="text-gray text-bold flex-shrink-0 col-3 f6">Milestone</span>    
-                    <div class="min-width-0 flex flex-wrap mt-n1 f6">
+                    <div class="min-width-0 d-flex flex-wrap mt-n1 f6">
                         <router-link to="/" class="d-inline-block text-bold mr-2 link-gray-dark">
                             <svg class="octicon octicon-milestone text-gray" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2H6V0h2v2zm4 5H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h10l2 2-2 2zM8 4H6v2h2V4zM6 16h2V8H6v8z"></path></svg>
                             {{data.milestone.title}}
@@ -97,7 +97,7 @@
         </transition-group>
 
         <AnimatedHeightWrapper :stretch="timeline.loading && (timeline.data.length === 0)">
-            <LoadingTimeline class="loading-timeline flex flex-items-center flex-justify-center">
+            <LoadingTimeline class="loading-timeline d-flex flex-items-center flex-justify-center">
                 <LoadingIconEx/>
             </LoadingTimeline> 
         </AnimatedHeightWrapper>   
@@ -237,7 +237,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {CommonLoading,Label,AnimatedHeightWrapper,LoadingIconEx,Progress,IssueIcon,Editor,HiddenItemLoading} from '@/components'
-    import {ScrollTopListenerMixin} from '@/mixins'
+    import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
     import {TimelineItem,Comment,ProjectCard} from './components'
     import {util_dateFormat} from '@/util'
     import {
@@ -252,7 +252,7 @@
     export default {
         name: 'issueDetail',
         inject: ['owner','repo'],
-        mixins: [ScrollTopListenerMixin],
+        mixins: [ScrollTopListenerMixin,RouteUpdateAwareMixin],
         provide() {
             return {
                 commentExtraGraphqlDataGetter: () => this.timeline.commentExtraGraphqlData.data,
@@ -428,7 +428,7 @@
             async network_getData() {
                
                 try{
-                    let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name).cancelToken
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name).cancelToken
 
                     //获取issue基本数据
                     this.loading = true
@@ -492,7 +492,7 @@
                         }) + `?per_page=${this.timeline.perPage}`
                     }
 
-                    let cancelTokenAndSource = cancelAndUpdateAxiosCancelTokenSource(this.name + '_timeline_' + url_timeline)
+                    let cancelTokenAndSource = this.cancelAndUpdateAxiosCancelTokenSource(this.name + '_timeline_' + url_timeline)
                     this.cancelTokenArr_timeline = [
                         ...(this.cancelTokenArr_timeline || []),
                         cancelTokenAndSource
@@ -565,7 +565,7 @@
             async network_getTimelineCount() {
                 try{
                     this.timeline.count.loading = true
-                    let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name + '_timeline_count').cancelToken
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name + '_timeline_count').cancelToken
                     
                     let timelineTypes_graphql = []
                     this.timelineTypes.forEach(item => {
@@ -702,23 +702,8 @@
                 })
                 return mergedTimelineData
             },
-            cancelNetwork() {
-                this.cancelTokenArr_timeline.forEach(item => {
-                    item.source.cancel()
-                })
-            }
         },
-        watch: {
-            repo() {
-                this.cancelNetwork()
-            },
-            owner() {
-                this.cancelNetwork()
-            },
-            number() {
-                this.cancelNetwork()
-            }
-        },
+       
         components: {
             CommonLoading,
             Label,
@@ -751,6 +736,9 @@
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/labels/index.scss';
+@import 'node_modules/@primer/css/layout/index.scss';
+@import 'node_modules/@primer/css/avatars/index.scss';
 .title{
     margin-bottom: 0;
     font-weight: 400;

@@ -25,13 +25,21 @@ export const API_OAUTH2_USER_INFO = `${GITHUB_REST_API_BASE}/user`
 
 export const API_EVENTS = `${GITHUB_REST_API_BASE}/events`
 
-export const API_USER_EVENTS = user => `${GITHUB_REST_API_BASE}/users/${user}/events`
+export const API_USER_EVENTS = (login,pararms) => {
+    let query = util_queryParse.querify(pararms)
+    return `${GITHUB_REST_API_BASE}/users/${login}/events?${query}`
+}
 
 export const API_USER_RECEIVED_EVENTS = user => `${GITHUB_REST_API_BASE}/users/${user}/received_events`
 
 export const API_USER_ORG_EVENTS = (user,org) => `${GITHUB_REST_API_BASE}/users/${user}/events/orgs/${org}`
 
-export const API_USER_NOTIFICATIONS = `${GITHUB_REST_API_BASE}/notifications?all=true`
+export const API_USER_NOTIFICATIONS = payload => {
+    let query = util_queryParse.querify(payload)
+    return `${GITHUB_REST_API_BASE}/notifications?${query}`
+}
+
+export const API_USER = login => `${GITHUB_REST_API_BASE}/users/${login}`
 
 export const API_TOP_LANGUAGES = "https://api.github.com/repos/drujensen/fib/Hello-World/languages"
 

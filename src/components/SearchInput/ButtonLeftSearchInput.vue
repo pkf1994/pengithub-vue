@@ -1,12 +1,12 @@
 <template>
-    <Container class="container flex">
+    <Container class="container d-flex">
             <button class="btn" @click="clickButtonHandler">
                 <slot>
                     {{buttonTitle}}
                 </slot>
             </button>
         <slot name="input">
-              <Container class="relative flex-grow-1">
+              <Container class="position-relative flex-grow-1">
                 <input  :placeholder="placeholder"
                         ref="input"
                         :value="value"
@@ -69,6 +69,7 @@
 
 <style scoped lang="scss">
 @import 'node_modules/@primer/css/forms/index.scss';
+@import 'node_modules/@primer/css/navigation/index.scss';
 .container{
     border-radius: 3px;
     button{

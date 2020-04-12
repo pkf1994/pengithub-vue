@@ -1,5 +1,5 @@
 <template>
-    <Container class="py-3 relative timeline-item">
+    <Container class="py-3 position-relative timeline-item">
         <Inner v-if="!commentExtraDataHolder.isMinimized" class="inner bg-white">
             <Header class="px-3 header text-normal f5" :style="headerStyle">
                 <Action class="action py-2 px-1 ml-2 relative" style="align-self:start" @click="showActionPopover">
@@ -61,11 +61,11 @@
             </Header>
 
             <AnimatedHeightWrapper>
-                <Body v-if="!loading && commentExtraDataHolder.bodyHTML" v-html="commentExtraDataHolder.bodyHTML" style="padding:15px" class="markdown-body">
+                <Body v-if="!loading && commentExtraDataHolder.bodyHTML" v-html="commentExtraDataHolder.bodyHTML" style="padding:15px" class="markdown-body comment-body">
             
                 </Body>
 
-                <LoadingWrapper v-else class="loading-wrapper flex flex-justify-center flex-items-center">
+                <LoadingWrapper v-else class="loading-wrapper d-flex flex-justify-center flex-items-center">
                     <LoadingIconEx/>
                 </LoadingWrapper>
 
@@ -313,7 +313,8 @@
     }
 </script>
 
-<style>
+<style lang="scss">
+@import 'node_modules/@primer/css/markdown/index.scss';
 .team-mention, .user-mention {
     font-weight: 600;
     color: #24292e;
@@ -322,6 +323,7 @@
 </style>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/avatars/index.scss';
 .inner{
     position: relative;
     color: #24292e;
@@ -410,5 +412,12 @@
     color: #24292e;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.comment-body {
+    width: 100%;
+    padding: 15px;
+    overflow: visible;
+    font-size: 14px;
 }
 </style>

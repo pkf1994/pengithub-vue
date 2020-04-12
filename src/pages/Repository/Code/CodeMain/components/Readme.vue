@@ -7,8 +7,8 @@
             </Title>   
         </template>
 
-        <Content class="bubble-content p-3">
-            <Inner v-html="readme"/>
+        <Content class="bubble-content py-3 px-5"  v-html="readme">
+            
         </Content>
 
         <template v-slot:footer>
@@ -21,8 +21,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../../components'
-    import {util_dateFormat} from '../../../../../util'
+    import {ComplexBubble,AnimatedHeightWrapper} from '@/components'
+    import {util_dateFormat} from '@/util'
     export default {
         props: {
             loading: {
@@ -45,11 +45,16 @@
     }
 </script>
 
-<style scoped>
+<style lang="scss">
+@import 'node_modules/@primer/css/markdown/index.scss';
+</style>
+
+<style scoped lang="scss">
 .footer{
     padding: 10px 15px;
     font-weight: 500;
     line-height: 1.5;
     color: #0366d6;
 }
+
 </style>

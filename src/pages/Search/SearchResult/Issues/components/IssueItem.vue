@@ -1,5 +1,5 @@
 <template>
-        <Container class="py-4 mx-3 flex">
+        <Container class="py-4 mx-3 d-flex">
             <svg height="16"
                  v-if="issueType === 'issue'"
                  class="d-inline-block v-align-text-bottom flex-shrink-0"
@@ -81,7 +81,7 @@
     import {
         WithRandomMetaMixin} from '@/mixins'
     export default {
-        inject: ['issuesExtraDataProvided'],
+        inject: ['issuesExtraDataProvided','queryProvided'],
         mixins: [WithRandomMetaMixin],
         props: {
             issue: {
@@ -94,9 +94,6 @@
             }
         },
         computed: {
-            ...mapState({
-                searchQuery: state => state.search.searchQuery
-            }),
             issueType: function() {
                 return this.issue.pull_request ? "pullRequest" : "issue"
             },
@@ -118,7 +115,7 @@
         created(){
         },
         mounted() {
-            util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.searchQuery)
+            util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.queryProvided())
             util_adjustStyle.adjustInlineBlockStyle(`span[meta=${this.randomMeta}]`)
         },
         methods: {

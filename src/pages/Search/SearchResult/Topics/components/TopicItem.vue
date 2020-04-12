@@ -1,5 +1,5 @@
 <template>
-        <Container class="py-4 mx-3 flex">
+        <Container class="py-4 mx-3 d-flex">
             
            <!--  <AvatarColumn class="flex-shrink-0 mr-2">
                 <router-link v-if="avatarUrl" to="/search">
@@ -9,7 +9,7 @@
                                style="width:20px; height:20px; line-height:20px;">#</DefaultAvatar>
             </AvatarColumn> -->
             <Main class="ml-1  flex-grow-1">
-                <Name class="f4 text-normal flex">
+                <Name class="f4 text-normal d-flex">
                     <router-link to="/search" :meta="randomMeta">{{name}}</router-link>
                     <StarButton class="text-right flex-auto">
                         <button class="btn btn-sm">
@@ -25,7 +25,7 @@
                     </StarButton>
                 </Name>
 
-                <Description :meta="randomMeta">
+                <Description v-if="topic.short_description" :meta="randomMeta">
                     {{topic.short_description}}
                 </Description>
 

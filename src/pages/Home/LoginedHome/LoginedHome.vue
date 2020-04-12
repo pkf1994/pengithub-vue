@@ -14,7 +14,7 @@
         Button,
         HeaderDetachTopTab,
     } from '../../../components'
-    import Dashboard from "./Dashboard";
+    import Dashboard from "./Dashboard/Dashboard.vue";
     import PullRequests from "./PullRequests";
     import {mapActions, mapState} from "vuex";
     import {

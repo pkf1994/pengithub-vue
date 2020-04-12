@@ -51,7 +51,10 @@
                     console.log(e)
                     this.loading = false
                 }
-            }
+            },
+            generateRouterMeta() {
+                return `${this.$route.params.owner}/${this.$route.params.repo}`
+            },
         },
         components: {
             Container: styled.div``

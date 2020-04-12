@@ -152,6 +152,10 @@ export const GRAPHQL_TOPIC_REPOS = payload => {
       id
       openGraphImageUrl
       viewerHasStarred
+      primaryLanguage {
+        color
+        name
+      }
     }
   }
 }

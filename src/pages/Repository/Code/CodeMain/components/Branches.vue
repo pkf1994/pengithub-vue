@@ -37,8 +37,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper,SummaryAndDetail} from '../../../../../components'
-    import {util_dateFormat} from '../../../../../util'
+    import {ComplexBubble,AnimatedHeightWrapper,SummaryAndDetail} from '@/components'
+    import {util_dateFormat} from '@/util'
     import { mapState, mapGetters } from 'vuex'
     export default {
         inject: ['owner','repo','codeBasicInfo'],

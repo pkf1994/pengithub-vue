@@ -63,7 +63,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/labels/index.scss';
     .nav-item{
         color: hsla(0,0%,100%,.75);
     }

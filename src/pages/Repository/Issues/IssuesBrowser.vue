@@ -1,7 +1,7 @@
 <template>
     <Container class="flex-grow-1 bg-white flex-column">
 
-        <SubNav class="px-3 pt-4 pb-1 flex flex-justify-between">
+        <SubNav class="px-3 pt-4 pb-1 d-flex flex-justify-between">
             <nav class="flex">
                 <router-link class="subnav-item" to="/">
                     <svg class="octicon octicon-tag" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
@@ -400,8 +400,8 @@
             this.network_getData()
         },
         methods: {
-
           async network_getData(payload) {
+              console.log('get data === issuesBrowser')
                 try{
                     this.loading = true
                     let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(`${this.name} ${this.routerPathFragment} get_data`)
@@ -458,10 +458,21 @@
 
                     let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(`${this.name} ${this.routerPathFragment} get_issue_count_by_state`)
                     this.cancelSources.push(sourceAndCancelToken.source)
-                    let graphql_issueCountByState =  graphql.GRAPHQL_COUNT_OF_ISSUE_BY_STATE(this.query)
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_issueCountByState,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.countByState.data = res.data.data
 
+                    let url_issueCountOpen = api.API_SEARCH('issues',{
+                        q: this.query.replace(/is:(open|closed)/g,'').replace(/state:(open:closed)/g,'').trim() + ' is:open',
+                        per_page: 1
+                    })
+                    let url_issueCountClosed = api.API_SEARCH('issues',{
+                        q: this.query.replace(/is:(open|closed)/g,'').replace(/state:(open:closed)/g,'').trim() + ' is:closed',
+                        per_page: 1
+                    })
+                    let resArr = await Promise.all([authRequiredGet(url_issueCountOpen),authRequiredGet(url_issueCountClosed)])
+
+                     this.countByState.data = {
+                        open: resArr[0].data.total_count,
+                        closed: resArr[1].data.total_count,
+                    }
                     this.countByState.loading = false
                 }catch(e) {
                     this.countByState.loading = false
@@ -654,24 +665,11 @@
 </script>
 
 <style scoped lang="scss">
-.subnav-item:first-child {
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px;
-}
-.subnav-item:last-child {
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
-}
+@import 'node_modules/@primer/css/navigation/index.scss';
+@import 'node_modules/@primer/css/dropdown/index.scss';
+@import 'node_modules/@primer/css/select-menu/index.scss';
+@import 'node_modules/@primer/css/avatars/index.scss';
 
-.subnav-item {
-    position: relative;
-    float: left;
-    padding: 6px 14px;
-    font-weight: 600;
-    line-height: 20px;
-    color: #586069;
-    border: 1px solid #e1e4e8;
-}
 .active{
     color: #fff;
     background-color: #0366d6;

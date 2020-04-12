@@ -2,7 +2,7 @@
     <Container class="flex-grow-1">
         <AnimatedHeightWrapper class="pt-3 bg-white">
             <Header v-if="pullRequestProvided().id" class="px-3">
-                <HeaderActions class="flex flex-justify-between flex-items-center">
+                <HeaderActions class="d-flex flex-justify-between flex-items-center">
                    <State class="State State--green mr-2 d-inline-flex flex-items-center" :class="{'State--green':pullRequestProvided().state === 'open','State--red':pullRequestProvided().state === 'closed'}" style="text-transform:capitalize;">
                         <IssueIcon color="#fff" :issue="pullRequestProvided()"></IssueIcon>
                         &nbsp;{{pullRequestProvided().state}}
@@ -77,7 +77,7 @@
         </transition-group>
 
         <AnimatedHeightWrapper :stretch="timeline.loading && (timeline.data.length === 0)">
-            <LoadingTimeline class="loading-timeline flex flex-items-center flex-justify-center">
+            <LoadingTimeline class="loading-timeline d-flex flex-items-center flex-justify-center">
                 <LoadingIconEx/>
             </LoadingTimeline> 
         </AnimatedHeightWrapper>   
@@ -679,6 +679,8 @@
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/labels/index.scss';
+@import 'node_modules/@primer/css/avatars/index.scss';
 .title{
     margin-bottom: 0;
     font-size: 16px;

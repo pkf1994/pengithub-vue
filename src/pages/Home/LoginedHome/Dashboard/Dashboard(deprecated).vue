@@ -18,9 +18,9 @@
 
             <SimpleBubble v-if="events && events.length > 0"
                     :loading="loading"
+                    :disableAnimatedWrapper="false"
                     title="Recent activity">
                 <ActivityListItem v-for="item in events" :event="item" :key="item.id" >
-
                 </ActivityListItem>
             </SimpleBubble>
             
@@ -50,16 +50,16 @@
         CommonLoadingWrapper,
         AnimatedHeightWrapper,
         SimpleBubble,
-    } from '../../../../components'
+    } from '@/components'
       import {
         WithSearchInputMixin,
-    } from '../../../../mixins'
+    } from '@/mixins'
     import {
         ActivityListItem,
         RepositoryListItem
     } from './components'
     import {mapActions, mapState} from "vuex";
-    import {ACTION_HOME_REQUEST_DASHBOARD_DATA} from "../../../../store/modules/home/actionTypes";
+    import {ACTION_HOME_REQUEST_DASHBOARD_DATA} from "@/store/modules/home/actionTypes";
     export default {
         mixins: [WithSearchInputMixin],
         data() {

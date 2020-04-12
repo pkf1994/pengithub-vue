@@ -1,6 +1,6 @@
 <template>
     <Container class="p-3 relative container">
-        <Inner class="flex relative pl-4">
+        <Inner class="d-flex position-relative pl-4">
 
             <div class="pr-simple-timeline-icon-wrapper">
                  <slot name="icon">

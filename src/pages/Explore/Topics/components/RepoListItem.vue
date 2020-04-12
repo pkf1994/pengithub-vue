@@ -50,9 +50,9 @@
             <UpdateAtAndLanguage class="p-3">
                 <span class="mr-4">Updated {{formatUpdatedAt}}</span>   
 
-                <span class="f6 my-1 ml-0 d-inline-block" v-if="repository.language">
-                    <span class="repo-language-color" v-if="languageColor" :style="{backgroundColor: languageColor}"></span>
-                    {{repository.language}}
+                <span class="f6 my-1 ml-0 d-inline-block" v-if="extraData.primaryLanguage">
+                    <span class="repo-language-color" v-if="extraData.primaryLanguage.color" :style="{backgroundColor: extraData.primaryLanguage.color}"></span>
+                    {{extraData.primaryLanguage.name}}
                 </span>    
             </UpdateAtAndLanguage>
         </MultiInfo>
@@ -63,7 +63,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {AnimatedHeightWrapper} from '@/components'
-    import {util_numberFormat,util_dateFormat,util_analyseFileType} from '@/util'
+    import {util_numberFormat,util_dateFormat} from '@/util'
     export default {
         inject: ['repositoriesExtraDataProvided'],
         props: {
@@ -82,9 +82,6 @@
             extraData() {
                 return this.repositoriesExtraDataProvided().filter(i => i.id == this.repository.node_id)[0] || {}
             },
-            languageColor() {
-                return util_analyseFileType.getColorOfLanguage(this.repository.language)
-            }
         },
         components: {
             AnimatedHeightWrapper,

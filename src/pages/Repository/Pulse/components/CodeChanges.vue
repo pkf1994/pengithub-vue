@@ -10,10 +10,10 @@
 
         <Content class="bubble-content">
             <p class="mb-3">
-                <strong>{{commitCount()}} commits</strong> have been push to all branches. 
+                <strong>{{commitCount().data}} commits</strong> have been push to all branches. 
                 On {{defaultBranch}},
                 <strong>{{defaultBranchStatistic.authorCount}} authors </strong> have push
-                <strong>{{defaultBranchStatistic.commitCount}} commits</strong>,
+                <strong>{{defaultBranchStatistic.commitCount.data}} commits</strong>,
                 <strong>{{defaultBranchStatistic.additionCount}} additions and {{defaultBranchStatistic.deletionCount}} deletions</strong>.
             </p>
 
@@ -111,6 +111,7 @@
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/avatars/index.scss';
 .bubble-content{
     padding: 15px;
     font-size: 15px;
@@ -142,7 +143,5 @@
     font-size: 10px;
     color: #586069;
 }
-.avatar{
 
-}
 </style>
