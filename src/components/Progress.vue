@@ -1,5 +1,5 @@
 <template>
-    <Container class="position-relative overflow-hidden round-1 progress-bar" :style="progressContainerStyle" >
+    <Container class="position-relative overflow-hidden round-1 progress-bar"  >
         <span class="bg-green height-full d-inline-block v-align-top" :style="[{width:donePercent + '%'},progressStyle]"></span><span class="bg-purple height-full d-inline-block v-align-top" :style="{width:inProgressPercent + '%'}"></span>
     </Container>    
 </template>
@@ -21,10 +21,6 @@
                 type:Object,
                 required: false
             },
-            progressContainerStyle: {
-                type:Object,
-                required: false
-            }
         },
         computed: {
             

@@ -14,16 +14,14 @@
                 </Pinned>
 
                 <Contribution class="mt-6">
-                  
-
-                    <ContributionStatistic ref="contributionStatistic"></ContributionStatistic>
+                    <ContributionStatistic></ContributionStatistic>
                 </Contribution>
             </Main>
         </transition>
 
         <LoadingWrapper  class="loading-wrapper">
             <div v-if="loading && !loadingUserBasicInfoProvided()" class="inner d-flex flex-items-center flex-justify-center">
-                <LoadingIconEx></LoadingIconEx>
+                <LoadingIcon></LoadingIcon>
             </div>
         </LoadingWrapper>
     </Container>
@@ -32,7 +30,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {LoadingIconEx} from '@/components'
+    import {LoadingIcon} from '@/components'
     import {RepoListItem,ContributionStatistic} from './components'
     import * as graphql from './graphql'
     import {authRequiredGitHubGraphqlApiQuery} from '@/network' 
@@ -42,7 +40,7 @@
         inject: ['loadingUserBasicInfoProvided'],
         data() {
             return {
-                id:undefined,
+                id: undefined,
                 pinnedRepositories: [],
                 loading: false
             }
@@ -55,9 +53,6 @@
         created() {
             this.network_getData()
         },
-        /* mounted() {
-            console.log(this)
-        }, */
         methods: {
             async network_getData() {
                 try{
@@ -76,7 +71,7 @@
            
         },
         components: {
-            LoadingIconEx,
+            LoadingIcon,
             RepoListItem,
             ContributionStatistic,
             Container: styled.div``,
@@ -100,8 +95,8 @@
     bottom: 0;
     .inner{
         position:sticky;
-        height:150px;
-        top: 60px;
+        height: 150px;
+        top: calc(50% - 75px);
     }
 }
 

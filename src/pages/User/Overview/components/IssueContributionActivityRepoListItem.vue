@@ -3,7 +3,7 @@
         <button @click="triggerStretch" class="flex-wrap btn-link muted-link no-underline lh-condensed text-left width-full">
             <Content class="d-inline-block col-8">
                 <span class="css-truncate css-truncate-target  mb-1" style="max-width:100%;">
-                    {{pullRequestContribution.repository.nameWithOwner}}
+                    {{contribution.repository.nameWithOwner}}
                 </span>
             </Content>
 
@@ -25,12 +25,12 @@
 
         <AnimatedHeightWrapper :stretch="stretch">
              <ul class="pt-1 list-style-none">
-                <li class="py-1 ml-0" v-for="item in pullRequestContribution.contributions.nodes" :key="item.pullRequest.id">
+                <li class="py-1 ml-0" v-for="item in contribution.contributions.nodes" :key="item[meta].id">
                     <Content class="css-truncate css-truncate-target" style="max-width:85%;">
                         <span class="profile-rollup-icon">
-                            <IssueIcon :issue="item.pullRequest" class=" v-align-text-bottom"></IssueIcon>
+                            <IssueIcon :issue="item[meta]" class=" v-align-text-bottom"></IssueIcon>
                         </span>
-                        <router-link :to="item.pullRequest.resourcePath" class="link-gray-dark">{{item.pullRequest.title}}</router-link>
+                        <router-link :to="item[meta].resourcePath" class="link-gray-dark">{{item[meta].title}}</router-link>
                     </Content>
 
                     <time class="float-right f6 text-gray-light pt-1">
@@ -49,9 +49,13 @@
     import {util_numberFormat,util_dateFormat} from '@/util'
     export default {
         props: {
-            pullRequestContribution: {
+            contribution: {
                 type: Object,
                 required: true
+            },
+            meta: {
+                type: String,
+                default: 'issue'
             }
         },
         data() {
@@ -61,18 +65,18 @@
         },
         computed: {
             mergedCount() {
-                return this.pullRequestContribution.contributions.nodes.filter(i => {
-                    return i.pullRequest.state == 'MERGED'
+                return this.contribution.contributions.nodes.filter(i => {
+                    return i[this.meta].state == 'MERGED'
                 }).length
             },
             openCount() {
-                return this.pullRequestContribution.contributions.nodes.filter(i => {
-                    return i.pullRequest.state == 'OPEN'
+                return this.contribution.contributions.nodes.filter(i => {
+                    return i[this.meta].state == 'OPEN'
                 }).length
             },
             closedCount() {
-                return this.pullRequestContribution.contributions.nodes.filter(i => {
-                    return i.pullRequest.state == 'CLOSED'
+                return this.contribution.contributions.nodes.filter(i => {
+                    return i[this.meta].state == 'CLOSED'
                 }).length
             },
         },

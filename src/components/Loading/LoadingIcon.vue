@@ -1,15 +1,9 @@
 <template>
-    <svg class="container width-full height-full" viewBox="0 0 10 10">
-        <circle cy="50%"
-                cx="50%"
-                r="40%"
-                fill="none"
-                :stroke="iconColor"
-                stroke-dasharray="200%"
-                stroke-dashoffset="200%"
-                stroke-width="10%">
-        </circle>
-    </svg>
+     <img alt="loading"
+            height="45"
+            width="45"
+                 class="width-fit height-fit"
+                 src="../../assets/image/octocat-spinner-128.gif"/>
 </template>
 
 <script>

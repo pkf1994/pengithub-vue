@@ -19,7 +19,8 @@ const SearchResultIssues = () => import('../pages/Search/SearchResult/Issues/Iss
 const SearchResultTopics = () => import('../pages/Search/SearchResult/Topics/Topics.vue')
 const SearchResultUsers = () => import('../pages/Search/SearchResult/Users/Users.vue')
 const User = () => import('../pages/User/User.vue')
-const UserOverview = () => import('../pages/User/Overview.vue')
+const UserOverview = () => import('../pages/User/Overview/Overview.vue')
+const UserRepositories = () => import('../pages/User/Repositories/Repositories.vue')
 const Repository = () => import('../pages/Repository/Repository.vue')
 const RepositoryCode = () => import('../pages/Repository/Code/Code.vue')
 const RepositoryCodeMain = () => import('../pages/Repository/Code/CodeMain/CodeMain.vue')
@@ -158,6 +159,24 @@ export default [
         ]
     },
     {
+        path: '/:login',
+        components: {
+            default: User,
+            header: LogoHeader,
+            footer: SimpleFooter
+        },
+        children: [
+            {
+                path: '/',
+                component: UserOverview
+            },
+            {
+                path: 'repositories',
+                component: UserRepositories
+            },
+        ]
+    },
+    {
         path: '/:owner/:repo',
         components: {
             default: Repository,
@@ -269,20 +288,7 @@ export default [
             },
         ]
     },
-    {
-        path: '/:login',
-        components: {
-            default: User,
-            header: LogoHeader,
-            footer: SimpleFooter
-        },
-        children: [
-            {
-                path: '/',
-                component: UserOverview
-            }
-        ]
-    },
+    
   
     
 ]

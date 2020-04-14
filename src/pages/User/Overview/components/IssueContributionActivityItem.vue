@@ -9,36 +9,46 @@
         <Title class="d-flex flex-justify-between flex-items-baseline mb-3">
             <h4 class="text-normal text-gray lh-condensed my-0 pr-3">
                 Created {{this.isPullRequest ? 'a pull request' : 'an issue'}} in 
-                <router-link :to="`/${issue.repository.nameWithOwner}`" class="link-gray-dark">{{issue.repository.nameWithOwner}}</router-link>
-                that receive {{issue.comments.totalCount}} {{issue.comments.totalCount > 1 ? 'comments' : 'comment'}}
+                <router-link :to="`/${theIssue.repository.nameWithOwner}`" class="link-gray-dark">{{theIssue.repository.nameWithOwner}}</router-link>
+                that receive {{theIssue.comments.totalCount}} {{theIssue.comments.totalCount > 1 ? 'comments' : 'comment'}}
             </h4>   
             <span class="f6 text-gray-light muted-link no-wrap">
-                <time class="no-wrap">{{occurredAt | dateFormat('zzz d')}}</time>
+                <time class="no-wrap">{{issueContributionActivity.occurredAt | dateFormat('zzz d')}}</time>
             </span>  
         </Title>
 
         <Issue class="bg-white border border-gray-dark rounded-1 p-3">
-            <IssueIcon class="d-inline-block mt-1 float-left" :issue="issue"></IssueIcon>
+            <IssueIcon class="d-inline-block mt-1 float-left" :issue="theIssue"></IssueIcon>
 
             <IssueMain class="ml-4">
                 <h3 class="lh-condensed my-0">
-                    <router-link :to="issue.resourcePath" class="text-gray-dark">
-                        {{issue.title}}
+                    <router-link :to="theIssue.resourcePath" class="text-gray-dark">
+                        {{theIssue.title}}
                     </router-link>
                 </h3>
 
                 <p class="body mt-2">
-                    {{issue.bodyText}}
+                    {{theIssue.bodyText}}
                 </p>
 
                 <Info class="f6 text-gray mt-2">
                     <DiffStat v-if="isPullRequest">
-                        <span class="text-green">+{{issue.additions}}</span>
-                        <span class="text-red">-{{issue.deletions}}</span>
+                        <span class="text-green">+{{theIssue.additions}}</span>
+                        <span class="text-red">-{{theIssue.deletions}}</span>
                         <span v-for="(item,index) in diffstat" :key="index" :class="item" class="diffstat-item"></span>
                         &nbsp;·&nbsp;
                     </DiffStat>
-                    <span>{{issue.comments.totalCount}} {{issue.comments.totalCount > 1 ? 'comments' : 'comment'}}</span>
+                    
+                    <TaskProgress v-if="taskProgress" class="task-progress">
+                        <svg class="octicon octicon-checklist" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M16 8.5l-6 6-3-3L8.5 10l1.5 1.5L14.5 7 16 8.5zM5.7 12.2l.8.8H2c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h7c.55 0 1 .45 1 1v6.5l-.8-.8c-.39-.39-1.03-.39-1.42 0L5.7 10.8a.996.996 0 000 1.41v-.01zM4 4h5V3H4v1zm0 2h5V5H4v1zm0 2h3V7H4v1zM3 9H2v1h1V9zm0-2H2v1h1V7zm0-2H2v1h1V5zm0-2H2v1h1V3z"></path></svg>
+                        <span class="task-progress-counts">
+                            {{taskProgress.checked}} of {{taskProgress.all}}
+                        </span>
+                        <Progress :donePercent="(taskProgress.checked / taskProgress.all) * 100" :progressContainerStyle="{height: '8px'}" :progressStyle="{backgroundColor: '#ccc!important'}" class="d-inline-block" style="width:40px;"></Progress>
+                        &nbsp;·&nbsp;
+                    </TaskProgress>
+
+                    <span>{{theIssue.comments.totalCount}} {{theIssue.comments.totalCount > 1 ? 'comments' : 'comment'}}</span>
                 </Info>
             </IssueMain>
         </Issue>
@@ -49,27 +59,39 @@
 <script>
     import styled from 'vue-styled-components'
     import {IssueIcon} from '@/components'
-    import {AnimatedHeightWrapper} from '@/components'
+    import {AnimatedHeightWrapper,Progress} from '@/components'
     import {util_dateFormat} from '@/util'
     export default {
         props: {
-            issue: {
+            issueContributionActivity: {
                 type:Object,
                 required: true,
             },
-            occurredAt: {
-                type: String,
-                required: true
-            }
         },
         computed: {
+            theIssue() {
+                if(this.issueContributionActivity.issue) return this.issueContributionActivity.issue
+                if(this.issueContributionActivity.pullRequest) return this.issueContributionActivity.pullRequest
+            },
             isPullRequest() {
-                return this.issue.resourcePath.match(/\/pull\/[1-9][0-9]*$/) != null
+                return this.theIssue.resourcePath.match(/\/pull\/[1-9][0-9]*$/) != null
+            },
+            taskProgress() {
+                if(!this.theIssue.bodyHTML) return undefined
+                let reg_allCheckboxInput = /<input type="checkbox" [\s\S]*?>/g
+                let reg_checkedCheckboxInput = /<input type="checkbox" [\s\S]*?checked[\s\S]*?>/g
+                let checkboxMatches = this.theIssue.bodyHTML.match(reg_allCheckboxInput)
+                let checkedCheckboxMatches =this.theIssue.bodyHTML.match(reg_checkedCheckboxInput)
+                if((!checkedCheckboxMatches) && (!checkboxMatches)) return undefined
+                return {
+                    checked: checkedCheckboxMatches ? checkedCheckboxMatches.length : 0,
+                    all: checkboxMatches ? checkboxMatches.length : 0,
+                }
             },
             diffstat() {
                 if(!this.isPullRequest) return 
-                let additionCount = this.issue.additions
-                let deletionCount = this.issue.deletions
+                let additionCount = this.theIssue.additions
+                let deletionCount = this.theIssue.deletions
                 let sum = additionCount + deletionCount
 
                 if(sum <= 5) {
@@ -132,12 +154,14 @@
         components: {
             AnimatedHeightWrapper,
             IssueIcon,
+            Progress,
             Container: styled.div``,
             Title: styled.div``,
             Issue: styled.div``,
             IssueMain: styled.div``,
             Info: styled.div``,
             DiffStat: styled.span``,
+            TaskProgress: styled.span``,
         }
     }
 </script>
@@ -160,6 +184,7 @@
     display: -webkit-box;
    -webkit-box-orient: vertical;
    -webkit-line-clamp: 6;
+   overflow: hidden;
 }
 
 .diffstat-item{
@@ -169,6 +194,7 @@
     margin-left: 1px;
 }
 
+
 .added {
     background-color: #2cbe4e;
 }
@@ -177,5 +203,18 @@
 }
 .neutral {
     background-color: #d1d5da;
+}
+
+.task-progress {
+    color: #586069;
+    text-decoration: none;
+    vertical-align: top;
+}
+
+.task-progress-counts {
+    display: inline-block;
+    margin-right: 6px;
+    margin-left: -2px;
+    font-size: 12px;
 }
 </style>

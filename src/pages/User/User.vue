@@ -93,7 +93,7 @@
                     Block or report user
                 </BlockOrReport>
 
-                <ComplexTopTab :tabs="tabs" class="ml-n3 mr-n3 border-bottom" :tabStyle="{marginRight: `0px!important`}"></ComplexTopTab>
+                <ComplexTopTab :tabs="tabs" class="ml-n3 mr-n3 border-bottom user-tab bg-white" :tabStyle="{marginRight: `0px!important`}"></ComplexTopTab>
 
                 <router-view></router-view>
             </Main>
@@ -137,7 +137,8 @@
                 return [
                     {
                         to: `/${this.login}`,
-                        label: 'Overview'
+                        label: 'Overview',
+                        exact: true
                     },
                     {
                         to: `/${this.login}/repositories`,
@@ -162,36 +163,8 @@
                 ]
             }
         },
-        async created() {
+        created() {
             this.network_getData()
-/*              let graphql_ = `
-{
-  organization(login: "30-seconds") {
-    descriptionHTML
-    location
-    websiteUrl
-    avatarUrl
-    login
-    isVerified
-    registryPackages(first: 10) {
-      totalCount
-      nodes {
-        name
-        packageType
-        color
-        latestVersion {
-          version
-          statistics {
-            downloadsTotalCount
-          }
-        }
-      }
-    }
-   }
-}
-                    `
-                let res = await authRequiredGitHubGraphqlApiQuery(graphql_)
-                console.log(res.data) */
         },
         methods: {
             async network_getData() {
@@ -283,5 +256,11 @@
     font-weight: 600;
     color: #24292e;
     white-space: nowrap;
+}
+
+.user-tab{
+    position: sticky;
+    top:0;
+    z-index: 999;
 }
 </style>
