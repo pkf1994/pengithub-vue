@@ -92,7 +92,7 @@
         </h4>
 
         <AnimatedHeightWrapper :stretch="comments.loading && (comments.data.length === 0)">
-            <div style="height:200px" class="flex flex-items-center flex-justify-center">
+            <div style="height:200px" class="d-flex flex-items-center flex-justify-center">
                 <LoadingIconEx/>
             </div> 
         </AnimatedHeightWrapper>   

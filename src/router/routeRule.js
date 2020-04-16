@@ -21,6 +21,10 @@ const SearchResultUsers = () => import('../pages/Search/SearchResult/Users/Users
 const User = () => import('../pages/User/User.vue')
 const UserOverview = () => import('../pages/User/Overview/Overview.vue')
 const UserRepositories = () => import('../pages/User/Repositories/Repositories.vue')
+const UserProjects = () => import('../pages/User/Projects/Projects.vue')
+const UserStars = () => import('../pages/User/Stars/Stars.vue')
+const UserFollowers = () => import('../pages/User/Followers/Followers.vue')
+const UserFollowing = () => import('../pages/User/Following/Following.vue')
 const Repository = () => import('../pages/Repository/Repository.vue')
 const RepositoryCode = () => import('../pages/Repository/Code/Code.vue')
 const RepositoryCodeMain = () => import('../pages/Repository/Code/CodeMain/CodeMain.vue')
@@ -38,6 +42,7 @@ const RepositoryProjects = () => import('../pages/Repository/Projects/Projects.v
 const RepositoryPulse = () => import('../pages/Repository/Pulse/Pulse.vue')
 const RepositoryCommunity = () => import('../pages/Repository/Community/Community.vue')
 const RepositoryCommit = () => import('../pages/Repository/Commit/Commit.vue')
+const RepositoryCommits = () => import('../pages/Repository/Commits/Commits.vue')
 const RepositoryBranches = () => import('../pages/Repository/Branches/Branches.vue')
 const RepositoryBranchesOverview = () => import('../pages/Repository/Branches/Overview.vue')
 const RepositoryBranchesAll = () => import('../pages/Repository/Branches/All.vue')
@@ -174,6 +179,22 @@ export default [
                 path: 'repositories',
                 component: UserRepositories
             },
+            {
+                path: 'projects',
+                component: UserProjects
+            },
+            {
+                path: 'stars',
+                component: UserStars
+            },
+            {
+                path: 'followers',
+                component: UserFollowers
+            },
+            {
+                path: 'following',
+                component: UserFollowing
+            },
         ]
     },
     {
@@ -267,6 +288,10 @@ export default [
             {
                 path: 'commit/:sha',
                 component: RepositoryCommit,
+            },
+            {
+                path: 'commits/:ref?',
+                component: RepositoryCommits,
             },
             {   
                 path: 'branches',

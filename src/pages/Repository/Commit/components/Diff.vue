@@ -28,7 +28,7 @@
 
         <DiffView v-if="viewStyle == 'unified' && stretch"  class="diff-view">
             <div class="d-inline-block">
-                <CodeLine v-for="(item,index) in diffHunkEntries" :key="`${index}_${item.type}_${item.code}`" class="flex width-full" :data-type="lazyLoadedLines.indexOf(item.additionLineIndex) > -1 ? 'lazyLoaded' :item.type">
+                <CodeLine v-for="(item,index) in diffHunkEntries" :key="`${index}_${item.type}_${item.code}`" class="d-flex width-full" :data-type="lazyLoadedLines.indexOf(item.additionLineIndex) > -1 ? 'lazyLoaded' :item.type">
                     <BlobNum    v-if="item.type !== 'hunk' || item.additionLineIndex == 0"
                                 class="blob-num" 
                                 :data-line-number="item.deletionLineIndex === 0 ? '...' : item.deletionLineIndex" 
@@ -75,7 +75,7 @@
 
         <DiffView v-else-if="stretch"  class="diff-view-split">
             <div>
-                <CodeLine class="flex" style="background-color: #fafbfc;" v-for="(item,index) in diffHunkEntries" :key="`${index}_${item.type}_${item.code}`" :data-type="lazyLoadedLines.indexOf(item.additionLineIndex) > -1 ? 'lazyLoaded' :item.type">
+                <CodeLine class="d-flex" style="background-color: #fafbfc;" v-for="(item,index) in diffHunkEntries" :key="`${index}_${item.type}_${item.code}`" :data-type="lazyLoadedLines.indexOf(item.additionLineIndex) > -1 ? 'lazyLoaded' :item.type">
                     
 
                     <!-- hunk -->
@@ -114,7 +114,7 @@
                                 class="blob-code-split">{{item.code}}</BlobCode>
 
                     <!-- context -->
-                    <Column v-if="item.type !== 'hunk'" class="flex" style="width:50%">
+                    <Column v-if="item.type !== 'hunk'" class="d-flex" style="width:50%">
                         <BlobNum    v-if="item.type !== 'addition'" 
                                     class="blob-num text-center" 
                                     :class="{'blob-num-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context'}"
@@ -124,7 +124,7 @@
                                     :class="{'blob-code-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context'}"
                                     class="blob-code-split"><span class="type-mark-split d-inline-block">{{item.type == 'deletion' ? '-':' '}}</span>{{item.code.replace(/^\+/," ").replace(/^-/," ")}}</BlobCode>
                     </Column>
-                    <Column v-if="item.type !== 'hunk'" class="flex" style="width:50%;border-left: 1px solid #f6f8fa;">
+                    <Column v-if="item.type !== 'hunk'" class="d-flex" style="width:50%;border-left: 1px solid #f6f8fa;">
                         <BlobNum    v-if="item.type !== 'deletion'" 
                                     class="blob-num"
                                     :class="{'blob-num-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context'}"

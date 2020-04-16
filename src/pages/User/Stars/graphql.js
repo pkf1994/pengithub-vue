@@ -16,7 +16,7 @@ export const GRAPHQL_USER_REPOSITORY = payload => `
 }
 `
 
-export const GRAPHQL_USER_REPOSITORY_EXTRA = payload => {
+export const GRAPHQL_USER_STARRED_REPOSITORY_EXTRA = payload => {
   let grapqhl = ''
   payload.forEach((item,index) => {
     grapqhl = `
@@ -24,9 +24,6 @@ export const GRAPHQL_USER_REPOSITORY_EXTRA = payload => {
       repo${index}:repository(name:"${item.name}", owner:"${item.owner.login}") {
         id
         descriptionHTML
-        parent {
-          nameWithOwner
-        }
         primaryLanguage {
           name
           color

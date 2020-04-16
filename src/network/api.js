@@ -41,6 +41,22 @@ export const API_USER_NOTIFICATIONS = payload => {
 
 export const API_USER = login => `${GITHUB_REST_API_BASE}/users/${login}`
 
+export const API_USER_STARRED_REPOS = (login,params) => {
+    let query = util_queryParse.querify(params)
+    return `${GITHUB_REST_API_BASE}/users/${login}/starred?${query}`
+}
+
+export const API_USER_FOLLOWERS = (login,params) => {
+    let query = util_queryParse.querify(params)
+    return `${GITHUB_REST_API_BASE}/users/${login}/followers?${query}`
+}
+
+export const API_USER_FOLLOWING = (login,params) => {
+    let query = util_queryParse.querify(params)
+    return `${GITHUB_REST_API_BASE}/users/${login}/following?${query}`
+}
+
+
 export const API_TOP_LANGUAGES = "https://api.github.com/repos/drujensen/fib/Hello-World/languages"
 
 export const API_SEARCH = (type,param) => {
@@ -101,4 +117,3 @@ export const API_CHECK_IF_COLLABORATOR = payload => {
 export const API_PR_CHANGED_FILES = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/files`
 }
-

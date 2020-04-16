@@ -317,7 +317,6 @@
                         from: this.from,
                         to: this.to
                     })
-                    console.log(graphql_periodContributionsCollection)
 
                     let res = await Promise.all([
                         authRequiredGitHubGraphqlApiQuery(graphql_contributionStatistic,{cancelToken}),

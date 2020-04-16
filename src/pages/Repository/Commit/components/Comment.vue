@@ -100,7 +100,7 @@
 
 
         <Inner v-else class="inner bg-white">
-            <Header class="px-2 bg-gray flex flex-justify-between flex-items-center relative" :style="headerStyle">
+            <Header class="px-2 bg-gray d-flex flex-justify-between flex-items-center relative" :style="headerStyle">
                 <h3 class="header-minimized-title f5 text-gray text-normal text-italic">
                     This comment was marked as {{data.minimizedReason}}
                 </h3>

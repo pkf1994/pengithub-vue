@@ -10,45 +10,46 @@
                     type="text">
             <svg class="search-icon text-gray-light" fill="currentColor" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0013 6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0 .52-.09.7-.3a.996.996 0 000-1.41v.01zM7 10.7c-2.59 0-4.7-2.11-4.7-4.7 0-2.59 2.11-4.7 4.7-4.7 2.59 0 4.7 2.11 4.7 4.7 0 2.59-2.11 4.7-4.7 4.7z"></path></svg>
         </SearchInput>
-                <Title class="bg-gray p-3 title flex-justify-between text-normal" style="display:flex">
-                    <Statistic>
-                        <router-link class="link-gray mr-1" :to="`/${owner()}/${repo()}/projects?q=${'is:open ' + query.replace(/is:(open|closed)/g,'').trim()}`" :class="{active:query.indexOf('is:open') != -1}">
-                                <svg class="v-align-text-bottom d-inline-block mr-1" fill="currentColor" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 12h3V2h-3v10zm-4-2h3V2H6v8zm-4 4h3V2H2v12zm-1 1h13V1H1v14zM14 0H1a1 1 0 00-1 1v14a1 1 0 001 1h13a1 1 0 001-1V1a1 1 0 00-1-1z"></path></svg>
-                                <span>{{countInfoByState.totalCountOpen}}</span>
-                                <span>Open</span>
-                        </router-link>&nbsp;
 
-                        <router-link class="link-gray" :to="`/${owner()}/${repo()}/projects?q=${'is:closed ' + query.replace(/is:(open|closed)/g,'').trim()}`" :class="{active:query.indexOf('is:closed') != -1}">
-                                <svg class="octicon octicon-check" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
-                                <span>{{countInfoByState.totalCountClosed}}</span>
-                                <span>Closed</span>
-                        </router-link>
-                    </Statistic>
+        <Title class="bg-gray p-3 title flex-justify-between text-normal" style="display:flex">
+            <Statistic>
+                <router-link class="link-gray mr-1" :to="`/${owner()}/${repo()}/projects?q=${'is:open ' + query.replace(/is:(open|closed)/g,'').trim()}`" :class="{active:query.indexOf('is:open') != -1}">
+                        <svg class="v-align-text-bottom d-inline-block mr-1" fill="currentColor" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 12h3V2h-3v10zm-4-2h3V2H6v8zm-4 4h3V2H2v12zm-1 1h13V1H1v14zM14 0H1a1 1 0 00-1 1v14a1 1 0 001 1h13a1 1 0 001-1V1a1 1 0 00-1-1z"></path></svg>
+                        <span>{{countInfoByState.totalCountOpen}}</span>
+                        <span>Open</span>
+                </router-link>&nbsp;
 
-                    <Sort class="sort position-relative">
-                        <SortMenuBtn class="sort-menu-btn list-style-none relative" @click="triggerShowSortPopover">
-                            Sort
-                            <Popover class="project-sort-popover" ref="sortPopover" :popoverStyle="{right:'0px'}" :width="300">
-                                <SortMenuHeader class="project-sort-menu-header">Sort by</SortMenuHeader>    
-                                <SortMenuBody>
-                                    <router-link v-for="item in sortModalRouterLink" :key="item.label" :to='item.routerLink'>
-                                        <SelectMenuItem :selected="query.indexOf(item.queryFragment) > -1" style="padding: 8px;font-size: 12px;">
-                                            <span>{{item.label}}</span>    
-                                        </SelectMenuItem>
-                                    </router-link> 
-                                </SortMenuBody> 
-                            </Popover> 
-                        </SortMenuBtn>
-                    </Sort>
-                </Title>   
+                <router-link class="link-gray" :to="`/${owner()}/${repo()}/projects?q=${'is:closed ' + query.replace(/is:(open|closed)/g,'').trim()}`" :class="{active:query.indexOf('is:closed') != -1}">
+                        <svg class="octicon octicon-check" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
+                        <span>{{countInfoByState.totalCountClosed}}</span>
+                        <span>Closed</span>
+                </router-link>
+            </Statistic>
+
+            <Sort class="sort position-relative">
+                <SortMenuBtn class="sort-menu-btn list-style-none relative" @click="triggerShowSortPopover">
+                    Sort
+                    <Popover class="project-sort-popover" ref="sortPopover" :popoverStyle="{right:'0px'}" :width="300">
+                        <SortMenuHeader class="project-sort-menu-header">Sort by</SortMenuHeader>    
+                        <SortMenuBody>
+                            <router-link v-for="item in sortModalRouterLink" :key="item.label" :to='item.routerLink'>
+                                <SelectMenuItem :selected="query.indexOf(item.queryFragment) > -1" style="padding: 8px;font-size: 12px;">
+                                    <span>{{item.label}}</span>    
+                                </SelectMenuItem>
+                            </router-link> 
+                        </SortMenuBody> 
+                    </Popover> 
+                </SortMenuBtn>
+            </Sort>
+        </Title>   
                 
-            <transition-group name="fade" appear>
-                <ProjectListItem v-for="item in data" class="project-item" :key="item.id" :project="item"/>
-            </transition-group>
+        <transition-group name="fade" appear>
+            <ProjectListItem v-for="item in data" class="project-item" :key="item.id" :project="item"/>
+        </transition-group>
 
-            <LoadMore v-if="pageInfo.hasNextPage" @click="() => network_getData(true)" :class="{'text-gray':loadingMore}" class="text-center p-3 text-blue">
-            {{loadingMore ? 'Loading...' : 'Load more...'}}
-            </LoadMore>
+        <LoadMore v-if="pageInfo.hasNextPage" @click="() => network_getData(true)" :class="{'text-gray':loadingMore}" class="text-center p-3 text-blue">
+        {{loadingMore ? 'Loading...' : 'Load more...'}}
+        </LoadMore>
         
         <transition name="fade" appear>
             <EmptyNotice v-if="noData" class="empty-notice py-5 px-3 bg-white">

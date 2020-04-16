@@ -71,16 +71,7 @@
             <Notifications  v-if="codeBasicInfo().id"/>
         </transition>
        
-
-       
-
-        
-
-         
- 
-        
-
-         <transition name="fade" appear>
+        <transition name="fade" appear>
             <CommonLoading v-if="readme.loading || !codeBasicInfo().id"
                             :position="!codeBasicInfo().id ? 'center' : 'corner'"
                             :preventClickEvent="false"/>
