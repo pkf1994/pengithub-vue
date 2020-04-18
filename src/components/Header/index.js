@@ -1,4 +1,5 @@
 import LogoHeader from "./LogoHeader";
 import RepoHeader from "./RepoHeader";
 import LogoutedHeader from "./LogoutedHeader";
-export {LogoHeader,LogoutedHeader,RepoHeader}
+import BaseHeader from "./BaseHeader";
+export {LogoHeader,LogoutedHeader,RepoHeader,BaseHeader}

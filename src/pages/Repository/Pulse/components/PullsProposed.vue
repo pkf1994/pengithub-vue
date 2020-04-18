@@ -1,6 +1,6 @@
 <template>
     <ComplexBubble :loading="pullsProposed().data.length === 0 && pullsProposed().loading" 
-                    :disableFlag="pullsProposed().data.length === 0 && !pullsProposed().loading" 
+                    :disabledFlag="pullsProposed().data.length === 0 && !pullsProposed().loading" 
                     disableNotice="There are no recent pull request been proposed">
         <template v-slot:title>
             <Title  class="bubble-title" style="font-weight: 700">

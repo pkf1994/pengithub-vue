@@ -9,7 +9,6 @@
             </div>
            
             <WhoDidWhat>
-                
                 <router-link v-if="showActor" to="/" class="text-bold link-gray-dark">
                     {{data.actor ? data.actor.login : (data.author && data.author.name)}}
                 </router-link>

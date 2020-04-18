@@ -1,6 +1,6 @@
 <template>
     <ComplexBubble :loading="issuesOpened().length === 0 && issuesOpened().loading" 
-                    :disableFlag="issuesOpened().length === 0 && !issuesOpened().loading" 
+                    :disabledFlag="issuesOpened().length === 0 && !issuesOpened().loading" 
                     disableNotice="There are no recent issue been opened">
         <template v-slot:title>
             <Title  class="bubble-title" style="font-weight: 700">

@@ -1,6 +1,6 @@
 <template>
-    <ComplexBubble :loading="data.length === 0 && pullsMerged().loading" 
-                    :disableFlag="data.length === 0 && !pullsMerged().loading" 
+    <ComplexBubble :loading="data.length == 0 && pullsMerged().loading" 
+                    :disabledFlag="data.length == 0 && !pullsMerged().loading" 
                     disableNotice="There are no recent pull request been merged">
         <template v-slot:title>
             <Title  class="bubble-title" style="font-weight: 700">

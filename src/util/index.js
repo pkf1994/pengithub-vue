@@ -10,6 +10,7 @@ import util_string from './stringUtil'
 import util_throttle from './throttle'
 import util_emoji from './emoji'
 import util_markdownParse from './markdownParse'
+import util_timeZoneTransfer from './timeZoneTransfer'
 import './protoExtend'
 
 export {
@@ -23,5 +24,6 @@ export {
     util_string,
     util_throttle,
     util_emoji,
+    util_timeZoneTransfer,
     util_markdownParse,
     util_adjustStyle}

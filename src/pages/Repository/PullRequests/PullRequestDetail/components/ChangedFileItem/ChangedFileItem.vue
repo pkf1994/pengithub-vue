@@ -17,7 +17,7 @@
         <DiffView class="diff-view">
             <div :class="{'d-inline-block':!isProseFileType}" style="min-width: 100%;">
                 <CodeLine v-for="(item,index) in diffHunkEntries" :key="index" class="width-full">
-                    <div class="flex">
+                    <div class="d-flex">
                         <BlobNum    class="blob-num"  
                                     :data-line-number="item.type === 'hunk' ? '...' : item.deletionLineIndex" 
                                     :class="{

@@ -1,7 +1,7 @@
 <template>
     <Container  class="pr-6 p-3 border-gray-light border-bottom" >
             <ProjectTitle class="mb-1">
-                <router-link to="/" class="link-gray-dark mr-1">{{project.name}}</router-link>
+                <router-link :to="`${$route.path}/${project.number}`" class="link-gray-dark mr-1">{{project.name}}</router-link>
             </ProjectTitle>
             <ProjectUpdateAt class="f6 b-2 mb-2 md-0 text-gray-light">
                 <svg class=" v-align-text-bottom d-inline-block" fill="currentColor" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 8h3v2H7c-.55 0-1-.45-1-1V4h2v4zM7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7z"></path></svg>

@@ -20,7 +20,7 @@
     import styled from 'vue-styled-components'
     import {CodeChanges,PullsMerged,PullsProposed,IssuesClosed,IssuesOpened} from './components' 
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {util_dateFormat} from '@/util'
+    import {util_dateFormat,util_timeZoneTransfer} from '@/util'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery  } from '@/network'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
@@ -35,14 +35,14 @@
                 issuesClosed: () => this.issuesClosed,
                 pullsProposed: () => this.pullsProposed,
                 issuesOpened: () => this.issuesOpened,
-                contributorsStatistic: () => this.contributorsStatistic,
+                commitStatistic: () => this.commitStatisitc,
                 commitCount: () => this.commitCount,
             }
         },
         data() {
             return {
                 selectedValue: "weekly",
-                contributorsStatistic:{
+                commitStatisitc:{
                     data:[],
                     loading:false,
                 },
@@ -80,29 +80,8 @@
         },
         computed: {
             afterDateByPastPeriod() {
-                return  util_dateFormat.dateFormat('yyyy-MM-dd',new Date(Date.parse(new Date()) - (this.selectedValue === 'weekly' ? 7 * 24 * 3600000 : 30 * 24 * 3600000)))
+                return  util_dateFormat.dateFormat('yyyy-MM-ddThh:mm:ss',util_timeZoneTransfer.East8ToWest8(new Date(Date.parse(new Date()) - (this.selectedValue === 'weekly' ? 7 * 24 * 3600000 : 30 * 24 * 3600000))))
             },
-            defaultBranchStatistic() {
-                let authorCount = 0
-                let commitCount = 0
-                let additionCount = 0
-                let deletionCount = 0
-                this.contributorsStatistic.data.forEach(item => {
-                    let lastWeekData = item.weeks[item.weeks.length - 1]
-                    if(lastWeekData.c > 0){
-                        authorCount += 1
-                        commitCount += lastWeekData.c
-                        additionCount += lastWeekData.a
-                        deletionCount += lastWeekData.d
-                    }
-                })
-                return {
-                    commitCount,
-                    authorCount,
-                    additionCount,
-                    deletionCount
-                }
-            }
         },
         created() {
            this.network_getContributorStatistic()
@@ -115,15 +94,23 @@
         methods: {
             async network_getContributorStatistic() {
                 try{
-                    this.contributorsStatistic.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name + ' get_contributor_statistic')
-                    this.cancelSources.push(sourceAndCancelToken.source)
-                    const url = api.API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST(this.owner(),this.repo())
+                    this.commitStatisitc.loading = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name + ' get_contributor_statistic')
+
+                    /* const url = api.API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST(this.owner(),this.repo())
                     const res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.contributorsStatistic.data = res.data
-                    this.contributorsStatistic.loading = false
+                    this.commitStatisitc.data = res.data */
+
+                    let graphql_commitsInPastPeriod = graphql.GRAPHQL_COMMITS({
+                        ...this.$route.params,
+                        since: this.afterDateByPastPeriod
+                    })
+                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_commitsInPastPeriod,{cancelToken})
+
+                    this.commitStatisitc.data = res.data.data.repository.refs.nodes
+                    this.commitStatisitc.loading = false
                 }catch(e) {
-                    this.contributorsStatistic.loading = false
+                    this.commitStatisitc.loading = false
                     console.log(e)
                 }
             },

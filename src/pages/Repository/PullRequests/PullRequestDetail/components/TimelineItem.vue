@@ -15,9 +15,12 @@
             <template v-slot:additional>
                 <Commit class="py-1 d-flex" style="margin-top:7.5px">
                     <div class="d-flex">
-                        <router-link :to="`/${commit.author && commit.author.login}`" class="pr-2">
-                            <img class="avatar" width="16" height="16" :src="commit.author && commit.author.avatar_url" :alt="`@${commit.author && commit.author.login}`">
-                        </router-link>
+                        <AnimatedWidthWrapper>
+                             <router-link v-if="commit.author && commit.author.avatar_url" :to="`/${commit.author && commit.author.login}`" class="pr-2 d-inline-block">
+                                <img class="avatar v-align-baseline" width="16" height="16" :src="commit.author && commit.author.avatar_url" :alt="`@${commit.author && commit.author.login}`">
+                            </router-link>
+                        </AnimatedWidthWrapper>
+                       
                         <router-link :to="`/${owner()}/${repo()}/commit/${commit.sha}`" class="link-gray" style="word-break: break-word;">
                             {{data.message && parseEmoji(data.message.replace(/[\n\r]{2}[\S\s]*/g,''))}}
                         </router-link> 
@@ -388,7 +391,7 @@
     import Referenced from './Referenced'
     import Review from './Review'
     import {util_emoji} from '@/util'
-    import {Label,AnimatedHeightWrapper} from '@/components'
+    import {Label,AnimatedHeightWrapper,AnimatedWidthWrapper} from '@/components'
     import CommitComment from './CommitComment/CommitComment.vue'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
     export default {
@@ -649,6 +652,7 @@
             Referenced,
             Review,
             CommitComment,
+            AnimatedWidthWrapper,
             CommentWrapper: styled.div``,
             SourceIssue: styled.div``,
             IssueTitle: styled.div``,

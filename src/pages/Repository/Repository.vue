@@ -84,6 +84,7 @@
                         extraActiveRouterLinks: [
                             `${path}/pull`
                         ],
+                        extraActiveFlag: this.$route.path.match(/\/pull\/[1-9][0-9]*$/) != null,
                          meta: this.data.pullRequests && this.data.pullRequests.totalCount
                     },
                     {

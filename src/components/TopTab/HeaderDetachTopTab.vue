@@ -3,7 +3,7 @@
         <nav class="text-center reponav">
             <router-link :to="tabItem.routerLink"
                          :exact="tabItem.exact"
-                         :class="{'router-link-active':tabItem.extraActiveRouterLinks && tabItem.extraActiveRouterLinks.indexOf(currentPath) !== -1}"
+                         :class="{'router-link-active':tabItem.extraActiveRouterLinks && tabItem.extraActiveRouterLinks.indexOf(currentPath) !== -1 || tabItem.extraActiveFlag}"
                          class="pt-1 px-2 pb-3 d-inline-block nav-item to-adjust"
                          v-for="tabItem in tabs.filter(i => !i.disabled)"
                          :key="tabItem.label" >
@@ -30,29 +30,10 @@
                 type: Array,
                 required: true
             },
-            activeTab: {
-                type: String,
-                required: true
-            }
         },
         computed: {
             currentPath() {
                 return this.$route.path
-            }
-        },
-        mounted() {
-            this.adjustStyle()
-        },
-        methods: {
-            adjustStyle() {
-                let tabItemElList = document.querySelectorAll("nav .to-adjust")
-                let parent = undefined
-                tabItemElList.forEach((item,index) => {
-                    if(!parent)parent = item.parentNode
-                    if(index !== (tabItemElList.length - 1)) {
-                        parent.insertBefore(document.createTextNode(" "),item.nextSibling)
-                    }
-                })
             }
         },
         components: {

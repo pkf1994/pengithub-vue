@@ -1,4 +1,4 @@
-import {LogoHeader,RepoHeader,LogoutedHeader} from './Header'
+import {LogoHeader,RepoHeader,BaseHeader,LogoutedHeader} from './Header'
 import SummaryAndDetail from './SummaryAndDetail.vue'
 import Button from './Button'
 import {HeaderDetachTopTab,PageTopTab,ComplexTopTab,PaddingPageTopTab} from './TopTab'
@@ -24,6 +24,7 @@ import Subscription from './Subscription'
 import SimpleDiffView from './SimpleDiffView'
 export {
     Button,
+    BaseHeader,
     LogoHeader,
     LogoutedHeader,
     RepoHeader,

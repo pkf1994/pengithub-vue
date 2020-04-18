@@ -7,7 +7,6 @@ export const GRAPHQL_BRANCH_OR_TAG = payload => `
         }
     }
 }
-  
 `
 
 export const GRAPHQL_COMMITS = payload => {
@@ -32,3 +31,20 @@ export const GRAPHQL_COMMITS = payload => {
         }
     `
 }
+
+export const GRAPHQL_ALL_REFS = payload => `
+{
+    repository(name: "${payload.repo}", owner: "${payload.owner}") {
+      allBranches:refs(refPrefix: "refs/heads/", first: 100) {
+        nodes {
+          name
+        }
+      }
+      allTags:refs(refPrefix: "refs/tags/", first: 100, orderBy: {field: TAG_COMMIT_DATE, direction: DESC}) {
+        nodes {
+          name
+        }
+      }
+    }
+  }
+`

@@ -1,4 +1,4 @@
-import {SimpleFooter,LogoHeader,RepoHeader,LabelsFooter} from '../components'
+import {SimpleFooter,LogoHeader,RepoHeader,LabelsFooter} from '@/components'
 
 const Home = () => import('../pages/Home/Home.vue')
 const OauthRedirectPage = () => import('../pages/OauthRedirectPage/OauthRedirectPage.vue')
@@ -39,6 +39,7 @@ const RepositoryPullRequestConversation = () => import('../pages/Repository/Pull
 const RepositoryPullRequestCommits = () => import('../pages/Repository/PullRequests/PullRequestDetail/Commits.vue')
 const RepositoryPullRequestChanges = () => import('../pages/Repository/PullRequests/PullRequestDetail/Changes.vue')
 const RepositoryProjects = () => import('../pages/Repository/Projects/Projects.vue')
+const RepositoryProjectDetail = () => import('../pages/Repository/ProjectDetail/ProjectDetail.vue')
 const RepositoryPulse = () => import('../pages/Repository/Pulse/Pulse.vue')
 const RepositoryCommunity = () => import('../pages/Repository/Community/Community.vue')
 const RepositoryCommit = () => import('../pages/Repository/Commit/Commit.vue')
@@ -198,6 +199,13 @@ export default [
         ]
     },
     {
+        path:'/:owner/:repo/projects/:number',
+        components: {
+            default: RepositoryProjectDetail,
+            footer: SimpleFooter
+        },
+    },
+    {
         path: '/:owner/:repo',
         components: {
             default: Repository,
@@ -290,7 +298,7 @@ export default [
                 component: RepositoryCommit,
             },
             {
-                path: 'commits/:ref?',
+                path: 'commits/(\.*)?',
                 component: RepositoryCommits,
             },
             {   
@@ -313,7 +321,4 @@ export default [
             },
         ]
     },
-    
-  
-    
 ]

@@ -12,7 +12,7 @@
               
             </Body>
 
-            <LoadingWrapper v-else class="loading-wrapper flex flex-justify-center flex-items-center">
+            <LoadingWrapper v-else class="loading-wrapper d-flex flex-justify-center flex-items-center">
                 <LoadingIconEx/>
             </LoadingWrapper>
             

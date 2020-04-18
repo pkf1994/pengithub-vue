@@ -11,7 +11,7 @@
             <span class="f4 text-bold">Checklist</span>
         </Title>
 
-        <ComplexBubble :loading="loading">
+        <ComplexBubble :loading="loading" :disabledAnimatedWrapper="false">
             <ScoreBar class="position-relative border-bottom">
                 <Background class="progress-bar round-1"></Background>
                 <WhiteCover class="white-cover" :style="{width: parseInt(100 -data.health_percentage) + '%'}"></WhiteCover>

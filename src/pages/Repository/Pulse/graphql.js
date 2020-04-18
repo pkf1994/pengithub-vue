@@ -64,3 +64,44 @@ export const GRAPHQL_REPOSITORY_ISSUES = (payload) => {
   }
   `}
   
+
+  export const GRAPHQL_COMMITS = payload => `
+  {
+    repository(name: "${payload.repo}", owner: "${payload.owner}") {
+      refs(refPrefix: "refs/heads/", first: 100) {
+        nodes {
+          name
+          target {
+            ... on Commit {
+              id
+              history(first: 100, since: "${payload.since}") {
+                totalCount
+                nodes {
+                  author {
+                    avatarUrl
+                    user {
+                      id
+                      login
+                    }
+                  }
+                  tree {
+                    entries {
+                      name
+                      oid
+                    }
+                  }
+                  additions
+                  deletions
+                  status {
+                    state
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  `

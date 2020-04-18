@@ -3,7 +3,7 @@
         
         <transition name="fade" appear>
              <Main v-if="id">
-                <Pinned class="mt-4">
+                <Pinned class="mt-4" v-if="pinnedRepositories.length > 0">
                     <Title class="f4 mb-2 text-normal">
                         Pinned
                     </Title>
@@ -13,7 +13,7 @@
                     </RepoListItem>
                 </Pinned>
 
-                <Contribution class="mt-6">
+                <Contribution :class="{'mt-4':pinnedRepositories.length == 0,'mt-6':pinnedRepositories.length > 0}">
                     <ContributionStatistic></ContributionStatistic>
                 </Contribution>
             </Main>

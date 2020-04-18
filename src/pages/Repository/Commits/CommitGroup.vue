@@ -15,10 +15,16 @@
                 </AnimatedHeightWrapper>
                 
                 <CommitMeta class="commit-meta d-flex flex-items-center" style="color: #24292e;">
-                    <img class="avatar mr-1" height="20" width="20" :src="item.author.avatar_url" :alt="`@${item.author.name}`">
+                    
+                    <AvatarStack class="AvatarStack flex-self-start AvatarStack-body" :class="{'AvatarStack--two':item.author.login != item.committer.login}">
+                        <img class="avatar" v-if="item.author" height="20" width="20" :src="item.author.avatar_url" :alt="`@${item.author && item.author.name}`">
+                        <img v-if="item.author && item.author.login != item.committer.login" class="avatar" height="20" width="20" :src="item.committer.avatar_url" :alt="`@${item.author.name}`">
+                    </AvatarStack>
 
                     <div class="f6 text-gray min-width-0 mr-1">
-                        <router-link class="commit-author tooltipped tooltipped-s user-mention" :to="`/${item.author.login}`">{{item.author.login}}</router-link>
+                        <router-link v-if="item.author && item.author.login != item.committer.login" class="commit-author tooltipped tooltipped-s user-mention" :to="`/${item.author.login}`">{{item.author.login}}</router-link>
+                        <span v-if="item.author && item.author.login != item.committer.login" >authored and</span> 
+                        <router-link class="commit-author tooltipped tooltipped-s user-mention" :to="`/${item.committer.login}`">{{item.committer.login}}</router-link>
                         committed 
                         <span>{{commitGroup[0].commit.author.date | getDateDiff}}</span>
                     </div>
@@ -66,6 +72,7 @@
             Time: styled.div``,
             CommitTitle: styled.p``,
             CommitMeta: styled.div``,
+            AvatarStack: styled.div``,
         }
     }
 </script>
