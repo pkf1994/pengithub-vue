@@ -32,7 +32,9 @@
                 </Branches>
 
                 <Meta class="meta p-2 d-flex flex-wrap">
-                    <img class="avatar flex-self-start mr-1" height="20" width="20" :alt="`@${data.committer && data.committer.login}`" :src="data.committer && data.committer.avatar_url">
+                    <ImgWrapper>
+                        <img class="avatar flex-self-start mr-1" height="20" width="20" :alt="`@${data.committer && data.committer.login}`" :src="data.committer && data.committer.avatar_url">
+                    </ImgWrapper>  
                     <WhoDidWhat class="flex-self-start no-wrap mr-md-4 mr-0">
                         <router-link  class="user-mention" :to="`/${data.committer && data.committer.login}`">{{data.committer && data.committer.login}}</router-link>
                         <span>committed on {{committedAt}}</span>
@@ -143,7 +145,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading,AnimatedHeightWrapper,LoadingIconEx,HiddenItemLoading,Editor,Subscription} from '@/components'
+    import {CommonLoading,AnimatedHeightWrapper,LoadingIconEx,HiddenItemLoading,Editor,Subscription,ImgWrapper} from '@/components'
     import {Diff,Comment} from './components'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery } from '@/network'
     import * as api from '@/network/api'
@@ -338,6 +340,7 @@
             CommonLoading,
             AnimatedHeightWrapper,
             Diff,
+            ImgWrapper,
             Comment,
             LoadingIconEx,
             HiddenItemLoading,

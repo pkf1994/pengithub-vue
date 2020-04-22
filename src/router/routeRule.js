@@ -8,7 +8,8 @@ const HomeIssues = () => import('../pages/Home/LoginedHome/Issues.vue')
 const Explore = () => import('../pages/Explore/Explore.vue')
 const ExploreMain = () => import('../pages/Explore/ExploreMain/ExploreMain.vue')
 const ExploreTrending = () => import('../pages/Explore/Trending/Trending.vue')
-const ExploreCollections = () => import('../pages/Explore/Collections/Collections.vue')
+const ExploreCollectionsBrowser = () => import('../pages/Explore/Collections/CollectionsBrowser.vue')
+const ExploreCollectionDetail = () => import('../pages/Explore/Collections/CollectionDetail.vue')
 const ExploreTopicsBrowser = () => import('../pages/Explore/Topics/TopicsBrowser.vue')
 const ExploreTopicDetail = () => import('../pages/Explore/Topics/TopicDetail.vue')
 const Search = () => import('../pages/Search/Search.vue')
@@ -48,6 +49,8 @@ const RepositoryBranches = () => import('../pages/Repository/Branches/Branches.v
 const RepositoryBranchesOverview = () => import('../pages/Repository/Branches/Overview.vue')
 const RepositoryBranchesAll = () => import('../pages/Repository/Branches/All.vue')
 const RepositoryBranchesStale = () => import('../pages/Repository/Branches/Stale.vue')
+const RepositoryFindFile = () => import('../pages/Repository/FindFile/FindFile.vue')
+
 const Logout = () => import('../pages/Logout/Logout.vue')
 const Notifications = () => import('../pages/Notifications/Notifications.vue')
 
@@ -106,27 +109,32 @@ export default [
         children: [
             {
                 path: '/',
-                component: ExploreMain
+                components: {ExploreMain},
             },
             {
                 path: 'trending/developers/:language?',
-                component: ExploreTrending
+                components: {ExploreTrending},
+                
             },
             {
                 path: 'trending/:language?',
-                component: ExploreTrending
+                components: {ExploreTrending}
             },
             {
-                path: 'collections/:collection?',
-                component: ExploreCollections,
+                path: 'collections/:collection',
+                components: {ExploreCollectionDetail},
+            },
+            {
+                path: 'collections',
+                components: {ExploreCollectionsBrowser},
             },
             {
                 path: 'topics',
-                component: ExploreTopicsBrowser,
+                components: {ExploreTopicsBrowser},
             },
             {
                 path: 'topics/:topic',
-                component: ExploreTopicDetail,
+                components: {ExploreTopicDetail},
             }
         ]
     },
@@ -300,6 +308,10 @@ export default [
             {
                 path: 'commits/(\.*)?',
                 component: RepositoryCommits,
+            },
+            {
+                path: 'find/:sha',
+                component: RepositoryFindFile
             },
             {   
                 path: 'branches',

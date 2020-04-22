@@ -31,6 +31,7 @@
     import {authRequiredGitHubGraphqlApiQuery} from '@/network'
     import Vue from 'vue'
     export default {
+        name: 'topics__browser_page',
         provide() {
             return {
                 viewerHasStarredProvided: () => this.viewerHasStarred
@@ -47,7 +48,7 @@
                 },
                 perPage: 10,
                 cursor: 0,
-                viewerHasStarred: []
+                viewerHasStarred: [],
             }
         },
         created() {
@@ -61,7 +62,6 @@
 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_topicsSketchRoster)
                     let topicsSketchRoster = res.data.data.repository.object.entries
-                    console.log(topicsSketchRoster)
 
                     let graphql_topicsSketch = graphql.GRAPHQL_TOPICS_SKETCH(topicsSketchRoster)
                     let res_topicsSketch = await authRequiredGitHubGraphqlApiQuery(graphql_topicsSketch)
@@ -84,6 +84,7 @@
                     this.loadingRoster = false
                 }catch(e) {
                     console.log(e)
+                    this.$toast(e,'error')
                     this.loadingRoster = false
                 }
             },
@@ -126,6 +127,10 @@
                     this.loading = false
                 }catch(e) {
                     console.log(e)
+                    this.$toast(
+                        e,
+                        'error'
+                    )
                     this.loading = false
                 } 
             },
@@ -168,6 +173,10 @@
 
                     this.highlight.loading = false
                 }catch(e) {
+                    this.$toast(
+                        `Exception while getting highlight topics data in ${this.$options.name}: ${e.message}`,
+                        'error'
+                    )
                     console.log(e)
                     this.highlight.loading = false
                 } 

@@ -6,11 +6,11 @@ export default {
         const toastComponent = new ToastConstructor()
         toastComponent.$mount()
         document.body.appendChild(toastComponent.$el)
-        Vue.prototype.$toast = (toastContent,option) => {
-            toastComponent.showToast(toastContent,option)
+        Vue.prototype.$toast = (toastContent,type,duration) => {
+            toastComponent.pushToast(toastContent,type,duration)
         }
-        Vue.toast = (toastContent,option) => {
-            toastComponent.showToast(toastContent,option)
+        Vue.toast = (toastContent,type,duration) => {
+            toastComponent.pushToast(toastContent,type,duration)
         }
     }
 }

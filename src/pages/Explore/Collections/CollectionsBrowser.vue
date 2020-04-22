@@ -44,7 +44,10 @@
                     loading: false
                 },
                 perPage: 10,
-                cursor: 0
+                cursor: 0,
+                exception: {
+
+                } 
             }
         },
         created() {
@@ -79,6 +82,7 @@
 
                     this.loadingRoster = false
                 }catch(e) {
+                    console.log(this.$route)
                     console.log(e)
                     this.loadingRoster = false
                 }
@@ -107,6 +111,7 @@
                     this.cursor += this.perPage
                     this.loading = false
                 }catch(e) {
+                    console.log(this.$route)
                     console.log(e)
                     this.loading = false
                 } 
@@ -141,6 +146,7 @@
 
                     this.highlight.loading = false
                 }catch(e) {
+                    console.log(this.$route)
                     console.log(e)
                     this.highlight.loading = false
                 } 

@@ -48,7 +48,7 @@ export function handleException(e,meta) {
         return
     }
     if(meta.toastError) {
-        Vue.toast(e.message,{type:"error"})
+        Vue.toast(e.message,'error')
     }
     console.log(e)
 }

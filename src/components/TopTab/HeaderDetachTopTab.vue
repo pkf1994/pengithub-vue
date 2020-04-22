@@ -7,11 +7,10 @@
                          class="pt-1 px-2 pb-3 d-inline-block nav-item to-adjust"
                          v-for="tabItem in tabs.filter(i => !i.disabled)"
                          :key="tabItem.label" >
-                     <AnimatedWidthWrapper class=" v-align-bottom">
                         <span class="lh-15  no-wrap">
                             {{tabItem.label}}
                         </span>
-                        
+                    <AnimatedWidthWrapper class="v-align-bottom">
                         <span class="Counter no-wrap"  
                         style="background-color: hsla(0,0%,100%,.15);color: inherit;" 
                         v-if="tabItem.meta">{{tabItem.meta}}</span>

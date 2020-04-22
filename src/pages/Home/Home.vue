@@ -11,7 +11,6 @@
     const LOGINED_HOME = "LoginedHome"
     const HOLA = "Hola"
     export default {
-
         computed: {
             ...mapState({
                 currentComponent: function(state) {

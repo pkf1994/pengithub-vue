@@ -1,9 +1,12 @@
 <template>
         <Container class="py-4 px-3 d-flex">
-            <img class="rounded-1 v-align-middle mr-1 flex-shrink-0"
-                :src="code.repository.owner.avatar_url"
-                width="20"
-                height="20">
+            <ImgWrapper>
+                <img class="rounded-1 v-align-middle mr-1 flex-shrink-0"
+                    :src="code.repository.owner.avatar_url"
+                    width="20"
+                    height="20">
+            </ImgWrapper>
+            
             <Main style="min-width:0" class="flex-auto">
                 <FullName class="text-small text-bold">
                     <router-link to="/search" class="link-gray">{{code.repository.full_name}}</router-link>
@@ -46,7 +49,7 @@
     import {mapState} from "vuex";
     import {util_dateFormat,util_analyseFileType,util_adjustStyle} from '@/util'
     import {
-        AnimatedHeightWrapper,AnimatedWidthWrapper} from '@/components'
+        AnimatedHeightWrapper,AnimatedWidthWrapper,ImgWrapper} from '@/components'
     import {
         WithRandomMetaMixin,
         CancelNetworkOnDestroyMixin} from '@/mixins'
@@ -103,6 +106,7 @@
             util_adjustStyle.highlightKeyword(`[meta=${this.randomMeta}]`,this.query(),"background-color: #fff5b1!important;")
         },
         components: {
+            ImgWrapper,
             AnimatedHeightWrapper,
             AnimatedWidthWrapper,
             Container: styled.div``,

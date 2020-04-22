@@ -2,7 +2,9 @@
     <Container class="border rounded-1 box-shadow bg-gray-light my-4">
         <AnimatedHeightWrapper>
             <router-link v-if="extraData.openGraphImageUrl && (extraData.openGraphImageUrl.indexOf('https://repository-images.githubusercontent.com/') != -1)" :to="`/${repository.owner.login}/${repository.name}`">
-                <img :src="extraData.openGraphImageUrl" :alt="repository.name" class="d-block width-full"> 
+                <ImgWrapper>
+                    <img :src="extraData.openGraphImageUrl" :alt="repository.name" class="d-block width-full"> 
+                </ImgWrapper>
             </router-link>
         </AnimatedHeightWrapper>
         
@@ -62,7 +64,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {AnimatedHeightWrapper} from '@/components'
+    import {AnimatedHeightWrapper,ImgWrapper} from '@/components'
     import {util_numberFormat,util_dateFormat} from '@/util'
     export default {
         inject: ['repositoriesExtraDataProvided'],
@@ -85,6 +87,7 @@
         },
         components: {
             AnimatedHeightWrapper,
+            ImgWrapper,
             Container: styled.div``,
             TheMeta: styled.div``,
             FullName: styled.div``,

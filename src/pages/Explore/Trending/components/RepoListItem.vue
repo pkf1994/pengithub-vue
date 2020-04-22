@@ -53,6 +53,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {util_numberFormat} from '@/util'
+    import {ImgWrapper} from '@/components'
     export default {
         inject: ['viewerHasStarredProvided'],
         props: {
@@ -88,6 +89,7 @@
             }
         },
         components: {
+            ImgWrapper,
             Container: styled.div``,
             StarBtn: styled.span``,
             FullName: styled.div``,

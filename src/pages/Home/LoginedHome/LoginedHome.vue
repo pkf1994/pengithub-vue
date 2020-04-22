@@ -47,7 +47,7 @@
             }
         },
         created(){
-            this.action_home_requestNotificationsData()
+            //this.action_home_requestNotificationsData()
         },
         computed: {
             activeComponent() {

@@ -2,10 +2,12 @@
         <Container class="py-4 mx-3 d-flex">
             <AvatarColumn class="flex-shrink-0 mr-1">
                 <router-link to="/search">
-                    <img :src="user.avatar_url" 
-                    width="20" 
-                    height="20" 
-                    class="rounded-1" :alt="'@' + user.login">
+                    <ImgWrapper>
+                        <img :src="user.avatar_url" 
+                                width="20" 
+                                height="20" 
+                                class="rounded-1" :alt="'@' + user.login">
+                    </ImgWrapper>
                 </router-link>
                
             </AvatarColumn>
@@ -53,6 +55,7 @@
     import {util_adjustStyle} from '@/util'
     import {
         AnimatedWidthWrapper,
+        ImgWrapper,
         AnimatedHeightWrapper} from '@/components'
     import {
         WithRandomMetaMixin,
@@ -87,6 +90,7 @@
            
         },
         components: {
+            ImgWrapper,
             AnimatedHeightWrapper,
             AnimatedWidthWrapper,
             Container: styled.div``,

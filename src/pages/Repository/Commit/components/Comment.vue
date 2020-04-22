@@ -143,26 +143,28 @@
                    
 
                     <router-link class="d-inline-block float-left mt-1" to="/">
+                        <ImgWrapper>
                             <img    class="avatar" 
                                     :src="data.author && data.author.avatarUrl"
                                     height="28" 
                                     width="28" 
                                     :alt="`@${data.author && data.author.login}`">
+                        </ImgWrapper>
                     </router-link>
 
                     <Body style="margin-left: 44px;">
-                            <h4 class="f5 text-normal d-inline text-gray-dark">
-                                <router-link to="/">
-                                    <strong class="no-wrap text-gray">
-                                        {{data.author && data.author.login}}
-                                    </strong>
-                                </router-link>
-                                <span class="no-wrap text-gray">{{createdAt}}</span>
-                            </h4>
+                        <h4 class="f5 text-normal d-inline text-gray-dark">
+                            <router-link to="/">
+                                <strong class="no-wrap text-gray">
+                                    {{data.author && data.author.login}}
+                                </strong>
+                            </router-link>
+                            <span class="no-wrap text-gray">{{createdAt}}</span>
+                        </h4>
 
-                            <div class="pt-1 markdown-body" v-html="data.bodyHTML">
+                        <div class="pt-1 markdown-body" v-html="data.bodyHTML">
 
-                            </div> 
+                        </div> 
                     </Body>
                 </Main>
             </AnimatedHeightWrapper>
@@ -174,7 +176,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {util_dateFormat} from '@/util'
-    import {AnimatedHeightWrapper,Popover} from '@/components'
+    import {AnimatedHeightWrapper,Popover,ImgWrapper} from '@/components'
     import ClipboardJS from 'clipboard';
     export default {
         inject: ['commit'],
@@ -251,6 +253,7 @@
         components: {
             AnimatedHeightWrapper,
             Popover,
+            ImgWrapper,
             Container: styled.div``,
             Inner: styled.div``,
             Header: styled.div``,

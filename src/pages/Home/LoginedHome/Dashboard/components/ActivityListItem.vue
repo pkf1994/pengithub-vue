@@ -17,12 +17,15 @@
                 </AnimatedHeightWrapper>
                
                 <Body class="f6 mt-1">
-                <img class="rounded-1 d-inline-block v-align-bottom"
-                    v-if="event.actor && event.actor.avatar_url"
-                     height="16"
-                     width="16"
-                     :src="event.actor.avatar_url"
-                     :alt="'@' + event.actor.login">
+                <ImgWrapper>
+                    <img class="rounded-1 d-inline-block v-align-bottom"
+                                    v-if="event.actor && event.actor.avatar_url"
+                                    height="16"
+                                    width="16"
+                                    :src="event.actor.avatar_url"
+                                    :alt="'@' + event.actor.login">
+                </ImgWrapper>
+                
                 <span class="mx-1" v-if="event.actor && event.actor.avatar_url">·</span>
                 <router-link :to="`/${event.repo.full_name || event.repo.name}`" class="link-gray f6">
                     {{event.repo.full_name || event.repo.name}}
@@ -43,7 +46,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {util_dateFormat} from '@/util'
-    import {IssueIcon,Label,AnimatedHeightWrapper} from '@/components'
+    import {IssueIcon,Label,AnimatedHeightWrapper,ImgWrapper} from '@/components'
     import {authRequiredGet} from '@/network'
     export default {
         props: {
@@ -114,6 +117,7 @@
         },
         components: {
             IssueIcon,
+            ImgWrapper,
             Label,
             AnimatedHeightWrapper,
             Container: styled.div``,

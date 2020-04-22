@@ -14,11 +14,7 @@ import {mapState,mapActions} from 'vuex'
 import {ACTION_GET_UNREAD_NOTIFICATIONS_COUNT} from '@/store/modules/notifications/actionTypes.js'
 export default {
   created() {
-    try{
-      this.action_getNotificationsCount()
-    }catch(e) {
-      this.$toast(e.message,{type:"error"})
-    }
+    this.action_getNotificationsCount()
   },
   methods: {
     ...mapActions({

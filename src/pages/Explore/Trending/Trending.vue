@@ -273,7 +273,6 @@
             }
         },
         created() {
-            console.log(this.$route)
             this.network_getData()
         },
         methods: {
@@ -296,6 +295,7 @@
                     if(this.meta == 'developers') this.network_getViewerIsFollowingInfo()
                     this[this.meta].loading = false
                 }catch(e) {
+                    this.$toast(e,'error')
                     console.log(e)
                     this[this.meta].loading = false
                 }
@@ -316,6 +316,7 @@
                     this.repositories.viewerHasStarred.data = data
                     this.repositories.viewerHasStarred.loading = false
                 }catch(e) {
+                    this.$toast(e,'error')
                     console.log(e)
                     this.repositories.viewerHasStarred.loading = false
                 } 
@@ -336,6 +337,7 @@
                     this.developers.viewerIsFollowing.data = data
                     this.developers.viewerIsFollowing.loading = false
                 }catch(e) {
+                    this.$toast(e,'error')
                     console.log(e)
                     this.developers.viewerIsFollowing.loading = false
                 } 
@@ -359,6 +361,7 @@
                     this[meta].data = res.data
                     this[meta].loading = false
                 }catch(e) {
+                    this.$toast(e,'error')
                     console.log(e)
                     this[meta].loading = false
                 }

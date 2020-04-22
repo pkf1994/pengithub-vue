@@ -38,8 +38,10 @@
                  <div class="d-flex pb-3" v-if="data.assignees && data.assignees.length !== 0">
                     <span class="text-gray text-bold flex-shrink-0 col-3 f6">Assignees</span>    
                     <div class="min-width-0 d-flex flex-wrap mt-n1 flex-wrap">
-                        <img class="avatar mr-1" v-for="item in data.assignees" 
-                        :key="item.id" :src="item.avatar_url" height="20" width="20"> 
+                        <ImgWrapper>
+                            <img class="avatar mr-1" v-for="item in data.assignees" 
+                            :key="item.id" :src="item.avatar_url" height="20" width="20"> 
+                        </ImgWrapper>
                     </div>
                 </div> 
            
@@ -53,7 +55,6 @@
                                     :name="item.name"
                                     :color="`#${item.color}`"></Label> 
                         </router-link>
-                      
                     </div>
                 </div> 
             </AnimatedHeightWrapper>
@@ -128,7 +129,9 @@
                 </InfoBottomItemTitle>
                 <div style="margin-bottom:10px" v-for="item in data.assignees.slice(0,21)" :key="item.id">
                     <router-link to="/">
-                        <img class="avatar" :src="item.avatar_url" width="20" height="20" :alt="`@${item.login}`"> 
+                        <ImgWrapper>
+                            <img class="avatar" :src="item.avatar_url" width="20" height="20" :alt="`@${item.login}`"> 
+                        </ImgWrapper>
                         <span class="assignee-login">{{item.login}}</span>    
                     </router-link> 
                 </div>
@@ -192,7 +195,9 @@
                 </InfoBottomItemTitle>
                 <div style="margin-bottom:10px" class="d-flex flex-wrap">
                     <router-link to="/" v-for="item in extraData.data.participants ? extraData.data.participants.nodes : []" :key="item.id" class="mt-1 ml-1">
-                        <img class="avatar" :src="item.avatarUrl" width="26" height="26" :alt="`@${item.login}`"> 
+                        <ImgWrapper>
+                            <img class="avatar" :src="item.avatarUrl" width="26" height="26" :alt="`@${item.login}`"> 
+                        </ImgWrapper>
                     </router-link> 
                 </div>
                 <span v-if="extraData.data.participants && (extraData.data.participants.totalCount > 21)">and others</span>    
@@ -236,7 +241,15 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading,Label,AnimatedHeightWrapper,LoadingIconEx,Progress,IssueIcon,Editor,HiddenItemLoading} from '@/components'
+    import {CommonLoading,
+            Label,
+            AnimatedHeightWrapper,
+            LoadingIconEx,
+            Progress,
+            IssueIcon,
+            ImgWrapper,
+            Editor,
+            HiddenItemLoading} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
     import {TimelineItem,Comment,ProjectCard} from './components'
     import {util_dateFormat} from '@/util'
@@ -711,6 +724,7 @@
             TimelineItem,
             HiddenItemLoading,
             LoadingIconEx,
+            ImgWrapper,
             AnimatedHeightWrapper,
             Editor,
             Progress,

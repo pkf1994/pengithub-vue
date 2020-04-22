@@ -33,7 +33,9 @@
             <WhoDidWhatAt class="d-flex flex-row px-3 pt-3"  :class="{'minimized-header  pl-5':data.isMinimized}">
                 <div class="flex-auto flex flex-items-center">
                     <router-link :to="`/${data.author.login}`" class="d-inline-block">
-                        <img class="v-align-middle" :src="data.author.avatarUrl" :alt="`@${data.author.login}`" width="16" height="16">&nbsp;
+                        <ImgWrapper>
+                            <img class="v-align-middle" :src="data.author.avatarUrl" :alt="`@${data.author.login}`" width="16" height="16">&nbsp;
+                        </ImgWrapper>
                     </router-link>
                     <router-link :to="`/${data.author.login}`" class="f5 text-bold link-gray-dark">{{data.author.login}}</router-link>
                     <span class="text-gray">&nbsp;• {{createdAt}}</span>
@@ -66,7 +68,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {util_dateFormat} from '@/util'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '@/components'
+    import {LoadingIconEx,AnimatedHeightWrapper,Popover,ImgWrapper} from '@/components'
     import ClipboardJS from 'clipboard';
     import Reaction from '../Reaction'
     import Comment from '../Comment'
@@ -159,6 +161,7 @@
             AnimatedHeightWrapper,
             Popover,
             Reaction,
+            ImgWrapper,
             Container: styled.div``,
             Inner: styled.div``,
             Header: styled.div``,

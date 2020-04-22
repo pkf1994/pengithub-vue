@@ -17,7 +17,9 @@
                 </Action>
                 
                 <Avatar class="float-left relative">
-                    <img class="avatar" height="32" width="32" :alt="`@${propsData.author && propsData.author.login}`" :src="propsData.author && propsData.author.avatarUrl">
+                    <ImgWrapper>
+                        <img class="avatar" height="32" width="32" :alt="`@${propsData.author && propsData.author.login}`" :src="propsData.author && propsData.author.avatarUrl">
+                    </ImgWrapper>
                 </Avatar>
                 
                 <Meta class="meta">
@@ -50,7 +52,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {util_dateFormat} from '@/util'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '@/components'
+    import {LoadingIconEx,AnimatedHeightWrapper,Popover,ImgWrapper} from '@/components'
     import ClipboardJS from 'clipboard';
     import Reaction from '../Reaction'
     export default {
@@ -125,6 +127,7 @@
             LoadingIconEx,
             AnimatedHeightWrapper,
             Popover,
+            ImgWrapper,
             Reaction,
             Container: styled.div``,
             Inner: styled.div``,

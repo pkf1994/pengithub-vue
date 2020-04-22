@@ -2,7 +2,7 @@
     <Container class="py-3 position-relative timeline-item">
         <Inner v-if="!commentExtraDataHolder.isMinimized" class="inner bg-white">
             <Header class="px-3 header text-normal f5" :style="headerStyle">
-                <Action class="action py-2 px-1 ml-2 relative" style="align-self:start" @click="showActionPopover">
+                <Action class="action py-2 px-1 ml-2 position-relative" style="align-self:start" @click="showActionPopover">
                     <svg class="octicon" viewBox="0 0 13 16" version="1.1" width="13" height="16" role="img"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
                     <Popover ref="actionPopover" :popoverStyle="popoverStyle">
                             <button class="popover-item btn-link" :data-clipboard-text="location.href">
@@ -37,11 +37,13 @@
 
                 <HeaderInner class="py-2 flex-grow-1" >
                     <router-link class="d-inline-block" to="/">
-                        <img    class="avatar" 
-                                :src="data.user && data.user.avatar_url"
-                                height="20" 
-                                width="20" 
-                                :alt="`@${data.user && data.user.login}`">
+                        <ImgWrapper>
+                            <img   class="avatar" 
+                                    :src="data.user && data.user.avatar_url"
+                                    height="20" 
+                                    width="20" 
+                                    :alt="`@${data.user && data.user.login}`">
+                        </ImgWrapper>
                     </router-link>
                     <router-link to="/">
                         <strong class="no-wrap link-gray-dark">
@@ -147,11 +149,13 @@
                    
 
                     <router-link class="d-inline-block float-left mt-1" to="/">
-                            <img    class="avatar" 
+                        <ImgWrapper>
+                             <img    class="avatar" 
                                     :src="data.user && data.user.avatar_url"
                                     height="28" 
                                     width="28" 
                                     :alt="`@${data.user && data.user.login}`">
+                        </ImgWrapper>
                     </router-link>
 
                     <Body style="margin-left: 44px;">
@@ -177,8 +181,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_dateFormat} from '../../../../../util'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '../../../../../components'
+    import {util_dateFormat} from '@/util'
+    import {LoadingIconEx,AnimatedHeightWrapper,Popover,ImgWrapper} from '@/components'
     import {mapState} from 'vuex'
     import ClipboardJS from 'clipboard';
     export default {
@@ -296,6 +300,7 @@
         },
         components: {
             LoadingIconEx,
+            ImgWrapper,
             AnimatedHeightWrapper,
             Popover,
             Container: styled.div``,

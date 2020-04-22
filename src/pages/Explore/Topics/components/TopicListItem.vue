@@ -1,7 +1,9 @@
 <template>
     <router-link class="d-flex border-bottom border-gray-light pb-4 mb-5" :to="`/explore/topics/${topic.name}`">
         <DefaultAvatar v-if="!topic.avatar" class="bg-blue-light f4 text-gray-light text-bold rounded-1 flex-shrink-0 text-center mr-3" style="height:64px; width:64px; line-height:64px">#</DefaultAvatar>
-        <img v-else class="mr-3" :src="topic.avatar" :alt="`@${topic.displayName}`" width="64" height="64">
+        <ImgWrapper v-else>
+            <img class="mr-3" :src="topic.avatar" :alt="`@${topic.displayName}`" width="64" height="64">
+        </ImgWrapper>
         <Main class="flex-auto">
             <p class="f3 link-gray-dark mb-0">
                 {{topic.displayName}}
@@ -20,6 +22,7 @@
 
 <script>
     import styled from 'vue-styled-components'
+    import {ImgWrapper} from '@/components'
     export default {
         inject: ['viewerHasStarredProvided'],
         props: {
@@ -35,6 +38,7 @@
             }
         },
         components: {
+            ImgWrapper,
             Container: styled.div``,
             AvatarColumn: styled.div``,
             DefaultAvatar: styled.div``,

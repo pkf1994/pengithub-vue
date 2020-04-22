@@ -9,7 +9,9 @@
             <Body class="body">
                 <WhoDidWhat>
                     <router-link v-if="showActor && showActorAvatar" to="/" class="d-inline-block">
-                        <img :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" class="avatar" height="20" width="20">
+                        <ImgWrapper>
+                            <img :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" class="avatar" height="20" width="20">
+                        </ImgWrapper>
                     </router-link>
                     <router-link v-if="showActor" to="/" class="text-bold link-gray-dark">
                         {{data.actor.login}}
@@ -26,7 +28,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_dateFormat} from '../../../../../util'
+    import {ImgWrapper} from '@/components'
+    import {util_dateFormat} from '@/util'
     export default {
         props: {
             data: {
@@ -60,6 +63,7 @@
             }
         },
         components: {
+            ImgWrapper,
             Container: styled.div``,
             Inner: styled.div``,
             Badge: styled.div``,

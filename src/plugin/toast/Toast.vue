@@ -1,39 +1,67 @@
 <template>
-    <transition name="fade">
-        <Container class="container" v-show="show">
-            <ToastContent class="toast-content" :class="{warn: type === 'warn',error: type === 'error'}">
-                {{toastContent}}
+    <Container class="container">
+        <transition-group name="toast-slide" appear>
+            <ToastContent v-for="item in toastArr" :key="item.uniMeta" class="toast-content" :class="{warn: item.type === 'warn',error: item.type === 'error'}">
+                {{item.content}}
             </ToastContent>
-        </Container>
-    </transition>
+        </transition-group>
+    </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
+    import Vue from 'vue'
     export default {
         data() {
             return {
-                show: false,
-                type: "notice",
-                toastContent: "Default Toast",
-                duration: 2000
+                duration: 2000,
+                prevToast: {
+                    content: '',
+                    type: undefined,
+                    duration: undefined
+                },
+                toastArr: [
+                  
+                ]
             }
         },
         methods: {
-            showToast(toastContent,option) {
-                option = {
-                    type: "notice",
-                    duration: 2000,
-                    ...option
+            pushToast(content,type = 'notice',duration = 3000) {
+                if(!content || !content.message || content.message.trim() == '') return 
+                
+                if(content.toString() == this.prevToast.content.toString() && type == this.prevToast.type) {
+                    Vue.set(this.toastArr,this.toastArr.length - 1,{
+                        ...this.toastArr[this.toastArr.length - 1],
+                        duration: parseInt(duration) + parseInt(this.prevToast.duration)
+                    })
+                } else {
+                    if(this.toastArr.length == 3) this.shiftToast()
+                    this.toastArr.push({
+                        content,
+                        type,
+                        duration,
+                        uniMeta: (new Date()).getTime()
+                    })
                 }
-                const _this = this
-                this.toastContent = toastContent
-                this.type = option.type
-                this.duration = option.duration
-                this.show = true
-                setTimeout(() => {
-                    _this.show = false
-                },this.duration)
+
+                this.prevToast = {
+                    content,
+                    type,
+                    duration
+                }
+            },
+            shiftToast() {
+                this.toastArr.shift()
+            }
+        },
+        watch: {
+            toastArr(newOne,oldOne) {
+                if(newOne.length > 0) {
+                    clearTimeout(this.shiftTimer)
+                    this.shiftTimer = setTimeout(() => {
+                        this.shiftToast()
+                    },newOne[newOne.length - 1].duration)
+                }
             }
         },
         components: {
@@ -50,7 +78,6 @@
     left: 24px;
     right: 24px;
     z-index: 9;
-    display: flex;
     justify-content: center;
     align-content: center;
 }
@@ -63,6 +90,8 @@
     background-color: #fafbfc;
     box-shadow: 0 1px 5px rgba(27, 31, 35, 0.15);
     font-size: 20px;
+    margin-bottom: 8px;
+    transition: all .4s ease;
 }
 .warn{
     background: #FFF8DD;
@@ -72,4 +101,17 @@
     background: #FFEEEE;
     color: #FF0000;
 }
+
+
+
+.toast-slide-enter {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.toast-slide-leave-to {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
 </style>

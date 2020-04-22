@@ -5,7 +5,9 @@
                 <DefaultAvatar v-if="!avatar" style="width: 48px; height: 48; line-height: 48px;" class="border border-black-fade bg-blue-light f4 text-gray-light text-bold rounded-1 flex-shrink-0 text-center mr-3">
                     #
                 </DefaultAvatar>
-                <img v-else :src="avatar" :alt="`@${displayName}`" height="48" width="48" class="mr-3">
+                <ImgWrapper v-else>
+                    <img :src="avatar" :alt="`@${displayName}`" height="48" width="48" class="mr-3">
+                </ImgWrapper>
                 <h1 class="topic-name">{{displayName}}</h1>
             </Title>
         </transition>
@@ -24,7 +26,9 @@
         <transition name="fade" appear>
             <Description v-if="rawContent" class="border rounded-1 box-shadow bg-white p-4 mb-5">
                 <DescriptionAvatar class="mb-4 text-center" v-if='avatar'>
-                    <img :src="avatar" alt="displayName" height="100" width="100">
+                    <ImgWrapper>
+                        <img :src="avatar" alt="displayName" height="100" width="100">
+                    </ImgWrapper>
                 </DescriptionAvatar>
                 
                 <DescriptionHTML class="f5 mb-2 markdown-body" v-html="descriptionHTML">
@@ -123,7 +127,7 @@
 <script>
     import {util_markdownParse,util_queryParse,util_numberFormat} from '@/util'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading,Modal,LoadingIconEx,SelectMenuItem} from '@/components'
+    import {CommonLoading,Modal,LoadingIconEx,SelectMenuItem,ImgWrapper} from '@/components'
     import {LoadingMore} from '../components'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
@@ -299,6 +303,7 @@
                     //this.network_getRepositories()
                     this.loading = false
                 }catch(e) {
+                    this.$toast(e,'error')
                     this.loading = false
                     console.log(e)
                 }
@@ -317,6 +322,7 @@
                     this.repositories.filterLanguageList.data = res.data
                     this.repositories.filterLanguageList.loading = false
                 }catch(e) {
+                    this.$toast(e,'error')
                     console.log(e)
                     this.repositories.filterLanguageList.loading = false
                 }
@@ -362,6 +368,7 @@
 
                     this.repositories.loading = false
                 }catch(e) {
+                    this.$toast(e,'error')
                     this.repositories.loading = false
                     console.log(e)
                 }
@@ -377,6 +384,7 @@
                     this.repositories.extraData.data = this.repositories.extraData.data.concat(res_repositories.data.data.nodes)
                     this.repositories.extraData.loading = false
                 }catch(e) {
+                    this.$toast(e,'error')
                     this.repositories.extraData.loading = false
                     console.log(e)
                 }
@@ -399,6 +407,7 @@
             LoadingMore,
             Modal,
             SelectMenuItem,
+            ImgWrapper,
             LoadingIconEx,
             RepoListItem,
             Container: styled.div``,

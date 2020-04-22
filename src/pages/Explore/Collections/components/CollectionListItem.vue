@@ -2,7 +2,9 @@
     <Container class="d-flex border-bottom border-gray-light pb-4 mb-5">
         <AvatarColumn class="col-2 mr-3">
             <DefaultAvatar v-if="!collection.avatar" class="bg-blue-light f4 text-gray-light text-bold rounded-1 flex-shrink-0 text-center" style="height:64px; line-height:64px;">#</DefaultAvatar>
-            <img v-else class="width-full" :src="collection.avatar" :alt="`@${collection.displayName}`">
+            <ImgWrapper v-else>
+                <img class="width-full" :src="collection.avatar" :alt="`@${collection.displayName}`">
+            </ImgWrapper>
         </AvatarColumn>
         <Main class="col-10">
             <h2 class="h3">
@@ -17,6 +19,7 @@
 
 <script>
     import styled from 'vue-styled-components'
+    import {ImgWrapper} from '@/components'
     export default {
         props: {
             collection: {
@@ -25,6 +28,7 @@
             }
         },
         components: {
+            ImgWrapper,
             Container: styled.div``,
             AvatarColumn: styled.div``,
             DefaultAvatar: styled.div``,

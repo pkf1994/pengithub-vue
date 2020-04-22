@@ -10,7 +10,9 @@
                     <span>{{formatDate(item.commit.committer.date)}}</span>
                 </CommittedDate>
                 <CommitInfo class="commit-info-item bg-white">
-                    <img :src="item.commit.committer.user ? item.commit.committer.avatarUrl : item.commit.author.avatarUrl" width="20" height="20" :alt="item.commit.committer.user ? item.commit.committer.user.login : item.commit.author.user.login" class="avatar">
+                    <ImgWrapper class="img">
+                        <img :src="item.commit.committer.user ? item.commit.committer.avatarUrl : item.commit.author.avatarUrl" width="20" height="20" :alt="item.commit.committer.user ? item.commit.committer.user.login : item.commit.author.user.login" class="avatar">
+                    </ImgWrapper>
                     <Title class="title">
                         <router-link :to="item.commit.commitResourcePath" v-html="item.commit.messageHeadlineHTML">
                         </router-link>
@@ -37,7 +39,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading} from '@/components'
+    import {CommonLoading,ImgWrapper} from '@/components'
     import {HiddenItemLoading} from './components'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery } from '@/network'
     import {util_dateFormat,util_emoji} from '@/util'
@@ -103,6 +105,7 @@
         components: {
             CommonLoading,
             HiddenItemLoading,
+            ImgWrapper,
             Container: styled.div``,
             CutOffNotice: styled.div``,
             Commit: styled.div``,
@@ -146,7 +149,7 @@
     line-height: inherit;
     text-align: left;
     display: block;
-    img{
+    .img{
         position: absolute;
         top: 14px;
         left: 15px;

@@ -3,7 +3,9 @@
 
         <AvatarColumn class="col-2">
             <router-link :to="`/${comprehensiveFollowing.login}`">
-                <img class="avatar" height="50" width="50" :src="comprehensiveFollowing.avatar_url" :alt="`@${comprehensiveFollowing.login}`">
+                <ImgWrapper>
+                    <img class="avatar" height="50" width="50" :src="comprehensiveFollowing.avatar_url" :alt="`@${comprehensiveFollowing.login}`">
+                </ImgWrapper>
             </router-link>
 
         </AvatarColumn> 
@@ -46,7 +48,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {AnimatedHeightWrapper,AnimatedWidthWrapper} from '@/components'
+    import {AnimatedHeightWrapper,AnimatedWidthWrapper,ImgWrapper} from '@/components'
     export default {
         inject: ['extraDataProvided'],
         props: {
@@ -66,6 +68,7 @@
         components: {
             AnimatedHeightWrapper,
             AnimatedWidthWrapper,
+            ImgWrapper,
             Container: styled.div``,
             FollowBtn: styled.div``,
             AvatarColumn: styled.div``,

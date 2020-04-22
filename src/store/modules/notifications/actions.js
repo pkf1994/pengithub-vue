@@ -2,6 +2,7 @@ import * as api from '@/network/api'
 import {authRequiredGet} from '@/network'
 import {MUTATION_RESOLVE_NOTIFICATIONS_COUNT} from './mutations'
 import * as actionType from './actionTypes'
+import Vue from 'vue'
 const parse = require('parse-link-header')
 
 export default {
@@ -17,7 +18,6 @@ export default {
                 per_page: 1
             })
             const res = await authRequiredGet(url)
-            console.log(res)
 
             let pageInfo = parse(res.headers.link) || {}
             
@@ -46,6 +46,7 @@ export default {
                 actionType: actionType.ACTION_GET_UNREAD_NOTIFICATIONS_COUNT,
                 loading: false
             })  
+            Vue.toast(e,'error')
             console.log(e)
             throw(e)
         }   

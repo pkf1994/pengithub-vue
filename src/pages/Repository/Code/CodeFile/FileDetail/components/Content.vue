@@ -37,7 +37,9 @@
        
          <Content class="Box-body p-0 content" v-if="isImage && !isSvg">
             <div class="p-3">
-                <img :src="raw" class='d-block mx-auto width-fit'> 
+                <ImgWrapper>
+                    <img :src="raw" class='d-block mx-auto width-fit'> 
+                </ImgWrapper>
             </div>
         </Content>
 
@@ -59,7 +61,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper} from '@/components'
+    import {ComplexBubble,AnimatedHeightWrapper,ImgWrapper} from '@/components'
     import {mapState,mapGetters} from 'vuex'
     import {util_analyseFileType} from '@/util'
     export default {
@@ -110,6 +112,7 @@
             }
         },
         components: {
+            ImgWrapper,
             ComplexBubble,
             AnimatedHeightWrapper,
             Header: styled.div``,

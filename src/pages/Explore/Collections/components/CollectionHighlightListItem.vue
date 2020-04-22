@@ -1,6 +1,8 @@
 <template>
-    <router-link :to="`/explore/collections/${collection.name}`" class="exploregrid-item d-flex flex-column flex-justify-center p-5">
-        <img :src="collection.avatar" :alt="`@${collection.displayName}`" width="64" height="64" class="mx-auto rounded-1 mb-3">
+    <router-link :to="`/explore/collections/${collection.name}`" class="exploregrid-item d-flex flex-items-center flex-column flex-justify-center p-5">
+        <ImgWrapper>
+            <img :src="collection.avatar" :alt="`@${collection.displayName}`" width="64" height="64" class="mx-auto rounded-1 mb-3">
+        </ImgWrapper>
         <p class="f3 lh-condensed text-center link-gray-dark mb-0 mt-1">
             {{collection.displayName}}
         </p>
@@ -12,6 +14,7 @@
 
 <script>
     import styled from 'vue-styled-components'
+    import {ImgWrapper} from '@/components'
     export default {
         props: {
             collection: {
@@ -20,6 +23,7 @@
             }
         },
         components: {
+            ImgWrapper,
             Container: styled.div``,
          }
     }

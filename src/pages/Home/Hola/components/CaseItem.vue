@@ -1,7 +1,9 @@
 <template>
     <Container class="py-2">
         <Inner class="inner round-1 flex-column px-3 pt-3 ">
-            <img :src="img" class="image round-1 width-fit">
+            <ImgWrapper>
+                <img :src="img" class="image round-1 width-fit">
+            </ImgWrapper>
             <Title class="h4-mktg pt-3 mb-1 font-inter">{{title}}</Title>
             <SubTitle class="sub-title f6 text-gray">{{subTitle}}</SubTitle>
             <ReadMore class="read-more border-top py-3 text-blue f5-mktg">
@@ -14,6 +16,7 @@
 
 <script>
     import styled from 'vue-styled-components';
+    import {ImgWrapper} from '@/components'
     export default {
         props: {
             img: {
@@ -30,6 +33,7 @@
             }
         },
         components: {
+            ImgWrapper,
             Container: styled.div``,
             Title: styled.h1``,
             SubTitle: styled.p``,

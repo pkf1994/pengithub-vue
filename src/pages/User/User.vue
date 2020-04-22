@@ -7,7 +7,9 @@
                 <AvatarAndName>
                     <Avatar class="float-left col-3 pr-3 mb-2">
                         <a href="" class="d-block position-relative">
-                            <img :src="data.avatarUrl" :alt="`@${data.login}`" width="260" height="260" class="avatar width-full height-full">
+                            <ImgWrapper>
+                                <img :src="data.avatarUrl" :alt="`@${data.login}`" width="260" height="260" class="avatar width-full height-full">
+                            </ImgWrapper>
                         </a>
                     </Avatar>
 
@@ -38,7 +40,9 @@
                     <Sponsors class="border-top py-3" v-if="data.sponsorshipsAsMaintainer && data.sponsorshipsAsMaintainer.totalCount > 0">
                         <h2 class="h4 d-flex flex-items-start mb-1">Sponsors</h2>
                         <router-link class="avatar-group-item mb-0 v-align-top mr-1 mb-1" v-for="item in data.sponsorshipsAsMaintainer.nodes" :key="item.sponsor.login" :to="`/${item.sponsor.login}`">
-                            <img class="avatar d-block" :src="item.sponsor.avatarUrl" :alt="`@${item.sponsor.login}`" width="35" height="35">
+                            <ImgWrapper>
+                                <img class="avatar d-block" :src="item.sponsor.avatarUrl" :alt="`@${item.sponsor.login}`" width="35" height="35">
+                            </ImgWrapper>
                         </router-link><span v-if="data.sponsorshipsAsMaintainer.totalCount - data.sponsorshipsAsMaintainer.nodes.length > 0" class="d-inline-block border text-center rounded-1" style="width:35px;height:35px;line-height:33px;">
                             +{{data.sponsorshipsAsMaintainer.totalCount - data.sponsorshipsAsMaintainer.nodes.length}}
                         </span>
@@ -47,7 +51,9 @@
                     <Sponsoring class="border-top py-3" v-if="data.sponsorshipsAsSponsor && data.sponsorshipsAsSponsor.totalCount > 0">
                         <h2 class="h4 d-flex flex-items-start mb-1">Sponsoring</h2>
                         <router-link class="avatar-group-item mb-0 v-align-top mr-1 mb-1" v-for="item in data.sponsorshipsAsSponsor.nodes" :key="item.maintainer.login" :to="`/${item.maintainer.login}`">
-                            <img class="avatar d-block" :src="item.maintainer.avatarUrl" :alt="`@${item.maintainer.login}`" width="35" height="35">
+                            <ImgWrapper>
+                                <img class="avatar d-block" :src="item.maintainer.avatarUrl" :alt="`@${item.maintainer.login}`" width="35" height="35">
+                            </ImgWrapper>
                         </router-link><span v-if="data.sponsorshipsAsSponsor.totalCount - data.sponsorshipsAsSponsor.nodes.length > 0" class="d-inline-block border text-center rounded-1" style="width:35px;height:35px;line-height:33px;">
                             +{{data.sponsorshipsAsSponsor.totalCount - data.sponsorshipsAsSponsor.nodes.length}}
                         </span>
@@ -110,7 +116,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading,ComplexTopTab} from '@/components'
+    import {CommonLoading,ComplexTopTab,ImgWrapper} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
     import * as graphql from './graphql'
@@ -186,6 +192,7 @@
         },
         components: {
             CommonLoading,
+            ImgWrapper,
             ComplexTopTab,
             Container: styled.div``,
             Main: styled.div``,

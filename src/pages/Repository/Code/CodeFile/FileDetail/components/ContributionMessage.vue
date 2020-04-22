@@ -3,7 +3,9 @@
                     :withFooterBorderTop=false>
         <LastUpdateMessage class="bg-blue-light Box-body d-flex py-2 px-3 flex-column flex-justify-between">
             <CommitterAndMessage class="f6">
-                <img class="avatar" width="20" height="20" :src="lastCommit().author && lastCommit().author.avatarUrl" :alt="`@${lastCommit().author && lastCommit().author.user && lastCommit().author.user.login}`">
+                <ImgWrapper>
+                    <img class="avatar" width="20" height="20" :src="lastCommit().author && lastCommit().author.avatarUrl" :alt="`@${lastCommit().author && lastCommit().author.user && lastCommit().author.user.login}`">
+                </ImgWrapper>
                 <router-link to="/" class="text-bold link-gray-dark lh-default v-align-middle">
                     {{lastCommit().author && lastCommit().author.user && lastCommit().author.user.login}}
                 </router-link>
@@ -28,7 +30,9 @@
                 </span>
                 <span>
                     <router-link class="avatar-link" to='/' v-for="item in contributors()" :key="item.login">
-                        <img class="avatar mr-1" height='20' width='20' :src="item.avatarUrl"/> 
+                        <ImgWrapper>
+                            <img class="avatar mr-1" height='20' width='20' :src="item.avatarUrl"/> 
+                        </ImgWrapper>
                     </router-link>   
                 </span>
             </Contributors>
@@ -38,8 +42,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,AnimatedHeightWrapper} from '../../../../../../components'
-    import {util_dateFormat} from '../../../../../../util'
+    import {ComplexBubble,AnimatedHeightWrapper,ImgWrapper} from '@/components'
+    import {util_dateFormat} from '@/util'
     import {mapState} from 'vuex'
     export default {
         inject: ['contributors','loading','lastCommit'],
@@ -55,6 +59,7 @@
         },
         components: {
             ComplexBubble,
+            ImgWrapper,
             AnimatedHeightWrapper,
             LastUpdateMessage: styled.div``,
             CommitterAndMessage: styled.span``,

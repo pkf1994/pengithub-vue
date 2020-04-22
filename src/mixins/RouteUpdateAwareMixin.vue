@@ -16,15 +16,18 @@
         },
         
         beforeRouteEnter (to, from, next) {
-            next(vm => {
+            next(async vm => {
                 if(vm.routeUpdateAwareMixinDebugFlag) {
                     console.log('beforeRouteEnter')
                 }
                 if(vm.routerMeta && vm.routerMeta != vm.generateRouterMeta()) {
-                    vm.cancelUntimelyAxios()
                     vm.routeResetHook()
+                    vm.cancelUntimelyAxios()
+                    /* await (function(time) {
+                        return new Promise((resolve) => setTimeout(resolve, time));
+                    })(3000) */
                     vm.routeUpdateHook()
-                    vm.routerMeta = vm.generateRouterMeta()
+                    vm.routerMeta = vm.generateRouterMeta() 
                 }
             })
         },

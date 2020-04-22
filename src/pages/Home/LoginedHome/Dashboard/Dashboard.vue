@@ -5,6 +5,7 @@
         <Main class="bg-white pb-3">
             <SearchWrapper class="search-wrapper">
                 <input aria-label="Search GitHub"
+                        :disabled="loading"
                        v-model="localSearchQuery"
                        autocapitalize="off"
                        autocomplete="off"
@@ -17,8 +18,8 @@
             </SearchWrapper>
 
             <transition name="fade" appear>
-                  <SimpleBubble v-if="recentActivities.data.length > 0"
-                        :loading="loading"
+                  <SimpleBubble v-if="recentActivities.data.length > 0 && !exception.recentActivities && repositoriesContributedTo.length > 0"
+                        :loading="recentActivities.loading"
                         :disableAnimatedWrapper="false"
                         title="Recent activity">
                     <ActivityListItem v-for="item in recentActivities.data.slice(0,4)" :event="item" :key="item.id" >
@@ -28,7 +29,7 @@
 
             <transition name="fade" appear>
                    <SimpleBubble title="Repositories you contribute to"
-                    v-if="repositoriesContributedTo.length > 0 || !loading"
+                    v-if="(repositoriesContributedTo.length > 0 || !loading) && !exception.repositoriesContributedTo"
                     :loading="loading"
                     :disableFlag="!loading && repositoriesContributedTo.length == 0"
                     disableNotice="You haven't contributed any repository yet.">
@@ -38,7 +39,7 @@
 
             <transition name="fade" appear>
                 <SimpleBubble title="Starred repositories"
-                        v-if=" starredRepositories.length > 0 || !loading"
+                        v-if="(starredRepositories.length > 0 || !loading) && !exception.starredRepositories"
                         :loading="loading"
                         :disableFlag="!loading && starredRepositories.length === 0"
                         disableNotice="You haven't starred any repository yet">
@@ -95,6 +96,11 @@
                 recentActivities: {
                     data: [],
                     loading: false
+                },
+                exception: {
+                    repositoriesContributedTo: false,
+                    starredRepositories: false,
+                    recentActivities: false,
                 }
             }
         },
@@ -104,14 +110,26 @@
             }),
         },
         created() {
-           // this.action_home_requestDashboardData()
            this.network_getRecentActivities()
-           this.network_getRepositoriesStarredAndContributedByViewer()
+           this.network_getRepositoriesStarredAndContributedByViewer();
+/* 
+        var re = /x/;
+        var i = 0;
+        console.log(re);
+
+        re.toString = function () {
+            return '第 ' + (++i) + ' 次打开控制台';
+        }
+
+         setInterval(()=>console.log(re),1000) */
+
+
         },
         methods: {
           /*   ...mapActions({
                 action_home_requestDashboardData: ACTION_HOME_REQUEST_DASHBOARD_DATA
             }), */
+          
             async network_getRecentActivities() {
                  try{
                     this.recentActivities.loading = true
@@ -166,6 +184,8 @@
                     })
                     this.recentActivities.loading = false
                 }catch(e) {
+                    this.$toast(e,'error')
+                    this.exception.recentActivities = true
                     console.log(e)
                     this.recentActivities.loading = false
                 }
@@ -175,11 +195,13 @@
                     this.loading = true
                     let graphql_ = graphql.GRAPHQL_DASHBOARD(this.login)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_)
-                    console.log(res)
                     this.repositoriesContributedTo = res.data.data.viewer.repositoriesContributedTo.nodes
                     this.starredRepositories = res.data.data.viewer.starredRepositories.nodes
                     this.loading = false
                 }catch(e) {
+                    this.$toast(e,'error')
+                    this.exception.starredRepositories = true
+                    this.exception.repositoriesContributedTo = true
                     console.log(e)
                     this.loading = false
                 }

@@ -2,7 +2,9 @@
     <Container class="Box-row">
         <Inner class="d-flex inner">
             <AvatarWrapper class="col-3 px-2">
-                <img :src="developer.avatar" :alt="`@${developer.username}`" class="d-block width-full">
+                <ImgWrapper>
+                    <img :src="developer.avatar" :alt="`@${developer.username}`" class="d-block width-full">
+                </ImgWrapper>
             </AvatarWrapper>
 
             <Info class="col-9 mx-2">
@@ -38,7 +40,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    export default {
+    import {ImgWrapper} from '@/components'
+    export default { 
         inject: ['viewerIsFollowingProvided'],
         props: {
             developer: {
@@ -53,6 +56,7 @@
             }
         },
         components: {
+            ImgWrapper,
             Container: styled.div``,
             Inner: styled.div``,
             AvatarWrapper: styled.div``,

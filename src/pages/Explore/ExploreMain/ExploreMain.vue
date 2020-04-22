@@ -31,10 +31,12 @@
         </Viewer> -->
 
         <transition appear name="fade">
-            <AnimatedHeightWrapper class="my-6">
-                <Jumbotron class="text-center" v-if="trendingRepoToday.data.length > 0">
+            <AnimatedHeightWrapper>
+                <Jumbotron class="text-center py-6" v-if="!trendingRepoToday.loading && !trendingDevelopers.loading">
                     <div class="col-2 mx-auto">
-                        <img src="https://github.githubassets.com/images/icons/emoji/tada.png" alt="tada" class="width-full">
+                        <ImgWrapper>
+                            <img src="https://github.githubassets.com/images/icons/emoji/tada.png" alt="tada" class="width-full">
+                        </ImgWrapper>
                     </div>
                     <h2 class="lh-condensed my-2 headline" style="font-size:22px">
                         That's everything we found for you, for now.
@@ -54,7 +56,7 @@
         </transition>
 
         <transition appear name="fade">
-            <ComplexBubble ref="xxx" class="mt-3" v-if="trendingRepoToday.data.length > 0">
+            <ComplexBubble ref="xxx" class="mt-3" v-if="trendingRepoToday.data.length > 0 && !exception.trendingRepoToday">
                 <template v:slot="title">
                     <div class="Box-header d-flex">
                         <svg height="16" class="octicon octicon-telescope mr-2" viewBox="0 0 14 16" version="1.1" width="14" aria-hidden="true"><path fill-rule="evenodd" d="M8 9l3 6h-1l-2-4v5H7v-6l-2 5H4l2-5 2-1zM7 0H6v1h1V0zM5 3H4v1h1V3zM2 1H1v1h1V1zM.63 9a.52.52 0 00-.16.67l.55.92c.13.23.41.31.64.2l1.39-.66-1.16-2-1.27.86.01.01zm7.89-5.39l-5.8 3.95L3.95 9.7l6.33-3.03-1.77-3.06h.01zm4.22 1.28l-1.47-2.52a.51.51 0 00-.72-.17l-1.2.83 1.84 3.2 1.33-.64c.27-.13.36-.44.22-.7z"></path></svg>
@@ -78,7 +80,7 @@
         </transition>
 
         <transition appear name="fade">
-            <ComplexBubble class="mt-3" v-if="trendingDevelopers.data.length > 0">
+            <ComplexBubble class="mt-3" v-if="trendingDevelopers.data.length > 0 && !exception.trendingDevelopers">
                 <template v:slot="title">
                     <div class="Box-header d-flex">
                         <svg height="16" class="octicon octicon-telescope mr-2" viewBox="0 0 14 16" version="1.1" width="14" aria-hidden="true"><path fill-rule="evenodd" d="M8 9l3 6h-1l-2-4v5H7v-6l-2 5H4l2-5 2-1zM7 0H6v1h1V0zM5 3H4v1h1V3zM2 1H1v1h1V1zM.63 9a.52.52 0 00-.16.67l.55.92c.13.23.41.31.64.2l1.39-.66-1.16-2-1.27.86.01.01zm7.89-5.39l-5.8 3.95L3.95 9.7l6.33-3.03-1.77-3.06h.01zm4.22 1.28l-1.47-2.52a.51.51 0 00-.72-.17l-1.2.83 1.84 3.2 1.33-.64c.27-.13.36-.44.22-.7z"></path></svg>
@@ -100,8 +102,6 @@
                 </BubbleFooter>
             </ComplexBubble>
         </transition>
-        
-
 
         <transition appear name="fade">
             <CommonLoading v-if="trendingRepoToday.loading || trendingDevelopers.loading"></CommonLoading>
@@ -111,11 +111,12 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,CommonLoading,AnimatedHeightWrapper} from '@/components'
+    import {ComplexBubble,CommonLoading,AnimatedHeightWrapper,ImgWrapper} from '@/components'
     import {RepoListItem,DeveloperListItem} from './components'
     import {commonGet,authRequiredGet} from '@/network'
     import {mapState} from 'vuex'
     export default {
+        name: 'explore_page',
         data() {
             return {
                 trendingRepoToday: {
@@ -126,6 +127,10 @@
                     data: [],
                     loading: false
                 },
+                exception: {
+                    trendingRepoToday: false,
+                    trendingDevelopers: false,
+                }
             }
         },
         computed: {
@@ -153,6 +158,8 @@
                     this.trendingRepoToday.loading = false
                 }catch(e) {
                     console.log(e)
+                    this.$toast(e,'error')
+                    this.exception.trendingRepoToday = true
                     this.trendingRepoToday.loading = false
                 }
             },
@@ -168,6 +175,8 @@
                     this.trendingDevelopers.loading = false
                 }catch(e) {
                     console.log(e)
+                    this.$toast(e,'error')
+                    this.exception.trendingDevelopers = true
                     this.trendingDevelopers.loading = false
                 }
             }
@@ -178,6 +187,7 @@
             DeveloperListItem,
             CommonLoading,
             AnimatedHeightWrapper,
+            ImgWrapper,
             Container: styled.div``,
           /*   Viewer: styled.div``,
             ViewerBasicInfo: styled.div``,

@@ -117,3 +117,7 @@ export const API_CHECK_IF_COLLABORATOR = payload => {
 export const API_PR_CHANGED_FILES = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/files`
 }
+
+export const API_TREE_LIST = payload => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/trees/${payload.sha}?recursive=1`
+}

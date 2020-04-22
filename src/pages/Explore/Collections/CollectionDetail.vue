@@ -8,15 +8,16 @@
                 <JumbotronTitle class="jumbotron-title mb-3 lh-condensed" style="font-size:40px">
                     {{displayName}}
                 </JumbotronTitle>
-                <JumbotronDescription class="jumbotron-description text-gray lh-condensed mb-3">
-                    {{description}}
+                <JumbotronDescription class="jumbotron-description text-gray lh-condensed mb-3" v-html="descriptionHTML">
                 </JumbotronDescription>
                 <router-link to="/" class="f5">Suggest edits</router-link> 
             </Jumbotron>
         </transition>
        
         <Avatar class="col-6 mx-auto" v-if="avatar">
-            <img :src="avatar" :alt="displayName" class="width-full">
+            <ImgWrapper>
+                <img :src="avatar" :alt="displayName" class="width-full">
+            </ImgWrapper>
         </Avatar>
 
         <transition-group appear name="fade">
@@ -34,9 +35,10 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading} from '@/components'
+    import {CommonLoading,ImgWrapper} from '@/components'
     import {RepoListItem} from './components'
     import * as graphql from './graphql'
+    import {util_markdownParse} from '@/util'
     import {authRequiredGitHubGraphqlApiQuery} from '@/network'
     export default {
         name: 'explore_collection_detail_page',
@@ -61,8 +63,8 @@
                 let displayNameHolder = magicArr.filter(i => i.match(/^display_name:/) != null)[0]
                 return displayNameHolder && displayNameHolder.replace("display_name: ","")
             },
-            description() {
-                return this.rawContent.split('---').pop().replace('\n','')
+            descriptionHTML() {
+                return util_markdownParse.markdownToHTML(this.rawContent.split('---').pop().replace('\n',''))
             }
         },
         created() {
@@ -82,6 +84,7 @@
                     this.network_getRepositories()
                     this.loading = false
                 }catch(e) {
+                    this.$toast(e,'error')
                     this.loading = false
                     console.log(e)
                 }
@@ -115,6 +118,7 @@
                     
                     this.repositories.loading = false
                 }catch(e) {
+                    this.$toast(e,'error')
                     this.repositories.loading = false
                     console.log(e)
                 } 
@@ -122,6 +126,7 @@
         },
         components: {
             CommonLoading,
+            ImgWrapper,
             RepoListItem,
             Container: styled.div``,
             Jumbotron: styled.div``,

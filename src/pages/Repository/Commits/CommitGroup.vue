@@ -17,8 +17,12 @@
                 <CommitMeta class="commit-meta d-flex flex-items-center" style="color: #24292e;">
                     
                     <AvatarStack class="AvatarStack flex-self-start AvatarStack-body" :class="{'AvatarStack--two':item.author.login != item.committer.login}">
-                        <img class="avatar" v-if="item.author" height="20" width="20" :src="item.author.avatar_url" :alt="`@${item.author && item.author.name}`">
-                        <img v-if="item.author && item.author.login != item.committer.login" class="avatar" height="20" width="20" :src="item.committer.avatar_url" :alt="`@${item.author.name}`">
+                        <ImgWrapper>
+                            <img class="avatar" v-if="item.author" height="20" width="20" :src="item.author.avatar_url" :alt="`@${item.author && item.author.name}`">
+                        </ImgWrapper>
+                        <ImgWrapper>
+                            <img v-if="item.author && item.author.login != item.committer.login" class="avatar" height="20" width="20" :src="item.committer.avatar_url" :alt="`@${item.author.name}`">
+                        </ImgWrapper>
                     </AvatarStack>
 
                     <div class="f6 text-gray min-width-0 mr-1">
@@ -43,7 +47,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {AnimatedHeightWrapper} from '@/components'
+    import {AnimatedHeightWrapper,ImgWrapper} from '@/components'
     export default {
         inject: ['graphqlDataProvided'],
         props: {
@@ -68,6 +72,7 @@
         },
         components: {
             AnimatedHeightWrapper,
+            ImgWrapper,
             Container: styled.div``,
             Time: styled.div``,
             CommitTitle: styled.p``,

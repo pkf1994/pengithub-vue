@@ -79,7 +79,9 @@
                 <WhoDidWhatAt class="d-flex flex-row">
                     <div class="flex-auto">
                         <router-link :to="`/${reviewComment.author.login}`" class="d-inline-block">
-                            <img :src="reviewComment.author.avatarUrl" :alt="`@${reviewComment.author.login}`" width="16" height="16">
+                            <ImgWrapper>
+                                <img :src="reviewComment.author.avatarUrl" :alt="`@${reviewComment.author.login}`" width="16" height="16">
+                            </ImgWrapper>
                         </router-link>
                         <router-link :to="`/${reviewComment.author.login}`" class="f5 text-bold link-gray-dark">{{reviewComment.author.login}}</router-link> 
                         <span class="text-gray" v-if="reviewProvided().state != 'pending'"> • {{dateFormat(reviewComment.createdAt)}}</span>
@@ -104,7 +106,9 @@
                     <WhoDidWhatAt class="d-flex flex-row">
                         <div class="flex-auto">
                             <router-link :to="`/${item.user.login}`" class="d-inline-block">
-                                <img :src="item.user.avatar_url" :alt="`@${item.user.login}`" width="16" height="16">
+                                <ImgWrapper>   
+                                    <img :src="item.user.avatar_url" :alt="`@${item.user.login}`" width="16" height="16">
+                                </ImgWrapper>
                             </router-link>
                             <router-link :to="`/${item.user.login}`" class="f5 text-bold link-gray-dark">{{item.user.login}}</router-link> 
                             <span class="text-gray"> • {{dateFormat(item.created_at)}}</span>
@@ -129,7 +133,9 @@
                     <WhoDidWhatAt class="d-flex flex-row">
                         <div class="flex-auto">
                             <router-link :to="`/${item.author.login}`" class="d-inline-block">
-                                <img :src="item.author.avatarUrl" :alt="`@${item.author.login}`" width="16" height="16">
+                                <ImgWrapper>
+                                    <img :src="item.author.avatarUrl" :alt="`@${item.author.login}`" width="16" height="16">
+                                </ImgWrapper>
                             </router-link>
                             <router-link :to="`/${item.author.login}`" class="f5 text-bold link-gray-dark">{{item.author.login}}</router-link> 
                         </div>
@@ -164,7 +170,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {util_dateFormat,util_analyseFileType} from '@/util'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover,SimpleDiffView} from '@/components'
+    import {LoadingIconEx,AnimatedHeightWrapper,Popover,SimpleDiffView, ImgWrapper} from '@/components'
     import HiddenItemLoading from './HiddenItemLoading'
     import {mapState} from 'vuex'
     import ClipboardJS from 'clipboard';
@@ -315,6 +321,7 @@
             Reaction,
             HiddenItemLoading,
             SimpleDiffView,
+            ImgWrapper,
             Container: styled.div``,
             Main: styled.div``,
             FileHeader: styled.div``,

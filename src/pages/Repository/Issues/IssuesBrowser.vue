@@ -66,7 +66,9 @@
           
             <transition-group name="slide-up" appear>
                 <SelectMenuItem v-for="item in associatedUsers.author.data" :key="item.id" :selected="query.indexOf(`author:${item.login}`) > -1"  @click.native="() => selectTheAuthorOrNot(item.login)">
-                    <img class="avatar mr-2" width="20" height="20" :src="item.avatar_url">
+                    <ImgWrapper>
+                        <img class="avatar mr-2" width="20" height="20" :src="item.avatar_url">
+                    </ImgWrapper>
                     <strong class='mr-1'>{{item.login}}</strong>
                     <span>{{((associatedUsers.userName.data || []).filter(_item => _item.id === item.node_id)[0] || {name:''}).name}}</span>    
                 </SelectMenuItem>
@@ -124,7 +126,9 @@
             </router-link> 
             <transition-group name="slide-up" appear>
                 <SelectMenuItem :selected="query.indexOf(`assignee:${item.login}`) > -1"  @click.native="() => selectTheAssigneeOrNot(item.login)" v-for="item in associatedUsers.assignee.data" :key="item.id">
-                    <img class="avatar mr-2" width="20" height="20" :src="item.avatar_url">
+                    <ImgWrapper>
+                        <img class="avatar mr-2" width="20" height="20" :src="item.avatar_url">
+                    </ImgWrapper>
                     <strong class='mr-1'>{{item.login}}</strong>
                     <span>{{((associatedUsers.userName.data || []).filter(_item => _item.id === item.node_id)[0] || {name:''}).name}}</span>    
                 </SelectMenuItem>
@@ -186,11 +190,12 @@
     import {
         SelectMenuItem,
         SimpleSearchInput,
+        ImgWrapper,
         Modal,
         IssuesPageTemplate,
         SimplePagination,
         ButtonLeftSearchInput,
-        LoadingIconEx} from '../../../components'
+        LoadingIconEx} from '@/components'
     import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
@@ -649,6 +654,7 @@
             SimpleSearchInput,
             IssuesPageTemplate,
             SimplePagination,
+            ImgWrapper,
             SubNav: styled.div``,
             Container: styled.div``,
             TopTabContainer: styled.div``,

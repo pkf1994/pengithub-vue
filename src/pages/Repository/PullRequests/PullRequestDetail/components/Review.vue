@@ -8,7 +8,9 @@
            
             <WhoDidWhat>
                 <router-link :to="`/${propsData.user.login}`" class="d-inline-block">
+                    <ImgWrapper>
                         <img :src="propsData.user.avatar_url" :alt="`@${propsData.user.login}`" class="avatar mr-1" height="16" width="16">
+                    </ImgWrapper>
                 </router-link>
                 <router-link  :to="`/${propsData.user.login}`" class="text-bold link-gray-dark">
                     {{propsData.user.login}}
@@ -53,7 +55,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover,Label} from '@/components'
+    import {LoadingIconEx,AnimatedHeightWrapper,Popover,Label,ImgWrapper} from '@/components'
     import {util_dateFormat} from '@/util'
     import Reaction from './Reaction'
     import ReviewComment from './ReviewComment'
@@ -158,6 +160,7 @@
             LoadingIconEx,
             AnimatedHeightWrapper,
             Popover,
+            ImgWrapper,
             Reaction,
             ReviewComment,
             HiddenItemLoading,

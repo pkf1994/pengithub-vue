@@ -17,7 +17,9 @@
                     <div class="d-flex">
                         <AnimatedWidthWrapper>
                              <router-link v-if="commit.author && commit.author.avatar_url" :to="`/${commit.author && commit.author.login}`" class="pr-2 d-inline-block">
-                                <img class="avatar v-align-baseline" width="16" height="16" :src="commit.author && commit.author.avatar_url" :alt="`@${commit.author && commit.author.login}`">
+                                <ImgWrapper>
+                                    <img class="avatar v-align-baseline" width="16" height="16" :src="commit.author && commit.author.avatar_url" :alt="`@${commit.author && commit.author.login}`">
+                                </ImgWrapper>
                             </router-link>
                         </AnimatedWidthWrapper>
                        
@@ -169,7 +171,9 @@
             </template>
             <template v-slot:additional>
                 <SourceCommit class="mt-3 flex">
-                    <img class="mr-2" :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" height="20" width="20">
+                    <ImgWrapper>
+                        <img class="mr-2" :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" height="20" width="20">
+                    </ImgWrapper>
 
                     <code class="d-inline-block mr-1 flex-grow-1 mr-3">
                         <router-link to="/" class="link-gray" v-html="referenceHighlightMessageOfCommit"></router-link>
@@ -391,7 +395,7 @@
     import Referenced from './Referenced'
     import Review from './Review'
     import {util_emoji} from '@/util'
-    import {Label,AnimatedHeightWrapper,AnimatedWidthWrapper} from '@/components'
+    import {Label,AnimatedHeightWrapper,AnimatedWidthWrapper,ImgWrapper} from '@/components'
     import CommitComment from './CommitComment/CommitComment.vue'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
     export default {
@@ -649,6 +653,7 @@
             SimpleTimelineItem,
             Label,
             AnimatedHeightWrapper,
+            ImgWrapper,
             Referenced,
             Review,
             CommitComment,
@@ -667,6 +672,7 @@
 </script>
 
 <style scoped lang='scss'>
+@import 'node_modules/@primer/css/avatars/index.scss';
 .issue-state{
     text-transform: Capitalize
 }

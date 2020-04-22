@@ -26,7 +26,9 @@
                 <AuthorAndLastEdit class="author-and-last-edit d-flex">
                     <div class="flex-auto">
                         <div class="avatar-parent-child float-left">
-                            <img class="avatar" :src="pullRequestProvided().user && pullRequestProvided().user.avatar_url" width="32" height="32" :alt="`@${pullRequestProvided().user && pullRequestProvided().user.login}`">
+                            <ImgWrapper>
+                                <img class="avatar" :src="pullRequestProvided().user && pullRequestProvided().user.avatar_url" width="32" height="32" :alt="`@${pullRequestProvided().user && pullRequestProvided().user.login}`">
+                            </ImgWrapper>
                         </div>
 
                         <div style="margin-left:42px;">
@@ -155,7 +157,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading,Label,AnimatedHeightWrapper,LoadingIconEx,Progress,IssueIcon,Subscription} from '@/components'
+    import {CommonLoading,Label,AnimatedHeightWrapper,ImgWrapper,LoadingIconEx,Progress,IssueIcon,Subscription} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
     import {TimelineItem,Comment,HiddenItemLoading,Editor,ProjectCard,PullRequestBody} from './components'
     import {util_dateFormat} from '@/util'
@@ -655,6 +657,7 @@
             AnimatedHeightWrapper,
             Editor,
             Subscription,
+            ImgWrapper,
             Progress,
             PullRequestBody,
             IssueIcon,

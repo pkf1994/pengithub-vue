@@ -93,7 +93,7 @@
             </template>
             <template v-slot:action>
                 closed this
-                <router-link to="/" v-if="data.commit_id">in {{`${owner}/${repo}@${commit.sha && commit.sha.substring(0,7)}`}}</router-link>
+                <router-link to="/" v-if="data.commit_id">in {{`${owner()}/${repo()}@${commit.sha && commit.sha.substring(0,7)}`}}</router-link>
             </template>
         </Other>
         <!-- reopened  -->
@@ -180,7 +180,9 @@
             </template>
             <template v-slot:additional>
                 <SourceCommit class="mt-3 d-flex">
-                    <img class="mr-2" :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" height="20" width="20">
+                    <ImgWrapper>
+                        <img class="mr-2" :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" height="20" width="20">
+                    </ImgWrapper>
 
                     <code class="d-inline-block mr-1 flex-grow-1 mr-3">
                         <router-link to="/" class="link-gray" v-html="referenceHighlightMessageOfCommit"></router-link>
@@ -342,57 +344,6 @@
                {{(data.actor.login === owner || data.actor.login === 'ghost') && data.actor.type !== 'Organization'? "Repository owner" : ''}} deleted a comment 
             </template>
         </Other>
-
-        <!-- review_requested  -->
-        <!-- <Other v-else-if="data.event === 'review_requested'" :data="data">
-            <template v-slot:icon>
-                <svg class="octicon octicon-eye" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"></path></svg>
-            </template>
-            <template v-slot:action>
-                requested review from 
-                <strong>{{data.requested_reviewer ? data.requested_reviewer.login : data.requested_team.login}}</strong>
-            </template>
-        </Other> -->
-         <!-- review_request_removed  -->
-        <!-- <Other v-else-if="data.event === 'review_request_removed'" :data="data">
-            <template v-slot:icon>
-                <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
-            </template>
-            <template v-slot:action>
-                 removed the request for review from 
-                <strong>{{data.requested_reviewer ? data.requested_reviewer.login : data.requested_team.login}}</strong>
-            </template>
-        </Other> -->
-         <!-- review_dismissed  -->
-        <!-- <Other v-else-if="data.event === 'review_dismissed'" :data="data">
-            <template v-slot:icon>
-                <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
-            </template>
-            <template v-slot:action>
-                 dismissed the review for <strong>{{data.dismissed_review.dismissal_message}}</strong>
-            </template>
-        </Other> -->
-         <!-- reviewed  -->
-        <!-- <Other v-else-if="data.event === 'review_dismissed'" :data="data">
-            <template v-slot:icon>
-                <svg class="octicon octicon-eye" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"></path></svg>
-            </template>
-            <template v-slot:action>
-                 dismissed the review for <strong>{{data.dismissed_review.dismissal_message}}</strong>
-            </template>
-        </Other> -->
-        <!-- review_requested_merged  -->
-        <!-- <Other v-else-if="data.event === 'review_requested_merged'" :data="data">
-            <template v-slot:icon>
-                <svg class="octicon octicon-eye" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"></path></svg>
-            </template>
-            <template v-slot:action>
-                requested review from 
-                <strong v-for="(item,index) in data.requested_reviewers" :key="item.id">
-                    {{item.login}} {{data.requested_reviewers.length > index ? 'and' : ''}}
-                </strong>
-            </template>
-        </Other> -->
     </Container>
 </template>
 
@@ -401,8 +352,8 @@
     import Comment from './Comment'
     import Other from './Other'
     import SimilarComments from './SimilarComments'
-    import {Label,AnimatedHeightWrapper} from '../../../../../components'
-    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '../../../../../store/modules/network'
+    import {Label,AnimatedHeightWrapper,ImgWrapper} from '@/components'
+    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/store/modules/network'
     export default {
         inject: ['owner','repo'],
         props: {
@@ -599,6 +550,7 @@
             }
         },
         components: {
+            ImgWrapper,
             Comment,
             Other,
             Label,

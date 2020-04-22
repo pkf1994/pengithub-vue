@@ -22,6 +22,7 @@ import IssueIcon from './IssueIcon'
 import Editor from './Editor'
 import Subscription from './Subscription'
 import SimpleDiffView from './SimpleDiffView'
+import ImgWrapper from './ImgWrapper'
 export {
     Button,
     BaseHeader,
@@ -63,5 +64,6 @@ export {
     HiddenItemLoading,
     Editor,
     Subscription,
-    SimpleDiffView
+    SimpleDiffView,
+    ImgWrapper
 }
