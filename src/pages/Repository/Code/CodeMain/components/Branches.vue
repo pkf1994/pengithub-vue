@@ -27,10 +27,17 @@
         </Content>
 
         <template v-slot:footer>
-            <router-link :to="codeFileBrowserRouterLink" class="d-block footer text-center">
-                <svg class="d-inline-block v-align-text-bottom" fill="currentColor" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13 4H7V3c0-.66-.31-1-1-1H1c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1zM6 4H1V3h5v1z"></path></svg>
-                View code  
-            </router-link>
+            <span class="d-flex">
+                 <router-link :to="codeFileBrowserRouterLink" class="flex-grow-1 footer text-center d-inline-block">
+                    <svg class="d-inline-block v-align-text-bottom" fill="currentColor" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13 4H7V3c0-.66-.31-1-1-1H1c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1zM6 4H1V3h5v1z"></path></svg>
+                    View code  
+                </router-link>
+                 <router-link :to="findFileRouterLink" class="flex-grow-1 footer text-center d-inline-block" style="border-left: 1px solid #d1d5da;">
+                    <svg class="octicon octicon-search" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0013 6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0 .52-.09.7-.3a.996.996 0 000-1.41v.01zM7 10.7c-2.59 0-4.7-2.11-4.7-4.7 0-2.59 2.11-4.7 4.7-4.7 2.59 0 4.7 2.11 4.7 4.7 0 2.59-2.11 4.7-4.7 4.7z"></path></svg>
+                    Jump to file 
+                </router-link>
+            </span>
+           
         </template>
     </ComplexBubble>
 </template>
@@ -64,6 +71,11 @@
             codeFileBrowserRouterLink() {
                 if(this.codeBasicInfo().defaultBranchRef){
                     return `/${this.owner()}/${this.repo()}/tree/${this.codeBasicInfo().defaultBranchRef.name}`
+                }
+            },
+            findFileRouterLink() {
+                if(this.codeBasicInfo().defaultBranchRef){
+                    return `/${this.owner()}/${this.repo()}/find/${this.codeBasicInfo().defaultBranchRef.name}`
                 }
             },
             activeBranchList() {

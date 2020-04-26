@@ -207,7 +207,7 @@
                 ]
             },
             filterAvailableLanguage() {
-                return this.availableLanguage.data.filter(i => (i.name.indexOf(this.availableLanguage.searchQuery) != -1 || i.urlParam.indexOf(this.availableLanguage.searchQuery) != -1))
+                return this.availableLanguage.data.filter(i => (i.name.toLowerCase().indexOf(this.availableLanguage.searchQuery.toLowerCase()) != -1 || i.urlParam.toLowerCase().indexOf(this.availableLanguage.searchQuery.toLowerCase()) != -1))
             }
         },
         created() {

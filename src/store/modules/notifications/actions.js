@@ -7,6 +7,8 @@ const parse = require('parse-link-header')
 
 export default {
     async [actionType.ACTION_GET_UNREAD_NOTIFICATIONS_COUNT](context,payload) {
+        let accessToken = context.rootState.oauth.accessToken.accessToken
+        if(!accessToken) return
         try{
             context.commit({
                 type: 'TRIGGER_LOADING',

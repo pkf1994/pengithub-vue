@@ -27,7 +27,7 @@
         },
         methods: {
             pushToast(content,type = 'notice',duration = 3000) {
-                if(!content || !content.message || content.message.trim() == '') return 
+                if(!(content || content.message || content.message.trim() != '')) return 
                 
                 if(content.toString() == this.prevToast.content.toString() && type == this.prevToast.type) {
                     Vue.set(this.toastArr,this.toastArr.length - 1,{
@@ -40,7 +40,7 @@
                         content,
                         type,
                         duration,
-                        uniMeta: (new Date()).getTime()
+                        uniMeta: (new Date()).getTime() + parseInt(Math.random() * 100) 
                     })
                 }
 

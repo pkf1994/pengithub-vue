@@ -1,6 +1,6 @@
 import axios from "axios";
 import store from '../store'
-import {API_GRAPHQL_ENDPOINT} from "./api";
+import {API_GRAPHQL_ENDPOINT,API_OAUTH2} from "./api";
 
 const authRequiredAxios = axios.create({
 })
@@ -13,14 +13,34 @@ authRequiredAxios.interceptors.request.use(
             }
         }
         return config
-    }, error => {
-        if(axios.isCancel(error))return
+    }, 
+    error => {
+        if(axios.isCancel(error)) return
+        return Promise.reject(error);
+    }
+)
+
+authRequiredAxios.interceptors.response.use(
+    config => config,
+    error => { 
+        if(error.response && error.response.status) {
+            switch(error.response.status) {
+                case 401:
+                    window.location.href = API_OAUTH2
+            }
+        }
         return Promise.reject(error);
     }
 )
 
 export const commonGet = (url, config = {}) => {
     return axios.get(url,config).then(res => {
+        return res
+    })
+}
+
+export const commonDelete = (url, config = {}) => {
+    return axios.delete(url,config).then(res => {
         return res
     })
 }

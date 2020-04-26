@@ -1,11 +1,11 @@
 <template>
     <Container>
         <Main>
-            <HolaJumbotron class="py-6 px-3 bg-sub-primary flex-column-center">
-                <HolaJumbotronTitle class="h0-mktg font-inter text-white text-center mb-3 lh-1">
+            <HolaJumbotron class="py-6 px-3 bg-sub-primary flex-column-center jumbotron-codelines">
+                <HolaJumbotronTitle class="font-inter text-white text-center mb-3 lh-1 h000-mktg lh-condensed-ultra">
                     Built for developers
                 </HolaJumbotronTitle>
-                <HolaJumbotronParagraph class="font-inter f2-mktg mb-4 text-hsla-pale text-center">
+                <HolaJumbotronParagraph class="font-inter lead-mktg mb-4 text-hsla-pale text-center">
                     GitHub is a development
                     platform inspired by the
                     way you work. From
@@ -16,14 +16,29 @@
                     build software alongside 40
                     million&nbsp;developers.
                 </HolaJumbotronParagraph>
-                <Button inline
+
+                <HolaJumbotronParagraph class="font-inter lead-mktg mb-4 text-hsla-pale text-center">
+                    Get started for free — join the millions of developers already using GitHub to share their code, work together, and build amazing things.
+                </HolaJumbotronParagraph>
+
+                 <Button inline
                         style="padding-bottom: 20px;padding-top: 20px"
-                        class="px-5 bg-btn-primary-green round-1 w-500 f4 text-white">
-                    Sign in for GitHub
+                        @click.native="signIn"
+                        class="px-5 w-500 f4-mktg text-white my-4 btn-primary-mktg btn-mktg btn-block" >
+                    Sign up with oauth
                 </Button>
+
+                 <EndJumbotronNotes class="end-jumbotron-notes text-center">
+                    By clicking “Sign in for GitHub”, you agree to our
+                    <a class="text-white" href="https://help.github.com/terms" target="_blank">terms of service</a>
+                    and
+                    <a class="text-white" href="https://help.github.com/privacy" target="_blank">privacy statement</a>
+                    .
+                    <span class="js-email-notice">We’ll occasionally send you account related emails.</span>
+                </EndJumbotronNotes>
             </HolaJumbotron>
 
-            <EnterpriseMktg class="pt-7 pb-6 px-3">
+           <!--  <EnterpriseMktg class="pt-7 pb-6 px-3">
                 <EnterpriseMktgInner class="enterprise-mktg-inner bg-white enterprise-mktg p-4 pt-6 box-shadow-large round-2">
                     <EnterpriseMktgTitle class="h2-mktg mb-3 font-inter text-center lh-125">
                         Get started with GitHub&nbsp;Enterprise
@@ -151,9 +166,7 @@
 
             <SellingPoint title="Security and Administration"
                           subTitle="Your business needs, met"
-                          paragraph="
-       From flexible hosting to granular access controls, we’ve got your security requirements covered.
-    "
+                          paragraph="From flexible hosting to granular access controls, we’ve got your security requirements covered."
                           btnTitle="How GitHub Enterprise works →">
 
                 <Advantage class="px-3 flex-column">
@@ -289,15 +302,15 @@
                         * As of August 2019
                     </StatisticsItemNotes>
                 </Statistics>
-            </SellingPoint>
+            </SellingPoint> -->
 
-            <EndJumbotron class="py-7 px-3 bg-gray-dark flex-column-center">
+            <!-- <EndJumbotron class="py-7 px-3 bg-gray-dark flex-column-center">
                 <EndJumbotronTitle class="h2-mktg font-inter w-400 lh-15 text-white text-center">
                     Get started for free — join the millions of developers already using GitHub to share their code, work together, and build amazing things.
                 </EndJumbotronTitle>
                 <Button inline
                         style="padding-bottom: 20px;padding-top: 20px"
-                        class="px-5 bg-btn-primary-green round-1 w-500 f4-mktg text-white my-4">
+                        class="px-5 w-500 f4-mktg text-white my-4 btn-primary-mktg btn-mktg btn-block" >
                     Sign up for GitHub
                 </Button>
                 <EndJumbotronNotes class="end-jumbotron-notes text-center">
@@ -308,7 +321,7 @@
                     .
                     <span class="js-email-notice">We’ll occasionally send you account related emails.</span>
                 </EndJumbotronNotes>
-            </EndJumbotron>
+            </EndJumbotron> -->
 
             <Footer></Footer>
         </Main>
@@ -480,7 +493,11 @@
                 ]
             }
         },
-
+        methods: {
+            signIn() {
+                this.$router.push('/oauth_redirect')
+            }
+        },
         components: {
             Button,
             AdvantageItem,
@@ -537,6 +554,12 @@
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/marketing/index.scss';
+
+.jumbotron-codelines {
+    color: hsla(0,0%,100%,.6);
+}
+
 .link{
     border-bottom: 1px solid hsla(0,0%,100%,.125);
     text-decoration: none;

@@ -26,8 +26,8 @@
     import {commonGet} from '@/network'
     export default {
         async created() {
-            let r = await commonGet("https://github.com/vuejs/vue/tree-list/5d93c838962b943216cc8cb24aae34ae479be2bd")
-            console.log(r)
+           /*  let r = await commonGet("https://github.com/vuejs/vue/tree-list/5d93c838962b943216cc8cb24aae34ae479be2bd")
+            console.log(r) */
         },
         components: {
             TopTab,

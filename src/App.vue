@@ -13,13 +13,23 @@ import styled from 'vue-styled-components'
 import {mapState,mapActions} from 'vuex'
 import {ACTION_GET_UNREAD_NOTIFICATIONS_COUNT} from '@/store/modules/notifications/actionTypes.js'
 export default {
+  computed: {
+    ...mapState({
+      login: state => state.oauth.viewerInfo.login
+    })
+  },
   created() {
-    this.action_getNotificationsCount()
+    if(this.login)this.action_getNotificationsCount()
   },
   methods: {
     ...mapActions({
         action_getNotificationsCount: ACTION_GET_UNREAD_NOTIFICATIONS_COUNT
     }),
+  },
+  watch: {
+    login() {
+      this.action_getNotificationsCount()
+    }
   },
   components: {
       Container: styled.div``

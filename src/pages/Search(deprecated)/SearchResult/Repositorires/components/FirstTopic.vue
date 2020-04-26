@@ -33,7 +33,7 @@
                 searchQuery: state => state.search.searchQuery.toLowerCase()
             }),
             containTheSearchQuery() {
-                 return this.firstTopic.display_name.toLowerCase().indexOf(this.searchQuery) !== -1
+                 return this.firstTopic.display_name.toLowerCase().indexOf(this.searchQuery.toLowerCase()) !== -1
             }
         },
         components: {

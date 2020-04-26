@@ -2,8 +2,8 @@
      <img alt="loading"
             height="45"
             width="45"
-                 class="width-fit height-fit"
-                 src="../../assets/image/octocat-spinner-128.gif"/>
+            class="width-fit height-fit"
+            src="../../assets/image/octocat-spinner-128.gif"/>
 </template>
 
 <script>

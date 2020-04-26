@@ -21,6 +21,8 @@ export const API_OAUTH2 = `https://github.com/login/oauth/authorize?client_id=${
 
 export const API_OAUTH2_ACCESS_TOKEN = code => `http://127.0.0.1:8088/oauth2server/oauth2/access_token.do?code=${code}`
 
+export const API_OAUTH2_REVOKE_ACCESS_TOKEN = accessToken => `http://127.0.0.1:8088/oauth2server/oauth2/revoke.do?accessToken=${accessToken}`
+
 export const API_OAUTH2_USER_INFO = `${GITHUB_REST_API_BASE}/user`
 
 export const API_EVENTS = `${GITHUB_REST_API_BASE}/events`
@@ -70,7 +72,7 @@ export const API_REPO_LABELS = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${
 
 export const API_README = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/readme`
 
-export const API_CONTENTS = (owner,repo,path,branch) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/contents/${path}${branch?'?ref='+branch:''}`
+export const API_CONTENTS = (payload) => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/contents/${payload.path}${payload.branch?'?ref='+payload.branch:''}`
 
 export const API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/stats/contributors`
 

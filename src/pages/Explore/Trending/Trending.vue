@@ -11,18 +11,18 @@
                         <FilterPane class="Box-header">
                             <PaddingPageTopTab :tabs="tabs" class="mb-3" style="padding:0!important"></PaddingPageTopTab>
                             <AnimatedHeightWrapper>
-                                <FilterItem v-if="meta == 'repositories'" class="pb-3 ml-2 end-with-triangle">
+                                <FilterItem v-if="meta == 'repositories'" @click="() => triggerModal('spokenLanguageModal')" class="pb-3 ml-2 end-with-triangle">
                                     <span>Spoken Language:</span>
-                                    <span @click="() => triggerModal('spokenLanguageModal')" class="text-bold">{{spokenLanguage}}&nbsp;</span>
+                                    <span class="text-bold">{{filterSpokenLanguageList.data.length > 0 ? spokenLanguage : ($route.query.spoken_language_code || 'Any')}}&nbsp;</span>
                                 </FilterItem>
                             </AnimatedHeightWrapper>
-                            <FilterItem class="mb-3 ml-2 end-with-triangle">
+                            <FilterItem class="mb-3 ml-2 end-with-triangle" @click="() => triggerModal('languageModal')">
                                 <span>Language:</span>
-                                <span class="text-bold" @click="() => triggerModal('languageModal')">{{language}}&nbsp;</span>
+                                <span class="text-bold">{{filterLanguageList.data.length > 0 ? language : ($route.query.language || 'Any')}}&nbsp;</span>
                             </FilterItem>
-                            <FilterItem class="ml-2 end-with-triangle">
+                            <FilterItem class="ml-2 end-with-triangle" @click="() => triggerModal('sinceModal')">
                                 <span>Date range:</span>
-                                <span class="text-bold" @click="() => triggerModal('sinceModal')">{{dateRange}}&nbsp;</span>
+                                <span class="text-bold">{{dateRange}}&nbsp;</span>
                             </FilterItem>
                         </FilterPane>
                     </template>
@@ -72,7 +72,7 @@
              <div v-if="filterLanguageList.loading" class="flex-row-center height-full">
                 <LoadingIconEx></LoadingIconEx>
             </div>
-            <div class="select-menu-text-filter p-3">
+            <div v-else class="select-menu-text-filter p-3">
                 <input type="text" v-model="filterText.language" class="form-control" placeholder="Filter spoken languages" autofocus="" autocomplete="off"/>
             </div>
             <router-link :to='clearLanguageRouterLink'>
@@ -207,7 +207,7 @@
             },
             spokenLanguageModalRouterLinkData() {
                 let data = []
-                this.filterSpokenLanguageList.data.filter(i => i.name.indexOf(this.filterText.spokenLanguage) > -1 || i.urlParam.indexOf(this.filterText.spokenLanguage) > -1).forEach( i => {
+                this.filterSpokenLanguageList.data.filter(i => i.name.toLowerCase().indexOf(this.filterText.spokenLanguage.toLowerCase()) > -1 || i.urlParam.toLowerCase().indexOf(this.filterText.spokenLanguage.toLowerCase()) > -1).forEach( i => {
                     let to = `${this.$route.path}?${util_queryParse.querify({
                         ...this.$route.query,
                         spoken_language_code: i["urlParam"]
@@ -221,7 +221,7 @@
             },
             languageModalRouterLinkData() {
                 let data = []
-                this.filterLanguageList.data.filter(i => i.name.indexOf(this.filterText.language) > -1 || i.urlParam.indexOf(this.filterText.language) > -1).forEach( i => {
+                this.filterLanguageList.data.filter(i => i.name.toLowerCase().indexOf(this.filterText.language.toLowerCase()) > -1 || i.urlParam.toLowerCase().indexOf(this.filterText.language.toLowerCase()) > -1).forEach( i => {
                     let to = `/explore/trending${this.meta == 'repositories' ? '' : '/developers'}/${i.urlParam}?${util_queryParse.querify(this.$route.query)}`
                     data.push({
                         to,
@@ -291,8 +291,11 @@
                     let res = await commonGet(url)
                     this[this.meta].data = res.data
 
-                    if(this.meta == 'repositories') this.network_getViewerHasStarredInfo()
-                    if(this.meta == 'developers') this.network_getViewerIsFollowingInfo()
+                    if(this.accessToken) {
+                        if(this.meta == 'repositories') this.network_getViewerHasStarredInfo()
+                        if(this.meta == 'developers') this.network_getViewerIsFollowingInfo()
+                    }
+                    
                     this[this.meta].loading = false
                 }catch(e) {
                     this.$toast(e,'error')

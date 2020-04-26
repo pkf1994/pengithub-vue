@@ -239,7 +239,7 @@
                 if(_avaliableAuthorsSubArr) {
                     _avaliableAuthorsSubArr.forEach((item,index) => {
                         let q = this.query.replace(/(author:\S*)/g,'').trim() + ` author:${item.login}`
-                        if(item.login.indexOf(this.authorModalSearchQuery) > -1) {
+                        if(item.login.toLowerCase().indexOf(this.authorModalSearchQuery.toLowerCase()) > -1) {
                             avaliableAuthors.push({
                                 ...item,
                                 routerLink: `/${this.owner}/${this.repo}/pulls?q=${q}`,
@@ -257,7 +257,7 @@
                 if(_avaliableAssigneesSubArr) {
                     _avaliableAssigneesSubArr.forEach((item,index) => {
                         let q = this.query.replace(/(assignee:\S*)/g,'').replace('no:assignee','').trim() + ` assignee:${item.login}`
-                        if(item.login.indexOf(this.assigneeModalSearchQuery) > -1) {
+                        if(item.login.toLowerCase().indexOf(this.assigneeModalSearchQuery.toLowerCase()) > -1) {
                             avaliableAssignees.push({
                                 ...item,
                                 routerLink: `/${this.owner}/${this.repo}/pulls?q=${q}`,
@@ -276,7 +276,7 @@
                     _labelsSubArr.forEach((item,index) => {
                         let reg = new RegExp(`label:${item.name}`,'g')
                         let q = this.query.replace(reg,'').trim().replace('no:label','') + ` label:${item.name}`
-                        if(item.name.indexOf(this.labelModalSearchQuery) > -1) {
+                        if(item.name.toLowerCase().indexOf(this.labelModalSearchQuery.toLowerCase()) > -1) {
                             labels.push({
                                 ...item,
                                 routerLink: `/${this.owner}/${this.repo}/pulls?q=${q}`,

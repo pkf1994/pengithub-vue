@@ -23,6 +23,7 @@ import Editor from './Editor'
 import Subscription from './Subscription'
 import SimpleDiffView from './SimpleDiffView'
 import ImgWrapper from './ImgWrapper'
+import HyperlinkWrapper from './HyperlinkWrapper'
 export {
     Button,
     BaseHeader,
@@ -65,5 +66,6 @@ export {
     Editor,
     Subscription,
     SimpleDiffView,
-    ImgWrapper
+    ImgWrapper,
+    HyperlinkWrapper
 }

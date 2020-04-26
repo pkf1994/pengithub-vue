@@ -570,7 +570,7 @@ export default {
                     meta: 'text'
                 })
                 //查看是否返回html
-                const url = API_CONTENTS(payload.owner,payload.repo,payload.path,payload.branch)
+                const url = API_CONTENTS(payload)
                 const res = await authRequiredGet(url,{
                     headers: {
                         "Accept":"application/vnd.github.VERSION.html"

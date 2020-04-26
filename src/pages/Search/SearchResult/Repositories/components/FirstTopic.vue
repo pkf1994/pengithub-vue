@@ -29,7 +29,7 @@
         computed: {
             containTheSearchQuery() {
                 if(! this.firstTopic.display_name) return false
-                 return this.firstTopic.display_name.toLowerCase().indexOf(this.$route.query.q) !== -1
+                 return this.firstTopic.display_name.toLowerCase().indexOf(this.$route.query.q.toLowerCase()) !== -1
             }
         },
         components: {

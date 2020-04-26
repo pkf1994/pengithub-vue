@@ -126,7 +126,12 @@
                     if(!res.data.data.repository.content.isBinary) {
                         this.data = res.data.data.repository.content.text
                         //查看是否返回html
-                        const url = api.API_CONTENTS(this.owner(),this.repo(),this.path,this.currentBranch)
+                        const url = api.API_CONTENTS({
+                            owner: this.owner(),
+                            repo: this.repo(),
+                            path: this.path,
+                            branch: this.currentBranch
+                        })
                         const res_html = await authRequiredGet(url,{
                             headers: {
                                 "Accept":"application/vnd.github.VERSION.html"

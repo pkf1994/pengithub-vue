@@ -2,67 +2,83 @@ import {handleException, commitTriggerLoadingMutation} from "../util";
 import {util_queryParse} from "../../../util";
 import {API_OAUTH2_ACCESS_TOKEN, API_OAUTH2_USER_INFO} from "../api";
 import {
-    MUTATION_OAUTH_GETTING_ACCESS_TOKEN_FAILED,
-    MUTATION_OAUTH_RESOLVE_ACCESS_TOKEN, MUTATION_OAUTH_RESOLVE_VIEWER_INFO,
+    MUTATION_SIGN_OUT,
+    MUTATION_OAUTH_RESOLVE_ACCESS_TOKEN, 
+    MUTATION_OAUTH_RESOLVE_VIEWER_INFO,
 } from "./mutations";
 
-import {authRequiredGitHubGraphqlApiQuery, commonGet} from "../network";
-import {
-    ACTION_OAUTH_REQUEST_ACCESS_TOKEN,
-    ACTION_OAUTH_REQUEST_VIEWER_INFO
-} from "./actionTypes";
+import {authRequiredGitHubGraphqlApiQuery, commonGet, commonDelete} from "../network";
+import * as actionType from "./actionTypes";
+import * as api from '@/network/api'
 import {GRAPH_QL_VIEWER} from "./graphql";
 
-import router from '../../../router'
-
+import Vue from 'vue'
 
 export default {
-    async [ACTION_OAUTH_REQUEST_ACCESS_TOKEN] (context, payload) {
-        try{
-            commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_ACCESS_TOKEN,true)
-            //获取access_token
-            const url_getAccessToken = API_OAUTH2_ACCESS_TOKEN(payload.code)
-            const res_getAccessToken = await commonGet(url_getAccessToken)
-            
-            let accessTokenObject = util_queryParse.parse(res_getAccessToken.data)
-            await context.commit({
-                type: MUTATION_OAUTH_RESOLVE_ACCESS_TOKEN,
-                ...accessTokenObject,
-                authenticated: true,
-            })
-            commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_ACCESS_TOKEN,false)
-
-        }catch (e) {
-            handleException(e) 
-            if(e.response) {
-                context.commit({
-                    type: MUTATION_OAUTH_GETTING_ACCESS_TOKEN_FAILED,
-                    exception: e.response.data
-                })
-            }
-            commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_ACCESS_TOKEN,false)
-        }
+    async [actionType.ACTION_OAUTH_REQUEST_ACCESS_TOKEN] (context, payload) {
+        //获取access_token
+        const url_getAccessToken = API_OAUTH2_ACCESS_TOKEN(payload.code)
+        const res_getAccessToken = await commonGet(url_getAccessToken)
+        
+        let accessTokenObject = util_queryParse.parse(res_getAccessToken.data)
+        context.commit({
+            type: MUTATION_OAUTH_RESOLVE_ACCESS_TOKEN,
+            ...accessTokenObject,
+            authenticated: true,
+        })
     },
 
-    async [ACTION_OAUTH_REQUEST_VIEWER_INFO] (context,payload) {
+    async [actionType.ACTION_OAUTH_REQUEST_VIEWER_INFO] (context,payload) {
+        const res_viewerBasicInfo = await authRequiredGitHubGraphqlApiQuery(GRAPH_QL_VIEWER)
+        context.commit({
+            type: MUTATION_OAUTH_RESOLVE_VIEWER_INFO,
+            login: res_viewerBasicInfo.data.data.viewer.login,
+            avatarUrl: res_viewerBasicInfo.data.data.viewer.avatarUrl,
+        })
+    },
+
+    async [actionType.ACTION_SIGN_OUT] (context,payload) {
         try{
-            commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_VIEWER_INFO,true)
-            //获取基本用户信息
-            const res_viewerBasicInfo = await authRequiredGitHubGraphqlApiQuery(GRAPH_QL_VIEWER)
+            let accessToken = context.rootState.oauth.accessToken.accessToken
+            if(!accessToken || accessToken.trim() == '') return 
 
             context.commit({
-                type: MUTATION_OAUTH_RESOLVE_VIEWER_INFO,
-                login: res_viewerBasicInfo.data.data.viewer.login,
-                avatarUrl: res_viewerBasicInfo.data.data.viewer.avatarUrl,
+                type: "TRIGGER_LOADING",
+                actionType: actionType.ACTION_SIGN_OUT,
+                loading: true,
             })
-            commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_VIEWER_INFO,false)
-            await router.replace({
-                path: '/'
+
+            Vue.triggerLoading(true)
+
+            let url = api.API_OAUTH2_REVOKE_ACCESS_TOKEN(accessToken)
+
+            let res = await commonGet(url)
+
+            if(res.data.message) {
+                throw new Error(res.data.message)
+            }
+
+            context.commit({
+                type: MUTATION_SIGN_OUT
             })
-        }catch (e) {
-            handleException(e)
-            commitTriggerLoadingMutation(context,ACTION_OAUTH_REQUEST_VIEWER_INFO,false)
+
+            Vue.triggerLoading(false)
+
+            context.commit({
+                type: "TRIGGER_LOADING",
+                actionType: actionType.ACTION_SIGN_OUT,
+                loading: false,
+            })
+        }catch(e) {
+            context.commit({
+                type: "TRIGGER_LOADING",
+                actionType: actionType.ACTION_SIGN_OUT,
+                loading: false,
+            })
+            Vue.toast(e,'error')
+            console.log(e)
         }
+
     }
 }
 

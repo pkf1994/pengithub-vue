@@ -28,13 +28,14 @@
                     </router-link>
                     <router-link @click.native="closeNav" class="nav-item d-block d-lg-none py-2 py-lg-0 border-top border-lg-top-0 border-white-fade-15"  to="/">
                         <ImgWrapper>
-                            <img height="20" width="20" class="avatar" :src="avatarUrl"/>&nbsp;{{login ? login : 'user'}}
+                            <img height="20" width="20" class="avatar" :src="avatarUrl"/>
                         </ImgWrapper>
+                        {{login ? login : 'user'}}
                     </router-link>
-                    <router-link @click.native="closeNav" class="nav-item d-block d-lg-none py-2 py-lg-0 border-top border-lg-top-0 border-white-fade-15"  to="/">
+                    <button @click="signOut" class="nav-item d-lg-none py-2 py-lg-0 border-top border-lg-top-0 border-white-fade-15" style="text-align:left">
                         <svg class="d-inline-block v-align-middle" fill="currentColor" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 9V7H8V5h4V3l4 3-4 3zm-2 3H6V3L2 1h8v3h1V1c0-.55-.45-1-1-1H1C.45 0 0 .45 0 1v11.38c0 .39.22.73.55.91L6 16.01V13h4c.55 0 1-.45 1-1V8h-1v4z"></path></svg>
                         Sign out
-                    </router-link>
+                    </button>
                 </nav>
             </MenuPullDown>
         </AnimatedHeightWrapper>
@@ -47,7 +48,9 @@
     import LogoutedHeader from './LogoutedHeader'
     import ImgWrapper from '../ImgWrapper'
     import {AnimatedHeightWrapper} from '../AnimatedSizeWrapper'
-    import {mapState} from "vuex";
+    import {mapState,mapActions} from "vuex";
+    import {commonDelete} from '@/network'
+    import {ACTION_SIGN_OUT} from '@/store/modules/oauth/actionTypes.js'
     export default {
         data() {
             return {
@@ -91,6 +94,7 @@
                 authenticated: state => state.oauth.accessToken.authenticated,
                 unreadNotificationsCount: state => state.notifications.unread.count,
                 loadingUnreadNotificationsCount: state => state.notifications.unread.loading,
+                accessToken: state => state.oauth.accessToken.accessToken
             })
         },
         mounted() {
@@ -100,11 +104,24 @@
            /*  computedStretchHeight() {
                 this.computedHeight = this.$refs.menuPullDown.$el.offsetHeight
             }, */
+            ...mapActions({
+                action_signOut: ACTION_SIGN_OUT
+            }),
             triggerShowPullDown() {
                 this.stretch = !this.stretch
             },
             closeNav() {
-                 this.stretch = false
+                this.stretch = false
+            },
+            async signOut() {
+                
+               /*  let res = await commonDelete(`https://api.github.com/applications/125cb651f63615c6d362/tokens/${this.accessToken}`,{
+                    headers: {
+                        "Authorization": "basic MTI1Y2I2NTFmNjM2MTVjNmQzNjI6ZDcxYjYxNzc0NGMyMGIzMWY3ZTUyNjkzZGUwNGNhMjIxOGY3NzFlMg=="
+                    }
+                })
+                console.log(res) */
+                this.action_signOut()
             }
         },
         components: {

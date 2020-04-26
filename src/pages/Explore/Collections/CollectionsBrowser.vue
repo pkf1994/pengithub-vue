@@ -20,7 +20,7 @@
         </Main>
 
         <transition name="fade" appear>
-            <CommonLoading v-if="data.filter(i => i.content).length == 0 || highlight.loading" :position="data.filter(i => i.content).length == 0 ? 'center' : 'corner'"></CommonLoading>
+            <CommonLoading v-if="loadingRoster || highlight.loading" :position="loadingRoster ? 'center' : 'corner'"></CommonLoading>
         </transition>
     </Container>
 </template>
@@ -29,9 +29,11 @@
     import styled from 'vue-styled-components'
     import {Jumbotron,LoadingMore} from '../components'
     import {CollectionListItem,CollectionHighlightListItem} from './components'
+    import {mapState} from 'vuex'
     import {CommonLoading} from '@/components'
     import * as graphql from './graphql'
-    import {authRequiredGitHubGraphqlApiQuery} from '@/network'
+    import * as api from '@/network/api'
+    import {authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
     import Vue from 'vue'
     export default {
         data() {
@@ -50,55 +52,117 @@
                 } 
             }
         },
+        computed: {
+            ...mapState({
+                accessToken: state => state.oauth.accessToken.accessToken
+            })
+        },
         created() {
-            this.network_getCollectionsSketchRosterData()
+            this.network_getCollectionsSketchRosterData(this.accessToken)
         },
         methods: {
-            async network_getCollectionsSketchRosterData() {
+            async network_getCollectionsSketchRosterData(accessToken) {
                 try{
+                    
                     this.loadingRoster = true
-                    let graphql_collectionsSketchRoster = graphql.GRAPHQL_COLLECTIONS_ROSTER
 
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_collectionsSketchRoster)
-                    let collectionsSketchRoster = res.data.data.repository.object.entries
+                    //explore/collections页面的数据存放于github/explore仓库
+                    //已进行oauth登录。通过graphql获取数据
+                    if(accessToken) {
+                        let graphql_collectionsSketchRoster = graphql.GRAPHQL_COLLECTIONS_ROSTER
 
-                    let graphql_collectionsSketch = graphql.GRAPHQL_COLLECTIONS_SKETCH(collectionsSketchRoster)
-                    let res_collectionsSketch = await authRequiredGitHubGraphqlApiQuery(graphql_collectionsSketch)
-                    let collectionSketchRosterArr = []
+                        let res = await authRequiredGitHubGraphqlApiQuery(graphql_collectionsSketchRoster)
+                        let collectionsSketchRoster = res.data.data.repository.object.entries
 
-                    for(let key in res_collectionsSketch.data.data.repository) {
-                        let collectionAvatarObject = res_collectionsSketch.data.data.repository[key].entries.filter(i => i.name.match(/.png$/) != null) [0] 
-                        let collectionSketchItem = {
-                            name: collectionsSketchRoster[parseInt(key.replace('object',''))].name,
-                            expression: `master:collections/${collectionsSketchRoster[parseInt(key.replace('object',''))].name}/index.md`,
-                            avatar: collectionAvatarObject ? `https://raw.githubusercontent.com/github/explore/master/collections/${collectionsSketchRoster[parseInt(key.replace('object',''))].name}/${collectionAvatarObject.name}` : undefined 
-                        }
-                        collectionSketchRosterArr.push(collectionSketchItem)
-                    }   
+                        let graphql_collectionsSketch = graphql.GRAPHQL_COLLECTIONS_SKETCH(collectionsSketchRoster)
+                        let res_collectionsSketch = await authRequiredGitHubGraphqlApiQuery(graphql_collectionsSketch)
+                        let collectionSketchRosterArr = []
 
-                    this.data = collectionSketchRosterArr
-                    this.network_getHighlightCollections()
-                    this.network_getData()
+                        for(let key in res_collectionsSketch.data.data.repository) {
+                            let collectionAvatarObject = res_collectionsSketch.data.data.repository[key].entries.filter(i => i.name.match(/.png$/) != null) [0] 
+                            let collectionSketchItem = {
+                                name: collectionsSketchRoster[parseInt(key.replace('object',''))].name,
+                                expression: `master:collections/${collectionsSketchRoster[parseInt(key.replace('object',''))].name}/index.md`,
+                                avatar: collectionAvatarObject ? `https://raw.githubusercontent.com/github/explore/master/collections/${collectionsSketchRoster[parseInt(key.replace('object',''))].name}/${collectionAvatarObject.name}` : undefined 
+                            }
+                            collectionSketchRosterArr.push(collectionSketchItem)
+                        }   
+
+                        this.data = collectionSketchRosterArr
+                        
+
+                    //未登录，通过rest api git trees 接口获取数据
+                    }else {
+
+                        let url = api.API_TREE_LIST({
+                            repo: 'explore',
+                            owner: 'github',
+                            sha: 'master'
+                        })
+
+                        let res = await authRequiredGet(url)
+
+                        let collectionArr = []
+                        
+                        res.data.tree.forEach(i => {
+                            if(i.path.match(/^collections\/[\S\s]+\/index\.md$/) !== null) {
+                                let name = i.path.replace('collections/','').replace('/index.md','')
+                                let avatarPath = `collections/${name}/${name}.png`
+                                let withAvatarExist = res.data.tree.filter(i => {
+                                    return i.path == avatarPath
+                                }).length != 0
+                                let avatar =  withAvatarExist ? `https://raw.githubusercontent.com/github/explore/master/collections/${name}/${name}.png` : undefined
+                                collectionArr.push({
+                                    name,
+                                    avatar,
+                                    path: i.path
+                                })
+                            } 
+                        })
+                        this.data = collectionArr
+                    }
+
+                    this.network_getData(accessToken)
+
+                    this.network_getHighlightCollections(accessToken)
+                    this.network_getData(accessToken)
 
                     this.loadingRoster = false
                 }catch(e) {
-                    console.log(this.$route)
-                    console.log(e)
+                    this.handleError(e)
                     this.loadingRoster = false
                 }
             },
-            async network_getData() {
+            async network_getData(accessToken) {
                 if(this.cursor >= this.data.length) return
                 try{
                     this.loading = true
+
                     let collectionsSketchRosterToLoad = this.data.slice(this.cursor,this.cursor + this.perPage)
-                   
 
-                    let graphql_collections = graphql.GRAPHQL_COLLECTIONS(collectionsSketchRosterToLoad)
-                    let res_collections = await authRequiredGitHubGraphqlApiQuery(graphql_collections)
+                    if(accessToken) {
+                        let graphql_collections = graphql.GRAPHQL_COLLECTIONS(collectionsSketchRosterToLoad)
+                        let res_collections = await authRequiredGitHubGraphqlApiQuery(graphql_collections)
 
-                    for(let key in res_collections.data.data.repository) {
-                        collectionsSketchRosterToLoad[parseInt(key.replace('object',''))].content = res_collections.data.data.repository[key].text
+                        for(let key in res_collections.data.data.repository) {
+                            collectionsSketchRosterToLoad[parseInt(key.replace('object',''))].content = res_collections.data.data.repository[key].text
+                        }
+                       
+                    }else{
+                        let getArr = []
+                        collectionsSketchRosterToLoad.forEach(i => {
+                            getArr.push(authRequiredGet(api.API_CONTENTS({
+                                owner: 'github',
+                                repo: 'explore',
+                                path: i.path
+                            })))
+                        })
+
+                        let res = await Promise.all(getArr)
+
+                        res.forEach((i,index) => {
+                            collectionsSketchRosterToLoad[index].content = window.atob(i.data.content)
+                        })
                     }
 
                     collectionsSketchRosterToLoad.forEach((item,index) => {
@@ -107,16 +171,15 @@
                         Vue.set(item,'displayName',displayNameHolder.replace("display_name: ",""))
                         Vue.set(item,'description',item.content.split('---').pop().replace('\n',''))
                     })
-
+                    
                     this.cursor += this.perPage
                     this.loading = false
                 }catch(e) {
-                    console.log(this.$route)
-                    console.log(e)
+                    this.handleError(e)
                     this.loading = false
                 } 
             },
-            async network_getHighlightCollections() {
+            async network_getHighlightCollections(accessToken) {
                  try{
                     this.highlight.loading = true
 
@@ -128,11 +191,28 @@
                         }
                     }
 
-                    let graphql_collections = graphql.GRAPHQL_COLLECTIONS(collectionsSketchRosterToLoad)
-                    let res_collections = await authRequiredGitHubGraphqlApiQuery(graphql_collections)
+                    if(accessToken) {
+                        let graphql_collections = graphql.GRAPHQL_COLLECTIONS(collectionsSketchRosterToLoad)
+                        let res_collections = await authRequiredGitHubGraphqlApiQuery(graphql_collections)
 
-                    for(let key in res_collections.data.data.repository) {
-                        collectionsSketchRosterToLoad[parseInt(key.replace('object',''))].content = res_collections.data.data.repository[key].text
+                        for(let key in res_collections.data.data.repository) {
+                            collectionsSketchRosterToLoad[parseInt(key.replace('object',''))].content = res_collections.data.data.repository[key].text
+                        }
+                    } else {
+                        let getArr = []
+                        collectionsSketchRosterToLoad.forEach(i => {
+                            getArr.push(authRequiredGet(api.API_CONTENTS({
+                                owner: 'github',
+                                repo: 'explore',
+                                path: i.path
+                            })))
+                        })
+
+                        let res = await Promise.all(getArr)
+
+                        res.forEach((i,index) => {
+                            collectionsSketchRosterToLoad[index].content = window.atob(i.data.content)
+                        })
                     }
 
                     collectionsSketchRosterToLoad.forEach((item,index) => {
@@ -146,8 +226,7 @@
 
                     this.highlight.loading = false
                 }catch(e) {
-                    console.log(this.$route)
-                    console.log(e)
+                    this.handleError(e)
                     this.highlight.loading = false
                 } 
             }
