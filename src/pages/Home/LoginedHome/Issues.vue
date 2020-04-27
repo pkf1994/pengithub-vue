@@ -1,5 +1,6 @@
 <template>
     <Container>
+        <HeaderDetachTopTab :tabs="tabs"></HeaderDetachTopTab>
         <PaddingPageTopTab :tabs="topTabData"></PaddingPageTopTab>
          <IssuesPageTemplate :data="data" 
                         :extraData="extraData"
@@ -72,7 +73,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {IssuesPageTemplate,SelectMenuItem,Modal,IconSearchInput,PaddingPageTopTab} from '@/components'
+    import {IssuesPageTemplate,SelectMenuItem,Modal,IconSearchInput,PaddingPageTopTab,HeaderDetachTopTab} from '@/components'
     import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
     import {mapState} from 'vuex'
     import * as api from '@/network/api'
@@ -116,7 +117,21 @@ import { util_queryParse } from '../../../util'
                     first: undefined,
                     prev: undefined
                 },
-               
+                tabs: [
+                     {
+                        label: "Dashboard",
+                        exact: true,
+                        routerLink: '/'
+                    },
+                    {
+                        label: "Pull requests",
+                        routerLink: '/pulls'
+                    },
+                    {
+                        label: "Issues",
+                        routerLink: '/issues'
+                    }
+                ],
             }
         },
         computed: {
@@ -270,7 +285,8 @@ import { util_queryParse } from '../../../util'
                         activeFlag: this.searchQueryQualifierMeta == 'mentions'
                     }
                 ]
-            }
+            },
+            
         },
         created() {
             this.network_getData()  
@@ -407,6 +423,7 @@ import { util_queryParse } from '../../../util'
             SelectMenuItem,
             Modal,
             IssuesPageTemplate,
+            HeaderDetachTopTab,
             PaddingPageTopTab,
             IconSearchInput,
             Container: styled.div``,

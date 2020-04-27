@@ -20,7 +20,7 @@
         </Main>
 
         <transition name="fade" appear>
-            <CommonLoading v-if="loadingRoster || highlight.loading" :position="loadingRoster ? 'center' : 'corner'"></CommonLoading>
+            <CommonLoading v-if="loadingRoster || (loading && data.filter(i => i.content).length == 0) || highlight.loading"></CommonLoading>
         </transition>
     </Container>
 </template>
@@ -47,28 +47,21 @@
                 },
                 perPage: 10,
                 cursor: 0,
-                exception: {
-
-                } 
+                documentTitle: 'Collections'
             }
         },
-        computed: {
-            ...mapState({
-                accessToken: state => state.oauth.accessToken.accessToken
-            })
-        },
         created() {
-            this.network_getCollectionsSketchRosterData(this.accessToken)
+            this.network_getCollectionsSketchRosterData()
         },
         methods: {
-            async network_getCollectionsSketchRosterData(accessToken) {
+            async network_getCollectionsSketchRosterData() {
                 try{
                     
                     this.loadingRoster = true
 
                     //explore/collections页面的数据存放于github/explore仓库
                     //已进行oauth登录。通过graphql获取数据
-                    if(accessToken) {
+                    if(this.accessToken) {
                         let graphql_collectionsSketchRoster = graphql.GRAPHQL_COLLECTIONS_ROSTER
 
                         let res = await authRequiredGitHubGraphqlApiQuery(graphql_collectionsSketchRoster)
@@ -122,10 +115,10 @@
                         this.data = collectionArr
                     }
 
-                    this.network_getData(accessToken)
+                    this.network_getData()
 
-                    this.network_getHighlightCollections(accessToken)
-                    this.network_getData(accessToken)
+                    this.network_getHighlightCollections()
+                    this.network_getData()
 
                     this.loadingRoster = false
                 }catch(e) {
@@ -133,14 +126,14 @@
                     this.loadingRoster = false
                 }
             },
-            async network_getData(accessToken) {
+            async network_getData() {
                 if(this.cursor >= this.data.length) return
                 try{
                     this.loading = true
 
                     let collectionsSketchRosterToLoad = this.data.slice(this.cursor,this.cursor + this.perPage)
 
-                    if(accessToken) {
+                    if(this.accessToken) {
                         let graphql_collections = graphql.GRAPHQL_COLLECTIONS(collectionsSketchRosterToLoad)
                         let res_collections = await authRequiredGitHubGraphqlApiQuery(graphql_collections)
 
@@ -179,7 +172,7 @@
                     this.loading = false
                 } 
             },
-            async network_getHighlightCollections(accessToken) {
+            async network_getHighlightCollections() {
                  try{
                     this.highlight.loading = true
 
@@ -191,7 +184,7 @@
                         }
                     }
 
-                    if(accessToken) {
+                    if(this.accessToken) {
                         let graphql_collections = graphql.GRAPHQL_COLLECTIONS(collectionsSketchRosterToLoad)
                         let res_collections = await authRequiredGitHubGraphqlApiQuery(graphql_collections)
 

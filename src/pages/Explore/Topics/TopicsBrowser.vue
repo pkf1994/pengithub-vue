@@ -17,7 +17,7 @@
         </Main>
 
         <transition name="fade" appear>
-            <CommonLoading v-if="data.filter(i => i.content).length == 0 || highlight.loading" :position="data.filter(i => i.content).length == 0 ? 'center' : 'corner'"></CommonLoading>
+            <CommonLoading v-if="loadingRoster || (loading && data.filter(i => i.content).length == 0) || highlight.loading"></CommonLoading>
         </transition>
     </Container>
 </template>
@@ -50,6 +50,7 @@
                 perPage: 10,
                 cursor: 0,
                 viewerHasStarred: [],
+                documentTitle: "Topics on GitHub"
             }
         },
         created() {

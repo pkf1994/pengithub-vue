@@ -27,7 +27,7 @@
         </transition-group>
      
         <transition name="fade" appear>
-            <CommonLoading v-if="loading || repositories.loading" :position="loading ? 'center' : 'corner'"></CommonLoading>
+            <CommonLoading v-if="loading || loadingAvatar || repositories.loading" :position="loading ? 'center' : 'corner'"></CommonLoading>
         </transition>
     </Container>
 </template>
@@ -38,8 +38,9 @@
     import {CommonLoading,ImgWrapper} from '@/components'
     import {RepoListItem} from './components'
     import * as graphql from './graphql'
+    import * as api from '@/network/api'
     import {util_markdownParse} from '@/util'
-    import {authRequiredGitHubGraphqlApiQuery} from '@/network'
+    import {authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
     export default {
         name: 'explore_collection_detail_page',
         mixins: [RouteUpdateAwareMixin],
@@ -48,10 +49,11 @@
                 rawContent: '',
                 avatar: undefined,
                 loading: false,
+                loadingAvatar: false,
                 repositories: {
                     data: [],
                     loading: false
-                }
+                },
             }
         },
         computed: {
@@ -65,6 +67,10 @@
             },
             descriptionHTML() {
                 return util_markdownParse.markdownToHTML(this.rawContent.split('---').pop().replace('\n',''))
+            },
+            documentTitle() {
+                if(this.displayName) return `collection: ${this.displayName}`
+                return window.location.href 
             }
         },
         created() {
@@ -74,19 +80,39 @@
             async network_getData() {
                 try{
                     this.loading = true
+                    this.loadingAvatar = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let graphql_collectionSketchAndRaw = graphql.GRAPHQL_COLLECTION_SKETCH_AND_RAW(this.collection)
-                    let res_collectionSketchAndRaw = await authRequiredGitHubGraphqlApiQuery(graphql_collectionSketchAndRaw,{cancelToken})
-                    res_collectionSketchAndRaw.data.data.repository.sketch.entries.forEach(i => {
-                        if(i.name.match(/\.png$/) != null) this.avatar = `https://raw.githubusercontent.com/github/explore/master/collections/${this.collection}/${i.name}`
+
+                    let url_rawContent = api.API_CONTENTS({
+                        owner: 'github',
+                        repo: 'explore',
+                        path: `collections/${this.collection}/index.md`
                     })
-                    this.rawContent = res_collectionSketchAndRaw.data.data.repository.raw.text
-                    this.network_getRepositories()
-                    this.loading = false
+
+                    let url_avatar = api.API_CONTENTS({
+                        owner: 'github',
+                        repo: 'explore',
+                        path: `collections/${this.collection}/${this.collection}.png`
+                    })
+
+                    authRequiredGet(url_rawContent,{cancelToken}).then(res => {
+                        this.rawContent = window.atob(res.data.content)
+                        this.loading = false
+                        this.network_getRepositories()
+                    })
+
+                    authRequiredGet(url_avatar).then(res => {
+                        this.avatar = `https://raw.githubusercontent.com/github/explore/master/collections/${this.collection}/${this.collection}.png`
+                        this.loadingAvatar = false
+                    }).catch(e => {
+                        this.loadingAvatar = false
+                        //do nothing
+                    })
+                    
                 }catch(e) {
-                    this.$toast(e,'error')
+                    this.handleError(e)
+                    this.loadingAvatar = false
                     this.loading = false
-                    console.log(e)
                 }
             },
             async network_getRepositories() {
@@ -94,27 +120,18 @@
                     this.repositories.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_repositories')
 
-                     let magicArr = this.rawContent.split('\n')
-                    let reposMetaArr = []
+                    let magicArr = this.rawContent.split('\n')
+
                     magicArr.forEach(i => {
                         if(i.indexOf(' - ') == 0) {
                             let fullName = i.replace(' - ','')
-                            reposMetaArr.push({
-                                owner: fullName.split('/')[0],
-                                name: fullName.split('/')[1],
+                            authRequiredGet(`${api.API_REPO(fullName)}`).then(r => {
+                                this.repositories.data.push(r.data)
+                            }).catch(e => {
+                                console.log(e)
                             })
                         }
                     })
-
-                    let graphql_repos = graphql.GRAPHQL_REPOS(reposMetaArr)
-                    let res_repos = await authRequiredGitHubGraphqlApiQuery(graphql_repos,{cancelToken})
-                    let repos = []
-
-                    for(let key in res_repos.data.data) {
-                        repos.push(res_repos.data.data[key])
-                    }
-
-                    this.repositories.data = repos.filter(i => i != null)
                     
                     this.repositories.loading = false
                 }catch(e) {

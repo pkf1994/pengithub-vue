@@ -76,7 +76,7 @@
         </transition>
 
         <transition name="fade" appear>
-            <CommonLoading v-if="loading || repositories.loading || repositories.extraData.loading" :position="loading ? 'center' : 'corner'"></CommonLoading>
+            <CommonLoading v-if="loading || repositories.loading || repositories.extraData.loading || loadingAvatar" :position="loading ? 'center' : 'corner'"></CommonLoading>
         </transition>
 
         <Modal ref="languageModal" title="Select a language" :modalStyle="{height:'80vh'}" @show="network_getFilterData">
@@ -149,6 +149,7 @@
                 viewerHasStarred: false,
                 avatar: undefined,
                 loading: false,
+                loadingAvatar: false,
                 repositories: {
                     data: [],
                     loading: false,
@@ -292,16 +293,52 @@
              async network_getData() {
                 try{
                     this.loading = true
+                    this.loadingAvatar = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let graphql_topicSketchAndRaw = graphql.GRAPHQL_TOPIC_SKETCH_AND_RAW(this.topic)
+
+                    if(this.accessToken) {
+                        let url_rawContent = api.API_CONTENTS({
+                            owner: 'github',
+                            repo: 'explore',
+                            path: `topics/${this.topic}/index.md`
+                        })
+
+                        let url_avatar = api.API_CONTENTS({
+                            owner: 'github',
+                            repo: 'explore',
+                            path: `topics/${this.topic}/${this.topic}.png`
+                        })
+
+                        authRequiredGet(url_rawContent,{cancelToken}).then(res => {
+                            this.rawContent = window.atob(res.data.content)
+                            this.loading = false
+                        })
+
+                        authRequiredGet(url_avatar).then(res => {
+                            this.avatar = `https://raw.githubusercontent.com/github/explore/master/topics/${this.topic}/${this.topic}.png`
+                            this.loadingAvatar = false
+                        }).catch(e => {
+                            this.loadingAvatar = false
+                        })
+                    }else {
+                        let graphql_topicSketchAndRaw = graphql.GRAPHQL_TOPIC_SKETCH_AND_RAW(this.topic)
+                        let res_topicSketchAndRaw = await authRequiredGitHubGraphqlApiQuery(graphql_topicSketchAndRaw,{cancelToken})
+                        res_topicSketchAndRaw.data.data.repository.sketch.entries.forEach(i => {
+                            if(i.name.match(/\.png$/) != null) this.avatar = `https://raw.githubusercontent.com/github/explore/master/topics/${this.topic}/${i.name}`
+                        })
+                        this.rawContent = res_topicSketchAndRaw.data.data.repository.raw.text
+                        this.viewerHasStarred = res_topicSketchAndRaw.data.data.topic.viewerHasStarred
+                        this.loading = false
+                    }
+
+                   /*  let graphql_topicSketchAndRaw = graphql.GRAPHQL_TOPIC_SKETCH_AND_RAW(this.topic)
                     let res_topicSketchAndRaw = await authRequiredGitHubGraphqlApiQuery(graphql_topicSketchAndRaw,{cancelToken})
                     res_topicSketchAndRaw.data.data.repository.sketch.entries.forEach(i => {
                         if(i.name.match(/\.png$/) != null) this.avatar = `https://raw.githubusercontent.com/github/explore/master/topics/${this.topic}/${i.name}`
                     })
                     this.rawContent = res_topicSketchAndRaw.data.data.repository.raw.text
-                    this.viewerHasStarred = res_topicSketchAndRaw.data.data.topic.viewerHasStarred
+                    this.viewerHasStarred = res_topicSketchAndRaw.data.data.topic.viewerHasStarred */
                     //this.network_getRepositories()
-                    this.loading = false
                 }catch(e) {
                     this.$toast(e,'error')
                     this.loading = false
@@ -374,6 +411,7 @@
                 }
             },
             async network_getRepositoriesExtraData(payload) {
+                if(!this.accessToken) return
                   try{
                     this.repositories.extraData.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_repositories_extra_data')

@@ -66,7 +66,7 @@ export const API_SEARCH = (type,param) => {
     return `${GITHUB_REST_API_BASE}/search/${type}?${query}`
 }
 
-export const API_REPO = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}`
+export const API_REPO = fullName => `${GITHUB_REST_API_BASE}/repos/${fullName}`
 
 export const API_REPO_LABELS = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/labels?per_page=100`
 

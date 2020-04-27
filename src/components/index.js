@@ -3,7 +3,7 @@ import SummaryAndDetail from './SummaryAndDetail.vue'
 import Button from './Button'
 import {HeaderDetachTopTab,PageTopTab,ComplexTopTab,PaddingPageTopTab} from './TopTab'
 import {IconSearchInput,SimpleSearchInput,ButtonLeftSearchInput} from './SearchInput'
-import {SimpleFooter,LabelsFooter} from './Footer'
+import {SimpleFooter,LabelsFooter,ComplexFooter} from './Footer'
 import {SimpleBubble,ComplexBubble} from './Bubble'
 import Breadcrumb from './Breadcrumb.vue'
 import {IconPagination,SimplePagination} from './Pagination'
@@ -42,6 +42,7 @@ export {
     CommonLoadingWrapper,
     SimpleFooter,
     LabelsFooter,
+    ComplexFooter,
     Label,
     SimpleBubble,
     CommonLoadingEx,

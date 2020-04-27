@@ -31,9 +31,9 @@
                 {{formatForksNumber}}
             </span>
 
-             <span class="d-inline-block ml-0 mr-3"  v-if="repository.languages.nodes[0]">
-                <span class="repo-language-color" :style="{'backgroundColor': repository.languages.nodes[0].color}"></span>
-                <span>{{repository.languages.nodes[0].name}}</span>
+             <span class="d-inline-block ml-0 mr-3"  v-if="repository.language">
+                <span class="repo-language-color" v-if="languageColor" :style="{'backgroundColor': languageColor}"></span>
+                <span>{{repository.language}}</span>
             </span>
 
         </TheMeta>
@@ -42,7 +42,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_numberFormat} from '@/util'
+    import {util_numberFormat,util_analyseFileType} from '@/util'
     export default {
         props: {
             repository: {
@@ -52,11 +52,14 @@
         },
         computed: {
             formatStarNumber() {
-                return util_numberFormat.thousands(this.repository.stargazers.totalCount)
+                return util_numberFormat.thousands(this.repository.stargazers_count)
             },
             formatForksNumber() {
-                return util_numberFormat.thousands(this.repository.forkCount)
+                return util_numberFormat.thousands(this.repository.forks_count)
             },
+            languageColor() {
+                return util_analyseFileType.getColorOfLanguage(this.repository.language)
+            }
         },
         components: {
             Container: styled.div``,

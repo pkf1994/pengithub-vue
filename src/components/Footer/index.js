@@ -1,3 +1,4 @@
 import SimpleFooter from "./SimpleFooter";
 import LabelsFooter from "./LabelsFooter";
-export {SimpleFooter,LabelsFooter}
+import ComplexFooter from "./ComplexFooter";
+export {SimpleFooter,LabelsFooter,ComplexFooter}

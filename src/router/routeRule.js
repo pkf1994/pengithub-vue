@@ -1,4 +1,4 @@
-import {SimpleFooter,LogoHeader,RepoHeader,LabelsFooter} from '@/components'
+import {SimpleFooter,LogoHeader,RepoHeader,LabelsFooter,ComplexFooter} from '@/components'
 
 const Home = () => import('../pages/Home/Home.vue')
 const OauthRedirectPage = () => import('../pages/OauthRedirectPage/OauthRedirectPage.vue')
@@ -50,49 +50,59 @@ const RepositoryBranchesOverview = () => import('../pages/Repository/Branches/Ov
 const RepositoryBranchesAll = () => import('../pages/Repository/Branches/All.vue')
 const RepositoryBranchesStale = () => import('../pages/Repository/Branches/Stale.vue')
 const RepositoryFindFile = () => import('../pages/Repository/FindFile/FindFile.vue')
-
 const Logout = () => import('../pages/Logout/Logout.vue')
 const Notifications = () => import('../pages/Notifications/Notifications.vue')
+const NotFoundPage = () => import('../pages/NotFoundPage/NotFoundPage.vue')
 
-export const ROUTE_HOME = 'route-home'
-export const ROUTE_OAUTH_REDIRECT = 'route-oauthRedirect'
-export const ROUTE_LOGOUT = 'route-logout'
 
 export default [
+    
     {
         path: '/',
-        name: ROUTE_HOME,
         components: {
             default: Home,
             header: LogoHeader,
             footer: SimpleFooter
         },
-        children: [
-            {
-                path: 'pulls/:meta?',
-                component: HomePullRequests,
-            },
-            {
-                path: 'issues/:meta?',
-                component: HomeIssues,
-            },
-            {
-                path: '/',
-                component: Dashboard
-            }
-        ]
+    },
+    {
+        path: '/pulls/:meta?',
+        meta: {
+            authRequired: true
+        },
+        components: {
+            default: HomePullRequests,
+            header: LogoHeader,
+            footer: SimpleFooter
+        },
+    },
+    {
+        path: '/issues/:meta?',
+        meta: {
+            authRequired: true
+        },
+        components: {
+            default: HomeIssues,
+            header: LogoHeader,
+            footer: SimpleFooter
+        },
     },
     {
         path: '/oauth_redirect',
-        name: ROUTE_OAUTH_REDIRECT,
         component: OauthRedirectPage
     },
     {
         path: '/logout',
+        meta: {
+            authRequired: true
+        },
         component: Logout
     },
     {
         path: '/notifications',
+        meta: {
+            authRequired: true
+        },
         components: {
             default: Notifications,
             header: LogoHeader,
@@ -171,6 +181,14 @@ export default [
                 component: SearchResultUsers
             }
         ]
+    },
+    {
+        path: '/404',
+        components: {
+            default: NotFoundPage,
+            header: LogoHeader,
+            footer: ComplexFooter
+        }
     },
     {
         path: '/:login',
@@ -333,4 +351,5 @@ export default [
             },
         ]
     },
+    
 ]
