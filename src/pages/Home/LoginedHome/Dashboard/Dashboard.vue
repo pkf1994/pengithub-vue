@@ -182,11 +182,10 @@
                         if(i.payload.issue && i.payload.issue.state == 'closed') return false
                         return true
                     })
-                    this.recentActivities.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
+                    this.handleError(e)
                     this.exception.recentActivities = true
-                    console.log(e)
+                }finally{
                     this.recentActivities.loading = false
                 }
             },
@@ -197,12 +196,11 @@
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_)
                     this.repositoriesContributedTo = res.data.data.viewer.repositoriesContributedTo.nodes
                     this.starredRepositories = res.data.data.viewer.starredRepositories.nodes
-                    this.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
+                    this.handleError(e)
                     this.exception.starredRepositories = true
                     this.exception.repositoriesContributedTo = true
-                    console.log(e)
+                }finally{
                     this.loading = false
                 }
             },

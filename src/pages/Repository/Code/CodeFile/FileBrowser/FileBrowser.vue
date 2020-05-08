@@ -170,9 +170,9 @@ import Vue from 'vue'
                     this.data = res.data.data.repository.object.entries
                     this.network_getContentsLastUpdateInfo()
                     this.network_getCommitsCountByBranch()
-                    this.loading = false
                 }catch(e) {
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.loading = false
                 }
             },
@@ -195,9 +195,9 @@ import Vue from 'vue'
                        Vue.set(this.data[i],'committedDate',res.data.data.repository.object[key].nodes[0].committedDate)
                         i += 1
                     }
-                    this.loadingContentsLastUpdateInfo = false
                 }catch(e) {
                     console.log(e)
+                }finally{
                     this.loadingContentsLastUpdateInfo = false
                 }
             },
@@ -226,9 +226,9 @@ import Vue from 'vue'
                         branch: this.currentBranch
                     })
 
-                    this.countOfCommitsByBranch.loading = false
                 }catch(e) {
                     console.log(e)
+                }finally{
                     this.countOfCommitsByBranch.loading = false
                 }
             },

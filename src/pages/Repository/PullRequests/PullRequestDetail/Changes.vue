@@ -137,10 +137,10 @@
                         }
                     )
                     this.data = res.data
-                    this.loading = false
                 }catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             },
             async network_getReviewComments() {
@@ -165,10 +165,11 @@
                     })
 
                     this.reviewComments.data = reviewComment
-                    this.reviewComments.loading = false
                 }catch(e) {
+                    console.log(e)
+                }finally{
                     this.reviewComments.loading = false
-                } 
+                }
             },
             async network_getChangedFiles() {
                 try{
@@ -187,10 +188,11 @@
                     )
                     this.changedFiles.data = res.data
 
-                    this.changedFiles.loading = false
                 }catch(e) {
+                    console.log(e)
+                }finally{
                     this.changedFiles.loading = false
-                } 
+                }
             },
             triggerSwitcherStretch() {
                 this.switcherStretched = !this.switcherStretched

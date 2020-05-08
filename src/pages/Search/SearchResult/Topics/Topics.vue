@@ -160,10 +160,10 @@
                     this.pageInfo = parse(res.headers.link) || {}
                     this.totalCount = res.data.total_count
                     this.network_getExtraData()
-                    this.loading = false
                 } catch(e) {
+                    this.handleError(e)
+                } finally {
                     this.loading = false
-                    console.log(e)
                 }
             },
             async network_getExtraData() {
@@ -195,11 +195,11 @@
 
                     this.extraData.data.relatedTopicsAndViewerStarStatus = relatedTopicsAndViewerStarStatus
 
-                    this.extraData.loading = false
                     
                 }catch(e) {
-                    this.extraData.loading = false
                     console.log(e)
+                }finally{
+                    this.extraData.loading = false
                 }
             },
         },

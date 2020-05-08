@@ -478,10 +478,10 @@
                     )
                     
                     this.fileContent = res.data
-                    this.loading = false
                 }catch(e) {
-                    this.loading = false
                     console.log(e)
+                }finally{
+                    this.loading = false
                 }
             },
         },

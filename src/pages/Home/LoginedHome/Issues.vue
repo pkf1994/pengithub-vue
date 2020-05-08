@@ -81,7 +81,7 @@
     var parse = require('parse-link-header');
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {util_parseQuery} from '@/util' 
-import { util_queryParse } from '../../../util'
+    import { util_queryParse } from '../../../util'
     export default {
         mixins: [RouteUpdateAwareMixin],
         props: {
@@ -316,10 +316,10 @@ import { util_queryParse } from '../../../util'
                     //获取其他数据
                     if(res.data.items.length > 0)this.network_getExtraData(res.data.items)
                     if(!payload || !payload.url)this.network_getIssueCountByState()
-                    this.loading = false
                 }catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             },  
             async network_getExtraData(issues) {
@@ -334,11 +334,10 @@ import { util_queryParse } from '../../../util'
                         issueArr.push(res.data.data[key])
                     }
                     this.extraData.data = this.extraData.data.concat(issueArr)
-
-                    this.extraData.loading = false
                 }catch(e) {
-                    this.extraData.loading = false
                     console.log(e)
+                }finally{
+                    this.extraData.loading = false
                 }
             },
             async network_getIssueCountByState() {
@@ -363,10 +362,10 @@ import { util_queryParse } from '../../../util'
                    /*  let graphql_issueCountByState =  graphql.GRAPHQL_COUNT_OF_ISSUE_BY_STATE(this.query)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_issueCountByState,{cancelToken:sourceAndCancelToken.cancelToken})
                     this.countByState.data = res.data.data */
-                    this.countByState.loading = false
                 }catch(e) {
-                    this.countByState.loading = false
                     console.log(e)
+                }finally{
+                    this.countByState.loading = false
                 }
             },
             search() {

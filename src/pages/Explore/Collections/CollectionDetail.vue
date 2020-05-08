@@ -78,67 +78,56 @@
         },
         methods: {
             async network_getData() {
-                try{
-                    this.loading = true
-                    this.loadingAvatar = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
+                this.loading = true
+                this.loadingAvatar = true
+                let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
 
-                    let url_rawContent = api.API_CONTENTS({
-                        owner: 'github',
-                        repo: 'explore',
-                        path: `collections/${this.collection}/index.md`
-                    })
+                let url_rawContent = api.API_CONTENTS({
+                    owner: 'github',
+                    repo: 'explore',
+                    path: `collections/${this.collection}/index.md`
+                })
 
-                    let url_avatar = api.API_CONTENTS({
-                        owner: 'github',
-                        repo: 'explore',
-                        path: `collections/${this.collection}/${this.collection}.png`
-                    })
+                let url_avatar = api.API_CONTENTS({
+                    owner: 'github',
+                    repo: 'explore',
+                    path: `collections/${this.collection}/${this.collection}.png`
+                })
 
-                    authRequiredGet(url_rawContent,{cancelToken}).then(res => {
-                        this.rawContent = window.atob(res.data.content)
-                        this.loading = false
-                        this.network_getRepositories()
-                    })
-
-                    authRequiredGet(url_avatar).then(res => {
-                        this.avatar = `https://raw.githubusercontent.com/github/explore/master/collections/${this.collection}/${this.collection}.png`
-                        this.loadingAvatar = false
-                    }).catch(e => {
-                        this.loadingAvatar = false
-                        //do nothing
-                    })
-                    
-                }catch(e) {
-                    this.handleError(e)
-                    this.loadingAvatar = false
+                authRequiredGet(url_rawContent,{cancelToken}).then(res => {
+                    this.rawContent = window.atob(res.data.content)
+                    this.network_getRepositories()
+                }).catch(e => {
+                    this.handleError(e,{handle404:true})
+                }).finally(() =>{
                     this.loading = false
-                }
+                })
+
+                authRequiredGet(url_avatar).then(res => {
+                    this.avatar = `https://raw.githubusercontent.com/github/explore/master/collections/${this.collection}/${this.collection}.png`
+                    this.loadingAvatar = false
+                }).catch(e => {
+                    this.loadingAvatar = false
+                    //do nothing
+                })
+               
             },
             async network_getRepositories() {
-                try{
-                    this.repositories.loading = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_repositories')
+                this.repositories.loading = true
+                let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_repositories')
+                let magicArr = this.rawContent.split('\n').filter(i => i.indexOf(' - ') == 0)
 
-                    let magicArr = this.rawContent.split('\n')
-
-                    magicArr.forEach(i => {
-                        if(i.indexOf(' - ') == 0) {
-                            let fullName = i.replace(' - ','')
-                            authRequiredGet(`${api.API_REPO(fullName)}`).then(r => {
-                                this.repositories.data.push(r.data)
-                            }).catch(e => {
-                                console.log(e)
-                            })
-                        }
+                magicArr.forEach(i => {
+                    let fullName = i.replace(' - ','')
+                    authRequiredGet(`${api.API_REPO(fullName)}`).then(r => {
+                        this.repositories.data.push(r.data)
+                        if(this.repositories.data.length == magicArr.length) this.repositories.loading = false
+                    }).catch(e => {
+                        this.handleError(e)
+                        this.repositories.loading = false
+                        console.log(e)
                     })
-                    
-                    this.repositories.loading = false
-                }catch(e) {
-                    this.$toast(e,'error')
-                    this.repositories.loading = false
-                    console.log(e)
-                } 
+                })
             }
         },
         components: {

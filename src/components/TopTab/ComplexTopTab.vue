@@ -1,9 +1,9 @@
 <template>
     <nav class="d-flex overflow-auto">
         <router-link class="px-2 py-3 mr-3 router-link flex-row-center flex-shrink-0" 
+                        :class="{active:tabItem.active}"
                         :style="tabStyle"
                         v-for="tabItem in tabs"
-                        :exact='tabItem.exact'
                         :key="tabItem.label"
                         :to="tabItem.to">
             <span>{{tabItem.label}}</span>
@@ -45,7 +45,7 @@
         text-align: center;
         border-bottom: 2px solid transparent;
     }
-    .router-link-active {
+    .active {
         font-weight: 600;
         color: #24292e;
         border-bottom-color: #e36209

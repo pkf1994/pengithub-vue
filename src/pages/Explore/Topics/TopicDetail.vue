@@ -134,7 +134,7 @@
     import styled from 'vue-styled-components'
     import {RepoListItem} from './components'
     import {authRequiredGitHubGraphqlApiQuery,commonGet,authRequiredGet} from '@/network'
-    var parse = require('parse-link-header');
+    let parse = require('parse-link-header');
     export default {
         name: 'explore_topic_detail_page',
         mixins: [RouteUpdateAwareMixin],
@@ -291,59 +291,56 @@
         },
         methods: {
              async network_getData() {
-                try{
-                    this.loading = true
-                    this.loadingAvatar = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
+                this.loading = true
+                this.loadingAvatar = true
+                let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
 
-                    if(this.accessToken) {
-                        let url_rawContent = api.API_CONTENTS({
-                            owner: 'github',
-                            repo: 'explore',
-                            path: `topics/${this.topic}/index.md`
-                        })
+                if(this.accessToken) {
+                    let url_rawContent = api.API_CONTENTS({
+                        owner: 'github',
+                        repo: 'explore',
+                        path: `topics/${this.topic}/index.md`
+                    })
 
-                        let url_avatar = api.API_CONTENTS({
-                            owner: 'github',
-                            repo: 'explore',
-                            path: `topics/${this.topic}/${this.topic}.png`
-                        })
+                    let url_avatar = api.API_CONTENTS({
+                        owner: 'github',
+                        repo: 'explore',
+                        path: `topics/${this.topic}/${this.topic}.png`
+                    })
 
-                        authRequiredGet(url_rawContent,{cancelToken}).then(res => {
-                            this.rawContent = window.atob(res.data.content)
-                            this.loading = false
-                        })
-
-                        authRequiredGet(url_avatar).then(res => {
-                            this.avatar = `https://raw.githubusercontent.com/github/explore/master/topics/${this.topic}/${this.topic}.png`
-                            this.loadingAvatar = false
-                        }).catch(e => {
-                            this.loadingAvatar = false
-                        })
-                    }else {
-                        let graphql_topicSketchAndRaw = graphql.GRAPHQL_TOPIC_SKETCH_AND_RAW(this.topic)
-                        let res_topicSketchAndRaw = await authRequiredGitHubGraphqlApiQuery(graphql_topicSketchAndRaw,{cancelToken})
-                        res_topicSketchAndRaw.data.data.repository.sketch.entries.forEach(i => {
-                            if(i.name.match(/\.png$/) != null) this.avatar = `https://raw.githubusercontent.com/github/explore/master/topics/${this.topic}/${i.name}`
-                        })
-                        this.rawContent = res_topicSketchAndRaw.data.data.repository.raw.text
-                        this.viewerHasStarred = res_topicSketchAndRaw.data.data.topic.viewerHasStarred
+                    authRequiredGet(url_rawContent,{cancelToken}).then(res => {
+                        this.rawContent = window.atob(res.data.content)
+                    }).catch(e => {
+                        this.handleError(e,{handle404:true})
+                    }).finally(() => {
                         this.loading = false
-                    }
+                    })
 
-                   /*  let graphql_topicSketchAndRaw = graphql.GRAPHQL_TOPIC_SKETCH_AND_RAW(this.topic)
+                    authRequiredGet(url_avatar).then(res => {
+                        this.avatar = `https://raw.githubusercontent.com/github/explore/master/topics/${this.topic}/${this.topic}.png`
+                    }).finally(() => {
+                        this.loadingAvatar = false
+                    })
+                }else {
+                    let graphql_topicSketchAndRaw = graphql.GRAPHQL_TOPIC_SKETCH_AND_RAW(this.topic)
                     let res_topicSketchAndRaw = await authRequiredGitHubGraphqlApiQuery(graphql_topicSketchAndRaw,{cancelToken})
                     res_topicSketchAndRaw.data.data.repository.sketch.entries.forEach(i => {
                         if(i.name.match(/\.png$/) != null) this.avatar = `https://raw.githubusercontent.com/github/explore/master/topics/${this.topic}/${i.name}`
                     })
                     this.rawContent = res_topicSketchAndRaw.data.data.repository.raw.text
-                    this.viewerHasStarred = res_topicSketchAndRaw.data.data.topic.viewerHasStarred */
-                    //this.network_getRepositories()
-                }catch(e) {
-                    this.$toast(e,'error')
+                    this.viewerHasStarred = res_topicSketchAndRaw.data.data.topic.viewerHasStarred
                     this.loading = false
-                    console.log(e)
                 }
+
+                /*  let graphql_topicSketchAndRaw = graphql.GRAPHQL_TOPIC_SKETCH_AND_RAW(this.topic)
+                let res_topicSketchAndRaw = await authRequiredGitHubGraphqlApiQuery(graphql_topicSketchAndRaw,{cancelToken})
+                res_topicSketchAndRaw.data.data.repository.sketch.entries.forEach(i => {
+                    if(i.name.match(/\.png$/) != null) this.avatar = `https://raw.githubusercontent.com/github/explore/master/topics/${this.topic}/${i.name}`
+                })
+                this.rawContent = res_topicSketchAndRaw.data.data.repository.raw.text
+                this.viewerHasStarred = res_topicSketchAndRaw.data.data.topic.viewerHasStarred */
+                //this.network_getRepositories()
+              
             },
             async network_getFilterData() {
                 if(this.repositories.filterLanguageList.data.length > 0) return
@@ -357,10 +354,9 @@
                     let res = await commonGet(url)
 
                     this.repositories.filterLanguageList.data = res.data
-                    this.repositories.filterLanguageList.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.repositories.filterLanguageList.loading = false
                 }
             },
@@ -402,12 +398,10 @@
                     }
                     this.repositories.totalCount = res.data.total_count
                     this.network_getRepositoriesExtraData(res.data.items)
-
-                    this.repositories.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
+                    this.handleError(e)
+                }finally{
                     this.repositories.loading = false
-                    console.log(e)
                 }
             },
             async network_getRepositoriesExtraData(payload) {
@@ -420,11 +414,10 @@
 
                     let res_repositories = await authRequiredGitHubGraphqlApiQuery(graphql_repositories,{cancelToken})
                     this.repositories.extraData.data = this.repositories.extraData.data.concat(res_repositories.data.data.nodes)
-                    this.repositories.extraData.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
+                    this.handleError(e)
+                }finally{
                     this.repositories.extraData.loading = false
-                    console.log(e)
                 }
             },
             triggerModal(ref) {

@@ -165,9 +165,9 @@
 
                     this.network_getGraphqlData(this.data)
                     this.firstLoadedFlag = true
-                    this.loading = false
                 }catch(e) {
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.loading = false
                 }
             },
@@ -186,9 +186,9 @@
                     }
                     this.graphqlData.data = graphqlData
 
-                    this.graphqlData.loading = false
                 }catch(e) {
                     console.log(e)
+                }finally{
                     this.graphqlData.loading = false
                 }
             },
@@ -213,9 +213,9 @@
                         this.refType.data = 'branch'
                     }
 
-                    this.refType.loading = false
                 }catch(e) {
                     console.log(e)
+                }finally{
                     this.refType.loading = false
                 }
             },
@@ -235,9 +235,9 @@
                     this.allBranchesAndTags.branches = res.data.data.repository.allBranches.nodes
                     this.allBranchesAndTags.tags = res.data.data.repository.allTags.nodes
 
-                    this.allBranchesAndTags.loading = false
                 }catch(e) {
                     console.log(e)
+                }finally{
                     this.allBranchesAndTags.loading = false
                 }
             },

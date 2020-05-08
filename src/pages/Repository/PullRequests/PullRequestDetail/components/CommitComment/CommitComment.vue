@@ -96,10 +96,10 @@
                     this.pageInfo = res.data.data.node.comments.pageInfo
                     this.totalCount = res.data.data.node.comments.totalCount
 
-                    this.loading = false
                 }catch(e) {
-                    this.loading = false
                     console.log(e)
+                }finally{
+                    this.loading = false
                 }
             }
         },

@@ -172,10 +172,10 @@
                     this.pageInfo = parse(res.headers.link) || {}
                     this.totalCount = res.data.total_count
 
-                    this.loading = false
                 } catch(e) {
+                    this.handleError(e)
+                } finally {
                     this.loading = false
-                    console.log(e)
                 }
             },
             async network_getCountByLanguage() {
@@ -216,10 +216,10 @@
 
                     this.countByLanguage.data = countByLanguage
 
-                    this.countByLanguage.loading = false
                 } catch(e) {
-                    this.countByLanguage.loading = false
                     console.log(e)
+                } finally {
+                    this.countByLanguage.loading = false
                 }
             },
             routeUpdateHook() {

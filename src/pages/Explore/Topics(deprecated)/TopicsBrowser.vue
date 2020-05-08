@@ -83,8 +83,7 @@
 
                     this.loadingRoster = false
                 }catch(e) {
-                    console.log(e)
-                    this.$toast(e,'error')
+                    this.handleError(e)
                     this.loadingRoster = false
                 }
             },
@@ -123,16 +122,11 @@
                     }
 
                     this.viewerHasStarred = this.viewerHasStarred.concat(viewerHasStarredArr)
-
-                    this.loading = false
                 }catch(e) {
-                    console.log(e)
-                    this.$toast(
-                        e,
-                        'error'
-                    )
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                } 
+                }
             },
             async network_getHighlightTopics() {
                  try{
@@ -171,15 +165,11 @@
                         if(this.viewerHasStarred.indexOf(item) == -1) this.viewerHasStarred.push(item)
                     }
 
-                    this.highlight.loading = false
                 }catch(e) {
-                    this.$toast(
-                        `Exception while getting highlight topics data in ${this.$options.name}: ${e.message}`,
-                        'error'
-                    )
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.highlight.loading = false
-                } 
+                }
             }
         },
         components: {

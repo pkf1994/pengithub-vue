@@ -62,11 +62,11 @@
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_overview,{cancelToken})
                     this.id = res.data.data.user.id
                     this.pinnedRepositories = res.data.data.user.pinnedRepositories.nodes
-                    this.loading = false
                 }catch(e) {
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                } 
+                }
             },
            
         },

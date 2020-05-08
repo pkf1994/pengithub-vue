@@ -82,11 +82,10 @@
                     })
                     this.rawContent = res_collectionSketchAndRaw.data.data.repository.raw.text
                     this.network_getRepositories()
-                    this.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             },
             async network_getRepositories() {
@@ -116,12 +115,11 @@
 
                     this.repositories.data = repos.filter(i => i != null)
                     
-                    this.repositories.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
+                    this.handleError(e)
+                }finally{
                     this.repositories.loading = false
-                    console.log(e)
-                } 
+                }
             }
         },
         components: {

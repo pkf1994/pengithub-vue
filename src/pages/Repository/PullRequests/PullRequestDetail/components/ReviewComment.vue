@@ -298,9 +298,9 @@
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_replies)
                     this.repliesExtraData.data = this.repliesExtraData.data.concat(res.data.data.nodes)
                     this.repliesExtraData.cursor += 5
-                    this.repliesExtraData.loading = false
                 }catch(e) {
                     console.log(e)
+                }finally{
                     this.repliesExtraData.loading = false
                 }
             },

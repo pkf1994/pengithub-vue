@@ -6,7 +6,7 @@ import {IconSearchInput,SimpleSearchInput,ButtonLeftSearchInput} from './SearchI
 import {SimpleFooter,LabelsFooter,ComplexFooter} from './Footer'
 import {SimpleBubble,ComplexBubble} from './Bubble'
 import Breadcrumb from './Breadcrumb.vue'
-import {IconPagination,SimplePagination} from './Pagination'
+import {IconPagination,SimplePagination,SimplePaginationRest} from './Pagination'
 import {
     AnimatedHeightWrapper,
     AnimatedWidthWrapper} from "./AnimatedSizeWrapper";
@@ -48,6 +48,7 @@ export {
     CommonLoadingEx,
     IconPagination,
     SimplePagination,
+    SimplePaginationRest,
     AnimatedHeightWrapper,
     AnimatedWidthWrapper,
     LoadingAndCatchErrorTemplate,

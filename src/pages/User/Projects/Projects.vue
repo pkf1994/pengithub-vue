@@ -228,20 +228,15 @@
                     this.countByState.closed = res_graphql.data.data.user.closedProjectCount.totalCount
 
                     this.firstLoadedFlag = true
-
-                    if(loadingMoreFlag) {
-                        this.loadingMore = false
-                    }else{
-                        this.loading = false
-                    }
                 }catch(e) {
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     if(loadingMoreFlag) {
                         this.loadingMore = false
                     }else{
                         this.loading = false
                     }
-                } 
+                }
             },
             search() {
                 this.$router.push(`${this.$route.path}?query=${this.searchQuery}`)

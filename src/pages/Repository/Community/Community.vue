@@ -85,10 +85,10 @@
                         }
                     )
                     this.data = res.data
-                    this.loading = false
                 }catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             }
         },

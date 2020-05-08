@@ -151,12 +151,12 @@
                         }
                     })
                     this.readme.data = res.data
-                    this.readme.loading = false
                 } catch (e) {
                     console.log(e)
                     if(e.response && e.response.status === 404) {
                         this.readme.is404 = true
                     }
+                }finally{
                     this.readme.loading = false
                 }
             },

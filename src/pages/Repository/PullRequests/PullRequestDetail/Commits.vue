@@ -95,10 +95,10 @@
                     this.data = this.data.concat(res.data.data.repository.pullRequest.commits.nodes)
                     this.totalCount = res.data.data.repository.pullRequest.commits.totalCount
                     this.pageInfo = res.data.data.repository.pullRequest.commits.pageInfo
-                    this.loading = false
                 }catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             }
         },

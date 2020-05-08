@@ -195,14 +195,10 @@
                     }
                     this.pageInfo = res.data.data.repository.projects.pageInfo
 
-                    if(getMoreDataFlag){
-                        this.loadingMore = false
-                    }else{
-                        this.loading = false
-                    }
                 }catch(e){
-                    console.log(e)
-                     if(getMoreDataFlag){
+                    this.handleError(e)
+                }finally{
+                    if(getMoreDataFlag){
                         this.loadingMore = false
                     }else{
                         this.loading = false
@@ -226,9 +222,9 @@
                     this.countInfoByState.totalCountClosed = res.data.data.repository.totalCountClosed.totalCount
                     this.noData = res.data.data.repository.totalCountOpenWithoutSearchQuery.totalCount === 0 ? true : false
 
-                    this.countInfoByState.loading = false
                 }catch(e){
                     console.log(e)
+                }finally{
                     this.countInfoByState.loading = false
                 }
             }

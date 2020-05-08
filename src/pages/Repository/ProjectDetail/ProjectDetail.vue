@@ -16,7 +16,7 @@
 
         <CardList class="p-2">
             <transition-group appear name="fade-group">
-                <Card v-for="item in cards" :key="item.note" :card="item"></Card>
+                <Card v-for="item in cards" :key="item.id" :card="item"></Card>
             </transition-group>
         </CardList>
 
@@ -67,8 +67,10 @@
                 let cardsHolder = this.data.columns.nodes.filter(i => {
                     return i.name == this.column
                 })
+                if(!this.filterQuery || this.filterQuery.trim() == '') return cardsHolder[0] ? cardsHolder[0].cards.nodes : []
                 return cardsHolder[0] ? cardsHolder[0].cards.nodes.filter(i => {
-                    return i.note.toLowerCase().indexOf(this.filterQuery.toLowerCase()) != -1
+                    return (i.note && i.note.toLowerCase().indexOf(this.filterQuery.toLowerCase()) != -1) || 
+                            (i.content && i.content.title.toLowerCase().indexOf(this.filterQuery.toLowerCase()) != -1)
                 }) : []
             }
         },
@@ -87,11 +89,11 @@
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_,{cancelToken})
                     this.data = res.data.data.repository.project
                     this.firstLoadedFlag = true
-                    this.loading = false
                 }catch(e) {
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                }   
+                }
             },
             generateRouterMeta() {
                 return `${this.owner}-${this.repo}-${this.$route.number}`

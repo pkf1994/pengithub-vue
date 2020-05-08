@@ -478,9 +478,10 @@
                     
                     
                 }catch(e){
+                    this.handleError(e)
+                }finally{
                     this.loading = false
                     this.extraData.loading = false
-                    console.log(e)
                 }
             },
             async network_getTimeline(payload) {
@@ -568,11 +569,11 @@
                         this.timeline.commentExtraGraphqlData.data.push(res_issueCommentBodyAndReactions.data.data[key])
                     }
 
-                    this.timeline.commentExtraGraphqlData.loading = false
                 }catch(e){
+                    console.log(e)
+                }finally{
                     this.timeline.loading = false
                     this.timeline.commentExtraGraphqlData.loading = false
-                    console.log(e)
                 }
             },
             async network_getTimelineCount() {
@@ -600,11 +601,11 @@
                     }
 
                     this.timeline.count.data = timelineCount
-
-                    this.timeline.count.loading = false
+                    
                 }catch(e){
-                    this.timeline.count.loading = false
                     console.log(e)
+                }finally{
+                    this.timeline.count.loading = false
                 }
             },
             mergedTimelineData(timelineData) {

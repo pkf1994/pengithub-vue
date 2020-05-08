@@ -155,11 +155,10 @@
 
                     this.trendingRepoToday.data = res.data
 
-                    this.trendingRepoToday.loading = false
                 }catch(e) {
-                    console.log(e)
-                    this.$toast(e,'error')
+                    this.handleError(e)
                     this.exception.trendingRepoToday = true
+                }finally{
                     this.trendingRepoToday.loading = false
                 }
             },
@@ -172,11 +171,10 @@
 
                     this.trendingDevelopers.data = res.data
 
-                    this.trendingDevelopers.loading = false
                 }catch(e) {
-                    console.log(e)
-                    this.$toast(e,'error')
+                    this.handleError(e)
                     this.exception.trendingDevelopers = true
+                }finally{
                     this.trendingDevelopers.loading = false
                 }
             }

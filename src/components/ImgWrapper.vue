@@ -23,8 +23,13 @@
                 showImgFlag: true
             }
         },
-        created() {
-            
+        computed: {
+            imgSrc() {
+                if(!this.$slots.default) return 
+                if(!this.$slots.default[0]) return 
+                if(!this.$slots.default[0].elm) return 
+                return this.$slots.default[0].elm.src
+            }
         },
         mounted() {
             this.initCoverStyle()
@@ -35,13 +40,18 @@
                 if(!this.$slots.default) return 
                 this.width = this.$slots.default[0].elm.width
                 this.height = this.$slots.default[0].elm.height
-                this.showImgFlag = false
+                if(this.imgSrc) this.showImgFlag = false
             },
             initLoadHandler() {
                 if(!this.$slots.default) return 
                 this.$slots.default[0].elm.addEventListener('load',(e) => {
                     this.showImgFlag = true
                 })
+            }
+        },
+        watch: {
+            imgSrc() {
+                this.initLoadHandler()
             }
         },
         components: {

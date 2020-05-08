@@ -146,10 +146,10 @@
 
                     this.network_getExtraData()
 
-                    this.loading = false
                 } catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             },
             async network_getExtraData() {
@@ -178,10 +178,10 @@
                         extraData.push(res.data.data[key])
                     }
                     this.extraData.data = extraData
-                    this.extraData.loading = false
                 } catch(e) {
-                    this.extraData.loading = false
                     console.log(e)
+                }finally{
+                    this.extraData.loading = false
                 }
             }
         },

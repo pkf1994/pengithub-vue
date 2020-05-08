@@ -108,10 +108,10 @@
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_commitsInPastPeriod,{cancelToken})
 
                     this.commitStatisitc.data = res.data.data.repository.refs.nodes
-                    this.commitStatisitc.loading = false
                 }catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.commitStatisitc.loading = false
-                    console.log(e)
                 }
             },
             async network_getCommitCountInPastPeriod() {
@@ -133,10 +133,10 @@
                         }
                     )
                     this.commitCount.data = res.data.total_count
-                    this.commitCount.loading = false
                 }catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.commitCount.loading = false
-                    console.log(e)
                 }
             },
 
@@ -156,10 +156,10 @@
                     this.pullsMerged.data = this.pullsMerged.data.concat(res.data.data.search.nodes)
                     this.pullsMerged.pageInfo =  res.data.data.search.pageInfo
                     this.pullsMerged.totalCount =  res.data.data.search.issueCount
-                    this.pullsMerged.loading = false
                 }catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.pullsMerged.loading = false
-                    console.log(e)
                 }
             },
 
@@ -179,10 +179,10 @@
                     this.issuesClosed.data = this.issuesClosed.data.concat(res.data.data.search.nodes)
                     this.issuesClosed.pageInfo =  res.data.data.search.pageInfo
                     this.issuesClosed.totalCount =  res.data.data.search.issueCount
-                    this.issuesClosed.loading = false
                 }catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.issuesClosed.loading = false
-                    console.log(e)
                 }
             },
 
@@ -214,10 +214,10 @@
                     this.pullsProposed.data = this.pullsProposed.data.concat(res.data.items)
                     this.pullsProposed.totalCount = res.data.total_count
                     this.pullsProposed.pageInfo = pageInfo || {}
-                    this.pullsProposed.loading = false
                 }catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.pullsProposed.loading = false
-                    console.log(e)
                 }
             },
 
@@ -248,10 +248,10 @@
                     this.issuesOpened.data = this.issuesOpened.data.concat(res.data.items)
                     this.issuesOpened.totalCount = res.data.total_count
                     this.issuesOpened.pageInfo = pageInfo || {}
-                    this.issuesOpened.loading = false
                 }catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.issuesOpened.loading = false
-                    console.log(e)
                 }
             },
             routeUpdateHook() {

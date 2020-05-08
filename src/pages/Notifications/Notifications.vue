@@ -169,11 +169,11 @@
                     let res = await authRequiredGet(url,{cancelToken})
                     let pageInfo = parse(res.headers.link) || {}
                     this.totalCount.data = pageInfo.last && pageInfo.last.page
-                    this.totalCount.loading = false
                 }catch(e) {
-                    this.totalCount.loading = false
                     console.log(e)
-                } 
+                }finally{
+                    this.totalCount.loading = false
+                }
             },
             async network_getParticipatingNotificationCount(){
                  try{
@@ -188,11 +188,11 @@
                     let res = await authRequiredGet(url,{cancelToken})
                     let pageInfo = parse(res.headers.link) || {}
                     this.participatingNotificationCount.data = pageInfo.last && pageInfo.last.page
-                    this.participatingNotificationCount.loading = false
                 }catch(e) {
-                    this.participatingNotificationCount.loading = false
                     console.log(e)
-                } 
+                }finally{
+                    this.participatingNotificationCount.loading = false
+                }
             },
             async network_getData() {
                 try{
@@ -208,11 +208,12 @@
                     this.data = res.data
                     this.pageInfo = parse(res.headers.link) || {}
                     this.network_getExtraData()
-                    this.loading = false
                 }catch(e) {
-                    this.loading = false
+                    this.handleError(e)
                     console.log(e)
-                } 
+                }finally{
+                    this.loading = false
+                }
             },
             async network_getExtraData() {
                 try{
@@ -225,15 +226,13 @@
                         extraData.push(res_extraData.data.data[key])
                     }
                     this.extraData.data = extraData
-                    this.extraData.loading = false
                 }catch(e) {
-                    this.extraData.loading = false
                     console.log(e)
+                }finally{
+                    this.extraData.loading = false
                 }
             },
             triggerModal(ref) {
-                console.log(ref)
-                console.log( this.$refs)
                 this.$refs[ref].show = true
             },
             closeModal() {

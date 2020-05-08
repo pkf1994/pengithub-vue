@@ -43,6 +43,18 @@ export const API_USER_NOTIFICATIONS = payload => {
 
 export const API_USER = login => `${GITHUB_REST_API_BASE}/users/${login}`
 
+export const API_ORG = organization => `${GITHUB_REST_API_BASE}/orgs/${organization}`
+
+export const API_ORG_PUBLIC_MEMBER = (organization,params) => {
+    let query = util_queryParse.querify(params)
+    return `${GITHUB_REST_API_BASE}/orgs/${organization}/public_members?${query}`
+}
+
+export const API_ORG_REPOS = (organization,params) => {
+    let query = util_queryParse.querify(params)
+    return `${GITHUB_REST_API_BASE}/orgs/${organization}/repos?${query}`
+}
+
 export const API_USER_STARRED_REPOS = (login,params) => {
     let query = util_queryParse.querify(params)
     return `${GITHUB_REST_API_BASE}/users/${login}/starred?${query}`

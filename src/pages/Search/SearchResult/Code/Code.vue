@@ -150,10 +150,10 @@
                     this.pageInfo = parse(res.headers.link) || {}
                     this.totalCount = res.data.total_count
 
-                    this.loading = false
                 } catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             },
         },

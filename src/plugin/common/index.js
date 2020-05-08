@@ -26,8 +26,14 @@ export default {
                 } 
             },
             methods: {
-                handleError(e) {
+                handleError(e,config = {handle404: false}) {
+                    if(!e) return
                     console.log(e)
+                    if(config.handle404) {
+                        if(e.response && e.response.status == 404) {
+                            this.$router.replace('/404')
+                        }
+                    }
                     this.$toast(e,'error')
                     if(!e.response && !this.accessToken) {
                         this.$toast(this.loginNotice)

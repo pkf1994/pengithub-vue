@@ -80,10 +80,9 @@
                     this.network_getHighlightCollections()
                     this.network_getData()
 
-                    this.loadingRoster = false
                 }catch(e) {
-                    console.log(this.$route)
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.loadingRoster = false
                 }
             },
@@ -109,12 +108,11 @@
                     })
 
                     this.cursor += this.perPage
-                    this.loading = false
                 }catch(e) {
-                    console.log(this.$route)
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                } 
+                }
             },
             async network_getHighlightCollections() {
                  try{
@@ -143,13 +141,11 @@
                     })
 
                     this.highlight.data = collectionsSketchRosterToLoad
-
-                    this.highlight.loading = false
                 }catch(e) {
-                    console.log(this.$route)
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.highlight.loading = false
-                } 
+                }
             }
         },
         components: {

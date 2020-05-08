@@ -59,9 +59,9 @@
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_activeAndStaleBranches,{cancelToken:sourceAndCancelToken.cancelToken})
                     this.defaultBranch = res.data.data.repository.defaultBranchRef
                     this.allBranches = res.data.data.repository.refs.nodes
-                    this.loading = false
                 }catch(e) {
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.loading = false
                 }
             }

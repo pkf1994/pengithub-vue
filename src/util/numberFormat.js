@@ -3,6 +3,14 @@ export default {
         let reg=/\d{1,3}(?=(\d{3})+$)/g;
         return (number + '').replace(reg, '$&,');
     },
+
+    /**
+     *
+     *
+     * @param {*} number
+     * @param {number} [reservedDecimal=2]
+     * @returns
+     */
     thousands2K2M: function (number,reservedDecimal = 2) {
         if(number >= 1000000) {
             let numberString = (number/1000000).toString()

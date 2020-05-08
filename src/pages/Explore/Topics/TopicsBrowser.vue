@@ -89,10 +89,9 @@
                     this.data = topicArr
                     this.network_getHighlightTopics()
                     this.network_getData()
-
-                    this.loadingRoster = false
                 }catch(e) {
                     this.handleError(e)
+                }finally{
                     this.loadingRoster = false
                 }
             },
@@ -141,11 +140,11 @@
                         this.viewerHasStarred = this.viewerHasStarred.concat(viewerHasStarredArr)
                     }
 
-                    this.loading = false
                 }catch(e) {
-                     this.handleError(e)
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                } 
+                }
             },
             async network_getHighlightTopics() {
                  try{
@@ -158,8 +157,6 @@
                             topicsSketchRosterToLoad.push(randomItem)
                         }
                     }
-
-
 
                     let getArr = []
                     topicsSketchRosterToLoad.forEach(i => {
@@ -196,11 +193,11 @@
                         }
                     }
 
-                    this.highlight.loading = false
                 }catch(e) {
                     this.handleError(e)
+                }finally {
                     this.highlight.loading = false
-                } 
+                }
             }
         },
         components: {

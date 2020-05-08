@@ -431,10 +431,10 @@
                     //获取其他数据
                     if(res.data.items.length > 0)this.network_getExtraData(res.data.items)
                     if(!payload || !payload.url)this.network_getIssueCountByState()
-                    this.loading = false
                 }catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             },  
             async network_getExtraData(issues) {
@@ -451,10 +451,10 @@
                     }
                     this.extraData.data = this.extraData.data.concat(issueArr)
 
-                    this.extraData.loading = false
                 }catch(e) {
-                    this.extraData.loading = false
                     console.log(e)
+                }finally{
+                    this.extraData.loading = false
                 }
             },
             async network_getIssueCountByState() {
@@ -478,10 +478,10 @@
                         open: resArr[0].data.total_count,
                         closed: resArr[1].data.total_count,
                     }
-                    this.countByState.loading = false
                 }catch(e) {
-                    this.countByState.loading = false
                     console.log(e)
+                }finally{
+                    this.countByState.loading = false
                 }
             },
             async network_getAssociateUsers(meta) {
@@ -512,10 +512,10 @@
 
                     this.network_getAssociateUserName(avaliableUsers)
 
-                    this.associatedUsers[meta].loading = false
                 }catch(e) {
-                    this.associatedUsers[meta].loading = false
                     console.log(e)
+                }finally{
+                    this.associatedUsers[meta].loading = false
                 }
             },
             async network_getAssociateUserName(avaliableUsers) {
@@ -531,27 +531,24 @@
                         userName.push(res_userName.data.data[key])
                     }
                     this.associatedUsers.userName.data = userName
-
-                    this.associatedUsers.userName.loading = false
                 }catch(e){
-                    this.associatedUsers.userName.loading = false
                     console.log(e)
+                }finally{
+                    this.associatedUsers.userName.loading = false
                 }
             },
             async network_getLabels() {
                 try{
                     this.labels.loading = true
-
                     let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(`${this.name} ${this.routerPathFragment} get_labels`)
                     this.cancelSources.push(sourceAndCancelToken.source)
                     let url = api.API_REPO_LABELS(this.owner(),this.repo())
                     let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
                     this.labels.data = res.data
-
-                    this.labels.loading = false
                 }catch(e){
-                    this.labels.loading = false
                     console.log(e)
+                }finally{
+                    this.labels.loading = false
                 }
             },
             search() {

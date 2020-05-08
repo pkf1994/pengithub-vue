@@ -329,10 +329,9 @@
                     ]
                     this.organizations.data = res[0].data.data.user.organizations.nodes
                     this.organizations.totalCount = res[0].data.data.user.organizations.totalCount
-                   
-                    this.loading = false
                 }catch(e) {
                     console.log(e)
+                }finally{
                     this.loading = false
                 }
             },  
@@ -343,9 +342,9 @@
                     let graphql_allOrgs = graphql.GRAPHQL_ALL_ORGS(this.login)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_allOrgs)
                     this.organizations.all.data = res.data.data.user.organizations.nodes
-                    this.organizations.all.loading = false
                 }catch(e) {
                     console.log(e)
+                }finally {
                     this.organizations.all.loading = false
                 }
             },
@@ -380,9 +379,9 @@
                     console.log(graphql_periodContributionsCollection)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_periodContributionsCollection)
                     this.contributionsCollectionWithPeriod.push(res.data.data.user.contributionsCollection)
-                    this.loadingMoreContributionCollections = false
                 }catch(e) {
-                    console.log(e)
+                    this.handleError(e)
+                }finally {
                     this.loadingMoreContributionCollections = false
                 }
             },

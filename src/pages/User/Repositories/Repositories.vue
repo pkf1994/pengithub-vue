@@ -246,11 +246,11 @@
 
                     this.extraData = extraData
                     
-                    this.loading = false
                 }catch(e) {
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                } 
+                }
             },
             async network_getAvailableLanguage() {
                 if(this.availableLanguage.loading || this.availableLanguage.data.length > 0) return 
@@ -259,11 +259,11 @@
                     let url = api.API_ALL_LANGUAGE
                     let res = await commonGet(url)
                     this.availableLanguage.data = res.data
-                    this.availableLanguage.loading = false
                 }catch(e) {
                     console.log(e)
+                }finally{
                     this.availableLanguage.loading = false
-                } 
+                }
             },
             changePage(goPrevPageFlag) {
                 let queryStr = util_queryParse.querify({

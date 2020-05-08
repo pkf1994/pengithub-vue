@@ -61,10 +61,9 @@
                     let url = api.API_TREE_LIST(this.$route.params)
                     let res = await authRequiredGet(url,{cancelToken})
                     this.data = res.data.tree
-                    this.loading = false
                 }catch(e) {
-                    console.log(e)
-                    this.$toast(e,'error')
+                    this.handleError(e)
+                }finally{
                     this.loading = false
                 }
             },

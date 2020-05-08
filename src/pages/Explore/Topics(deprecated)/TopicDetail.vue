@@ -301,11 +301,10 @@
                     this.rawContent = res_topicSketchAndRaw.data.data.repository.raw.text
                     this.viewerHasStarred = res_topicSketchAndRaw.data.data.topic.viewerHasStarred
                     //this.network_getRepositories()
-                    this.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             },
             async network_getFilterData() {
@@ -320,10 +319,9 @@
                     let res = await commonGet(url)
 
                     this.repositories.filterLanguageList.data = res.data
-                    this.repositories.filterLanguageList.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.repositories.filterLanguageList.loading = false
                 }
             },
@@ -366,11 +364,10 @@
                     this.repositories.totalCount = res.data.total_count
                     this.network_getRepositoriesExtraData(res.data.items)
 
-                    this.repositories.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
+                    this.handleError(e)
+                }finally{
                     this.repositories.loading = false
-                    console.log(e)
                 }
             },
             async network_getRepositoriesExtraData(payload) {
@@ -382,11 +379,10 @@
 
                     let res_repositories = await authRequiredGitHubGraphqlApiQuery(graphql_repositories,{cancelToken})
                     this.repositories.extraData.data = this.repositories.extraData.data.concat(res_repositories.data.data.nodes)
-                    this.repositories.extraData.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
+                    this.handleError(e)
+                }finally{
                     this.repositories.extraData.loading = false
-                    console.log(e)
                 }
             },
             triggerModal(ref) {

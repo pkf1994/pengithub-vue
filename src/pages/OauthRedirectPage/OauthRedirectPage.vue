@@ -94,11 +94,10 @@
                     await this.action_oauth_requestAccessToken({code: code})
                     await this.action_oauth_requestViewerInfo()
                     this.$router.replace('/')
-                    this.loading = false
                 }catch(e) {
-                    console.log(e)
+                    this.handleError(e)
                     this.exception = true
-                    this.$toast(e,'error')
+                }finally{
                     this.loading = false
                 }
             }

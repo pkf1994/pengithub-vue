@@ -144,9 +144,9 @@
                         this.raw = `https://github.com/${this.owner()}/${this.repo()}/blob/${this.currentBranch}/${this.path}?raw=true`
                     }
 
-                    this.loading = false
                 }catch(e){
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.loading = false
                 }
             },

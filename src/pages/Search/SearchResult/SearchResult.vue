@@ -56,34 +56,40 @@
             tabs: function () {
                 return [
                     {
-                        to: this.cachedRouteQuery['/search/repositories'] || `/search/repositories?q=${this.query}`,
+                        to: this.cachedRouteQuery['/search'] || `/search?q=${this.query}`,
                         label: 'Repositories',
-                        meta: this.data.repositories === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.repositories,0)
+                        meta: this.data.repositories === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.repositories,0),
+                        active: this.$route.path == '/search'
                     },
                     {
                         to: this.cachedRouteQuery['/search/code'] || `/search/code?q=${this.query}`,
                         label: 'Code',
-                        meta: this.data.code === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.code,0)
+                        meta: this.data.code === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.code,0),
+                        active: this.$route.path == '/search/code'
                     },
                     {
                         to: this.cachedRouteQuery['/search/commits'] || `/search/commits?q=${this.query}`,
                         label: 'Commits',
-                        meta: this.data.commits === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.commits,0)
+                        meta: this.data.commits === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.commits,0),
+                        active: this.$route.path == '/search/commits'
                     },
                     {
                         to: this.cachedRouteQuery['/search/issues'] || `/search/issues?q=${this.query}`,
                         label: 'Issues',
-                        meta: this.data.issues === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.issues,0)
+                        meta: this.data.issues === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.issues,0),
+                        active: this.$route.path == '/search/issues'
                     },
                     {
                         to: this.cachedRouteQuery['/search/users'] || `/search/users?q=${this.query}`,
                         label: 'Users',
-                        meta: this.data.users === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.users,0)
+                        meta: this.data.users === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.users,0),
+                        active: this.$route.path == '/search/users'
                     },
                     {
                         to: this.cachedRouteQuery['/search/topics'] || `/search/topics?q=${this.query}`,
                         label: 'Topics',
-                        meta: this.data.topics === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.topics,0)
+                        meta: this.data.topics === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.topics,0),
+                        active: this.$route.path == '/search/topics'
                     }
                 ]
             },
@@ -141,12 +147,11 @@
                         commits: res_rest_arr[1].data.total_count,
                         topics: res_rest_arr[2].data.total_count,
                     }
-
-                    this.loading = false
                 }catch(e) {
                     console.log(e)
+                }finally{
                     this.loading = false
-                }
+                }   
             },
             search() {
                 let path = `${this.$route.path}?q=${this.localSearchQuery}`
@@ -165,7 +170,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/forms/index.scss';
     .search-input::placeholder{
         color:#586069;
         opacity: 0.55;

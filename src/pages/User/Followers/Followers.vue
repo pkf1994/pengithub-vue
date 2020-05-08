@@ -86,11 +86,11 @@
                         extraData.push(res_extra.data.data[key])
                     }
                     this.extraData = extraData
-                    this.loading = false
                 }catch(e) {
-                    console.log(e)
+                    this.handleError(e)
+                }finally {
                     this.loading = false
-                } 
+                }
             },
             changePage(goPrevPageFlag) {
                 let queryStr = util_queryParse.querify({

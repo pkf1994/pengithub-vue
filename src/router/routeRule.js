@@ -26,6 +26,10 @@ const UserProjects = () => import('../pages/User/Projects/Projects.vue')
 const UserStars = () => import('../pages/User/Stars/Stars.vue')
 const UserFollowers = () => import('../pages/User/Followers/Followers.vue')
 const UserFollowing = () => import('../pages/User/Following/Following.vue')
+const Organization = () => import('../pages/Organization/Organization.vue')
+const OrganizationRepositories = () => import('../pages/Organization/Repositories/Repositories.vue')
+const OrganizationPeople = () => import('../pages/Organization/People/People.vue')
+//const OrganizationPackages = () => import('../pages/Organization/Packages/Packages.vue')
 const Repository = () => import('../pages/Repository/Repository.vue')
 const RepositoryCode = () => import('../pages/Repository/Code/Code.vue')
 const RepositoryCodeMain = () => import('../pages/Repository/Code/CodeMain/CodeMain.vue')
@@ -157,7 +161,7 @@ export default [
         },
         children: [
             {
-                path: 'repositories',
+                path: '/',
                 component: SearchResultRepositories
             },
             {
@@ -222,6 +226,23 @@ export default [
                 path: 'following',
                 component: UserFollowing
             },
+        ]
+    },
+    {
+        path: '/orgs/:organization',
+        components: {
+            default: Organization,
+            footer: SimpleFooter
+        },
+        children: [
+            {
+                path: '/',
+                component: OrganizationRepositories
+            },
+            {
+                path: 'people',
+                component: OrganizationPeople
+            }
         ]
     },
     {
@@ -351,5 +372,12 @@ export default [
             },
         ]
     },
-    
+    {
+        path: '*',
+        components: {
+            default: NotFoundPage,
+            header: LogoHeader,
+            footer: ComplexFooter
+        }
+    },
 ]

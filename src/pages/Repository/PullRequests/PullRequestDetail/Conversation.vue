@@ -370,7 +370,6 @@
                     })
                     let res_bodyHTML = await authRequiredGitHubGraphqlApiQuery(graphql_bodyHTML,{cancelToken:sourceAndCancelToken.cancelToken})
                     this.data = res_bodyHTML.data.data.repository.pullRequest
-                    this.loading = false
 
                     //获取timeline(异步)
                     this.network_getTimeline()
@@ -379,8 +378,9 @@
                     this.network_getReviewCommentReplies()
 
                 }catch(e){
+                    this.handleError()
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             },
             async network_getTimeline(payload) {
@@ -465,12 +465,11 @@
                     for(let key in res_commentsAndReviewExtraData.data.data) {
                         this.timeline.extraData.data.push(res_commentsAndReviewExtraData.data.data[key])
                     }
-
-                    this.timeline.extraData.loading = false
                 }catch(e){
+                    this.handleError(e)
+                }finally{
                     this.timeline.loading = false
                     this.timeline.extraData.loading = false
-                    console.log(e)
                 }
             },
             async network_getTimelineCount() {
@@ -500,10 +499,10 @@
 
                     this.timeline.count.data = timelineCount
 
-                    this.timeline.count.loading = false
                 }catch(e){
-                    this.timeline.count.loading = false
                     console.log(e)
+                }finally{
+                    this.timeline.count.loading = false
                 }
             },
             //此处无法获取state为pending的review comment reply, 即使viewer为该review comment reply的author, 该数据可以在review组件中通过graphql api获取
@@ -526,10 +525,10 @@
                         if(item.in_reply_to_id) replies.push(item)
                     })
                     this.reviewCommentReplies.data = replies
-                    this.reviewCommentReplies.loading = false
                 }catch(e){
-                    this.reviewCommentReplies.loading = false
                     console.log(e)
+                }finally{
+                    this.reviewCommentReplies.loading = false
                 }
             },
             mergedTimelineData(timelineData) {

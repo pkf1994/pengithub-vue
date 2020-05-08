@@ -71,10 +71,10 @@
                     })
                     let res_pullRequest = await authRequiredGet(url_pullRequest,{cancelToken:sourceAndCancelToken.cancelToken})
                     this.data = res_pullRequest.data
-                    this.loading = false
                 }catch(e){
+                   this.handleError(e)
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             },
         },

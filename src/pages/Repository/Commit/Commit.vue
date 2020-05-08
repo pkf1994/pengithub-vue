@@ -260,10 +260,10 @@
 
                     this.network_getExtraData()
 
-                    this.loading = false
                 }catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             },
             async network_getExtraData() {
@@ -283,11 +283,10 @@
                     setTimeout(() => {
                         this.showDiff = true
                     },400)
-                    
-                    this.extraData.loading = false
                 }catch(e) {
-                    this.extraData.loading = false
                     console.log(e)
+                }finally{
+                    this.extraData.loading = false
                 }
             },
             async network_getComments() {
@@ -328,11 +327,10 @@
                     this.comments.data = this.comments.data.concat(res.data.data.node.comments.nodes)
                     this.comments.pageInfo = res.data.data.node.comments.pageInfo
                     this.comments.totalCount = res.data.data.node.comments.totalCount
-                    
-                    this.comments.loading = false
                 }catch(e) {
-                    this.comments.loading = false
                     console.log(e)
+                }finally{
+                    this.comments.loading = false
                 }
             }
         },

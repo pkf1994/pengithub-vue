@@ -180,9 +180,9 @@
                     let graphql_userInfo = graphql.GRAPHQL_USER_INFO(this.login)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_userInfo,{cancelToken})
                     this.data = res.data.data.user || {}
-                    this.loading = false
                 }catch(e) {
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.loading = false
                 }
             },

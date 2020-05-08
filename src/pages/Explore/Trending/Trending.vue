@@ -296,10 +296,9 @@
                         if(this.meta == 'developers') this.network_getViewerIsFollowingInfo()
                     }
                     
-                    this[this.meta].loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this[this.meta].loading = false
                 }
             },
@@ -317,12 +316,11 @@
                         data.push(res.data.data[key])
                     }
                     this.repositories.viewerHasStarred.data = data
-                    this.repositories.viewerHasStarred.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.repositories.viewerHasStarred.loading = false
-                } 
+                }
             },
             async network_getViewerIsFollowingInfo() {
                 try{
@@ -338,12 +336,11 @@
                         data.push(res.data.data[key])
                     }
                     this.developers.viewerIsFollowing.data = data
-                    this.developers.viewerIsFollowing.loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.developers.viewerIsFollowing.loading = false
-                } 
+                }
             },
             async network_getFilterData(meta) {
                 if(this[meta].data.length > 0) return
@@ -362,10 +359,9 @@
                     let res = await commonGet(url)
 
                     this[meta].data = res.data
-                    this[meta].loading = false
                 }catch(e) {
-                    this.$toast(e,'error')
-                    console.log(e)
+                    this.handleError(e)
+                }finally {
                     this[meta].loading = false
                 }
             },

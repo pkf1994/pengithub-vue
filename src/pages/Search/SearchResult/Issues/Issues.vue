@@ -199,10 +199,10 @@
 
                     this.network_getExtraData()
 
-                    this.loading = false
                 } catch(e) {
+                    this.handleError(e)
+                }finally{
                     this.loading = false
-                    console.log(e)
                 }
             },
             async network_getExtraData() {
@@ -233,10 +233,10 @@
                         extraData.push(res.data.data[key])
                     }
                     this.extraData.data = extraData
-                    this.extraData.loading = false
                 } catch(e) {
-                    this.extraData.loading = false
                     console.log(e)
+                }finally{
+                    this.extraData.loading = false
                 }
             },
             async network_getCountByLanguage() {
@@ -277,10 +277,10 @@
 
                     this.countByLanguage.data = countByLanguage
 
-                    this.countByLanguage.loading = false
                 } catch(e) {
-                    this.countByLanguage.loading = false
                     console.log(e)
+                } finally {
+                    this.countByLanguage.loading = false
                 }
             },
             routeUpdateHook() {

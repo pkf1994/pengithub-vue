@@ -118,9 +118,9 @@
                     let graphql_repoBasicInfo = graphql.GRAPHQL_REPOSITORY_BASIC_INFO(this.owner,this.repo)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_repoBasicInfo,{cancelToken:sourceAndCancelToken.cancelToken})
                     this.data = res.data.data.repository
-                    this.loading = false
                 }catch(e) {
-                    console.log(e)
+                    this.handleError(e)
+                }finally{
                     this.loading = false
                 }
             },
@@ -137,9 +137,9 @@
                     let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
 
                     this.viewerIsCollaborator.data = true
-                    this.viewerIsCollaborator.loading = false
                 }catch(e) {
                     console.log(e)
+                }finally{
                     this.viewerIsCollaborator.loading = false
                 }
             },
