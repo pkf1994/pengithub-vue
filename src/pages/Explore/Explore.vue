@@ -32,7 +32,10 @@
         components: {
             TopTab,
             Container: styled.div``
-        }
+        },
+        created() {
+            console.log(this.$router.history)
+        },
     }
 </script>
 

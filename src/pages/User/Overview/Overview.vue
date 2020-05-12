@@ -59,9 +59,10 @@
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
                     let graphql_overview = graphql.GRAPHQL_USER_OVERVIEW(this.login)
+                    console.log(graphql_overview)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_overview,{cancelToken})
                     this.id = res.data.data.user.id
-                    this.pinnedRepositories = res.data.data.user.pinnedRepositories.nodes
+                    this.pinnedRepositories = res.data.data.user.pinnedItems.nodes
                 }catch(e) {
                     this.handleError(e)
                 }finally{

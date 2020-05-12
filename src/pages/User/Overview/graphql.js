@@ -3,24 +3,26 @@ export const GRAPHQL_USER_OVERVIEW = payload => `
 {
   user(login: "${payload}") {
     id
-    pinnedRepositories(first: 6) {
+    pinnedItems(types: REPOSITORY, first: 6) {
       nodes {
-        name
-        id
-        owner {
-          login
-        }
-        stargazers {
-          totalCount
-        }
-        primaryLanguage {
-          color
+        ... on Repository {
           name
+          id
+          owner {
+            login
+          }
+          stargazers {
+            totalCount
+          }
+          primaryLanguage {
+            color
+            name
+          }
+          forks {
+            totalCount
+          }
+          description
         }
-        forks {
-          totalCount
-        }
-        description
       }
     }
   }

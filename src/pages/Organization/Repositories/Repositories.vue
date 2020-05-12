@@ -344,18 +344,20 @@
                     this.pageInfo = parse(res_rest.headers.link) || {}
                     this.firstLoadedFlag = true
 
-                    let graphql_extraData = graphql.GRAPHQL_ORG_REPOSITORY_EXTRA(this.data)
-                    let res_graphql = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
+                    if(this.accessToken) {
+                        let graphql_extraData = graphql.GRAPHQL_ORG_REPOSITORY_EXTRA(this.data)
+                        let res_graphql = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
 
-                    let extraData = []
-                    for(let key in res_graphql.data.data) {
-                        extraData.push(res_graphql.data.data[key])
+                        let extraData = []
+                        for(let key in res_graphql.data.data) {
+                            extraData.push(res_graphql.data.data[key])
+                        }
+
+                        this.extraData = extraData
                     }
-
-                    this.extraData = extraData
                     
                 }catch(e) {
-                    this.handleError(e)
+                    this.handleError(e,{handle404: true})
                 }finally{
                     this.loading = false
                 }

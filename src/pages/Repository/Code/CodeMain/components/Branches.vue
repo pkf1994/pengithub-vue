@@ -9,9 +9,9 @@
                     <svg class="branch-icon" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 5c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v.3c-.02.52-.23.98-.63 1.38-.4.4-.86.61-1.38.63-.83.02-1.48.16-2 .45V4.72a1.993 1.993 0 00-1-3.72C.88 1 0 1.89 0 3a2 2 0 001 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-.53-.2-1-.53-1.36.09-.06.48-.41.59-.47.25-.11.56-.17.94-.17 1.05-.05 1.95-.45 2.75-1.25S8.95 7.77 9 6.73h-.02C9.59 6.37 10 5.73 10 5zM2 1.8c.66 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2C1.35 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2zm0 12.41c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm6-8c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
                     <SummaryAndDetail>
                         <template v-slot:summary>
-                             <span>{{codeBasicInfo().defaultBranchRef && codeBasicInfo().defaultBranchRef.name}}</span>
+                             <span>{{repoBasicInfo().default_branch}}</span>
                         </template>
-                        <router-link to="/" class="branch-item d" v-for="item in activeBranchList" :key="item.name">
+                        <router-link :to="`/${owner()}/${repo()}/tree/${item.name}`" class="branch-item d" v-for="item in activeBranchList" :key="item.name">
                             {{item.name}}
                         </router-link>
                         <router-link :to="`/${owner()}/${repo()}/branches`" class="branch-item d" style="font-weight: 400;">
@@ -24,6 +24,10 @@
 
         <Content class="bubble-content" v-if="codeBasicInfo().defaultBranchRef && codeBasicInfo().defaultBranchRef.target">
             Last commit by <strong>{{codeBasicInfo().defaultBranchRef.target.history.nodes[0].author.user.login}}</strong> {{commitAt}}
+        </Content>
+
+        <Content class="bubble-content" v-else-if="lastCommit.node_id">
+            Last commit by <strong>{{lastCommit.author.login}}</strong> {{lastCommit.commit.committer.data | getDateDiff}}
         </Content>
 
         <template v-slot:footer>
@@ -46,23 +50,22 @@
     import styled from 'vue-styled-components'
     import {ComplexBubble,AnimatedHeightWrapper,SummaryAndDetail} from '@/components'
     import {util_dateFormat} from '@/util'
+    import * as api from '@/network/api'
+    import {authRequiredGet} from '@/network'
     import { mapState, mapGetters } from 'vuex'
     export default {
-        inject: ['owner','repo','codeBasicInfo'],
+        name: 'repository_code_main_branches',
+        inject: ['owner','repo','codeBasicInfo','repoBasicInfo'],
+        
         data() {
             return {
+                data: [],
+                lastCommit: {},
+                loading: false,
                 stretch: false
             }
         },
         computed: {
-            //deprecated
-            ...mapState({
-                loading: state => state.repository.code.loading,
-                defaultBranch: state => state.repository.code.data.defaultBranchRef,
-            }),
-            /* ...mapGetters([
-                'activeBranchList'
-            ]), */
             commitAt: function() {
                 if(this.codeBasicInfo().defaultBranchRef){
                     return this.codeBasicInfo().defaultBranchRef.target && util_dateFormat.getDateDiff(new Date(this.codeBasicInfo().defaultBranchRef.target.history.nodes[0].authoredDate))
@@ -88,13 +91,44 @@
                         }
                     })
                 }
-                return activeBranchList
+                if(!this.accessToken) {
+                    activeBranchList = this.data.filter(i => i.name != this.repoBasicInfo().default_branch).slice(0,4)
+                }
+                return this.data.filter(i => i.name != this.repoBasicInfo().default_branch).slice(0,4)
+            },
+            updateFlag() {
+                return `${this.owner()}/${this.repo()}`
             }
+        },
+        created() {
+            if(!this.accessToken) {
+                
+            }
+            this.network_getData()
         },
         methods: {
             triggerStretch() {
                 this.stretch = !this.stretch
+            },
+            network_getData() {
+                let url_lastCommit = api.API_REPOSITORY_COMMITS(this.owner(),this.repo(),{per_page:1})
+                let url_branches = api.API_REPOSITORY_BRANCHES(this.owner(),this.repo(),{per_page:5})
+                authRequiredGet(url_lastCommit).then(res => {
+                    this.lastCommit = res.data[0]
+                }).catch(e => {
+                    console.log(e)
+                })
+                authRequiredGet(url_branches).then(res => {
+                    this.data = res.data
+                }).catch(e => {
+                    console.log(e)
+                })
             }
+        },
+        watch: {
+            updateFlag() {
+                this.network_getData()
+            },
         },
         components: {
             ComplexBubble,

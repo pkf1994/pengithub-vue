@@ -9,7 +9,7 @@
             <MemberListItem v-for="item in data" :key="item.node_id" :member="item"></MemberListItem>
         </transition-group>
 
-        <SimplePaginationRest v-if="data.length > 0 " :pageInfo="pageInfo" :loading="loading"></SimplePaginationRest>
+        <SimplePaginationRest v-if="pageInfo.next || pageInfo.prev " :pageInfo="pageInfo" :loading="loading"></SimplePaginationRest>
 
         <transition name="fade" appear>
             <CommonLoading v-if="loadingOrganizationBasicInfo() || loading || extraData.loading" :position="loadingOrganizationBasicInfo() || loading ? 'center' : 'corner'"></CommonLoading>
@@ -75,7 +75,7 @@
                     this.network_getExtraData()
 
                 }catch(e) {
-                    this.handleError(e)
+                    this.handleError(e,{handle404:true})
                 }finally{
                     this.loading = false
                 }

@@ -8,7 +8,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading,SimplePaginationRest} from '@/components'
+    import {CommonLoading} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
     import {util_queryParse} from '@/util'

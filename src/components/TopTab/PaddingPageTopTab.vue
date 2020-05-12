@@ -1,6 +1,6 @@
 <template>
     <nav class="px-3 pt-3 d-flex">
-        <router-link v-for="item in tabs" :key="item.to" :to='item.to' class="nav-item flex-1 text-center no-wrap" :class="{'active':item.activeFlag}">{{item.label}}</router-link>
+        <router-link v-for="item in tabs" :key="item.to" :to='item.to' class="nav-item text-center no-wrap" :class="{'active':item.activeFlag}" :style="tabStyle">{{item.label}}</router-link>
     </nav>
 </template>
 
@@ -10,6 +10,10 @@
             tabs: {
                 type: Array,
                 required: true
+            },
+            tabStyle: {
+                type: Object,
+                required: false
             }
         }
     }

@@ -81,24 +81,35 @@
                 location.href = process.env.VUE_APP_HOST
             },
             async receiveCodeAndRequestAccessToken() {
-
                 try{
                     this.loading = true
-                    if(this.authenticated) {
-                    this.$router.replace({
-                            path: '/'
-                        })
-                        return
-                    }
+                    if(this.authenticated) return 
+
+                    //state校验
+                    let recordState = sessionStorage.getItem('state')
+                    let state = this.$route.query.state
+                   
+                    if(recordState != state) {
+                        throw new Error('State check error!')
+                    } 
                     const code = this.$route.query.code
                     await this.action_oauth_requestAccessToken({code: code})
                     await this.action_oauth_requestViewerInfo()
-                    this.$router.replace('/')
                 }catch(e) {
                     this.handleError(e)
                     this.exception = true
                 }finally{
                     this.loading = false
+                    let signInFromPath = sessionStorage.getItem('signInFromPath')
+                    if(signInFromPath) {
+                        this.$router.replace({
+                            path: signInFromPath
+                        })
+                    }else{
+                        this.$router.replace({
+                            path: '/'
+                        })
+                    }
                 }
             }
         },

@@ -1,13 +1,13 @@
 <template>
-    <Container>
+    <WithSignInNoticeWrapper ref="signInNotice">
         <PaddingPageTopTab :tabs="topTabData"></PaddingPageTopTab>
         <router-view></router-view>
-    </Container>
+    </WithSignInNoticeWrapper>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {PaddingPageTopTab} from '@/components'
+    import {PaddingPageTopTab,WithSignInNoticeWrapper} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {authRequiredGitHubGraphqlApiQuery } from '@/network'
     import * as graphql from './graphql.js'
@@ -44,11 +44,16 @@
                 ]
             }
         },
-          created() {
+        mounted() {
+            
             this.network_getData()
         },
         methods: {
             async network_getData() {
+                if(!this.accessToken) {
+                    this.$refs.signInNotice.show()
+                    return 
+                }
                 try{
                     this.loading = true
                     let sourceAndCancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
@@ -61,13 +66,17 @@
                     this.allBranches = res.data.data.repository.refs.nodes
                 }catch(e) {
                     this.handleError(e)
+                    if(e.response && e.response.status == 401) {
+                        this.$refs.signInNotice.show()
+                    }
                 }finally{
                     this.loading = false
                 }
-            }
+            },
         },
         components: {
             PaddingPageTopTab,
+            WithSignInNoticeWrapper,
             Container: styled.div``,
         }
     }

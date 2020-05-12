@@ -20,23 +20,35 @@
                 type: Object,
                 required: true
             },
+            before: {
+                type: Function,
+                required: false
+            },
+            after: {
+                type: Function,
+                required: false
+            }
         },
         methods: {
             goPrev() {
+                if(this.before) this.before.call()
                 this.$router.push(`${this.$route.path}?${util_queryParse.querify(
                     {
                         ...this.$route.query,
                         page: this.pageInfo.prev.page
                     }
                 )}`)
+                if(this.after) this.after.call()
             },
             goNext() {
+                if(this.before) this.before.call()
                 this.$router.push(`${this.$route.path}?${util_queryParse.querify(
                     {
                         ...this.$route.query,
                         page: this.pageInfo.next.page
                     }
                 )}`)
+                if(this.after) this.after.call()
             },
         },
         components: {

@@ -10,20 +10,12 @@
 <script>
     import styled from 'vue-styled-components'
     import { mapState } from 'vuex'
-    import {HeaderDetachTopTab} from '../../components'
+    import {HeaderDetachTopTab} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
-    import { ACTION_REPOSITORY_REQUEST_BASIC_DATA } from '../../store/modules/repository/actionTypes'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
-    const TAB_CODE = "Code"
-    const TAB_ISSUES = "Issues"
-    const TAB_PULLS = "Pull requests"
-    const TAB_PROJECTS = "Projects"
-    const TAB_WIKI = "Wiki"
-    const TAB_SECURITY = "Security"
-    const TAB_PULSE = "Pulse"
-    const TAB_COMMUNITY = "Community"
+    let parse = require('parse-link-header')
     export default {
         name: 'repository_page',
         mixins: [RouteUpdateAwareMixin],
@@ -31,7 +23,10 @@
             return {
                 data: {},
                 loading: false,
-                activeTab: TAB_CODE,
+                activeTab: "Code",
+                openIssuesCount: 0,
+                openPullRequestsCount: 0,
+                openProjectsCount: 0,
                 viewerIsCollaborator: {
                     data: false,
                     loading: true
@@ -59,46 +54,56 @@
             },
             tabs: function() {
                 let path = `/${this.owner}/${this.repo}`
+                let extraActiveRouterLinks = [
+                    `${path}/tree`,
+                    `${path}/blob`,
+                    `${path}/branches`,
+                    `${path}/branches/all`,
+                    `${path}/branches/stale`,
+                ]
                 return [
                     {
-                        label: TAB_CODE,
+                        label: "Code",
                         routerLink: path,
                         exact: true,
-                        extraActiveRouterLinks: [
+                        active: [
                             `${path}/tree`,
                             `${path}/blob`,
                             `${path}/branches`,
                             `${path}/branches/all`,
                             `${path}/branches/stale`,
-                        ]
+                        ].filter(i => {
+                            return this.$route.path.indexOf(i) != -1
+                        }).length > 0
                     },
                     {
-                        label: TAB_ISSUES,
+                        label: "Issues",
                         routerLink: `${path}/issues`,
-                        disabled: !this.data.hasIssuesEnabled,
-                        meta: this.data.issues && this.data.issues.totalCount
+                        disabled: !this.data.has_issues,
+                        meta: this.openIssuesCount
                     },
                     {
-                        label: TAB_PULLS,
+                        label: "Pull requests",
                         routerLink: `${path}/pulls`,
-                        extraActiveRouterLinks: [
+                        active: [
                             `${path}/pull`
-                        ],
-                        extraActiveFlag: this.$route.path.match(/\/pull\/[1-9][0-9]*$/) != null,
-                         meta: this.data.pullRequests && this.data.pullRequests.totalCount
+                        ].filter(i => {
+                            return this.$route.path.indexOf(i) != -1
+                        }).length > 0,
+                        meta: this.openPullRequestsCount
                     },
                     {
-                        label: TAB_PROJECTS,
+                        label: "Projects",
                         routerLink: `${path}/projects`,
-                        disabled: !this.data.hasProjectsEnabled,
-                        meta: this.data.projects && this.data.projects.totalCount
+                        disabled: !this.data.has_projects,
+                        meta: this.openProjectsCount
                     },
                     {
-                        label: TAB_PULSE,
+                        label: "Pulse",
                         routerLink: `${path}/pulse`
                     },
                     {
-                        label: TAB_COMMUNITY,
+                        label: "Community",
                         routerLink: `${path}/community`
                     }
                 ]
@@ -110,35 +115,83 @@
         },
         methods: {
             //获取仓库基本信息
-            async network_getData() {
-                try{
-                    this.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name)
-                    this.cancelSources.push(sourceAndCancelToken.source)
-                    let graphql_repoBasicInfo = graphql.GRAPHQL_REPOSITORY_BASIC_INFO(this.owner,this.repo)
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_repoBasicInfo,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.data = res.data.data.repository
-                }catch(e) {
-                    this.handleError(e)
-                }finally{
-                    this.loading = false
-                }
+            network_getData() {
+                this.loading = true
+                let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
+                let url_repo = api.API_REPO(`${this.owner}/${this.repo}`)
+                authRequiredGet(
+                    url_repo,
+                    {
+                        cancelToken,
+                        headers: {
+                            "Accept":  "application/vnd.github.mercy-preview+json"
+                        }
+                    }
+                ).then(res => {
+                    this.data = res.data
+                }).catch(e => {
+                    this.handleError(e,{handle404:true})
+                }).finally(() =>  this.loading = false)
+
+                //获取open issues count
+                let url_openIssuesCount = api.API_SEARCH('issues',{
+                    q:`repo:${this.owner}/${this.repo} state:open is:issue`,
+                    per_page: 1
+                })
+                authRequiredGet(url_openIssuesCount).then(res => {
+                    this.openIssuesCount = res.data.total_count
+                }).catch(e => {
+                    console.log(e)
+                })
+
+                 //获取open pull requests count
+                let url_openPullRequestsCount = api.API_SEARCH('issues',{
+                    q:`repo:${this.owner}/${this.repo} state:open is:pr`,
+                    per_page: 1
+                })
+                authRequiredGet(url_openPullRequestsCount).then(res => {
+                    this.openPullRequestsCount = res.data.total_count
+                }).catch(e => {
+                    console.log(e)
+                })
+
+                 //获取project count
+                let url_projectsCount = api.API_REPO_PROJECTS(`${this.owner}/${this.repo}`,{
+                    per_page: 1
+                })
+                authRequiredGet(
+                    url_projectsCount,
+                    {
+                        headers: {
+                            'Accept': "application/vnd.github.inertia-preview+json"
+                        }
+                    }
+                ).then(res => {
+                    let openProjectsCountHolder = parse(res.headers.link) || {}
+                    this.openProjectsCount = openProjectsCountHolder.last ? openProjectsCountHolder.last.page : res.data.length
+                }).catch(e => {
+                    console.log(e)
+                })
+
             },
             async network_ifViewerACollaborator() {
+                if(!this.accessToken) return
                 try{
                     this.viewerIsCollaborator.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name + ' check_if_viewer_a_collaborator')
-                    this.cancelSources.push(sourceAndCancelToken.source)
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name + ' check_if_viewer_a_collaborator')
                     let url = api.API_CHECK_IF_COLLABORATOR({
                         login: this.viewerLogin,
                         repo: this.repo,
                         owner: this.owner
                     })
-                    let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
-
+                    let res = await authRequiredGet(url,{cancelToken})
                     this.viewerIsCollaborator.data = true
                 }catch(e) {
-                    console.log(e)
+                    if(e.response && e.response.status == 403) {
+                        console.log('viewer is not collaborator')
+                    }else{
+                        console.log(e)
+                    }
                 }finally{
                     this.viewerIsCollaborator.loading = false
                 }

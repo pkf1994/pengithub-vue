@@ -54,7 +54,8 @@ const RepositoryBranchesOverview = () => import('../pages/Repository/Branches/Ov
 const RepositoryBranchesAll = () => import('../pages/Repository/Branches/All.vue')
 const RepositoryBranchesStale = () => import('../pages/Repository/Branches/Stale.vue')
 const RepositoryFindFile = () => import('../pages/Repository/FindFile/FindFile.vue')
-const Logout = () => import('../pages/Logout/Logout.vue')
+const RepositoryReleases = () => import('../pages/Repository/Releases/Releases.vue')
+const SignOut = () => import('../pages/SignOut/SignOut.vue')
 const Notifications = () => import('../pages/Notifications/Notifications.vue')
 const NotFoundPage = () => import('../pages/NotFoundPage/NotFoundPage.vue')
 
@@ -63,6 +64,7 @@ export default [
     
     {
         path: '/',
+        name: 'home',
         components: {
             default: Home,
             header: LogoHeader,
@@ -74,6 +76,7 @@ export default [
         meta: {
             authRequired: true
         },
+        name: 'pulls',
         components: {
             default: HomePullRequests,
             header: LogoHeader,
@@ -85,6 +88,7 @@ export default [
         meta: {
             authRequired: true
         },
+        name: 'issues',
         components: {
             default: HomeIssues,
             header: LogoHeader,
@@ -93,17 +97,20 @@ export default [
     },
     {
         path: '/oauth_redirect',
+        name: 'redirect',
         component: OauthRedirectPage
     },
     {
-        path: '/logout',
+        path: '/sign_out',
+        name: 'signOut',
         meta: {
             authRequired: true
         },
-        component: Logout
+        component: SignOut
     },
     {
         path: '/notifications',
+        name: 'notifications',
         meta: {
             authRequired: true
         },
@@ -115,6 +122,7 @@ export default [
     },
     {
         path: '/explore',
+        name: 'explore',
         components: {
             default: Explore,
             header: LogoHeader,
@@ -123,37 +131,45 @@ export default [
         children: [
             {
                 path: '/',
+                name: 'exploreMain',
                 components: {ExploreMain},
             },
             {
                 path: 'trending/developers/:language?',
+                name: 'exploreTrendingDevelopers',
                 components: {ExploreTrending},
                 
             },
             {
                 path: 'trending/:language?',
+                name: 'exploreTrendingRepositories',
                 components: {ExploreTrending}
             },
             {
                 path: 'collections/:collection',
+                name: 'exploreCollectionDetail',
                 components: {ExploreCollectionDetail},
             },
             {
                 path: 'collections',
+                name: 'exploreCollectionBrowser',
                 components: {ExploreCollectionsBrowser},
             },
             {
                 path: 'topics',
+                name: 'exploreTopicsBrowser',
                 components: {ExploreTopicsBrowser},
             },
             {
                 path: 'topics/:topic',
+                name: 'exploreTopicDetail',
                 components: {ExploreTopicDetail},
             }
         ]
     },
     {
         path: '/search',
+        name: 'search',
         components: {
             default: Search,
             header: LogoHeader,
@@ -162,32 +178,39 @@ export default [
         children: [
             {
                 path: '/',
+                name: 'searchRepositories',
                 component: SearchResultRepositories
             },
             {
                 path: 'code',
+                name: 'searchCode',
                 component: SearchResultCode
             },
             {
                 path: 'commits',
+                name: 'searchCommits',
                 component: SearchResultCommit
             },
             {
                 path: 'issues',
+                name: 'searchIssues',
                 component: SearchResultIssues
             },
             {
                 path: 'topics',
+                name: 'searchTopics',
                 component: SearchResultTopics
             },
             {
                 path: 'users',
+                name: 'searchUsers',
                 component: SearchResultUsers
             }
         ]
     },
     {
         path: '/404',
+        name: 'NotFound',
         components: {
             default: NotFoundPage,
             header: LogoHeader,
@@ -196,6 +219,7 @@ export default [
     },
     {
         path: '/:login',
+        name: 'user',
         components: {
             default: User,
             header: LogoHeader,
@@ -204,32 +228,39 @@ export default [
         children: [
             {
                 path: '/',
+                name: 'userOverview',
                 component: UserOverview
             },
             {
                 path: 'repositories',
+                name: 'userRepositories',
                 component: UserRepositories
             },
             {
                 path: 'projects',
+                name: 'userProjects',
                 component: UserProjects
             },
             {
                 path: 'stars',
+                name: 'userStars',
                 component: UserStars
             },
             {
                 path: 'followers',
+                name: 'userFollowers',
                 component: UserFollowers
             },
             {
                 path: 'following',
+                name: 'userFollowing',
                 component: UserFollowing
             },
         ]
     },
     {
         path: '/orgs/:organization',
+        name: 'organization',
         components: {
             default: Organization,
             footer: SimpleFooter
@@ -237,16 +268,19 @@ export default [
         children: [
             {
                 path: '/',
+                name: 'organizationRepositories',
                 component: OrganizationRepositories
             },
             {
                 path: 'people',
+                name: 'organizationPeople',
                 component: OrganizationPeople
             }
         ]
     },
     {
         path:'/:owner/:repo/projects/:number',
+        name: 'repositoryProjectDetail',
         components: {
             default: RepositoryProjectDetail,
             footer: SimpleFooter
@@ -254,6 +288,7 @@ export default [
     },
     {
         path: '/:owner/:repo',
+        name: 'repository',
         components: {
             default: Repository,
             header: RepoHeader,
@@ -266,22 +301,26 @@ export default [
         children: [
             {
                 path: '/',
+                name: 'repositoryCode',
                 component: RepositoryCode,
                 children: [
                     {
                         path: '/',
+                        name: 'repositoryCodeMain',
                         components: {
                             RepositoryCodeMain: RepositoryCodeMain
                         }
                     },
                     {
                         path: 'tree/(\.*)+',
+                        name: 'repositoryCodeFileBrowser',
                         components: {
                             RepositoryCodeFileBrowser: RepositoryCodeFileBrowser
                         }
                     },
                     {
                         path: 'blob/(\.*)+',
+                        name: 'repositoryCodeFileDetail',
                         components: {
                             RepositoryCodeFileDetail: RepositoryCodeFileDetail
                         }
@@ -290,16 +329,19 @@ export default [
             },
             {
                 path: 'issues',
+                name: 'repositoryIssues',
                 component: RepositoryIssues,
                 children: [
                     {
                         path: '/',
+                        name: 'repositoryIssuesBrowser',
                         components: {
                             RepositoryIssuesBrowser:RepositoryIssuesBrowser
                         }
                     },
                     {
                         path: ':number',
+                        name: 'repositoryIssueDetail',
                         components: {
                             RepositoryIssueDetail:RepositoryIssueDetail
                         }
@@ -308,72 +350,93 @@ export default [
             },
             {
                 path: 'pulls',
+                name: 'repositoryPullRequestsBrowser',
                 component: RepositoryPullRequestsBrowser,
             },
             {   
                 path: 'pull/:number',
+                name: 'repositoryPullRequestDetail',
                 component: RepositoryPullRequestDetail,
                 children: [
                     {
                         path: '/',
+                        name: 'repositoryPullRequestConversation',
                         component: RepositoryPullRequestConversation
                     },
                     {
                         path: 'commits',
+                        name: 'repositoryPullRequestCommits',
                         component: RepositoryPullRequestCommits
                     },
                     {
                         path: 'files',
+                        name: 'repositoryPullRequestChanges',
                         component: RepositoryPullRequestChanges
                     },
                 ]
             },
             {
                 path: 'projects',
+                name: 'repositoryProjects',
                 component: RepositoryProjects,
             },
             {
                 path: 'pulse',
+                name: 'repositoryPulse',
                 component: RepositoryPulse,
             },
             {
                 path: 'community',
+                name: 'repositoryCommunity',
                 component: RepositoryCommunity,
             },
             {
                 path: 'commit/:sha',
+                name: 'repositoryCommit',
                 component: RepositoryCommit,
             },
             {
                 path: 'commits/(\.*)?',
+                name: 'repositoryCommits',
                 component: RepositoryCommits,
             },
             {
                 path: 'find/:sha',
+                name: 'repositoryFindFile',
                 component: RepositoryFindFile
             },
             {   
                 path: 'branches',
+                name: 'repositoryBranches',
                 component: RepositoryBranches,
                 children: [
                     {
                         path: '/',
+                        name: 'repositoryBranchesOverview',
                         component: RepositoryBranchesOverview
                     },
                     {
                         path: 'all',
+                        name: 'repositoryBranchesAll',
                         component: RepositoryBranchesAll
                     },
                     {
                         path: 'stale',
+                        name: 'repositoryBranchesStale',
                         component: RepositoryBranchesStale
                     },
                 ]
             },
+            {
+                path: 'releases',
+                name: 'repositoryReleases',
+                component: RepositoryReleases
+            }
         ]
     },
     {
         path: '*',
+        name: 'unknow',
         components: {
             default: NotFoundPage,
             header: LogoHeader,

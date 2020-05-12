@@ -17,7 +17,9 @@ export const API_ALL_SPOKEN_LANGUAGE = "https://github-trending-api.now.sh/spoke
 
 export const API_ALL_LANGUAGE = "https://github-trending-api.now.sh/languages"
 
-export const API_OAUTH2 = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=${SCOPE}`
+export const API_OAUTH2 = payload => {
+    return `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=${SCOPE}&state=${payload.state}`
+}
 
 export const API_OAUTH2_ACCESS_TOKEN = code => `http://127.0.0.1:8088/oauth2server/oauth2/access_token.do?code=${code}`
 
@@ -80,6 +82,11 @@ export const API_SEARCH = (type,param) => {
 
 export const API_REPO = fullName => `${GITHUB_REST_API_BASE}/repos/${fullName}`
 
+export const API_REPO_PROJECTS = (fullName,params) => {
+    let query = util_queryParse.querify(params)
+    return `${GITHUB_REST_API_BASE}/repos/${fullName}/projects?${query}`
+}
+
 export const API_REPO_LABELS = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/labels?per_page=100`
 
 export const API_README = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/readme`
@@ -93,6 +100,16 @@ export const API_REPOSITORY_COMMUNITY = (owner,repo) => `${GITHUB_REST_API_BASE}
 export const API_REPOSITORY_COMMITS = (owner,repo,params) => {
     let query = util_queryParse.querify(params)
     return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/commits?${query}`
+}
+
+export const API_REPOSITORY_BRANCHES = (owner,repo,params) => {
+    let query = util_queryParse.querify(params)
+    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/branches?${query}`
+}
+
+export const API_REPOSITORY_RELEASES = (owner,repo,params) => {
+    let query = util_queryParse.querify(params)
+    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/releases?${query}`
 }
 
 export const API_REPOSITORY_CONTRIBUTORS = (owner,repo) => {
@@ -120,6 +137,11 @@ export const API_COMMIT = (payload) => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/commits/${payload.sha}`
 }
 
+export const API_COMMITS = (owner,repo,params) => {
+    let query = util_queryParse.querify(params)
+    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/commits?${query}`
+}
+
 export const API_BRANCHES_FOR_HEAD_COMMIT = (payload) => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/commits/${payload.sha}/branches-where-head`
 }
@@ -135,3 +157,4 @@ export const API_PR_CHANGED_FILES = payload => {
 export const API_TREE_LIST = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/trees/${payload.sha}?recursive=1`
 }
+

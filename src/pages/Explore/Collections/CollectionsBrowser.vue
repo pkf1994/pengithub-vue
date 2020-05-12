@@ -51,6 +51,8 @@
             }
         },
         created() {
+            let fromRouteMatched = this.$route.matched
+            console.log(this.$route)
             this.network_getCollectionsSketchRosterData()
         },
         methods: {

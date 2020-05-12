@@ -95,7 +95,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/box/index.scss';
 .all-stale-br-link{
     background-color: #f1f8ff;
     margin-top: -1px;

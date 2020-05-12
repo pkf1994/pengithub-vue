@@ -1,10 +1,11 @@
 <template>
     <Container class="bg-primary">
-        <nav class="text-center reponav">
-            <router-link :to="tabItem.routerLink"
+        <nav class="text-center reponav">   
+            <transition-group name="list-complete" appear>
+                <router-link :to="tabItem.routerLink"
                          :exact="tabItem.exact"
-                         :class="{'router-link-active':tabItem.extraActiveRouterLinks && tabItem.extraActiveRouterLinks.indexOf(currentPath) !== -1 || tabItem.extraActiveFlag}"
-                         class="pt-1 px-2 pb-3 d-inline-block nav-item to-adjust"
+                         :class="{'router-link-active': tabItem.active}"
+                         class="pt-1 px-2 pb-3 d-inline-block nav-item to-adjust list-complete-item"
                          v-for="tabItem in tabs.filter(i => !i.disabled)"
                          :key="tabItem.label" >
                         <span class="lh-15  no-wrap">
@@ -15,7 +16,8 @@
                         style="background-color: hsla(0,0%,100%,.15);color: inherit;" 
                         v-if="tabItem.meta">{{tabItem.meta}}</span>
                     </AnimatedWidthWrapper> 
-            </router-link>
+                </router-link>
+            </transition-group>
         </nav>
     </Container>
 </template>
@@ -59,5 +61,18 @@
     overflow-x: auto;
     text-align: center;
     white-space: nowrap;
+}
+
+.list-complete-item {
+  transition: all .6s;
+  display: inline-block;
+}
+.list-complete-enter, .list-complete-leave-to
+/* .list-complete-leave-active for below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateY(30px);
+}
+.list-complete-leave-active {
+  position: absolute;
 }
 </style>

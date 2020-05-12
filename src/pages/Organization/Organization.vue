@@ -26,7 +26,7 @@
     import {BaseHeader,HeaderDetachTopTab,CommonLoading} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as api from '@/network/api'
-    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
+    import {authRequiredGet} from '@/network'
     var parse = require('parse-link-header');
     export default {
         name: 'organization_page',
@@ -105,7 +105,6 @@
                             {cancelToken}
                         ),
                     ])
-                    
                    
                     this.data = res[0].data
 
@@ -113,7 +112,7 @@
                     this.memberCount = memberCountHolder.last ? memberCountHolder.last.page : 0
 
                 }catch(e) {
-                    this.handleError(e)
+                    this.handleError(e,{handle404:true})
                 }finally{
                     this.loading = false
                 }

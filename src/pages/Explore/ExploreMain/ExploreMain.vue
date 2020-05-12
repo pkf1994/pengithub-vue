@@ -133,11 +133,7 @@
                 }
             }
         },
-        computed: {
-           /*  ...mapState({
-                viewerInfo: state => state.oauth.viewerInfo
-            }) */
-        },
+        
         async created() {
             this.network_getTrendingRepoToday()
             this.network_getTrendingDevelopers()

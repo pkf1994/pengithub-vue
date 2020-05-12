@@ -11,6 +11,8 @@ import util_throttle from './throttle'
 import util_emoji from './emoji'
 import util_markdownParse from './markdownParse'
 import util_timeZoneTransfer from './timeZoneTransfer'
+import util_ramdonString from './ramdonString'
+import util_fileSize from './fileSize'
 import './protoExtend'
 
 export {
@@ -26,4 +28,6 @@ export {
     util_emoji,
     util_timeZoneTransfer,
     util_markdownParse,
+    util_ramdonString,
+    util_fileSize,
     util_adjustStyle}

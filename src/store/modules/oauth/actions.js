@@ -11,6 +11,7 @@ import {authRequiredGitHubGraphqlApiQuery, commonGet, commonDelete} from "../net
 import * as actionType from "./actionTypes";
 import * as api from '@/network/api'
 import {GRAPH_QL_VIEWER} from "./graphql";
+import router from '@/router'
 
 import Vue from 'vue'
 
@@ -58,25 +59,23 @@ export default {
                 throw new Error(res.data.message)
             }
 
+            if(payload.meta.authRequired) {
+                router.replace('/')
+            }
+
             context.commit({
                 type: MUTATION_SIGN_OUT
             })
 
-            Vue.triggerLoading(false)
-
-            context.commit({
-                type: "TRIGGER_LOADING",
-                actionType: actionType.ACTION_SIGN_OUT,
-                loading: false,
-            })
         }catch(e) {
+            throw(e)
+        }finally{
             context.commit({
                 type: "TRIGGER_LOADING",
                 actionType: actionType.ACTION_SIGN_OUT,
                 loading: false,
             })
-            Vue.toast(e,'error')
-            console.log(e)
+            Vue.triggerLoading(false)
         }
 
     }

@@ -24,6 +24,7 @@ import Subscription from './Subscription'
 import SimpleDiffView from './SimpleDiffView'
 import ImgWrapper from './ImgWrapper'
 import HyperlinkWrapper from './HyperlinkWrapper'
+import WithSignInNoticeWrapper from './WithSignInNoticeWrapper'
 export {
     Button,
     BaseHeader,
@@ -69,5 +70,6 @@ export {
     Subscription,
     SimpleDiffView,
     ImgWrapper,
-    HyperlinkWrapper
+    HyperlinkWrapper,
+    WithSignInNoticeWrapper
 }

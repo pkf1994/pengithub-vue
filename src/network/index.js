@@ -20,7 +20,7 @@ authRequiredAxios.interceptors.request.use(
     }
 )
 
-authRequiredAxios.interceptors.response.use(
+/* authRequiredAxios.interceptors.response.use(
     config => config,
     error => { 
         if(error.response && error.response.status) {
@@ -31,7 +31,7 @@ authRequiredAxios.interceptors.response.use(
         }
         return Promise.reject(error);
     }
-)
+) */
 
 export const commonGet = (url, config = {}) => {
     return axios.get(url,config).then(res => {
