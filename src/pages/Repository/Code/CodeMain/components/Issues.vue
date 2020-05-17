@@ -1,6 +1,5 @@
 <template>
-    <ComplexBubble :loading="!codeBasicInfo().id"
-                    :disableFlag="codeBasicInfo().issues && codeBasicInfo().issues.nodes.length === 0 && codeBasicInfo().id" 
+    <ComplexBubble :disableFlag="codeBasicInfo().issues && codeBasicInfo().issues.nodes.length === 0 && codeBasicInfo().id" 
                     disableNotice="There are no recent issues"
                     :delay="1500">
         <template v-slot:title>
@@ -11,15 +10,12 @@
         </template>
 
         <Content class="bubble-content p-0">
-            <IssueItem v-for="item in codeBasicInfo().issues ? codeBasicInfo().issues.nodes : []" 
-                        :key="item.id" 
+            <RestIssueItem v-for="item in issues" 
+                        :key="item.node_id" 
                         :issue="item" 
-                        type="issue" 
                         :showLabels="true"
                         :showRepoFullName="false">
-            </IssueItem>
-
-
+            </RestIssueItem>
         </Content>
         <template v-slot:footer>
             <router-link to="/" class="d-block footer text-center">
@@ -31,14 +27,51 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble} from '../../../../../components'
-    import {IssueItem} from '../../../components'
-    import {util_dateFormat,util_color} from '../../../../../util'
+    import {ComplexBubble} from '@/components'
+    import {RestIssueItem} from '../../../components'
+    import {util_dateFormat,util_color} from '@/util'
+    import * as api from '@/network/api'
+    import {authRequiredGet,cancelAndUpdateAxiosCancelTokenSource} from '@/network'
     export default {
+        name: 'repository_code_main_issues',
         inject: ['codeBasicInfo'],
+        props: {
+            issues: {
+                type: Array,
+                required: true
+            }
+        },
+        data() {
+            return {
+                data: [],
+                loading: false,
+            }
+        },
+        created() {
+            //this.network_getData()
+        },
+        methods: {
+            async network_getData() {
+                try{
+                    this.loading = false
+                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
+                    let url = api.API_SEARCH('issues',{
+                        q:`repo:${this.owner()}/${this.repo()} is:issue state:open is:public`,
+                        sort: 'updated',
+                        per_page: 5
+                    })
+                    let res = await authRequiredGet(url,{cancelToken: sourceAndCancelToken.cancelToken})
+                    this.data = res.data.items
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.loading = false
+                }
+            }
+        },
         components: {
             ComplexBubble,
-            IssueItem,
+            RestIssueItem,
             Title: styled.div``,
             Content: styled.div``,
         }

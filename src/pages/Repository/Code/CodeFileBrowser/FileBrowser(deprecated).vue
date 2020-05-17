@@ -7,7 +7,7 @@
                     <template v-slot:summary>
                             <span>{{currentBranch ? currentBranch : "loading..."}}</span>
                     </template>
-                        <router-link @click.native="triggerSummaryAndDetail" :to="`/${owner()}/${repo()}/tree/${item.name}`" class="branch-item d" v-for="item in otherBranches" :key="item.name">
+                        <router-link @click.native="triggerSummaryAndDetail" :to="`/${owner()}/${repo()}/dir/${item.name}`" class="branch-item d" v-for="item in otherBranches" :key="item.name">
                             {{item.name}}
                         </router-link>
                         <router-link to="/" class="to-all-branches">View more branches</router-link>
@@ -22,7 +22,7 @@
         </Header>
 
         <CurrentPath class="path" style="border-bottom: 1px solid #eaecef;">
-            <router-link class="text-gray" :to="`/${owner()}/${repo()}/tree/${currentBranch}`">
+            <router-link class="text-gray" :to="`/${owner()}/${repo()}/dir/${currentBranch}`">
                 {{repo()}}</router-link>/<Breadcrumb :path="path"/>
         </CurrentPath>    
 

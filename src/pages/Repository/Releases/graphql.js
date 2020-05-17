@@ -35,3 +35,20 @@ export const GRAPHQL_RELEASES = payload => {
         }
     `
 }
+
+export const GRAPHQL_TAG = payload => `
+{
+  node(id: "${payload}") {
+    ... on Tag {
+      tagger {
+        user {
+          login
+          avatarUrl
+        }
+      }
+    }
+  }
+}
+
+  
+`

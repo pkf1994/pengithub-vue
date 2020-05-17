@@ -1,6 +1,5 @@
 <template>
-    <ComplexBubble :loading="!codeBasicInfo().id" 
-                    :disableFlag="!codeBasicInfo().defaultBranchRef && !codeBasicInfo.id" 
+    <ComplexBubble v-if="repoBasicInfo().node_id"
                     :inactivatedFlagSignal="codeBasicInfo().id != undefined"
                     disableNotice="No branch yet">
         <template v-slot:title>
@@ -11,7 +10,7 @@
                         <template v-slot:summary>
                              <span>{{repoBasicInfo().default_branch}}</span>
                         </template>
-                        <router-link :to="`/${owner()}/${repo()}/tree/${item.name}`" class="branch-item d" v-for="item in activeBranchList" :key="item.name">
+                        <router-link :to="`/${owner()}/${repo()}/dir/${item.name}`" class="branch-item d" v-for="item in activeBranchList" :key="item.name">
                             {{item.name}}
                         </router-link>
                         <router-link :to="`/${owner()}/${repo()}/branches`" class="branch-item d" style="font-weight: 400;">
@@ -22,13 +21,15 @@
             </Title>   
         </template>
 
-        <Content class="bubble-content" v-if="codeBasicInfo().defaultBranchRef && codeBasicInfo().defaultBranchRef.target">
-            Last commit by <strong>{{codeBasicInfo().defaultBranchRef.target.history.nodes[0].author.user.login}}</strong> {{commitAt}}
-        </Content>
+        <AnimatedHeightWrapper>
+            <Content class="bubble-content" v-if="codeBasicInfo().defaultBranchRef && codeBasicInfo().defaultBranchRef.target">
+                Last commit by <strong>{{codeBasicInfo().defaultBranchRef.target.history.nodes[0].author.user.login}}</strong> {{commitAt}}
+            </Content>
 
-        <Content class="bubble-content" v-else-if="lastCommit.node_id">
-            Last commit by <strong>{{lastCommit.author.login}}</strong> {{lastCommit.commit.committer.data | getDateDiff}}
-        </Content>
+            <Content class="bubble-content" v-else-if="lastCommit.node_id">
+                Last commit by <strong>{{lastCommit.author.login}}</strong> {{lastCommit.commit.committer.data | getDateDiff}}
+            </Content>
+        </AnimatedHeightWrapper>
 
         <template v-slot:footer>
             <span class="d-flex">
@@ -72,14 +73,10 @@
                 }
             },
             codeFileBrowserRouterLink() {
-                if(this.codeBasicInfo().defaultBranchRef){
-                    return `/${this.owner()}/${this.repo()}/tree/${this.codeBasicInfo().defaultBranchRef.name}`
-                }
+                return `/${this.owner()}/${this.repo()}/dir/${this.repoBasicInfo().default_branch}`
             },
             findFileRouterLink() {
-                if(this.codeBasicInfo().defaultBranchRef){
-                    return `/${this.owner()}/${this.repo()}/find/${this.codeBasicInfo().defaultBranchRef.name}`
-                }
+                return `/${this.owner()}/${this.repo()}/find/${this.repoBasicInfo().default_branch}`
             },
             activeBranchList() {
                 let activeBranchList = []
@@ -94,7 +91,7 @@
                 if(!this.accessToken) {
                     activeBranchList = this.data.filter(i => i.name != this.repoBasicInfo().default_branch).slice(0,4)
                 }
-                return this.data.filter(i => i.name != this.repoBasicInfo().default_branch).slice(0,4)
+                return activeBranchList
             },
             updateFlag() {
                 return `${this.owner()}/${this.repo()}`
@@ -102,9 +99,8 @@
         },
         created() {
             if(!this.accessToken) {
-                
+                this.network_getData()
             }
-            this.network_getData()
         },
         methods: {
             triggerStretch() {

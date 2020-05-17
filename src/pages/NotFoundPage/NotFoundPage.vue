@@ -1,5 +1,6 @@
 <template>
-    <Container>
+    <Container class="flex-grow-1">
+        <LogoHeader></LogoHeader>
         <Jumbotron class="bg-gray-dark text-white py-5 text-center">
             <The404Headline class="headline pt-5 text-bold mx-2 mt-0">
                 4<span class="not-found-octocat-wrapper d-inline-block mx-2 bg-gray-dark position-relative">
@@ -48,18 +49,21 @@
                 <a href="https://twitter.com/githubstatus" class="link-gray">@githubstatus</a>
             </HyperlinkWrapper>
         </TheLinks>
+        <SimpleFooter></SimpleFooter>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {HyperlinkWrapper} from '@/components'
+    import {HyperlinkWrapper,LogoHeader,SimpleFooter} from '@/components'
     import {WithSearchInputMixin} from '@/mixins'
     export default {
         name: 'not_found_page',
         mixins: [WithSearchInputMixin],
         components: {
             HyperlinkWrapper,
+            LogoHeader,
+            SimpleFooter,
             Container: styled.div``,
             Jumbotron: styled.div``,
             The404Headline: styled.div``,

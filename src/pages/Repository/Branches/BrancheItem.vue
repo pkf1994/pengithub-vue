@@ -1,5 +1,5 @@
 <template>
-    <router-link :to="`/${owner()}/${repo()}/tree/${branch.name}`" class="Box-row d-flex flex-items-center Details position-relative" style="padding-top:8px;padding-bottom:8px;">
+    <router-link :to="`/${owner()}/${repo()}/dir/${branch.name}`" class="Box-row d-flex flex-items-center Details position-relative" style="padding-top:8px;padding-bottom:8px;">
         <Main class="d-flex css-truncate flex-wrap width-full" style="line-height:1.25" :style="magicStyle">
             <span class="branch-name css-truncate-target v-align-baseline width-fit mr-2 ">{{branch.name}}</span>
             <span class="css-truncate-target v-align-baseline text-gray f6 width-fit d-block pr-3">Updated {{formatUpdatedAt}} by {{branch.target && branch.target.history.nodes[0].author.user &&  branch.target.history.nodes[0].author.user.login}}</span>
@@ -40,7 +40,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/box/index.scss';
 .branch-name{
     padding: 2px 6px;
     font: 12px SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;

@@ -16,7 +16,7 @@
                 type: Boolean,
                 default: false
             },
-            path: {
+            displayPath: {
                 type: String,
                 required: false
             },
@@ -27,8 +27,8 @@
         },
         computed: {
             pathArr(){
-                if(!this.path) return
-                let _path = this.path
+                if(!this.displayPath) return
+                let _path = this.displayPath
                 //去前后/
                 let _regExp = new RegExp('^\/')
                 let regExp_ = new RegExp('\/$')

@@ -1,17 +1,19 @@
 <template>
-  <Container id="app-container" class="d-flex flex-column flex-grow-1">
-    <router-view class="router-view header" name="header"></router-view>
+  <WithNotFoundNoticeWrapper ref="notFoundWrapper" v-on:not-found.native="go404" id="app-container"  class="d-flex flex-column flex-grow-1">
+    <router-view class="router-view header" name="header"/>
     <keep-alive>
       <router-view class="router-view flex-grow-1"/>
     </keep-alive>
     <router-view class="router-view footer" name="footer"/>
-  </Container>
+  </WithNotFoundNoticeWrapper>
 </template>
 
 <script>
 import styled from 'vue-styled-components'
+import {WithNotFoundNoticeWrapper} from '@/components'
 import {mapState,mapActions} from 'vuex'
 import {ACTION_GET_UNREAD_NOTIFICATIONS_COUNT} from '@/store/modules/notifications/actionTypes.js'
+import {ACTION_OAUTH_REQUEST_VIEWER_INFO } from '@/store/modules/oauth/actionTypes.js'
 export default {
   computed: {
     ...mapState({
@@ -19,12 +21,22 @@ export default {
     })
   },
   created() {
-    if(this.login)this.action_getNotificationsCount()
+    this.init()
   },
   methods: {
     ...mapActions({
-        action_getNotificationsCount: ACTION_GET_UNREAD_NOTIFICATIONS_COUNT
+        action_getNotificationsCount: ACTION_GET_UNREAD_NOTIFICATIONS_COUNT,
+        action_oauth_requestViewerInfo: ACTION_OAUTH_REQUEST_VIEWER_INFO
     }),
+    async init() {
+      if(!this.login){
+        await this.action_oauth_requestViewerInfo()
+      }
+      this.action_getNotificationsCount()
+    },
+    go404() {
+      this.$refs.notFoundWrapper.notFoundFlag = true
+    }
   },
   watch: {
     login() {
@@ -32,6 +44,7 @@ export default {
     }
   },
   components: {
+      WithNotFoundNoticeWrapper,
       Container: styled.div``
   },
 }

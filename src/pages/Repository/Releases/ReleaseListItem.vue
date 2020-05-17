@@ -137,11 +137,11 @@
         },
         computed: {
             to() {
-                return this.release.url.replace('https://api.github.com/repos','')
+                return `/${this.owner()}/${this.repo()}/releases/tag/${this.name}`
             },
             name() {
                 let name = this.release.name
-                if(name.trim() == '' || !name) return this.release.tag_name
+                if( !name || name.trim() == '') return this.release.tag_name
                 return name
             },
             bodyHTML() {
@@ -154,7 +154,7 @@
                 return this.extraDataHolder && this.extraDataHolder.tag.target.oid
             },
             resourcePath() {
-                return `/${this.owner()}/${this.repo()}/tree/${this.release.tag_name}`
+                return `/${this.owner()}/${this.repo()}/dir/${this.release.tag_name}`
             },
             commitIsVerified() {
                 return this.extraDataHolder && this.extraDataHolder.tag.target.signature && this.extraDataHolder.tag.target.signature.isValid
@@ -167,18 +167,14 @@
             async network_getData() {
                 try{    
                     this.loading = true
-                    let url = api.API_COMMITS(
-                        this.owner(),
-                        this.repo(),
-                        {
-                            sha: this.release.target_commitish,
-                            since: this.release.published_at,
-                            per_page: 1
-                        }
-                    )
+                    let url = api.API_COMMITS_COMPARE({
+                        owner: this.owner(),
+                        repo: this.repo(),
+                        base: this.release.tag_name,
+                        head: this.release.target_commitish
+                    })
                     let res = await authRequiredGet(url)
-                    let commitsCountSinceThisReleaseHolder = parse(res.headers.link) || {}
-                    this.commitsCountSinceThisRelease = commitsCountSinceThisReleaseHolder.last ? commitsCountSinceThisReleaseHolder.last.page : res.data.length
+                    this.commitsCountSinceThisRelease = res.data.total_commits
 
                 }catch(e) {
                     console.log(e)

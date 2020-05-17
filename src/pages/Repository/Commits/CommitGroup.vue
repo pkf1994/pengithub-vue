@@ -5,49 +5,16 @@
             {{commitGroup.length > 1 ? 'Commits' : 'Commit'}} on {{commitGroup[0].commit.author.date | dateFormat('zzz d, yyyy')}}
         </Time>
 
-        <ol class="commit-group Box Box--condensed">
-            <li v-for="item in commitGroup" :key="item.node_id" class="commit Box-row Box-row--focus-gray mt-0 p-2 ">
-                <AnimatedHeightWrapper>
-                    <CommitTitle v-if="getMessaageHeadlineHTML(item.node_id)" class="h5 text-gray-dark pb-2">
-                        <router-link style="color: #444d56" :to="item.html_url.replace('https://github.com','')" v-html="getMessaageHeadlineHTML(item.node_id)">
-                        </router-link>
-                    </CommitTitle>
-                </AnimatedHeightWrapper>
-                
-                <CommitMeta class="commit-meta d-flex flex-items-center" style="color: #24292e;">
-                    
-                    <AvatarStack class="AvatarStack flex-self-start AvatarStack-body" :class="{'AvatarStack--two':item.author.login != item.committer.login}">
-                        <ImgWrapper>
-                            <img class="avatar" v-if="item.author" height="20" width="20" :src="item.author.avatar_url" :alt="`@${item.author && item.author.name}`">
-                        </ImgWrapper>
-                        <ImgWrapper>
-                            <img v-if="item.author && item.author.login != item.committer.login" class="avatar" height="20" width="20" :src="item.committer.avatar_url" :alt="`@${item.author.name}`">
-                        </ImgWrapper>
-                    </AvatarStack>
-
-                    <div class="f6 text-gray min-width-0 mr-1">
-                        <router-link v-if="item.author && item.author.login != item.committer.login" class="commit-author tooltipped tooltipped-s user-mention" :to="`/${item.author.login}`">{{item.author.login}}</router-link>
-                        <span v-if="item.author && item.author.login != item.committer.login" >authored and</span> 
-                        <router-link class="commit-author tooltipped tooltipped-s user-mention" :to="`/${item.committer.login}`">{{item.committer.login}}</router-link>
-                        committed 
-                        <span>{{commitGroup[0].commit.author.date | getDateDiff}}</span>
-                    </div>
-
-                    <div>
-                        <transition-group appear name="fade">
-                            <svg v-if="getState(item.node_id) == 'SUCCESS'" key="1" class="octicon octicon-check v-align-middle text-green" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
-                            <svg v-else-if="getState(item.node_id) == 'FAILURE'" key="2" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
-                        </transition-group>
-                    </div>
-                </CommitMeta>
-            </li>
-        </ol>
+        <div class="commit-group Box Box--condensed">
+            <CommitItem v-for="item in commitGroup" :commit="item" :key="item.node_id"/>
+        </div>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
     import {AnimatedHeightWrapper,ImgWrapper} from '@/components'
+    import CommitItem from './CommitItem'
     export default {
         inject: ['graphqlDataProvided'],
         props: {
@@ -73,6 +40,7 @@
         components: {
             AnimatedHeightWrapper,
             ImgWrapper,
+            CommitItem,
             Container: styled.div``,
             Time: styled.div``,
             CommitTitle: styled.p``,

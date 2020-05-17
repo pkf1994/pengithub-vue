@@ -97,9 +97,9 @@ export const API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST = (owner,repo) => `${GITH
 
 export const API_REPOSITORY_COMMUNITY = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/community/profile`
 
-export const API_REPOSITORY_COMMITS = (owner,repo,params) => {
-    let query = util_queryParse.querify(params)
-    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/commits?${query}`
+export const API_REPOSITORY_COMMITS = payload=> {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/commits?${query}`
 }
 
 export const API_REPOSITORY_BRANCHES = (owner,repo,params) => {
@@ -112,8 +112,30 @@ export const API_REPOSITORY_RELEASES = (owner,repo,params) => {
     return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/releases?${query}`
 }
 
+export const API_REPOSITORY_TAGS = (owner,repo,params) => {
+    let query = util_queryParse.querify(params)
+    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/tags?${query}`
+}
+
+export const API_REPOSITORY_RELEASE_BY_TAG_NAME = payload => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/releases/tags/${payload.tag}`
+}
+
 export const API_REPOSITORY_CONTRIBUTORS = (owner,repo) => {
     return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/contributors`
+}
+
+export const API_REPOSITORY_SUBSCRIPTION = (owner,repo) => {
+    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/subscription`
+}
+
+export const API_COMMITS_COMPARE = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/compare/${payload.base}...${payload.head}`
+
+export const API_GIT_REF = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/ref/${payload.ref}`
+
+export const API_GIT_MATCHING_REFS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/matching-refs/${payload.ref}?${query}`
 }
 
 export const API_ISSUE = (payload) => {
@@ -134,12 +156,13 @@ export const API_PULL_REQUEST_REVIEW_COMMENT = (payload) => {
 
 
 export const API_COMMIT = (payload) => {
-    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/commits/${payload.sha}`
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/commits/${payload.sha}?${query}`
 }
 
-export const API_COMMITS = (owner,repo,params) => {
-    let query = util_queryParse.querify(params)
-    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/commits?${query}`
+export const API_COMMITS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/commits?${query}`
 }
 
 export const API_BRANCHES_FOR_HEAD_COMMIT = (payload) => {

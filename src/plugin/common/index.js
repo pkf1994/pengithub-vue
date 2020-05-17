@@ -67,7 +67,12 @@ export default {
                         state
                     })
                     location.href = oauthHref
-                }   
+                },
+                emitNotFoundEvent(el) {
+                    let event = document.createEvent('HTMLEvents')
+                    event.initEvent("not-found",true,false)
+                    el.dispatchEvent(event)
+                }
             },
             activated() {
                 if(this.documentTitle) {

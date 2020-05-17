@@ -1,7 +1,7 @@
 <template>
     <Container>
         <Jumbotron title="Collections" paragraph="Curated lists and insight into burgeoning industries, topics, and communities.">
-            <router-link to="/github/explore/blob/master/CONTRIBUTING.md#curating-a-new-topic-or-collection" class="btn btn-outline">
+            <router-link to="/github/explore/file/master/CONTRIBUTING.md#curating-a-new-topic-or-collection" class="btn btn-outline">
                 Create a collection
             </router-link>
         </Jumbotron>

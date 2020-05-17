@@ -67,7 +67,7 @@
                 util_throttle.throttleByDelay(() => this.computeHeight(),50,this)
             },
             emitComputeHeightEvent() {
-                 let computeHeightEvent = document.createEvent('HTMLEvents')
+                let computeHeightEvent = document.createEvent('HTMLEvents')
                 computeHeightEvent.initEvent("compute-height",true,false)
                 this.$refs.content && this.$refs.content.$el.dispatchEvent(computeHeightEvent)
                 this.inactivatedFlag = this.inactivatedFlagSignal

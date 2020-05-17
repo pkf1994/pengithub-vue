@@ -1,5 +1,5 @@
 <template>
-    <Container class="container flex-column">
+    <Container>
         <HeaderDetachTopTab :tabs="tabs" :activeTab="activeTab"></HeaderDetachTopTab>
         <keep-alive>
             <router-view></router-view>
@@ -55,8 +55,8 @@
             tabs: function() {
                 let path = `/${this.owner}/${this.repo}`
                 let extraActiveRouterLinks = [
-                    `${path}/tree`,
-                    `${path}/blob`,
+                    `${path}/dir`,
+                    `${path}/file`,
                     `${path}/branches`,
                     `${path}/branches/all`,
                     `${path}/branches/stale`,
@@ -67,8 +67,8 @@
                         routerLink: path,
                         exact: true,
                         active: [
-                            `${path}/tree`,
-                            `${path}/blob`,
+                            `${path}/dir`,
+                            `${path}/file`,
                             `${path}/branches`,
                             `${path}/branches/all`,
                             `${path}/branches/stale`,

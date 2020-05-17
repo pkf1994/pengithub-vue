@@ -183,6 +183,7 @@ export const GRAPHQL_REPOSITORY_CONTENT_AND_LAST_COMMIT_AND_COMMIT_HISTORY = pay
     content: object(expression: "${payload.branch}:${path}") {
       ... on Blob {
         text
+        byteSize
         isBinary
       }
     }

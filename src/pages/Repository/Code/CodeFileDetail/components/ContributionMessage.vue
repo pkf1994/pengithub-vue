@@ -1,6 +1,5 @@
 <template>
-    <ComplexBubble :loading="loading()" 
-                    :withFooterBorderTop=false>
+    <ComplexBubble :withFooterBorderTop=false>
         <LastUpdateMessage class="bg-blue-light Box-body d-flex py-2 px-3 flex-column flex-justify-between">
             <CommitterAndMessage class="f6">
                 <ImgWrapper>
@@ -46,7 +45,7 @@
     import {util_dateFormat} from '@/util'
     import {mapState} from 'vuex'
     export default {
-        inject: ['contributors','loading','lastCommit'],
+        inject: ['contributors','lastCommit'],
         computed: {
             ...mapState({
                 //loading: state => state.repository.code.codeFile.fileDetail.loading,

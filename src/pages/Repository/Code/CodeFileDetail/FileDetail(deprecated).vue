@@ -26,8 +26,6 @@
     import {Breadcrumb} from '../../../../../components'
     import ClipboardJS from 'clipboard'
     import {ContributionMessage,Content} from './components'
-    import {ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB} from '../../../../../store/modules/repository/actionTypes'
-    import {mapActions,mapState} from 'vuex'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet   } from '@/network'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as graphql from '../../graphql'
@@ -64,21 +62,12 @@
             }
         },
         created() {
-           /*  this.action_getBlob({
-                owner: this.owner(),
-                repo: this.repo(),
-                path: this.$route.params.pathMatch,
-                branch: this.$route.params.branch
-            }) */
             this.network_getData()
         },
         mounted() {
             this.initClipboard()
         },
         computed: {
-            /* ...mapState({
-                contents: state => state.repository.code.codeFileBrows
-            }), */
             location() {
                 return location
             },
@@ -91,9 +80,6 @@
             }
         },
         methods: {
-            ...mapActions({
-                action_getBlob: ACTION_REPOSITORY_REQUEST_CONTENTS_BLOB,
-            }),
             async network_getData() {
                 if(!this.currentBranch){
                     this.loading = true
@@ -141,7 +127,7 @@
                             this.html = res_html.data
                         }
                     }else{
-                        this.raw = `https://github.com/${this.owner()}/${this.repo()}/blob/${this.currentBranch}/${this.path}?raw=true`
+                        this.raw = `https://github.com/${this.owner()}/${this.repo()}/file/${this.currentBranch}/${this.path}?raw=true`
                     }
 
                 }catch(e){

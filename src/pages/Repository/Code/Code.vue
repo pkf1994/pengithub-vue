@@ -13,10 +13,6 @@
     import {RouteUpdateAwareMixin} from '@/mixins'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery} from '@/network'
     import * as graphql from './graphql'
-    //deprecated
-    import {
-        ACTION_REPOSITORY_REQUEST_CODE_BASIC_DATA,
-        } from '../../../store/modules/repository/actionTypes'
     export default {
         mixins: [RouteUpdateAwareMixin],
         inject: ['owner','repo'],
@@ -28,7 +24,11 @@
         data() {
             return {
                 data: {},
-                loading: false
+                loading: false,
+                branches: {
+                    data: [],
+                    loading: false
+                }
             }
         },
         created() {
@@ -36,6 +36,11 @@
         },
         methods: {
             //获取仓库文件基本信息
+          /*   network_getData() {
+                if(this.accessToken) {
+                    this.network_getGraphql
+                }
+            }, */
             async network_getData() {
                 try{
                     this.loading = true

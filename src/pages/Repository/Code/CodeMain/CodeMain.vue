@@ -1,5 +1,7 @@
 <template>
-    <container class="px-3 container">
+    <CommonLoadingWrapper class="px-3 container" 
+                            :loading="readme.loading || !repoBasicInfo().node_id || pinnedIssues.loading || pinnedPullRequests.loading || subscription.loading"
+                            :position="!repoBasicInfo().node_id  ? 'center' : 'corner'">
         <AnimatedHeightWrapper :class="{'mt-3' : repoBasicInfo().description && repoBasicInfo().description !== ''}">  
             <Description class="repository-meta mb-0" v-if="repoBasicInfo().description && repoBasicInfo().description !== ''">
                 {{repoBasicInfo().description}}
@@ -7,21 +9,21 @@
                 <a v-if="repoBasicInfo().homepage && repoBasicInfo().homepage.trim() !== ''" 
                 :href="repoBasicInfo().homepage">{{repoBasicInfo().homepage}}</a>   
             </Description>
-            <Topics v-if="codeBasicInfo().repositoryTopics && codeBasicInfo().repositoryTopics.nodes && codeBasicInfo().repositoryTopics.nodes.length > 0" 
+            <Topics v-if="repoBasicInfo().topics && repoBasicInfo().topics.length > 0" 
                     class="repository-meta mt-2 d-inline-flex flex-wrap">
                 <router-link 
-                            :key="item.topic.name"
+                            :key="item"
                             to="/search"
                             class="topic-item f6"
-                            v-for="item in codeBasicInfo().repositoryTopics.nodes">
-                            {{item.topic.name}}
+                            v-for="item in repoBasicInfo().topics">
+                            {{item}}
                 </router-link>
             </Topics>
         </AnimatedHeightWrapper>  
 
          <transition name="fade" appear>
-             <ActionPane v-if="codeBasicInfo().id" class="bubble d-flex mt-3 mb-3 flex-items-stretch">
-                <StarItOrNot class="flex-auto text-center" :class="{'action-disabled': !accessToken}">
+             <ActionPane v-if="repoBasicInfo().node_id" class="bubble d-flex mt-3 mb-3 flex-items-stretch">
+                <StarItOrNot class="flex-auto text-center">
                     <button class="px-2 action-btn" @click="test">
                         <svg class="v-align-text-bottom d-inline-block" fill="currentColor" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74L14 6z"></path></svg>
                         {{codeBasicInfo().viewerHasStarred ? "Unstar" : "Star"}}   
@@ -30,7 +32,7 @@
                         </AnimatedWidthWrapper> 
                     </button>
                 </StarItOrNot>
-                <WatchItOrNot class="flex-auto text-center" style="border-left: 1px solid #d1d5da;" :class="{'action-disabled': !accessToken}">
+                <WatchItOrNot class="flex-auto text-center" style="border-left: 1px solid #d1d5da;">
                     <button  class="px-2">
                         <svg v-if="codeBasicInfo().viewerSubscription === 'IGNORED'" class="v-align-text-bottom d-inline-block" fill="currentColor" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2.81v10.38c0 .67-.81 1-1.28.53L3 10H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h2l3.72-3.72C7.19 1.81 8 2.14 8 2.81zm7.53 3.22l-1.06-1.06-1.97 1.97-1.97-1.97-1.06 1.06L11.44 8 9.47 9.97l1.06 1.06 1.97-1.97 1.97 1.97 1.06-1.06L13.56 8l1.97-1.97z"></path></svg>
                         <svg v-else class="v-align-text-bottom d-inline-block" fill="currentColor" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"></path></svg>   
@@ -48,36 +50,30 @@
 
 
         <transition name="fade" appear>
-             <Branches v-if="(!accessToken || codeBasicInfo().id)"></Branches>
+             <Branches></Branches>
         </transition>
 
         <transition name="fade" appear>
-             <Readme :readme="partialReadme" v-if="(!accessToken || codeBasicInfo().id) && !readme.is404" :loading="readme.loading || !codeBasicInfo().id"/>
+             <Readme :readme="partialReadme" v-if="repoBasicInfo().node_id && partialReadme && !readme.is404" :loading="readme.loading"/>
         </transition>
 
         <transition name="fade" appear>
-            <Releases v-if="codeBasicInfo().id"/>
+            <Releases/>
         </transition>
 
         <transition name="fade" appear>
-            <Issues v-if="codeBasicInfo().id"/>     
+            <Issues v-if="pinnedIssues.data.length > 0" :issues="pinnedIssues.data"/>     
         </transition>
 
         <transition name="fade" appear>
-            <PullRequests  v-if="codeBasicInfo().id"/>
+            <PullRequests v-if="pinnedPullRequests.data.length > 0" :pullRequests="pinnedPullRequests.data"/>
         </transition>
 
         <transition name="fade" appear>
-            <Notifications  v-if="codeBasicInfo().id"/>
+            <Notifications  v-if="subscription.loaded" :subscription="subscription"/>
         </transition>
        
-        <transition name="fade" appear>
-            <CommonLoading v-if="readme.loading || !codeBasicInfo().id"
-                            :position="!codeBasicInfo().id ? 'center' : 'corner'"
-                            :preventClickEvent="false"/>
-        </transition> 
-
-    </container>
+    </CommonLoadingWrapper>
 </template>
 
 <script>
@@ -87,6 +83,7 @@
         AnimatedWidthWrapper,
         LoadingAndCatchErrorTemplate,
         CommonLoading,
+        CommonLoadingWrapper,
         ComplexBubble} from '@/components'
     import { util_numberFormat } from '@/util'
     import {Branches,Readme,Releases,Issues,PullRequests,Notifications} from './components'
@@ -102,15 +99,24 @@
                     data: '',
                     response404: false,
                     loading: false
+                },
+                pinnedIssues: {
+                    data: [],
+                    loading: false
+                },
+                pinnedPullRequests: {
+                    data: [],
+                    loading: false
+                },
+                subscription: {
+                    data: {},
+                    loading: false,
+                    loaded: false
                 }
             }
         },
         inject: ['owner','repo','codeBasicInfo','repoBasicInfo'],
         computed: {
-            starNumber: function() {
-                if(this.codeBasicInfo().stargazers)return util_numberFormat.thousands(this.codeBasicInfo().stargazers.totalCount)
-                return ""
-            },
             subscriptionActionStr: function() {
                 if(this.codeBasicInfo().viewerSubscription === null) return "Unwatch releases"
                 if(this.codeBasicInfo().viewerSubscription === "SUBSCRIBED") return "Unwatch"
@@ -118,6 +124,7 @@
                 return "Watch"
             },
             partialReadme() {
+                if(!this.readme.data || this.readme.data.trim() == '')return 
                 let reg4Article = /<\/article>/
                 let reg4H = /<h[1|2|3|4][^>]*>.*<\/h[1|2|3|4]>/gi
                 let readme = this.readme.data
@@ -135,17 +142,22 @@
             this.network_getData()
         },
         methods: {
+            network_getData(){
+                this.network_getReadme()
+                this.network_getPinnedIssues()
+                this.network_getPinnedPullRequests()
+                this.network_getSubscription()
+            },
+        
             //获取readme数据
-            async network_getData() {
+            async network_getReadme() {
                 try{
-                     this.readme.is404 = false
+                    this.readme.is404 = false
                     this.readme.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name)
-                    this.cancelSources.push(sourceAndCancelToken.source)
-
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name)
                     let url = api.API_README(this.owner(),this.repo())
                     let res = await authRequiredGet(url,{
-                        cancelToken: sourceAndCancelToken.cancelToken,
+                        cancelToken,
                         headers: {
                             'Accept': "application/vnd.github.VERSION.html"
                         }
@@ -160,6 +172,58 @@
                     this.readme.loading = false
                 }
             },
+
+             async network_getPinnedIssues() {
+                try{
+                    this.pinnedIssues.loading = false
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_pinned_issues')
+                    let url = api.API_SEARCH('issues',{
+                        q:`repo:${this.owner()}/${this.repo()} is:issue state:open is:public`,
+                        sort: 'updated',
+                        per_page: 5
+                    })
+                    let res = await authRequiredGet(url,{cancelToken})
+                    this.pinnedIssues.data = res.data.items
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.pinnedIssues.loading = false
+                }
+            },
+
+             async network_getPinnedPullRequests() {
+                try{
+                    this.pinnedPullRequests.loading = false
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_pinned_pull')
+                    let url = api.API_SEARCH('issues',{
+                        q:`repo:${this.owner()}/${this.repo()} is:pr state:open is:public`,
+                        sort: 'updated',
+                        per_page: 5
+                    })
+                    let res = await authRequiredGet(url,{cancelToken})
+                    this.pinnedPullRequests.data = res.data.items
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.pinnedPullRequests.loading = false
+                }
+            },
+
+            async network_getSubscription() {
+                 try{
+                    this.subscription.loading = false
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_subscrtption')
+                    let url = api.API_REPOSITORY_SUBSCRIPTION(this.owner(),this.repo())
+                    let res = await authRequiredGet(url,{cancelToken})
+                    this.subscription.data = res.data.items
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.subscription.loading = false
+                    this.subscription.loaded = true
+                }
+            },
+
             test() {
                 this.$router.push('/vuejs/vue/pulls')
             }
@@ -176,6 +240,7 @@
             PullRequests,
             Notifications,
             CommonLoading,
+            CommonLoadingWrapper,
             container: styled.div``,
             ReadmeContent: styled.div``,
             Container: styled.div``,

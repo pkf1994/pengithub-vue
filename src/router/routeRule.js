@@ -1,5 +1,8 @@
-import {SimpleFooter,LogoHeader,RepoHeader,LabelsFooter,ComplexFooter} from '@/components'
-
+const LogoHeader = () => import('../components/Header/LogoHeader.vue')
+const RepoHeader = () => import('../components/Header/RepoHeader.vue')
+const SimpleFooter = () => import('../components/Footer/SimpleFooter.vue')
+const LabelsFooter = () => import('../components/Footer/LabelsFooter.vue')
+const ComplexFooter = () => import('../components/Footer/ComplexFooter.vue')
 const Home = () => import('../pages/Home/Home.vue')
 const OauthRedirectPage = () => import('../pages/OauthRedirectPage/OauthRedirectPage.vue')
 const Dashboard = () => import('../pages/Home/LoginedHome/Dashboard/Dashboard.vue')
@@ -33,8 +36,8 @@ const OrganizationPeople = () => import('../pages/Organization/People/People.vue
 const Repository = () => import('../pages/Repository/Repository.vue')
 const RepositoryCode = () => import('../pages/Repository/Code/Code.vue')
 const RepositoryCodeMain = () => import('../pages/Repository/Code/CodeMain/CodeMain.vue')
-const RepositoryCodeFileBrowser = () => import('../pages/Repository/Code/CodeFile/FileBrowser/FileBrowser.vue')
-const RepositoryCodeFileDetail = () => import('../pages/Repository/Code/CodeFile/FileDetail/FileDetail.vue')
+const RepositoryCodeFileBrowser = () => import('../pages/Repository/Code/CodeFileBrowser/CodeFileBrowser.vue')
+const RepositoryCodeFileDetail = () => import('../pages/Repository/Code/CodeFileDetail/CodeFileDetail.vue')
 const RepositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
 const RepositoryIssuesBrowser = () => import('../pages/Repository/Issues/IssuesBrowser.vue')
 const RepositoryIssueDetail = () => import('../pages/Repository/Issues/IssueDetail/IssueDetail.vue')
@@ -55,13 +58,14 @@ const RepositoryBranchesAll = () => import('../pages/Repository/Branches/All.vue
 const RepositoryBranchesStale = () => import('../pages/Repository/Branches/Stale.vue')
 const RepositoryFindFile = () => import('../pages/Repository/FindFile/FindFile.vue')
 const RepositoryReleases = () => import('../pages/Repository/Releases/Releases.vue')
+const RepositoryReleaseDetail = () => import('../pages/Repository/Releases/ReleaseDetail.vue')
+const RepositoryTags = () => import('../pages/Repository/Tags/Tags.vue')
 const SignOut = () => import('../pages/SignOut/SignOut.vue')
 const Notifications = () => import('../pages/Notifications/Notifications.vue')
 const NotFoundPage = () => import('../pages/NotFoundPage/NotFoundPage.vue')
 
 
 export default [
-    
     {
         path: '/',
         name: 'home',
@@ -122,7 +126,6 @@ export default [
     },
     {
         path: '/explore',
-        name: 'explore',
         components: {
             default: Explore,
             header: LogoHeader,
@@ -169,7 +172,6 @@ export default [
     },
     {
         path: '/search',
-        name: 'search',
         components: {
             default: Search,
             header: LogoHeader,
@@ -211,15 +213,10 @@ export default [
     {
         path: '/404',
         name: 'NotFound',
-        components: {
-            default: NotFoundPage,
-            header: LogoHeader,
-            footer: ComplexFooter
-        }
+        component: NotFoundPage
     },
     {
         path: '/:login',
-        name: 'user',
         components: {
             default: User,
             header: LogoHeader,
@@ -260,7 +257,6 @@ export default [
     },
     {
         path: '/orgs/:organization',
-        name: 'organization',
         components: {
             default: Organization,
             footer: SimpleFooter
@@ -288,10 +284,9 @@ export default [
     },
     {
         path: '/:owner/:repo',
-        name: 'repository',
         components: {
-            default: Repository,
             header: RepoHeader,
+            default: Repository,
             footer: SimpleFooter
         },
         props: {
@@ -301,7 +296,6 @@ export default [
         children: [
             {
                 path: '/',
-                name: 'repositoryCode',
                 component: RepositoryCode,
                 children: [
                     {
@@ -312,14 +306,14 @@ export default [
                         }
                     },
                     {
-                        path: 'tree/(\.*)+',
+                        path: 'dir/(\.*)+',
                         name: 'repositoryCodeFileBrowser',
                         components: {
                             RepositoryCodeFileBrowser: RepositoryCodeFileBrowser
                         }
                     },
                     {
-                        path: 'blob/(\.*)+',
+                        path: 'file/(\.*)+',
                         name: 'repositoryCodeFileDetail',
                         components: {
                             RepositoryCodeFileDetail: RepositoryCodeFileDetail
@@ -329,7 +323,6 @@ export default [
             },
             {
                 path: 'issues',
-                name: 'repositoryIssues',
                 component: RepositoryIssues,
                 children: [
                     {
@@ -355,7 +348,6 @@ export default [
             },
             {   
                 path: 'pull/:number',
-                name: 'repositoryPullRequestDetail',
                 component: RepositoryPullRequestDetail,
                 children: [
                     {
@@ -407,7 +399,6 @@ export default [
             },
             {   
                 path: 'branches',
-                name: 'repositoryBranches',
                 component: RepositoryBranches,
                 children: [
                     {
@@ -431,7 +422,17 @@ export default [
                 path: 'releases',
                 name: 'repositoryReleases',
                 component: RepositoryReleases
-            }
+            },
+            {
+                path: 'releases/tag/:tagOrRelease',
+                name: 'repositoryReleaseDetail',
+                component: RepositoryReleaseDetail
+            },
+            {
+                path: 'tags',
+                name: 'repositoryTags',
+                component: RepositoryTags
+            },
         ]
     },
     {
@@ -439,7 +440,6 @@ export default [
         name: 'unknow',
         components: {
             default: NotFoundPage,
-            header: LogoHeader,
             footer: ComplexFooter
         }
     },

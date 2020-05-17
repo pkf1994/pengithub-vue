@@ -1,7 +1,5 @@
 <template>
-    <ComplexBubble :loading="!codeBasicInfo().id" 
-                    :disableFlag="pullRequests.totalCount === 0 && codeBasicInfo().id !== undefined" 
-                    disableNotice="There are no recent pull request"
+    <ComplexBubble  disableNotice="There are no recent pull request"
                     :delay="1500">
         <template v-slot:title>
             <Title  class="bubble-title" style="font-weight: 700">
@@ -11,15 +9,14 @@
         </template>
 
         <Content class="bubble-content p-0">
-           <IssueItem v-for="item in pullRequests.nodes || []" 
+           <RestIssueItem v-for="item in pullRequests" 
                     :key="item.id" 
                     :issue="item" 
                     :showLabels="true"
-                    :showRepoFullName="false"
-                        type="pullRequest"></IssueItem>    
+                    :showRepoFullName="false"></RestIssueItem>    
         </Content>
         <template v-slot:footer>
-            <router-link to="/" class="d-block footer text-center">
+            <router-link :to="`/${owner()}/${repo()}/pulls`" class="d-block footer text-center">
                 View all pull requests
             </router-link>
         </template>
@@ -28,29 +25,21 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble} from '../../../../../components'
-    import {IssueItem} from '../../../components'
-    import {WithRandomMetaMixin} from '../../../../../mixins'
-    import {util_dateFormat,util_color} from '../../../../../util'
+    import {ComplexBubble} from '@/components'
+    import {RestIssueItem} from '../../../components'
+    import {WithRandomMetaMixin} from '@/mixins'
+    import {util_dateFormat,util_color} from '@/util'
     export default {
-        inject: ['codeBasicInfo'],
-        
-        computed: {
-            pullRequests() {
-                return this.codeBasicInfo().pullRequests || {}
-            },
-        },
-        methods: {
-            dateFormat(dataStr) {
-                return util_dateFormat.getDateDiff(new Date(dataStr))
-            },
-            isLight(colorStr) {
-                return util_color.isLight(colorStr)
+        inject: ['owner','repo'],
+        props: {
+            pullRequests: {
+                type: Array,
+                required: true
             }
         },
         components: {
             ComplexBubble,
-            IssueItem,
+            RestIssueItem,
             Title: styled.div``,
             Content: styled.div``,
         }

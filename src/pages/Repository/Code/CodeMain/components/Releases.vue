@@ -1,5 +1,5 @@
 <template>
-    <ComplexBubble v-if="data.id"
+    <ComplexBubble  v-if="data.id && repoBasicInfo().node_id"
                     :delay="1500">
         <template v-slot:title>
             <Title class="bubble-title" style="font-weight: 700">
@@ -10,14 +10,14 @@
 
         <Content class="bubble-content">
             <svg class="v-align-text-bottom d-inline-block text-green mr-1" fill="currentColor" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
-            <router-link to="/">
+            <router-link :to="`/${owner()}/${repo()}/releases/tag/${data.tag_name}`">
                 {{data.tag_name}}
            </router-link>
            published {{data.published_at | getDateDiff}}
         </Content>
 
         <template v-slot:footer v-if="releasesCount > 1">
-            <router-link to="/" class="d-block footer text-center">
+            <router-link :to="`/${owner()}/${repo()}/releases`" class="d-block footer text-center">
                 View all of {{releasesCount}} releases 
             </router-link>
         </template>
@@ -33,7 +33,7 @@
     let parse = require('parse-link-header')
     export default {
         name: 'repository_code_main_releases',
-        inject: ['owner','repo'],
+        inject: ['owner','repo','repoBasicInfo'],
         data() {
             return {
                 data: {},

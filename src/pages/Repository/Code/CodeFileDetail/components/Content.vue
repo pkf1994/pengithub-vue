@@ -1,23 +1,26 @@
 <template>
-    <ComplexBubble :loading="loading()" :delay="2000">
+    <ComplexBubble :delay="2000">
         <template v-slot:title>
             <AnimatedHeightWrapper>
                 <Header class="Box-header py-2 d-flex flex-column flex-shrink-0">
                     <Pane class="d-flex py-1 py-md-0 flex-auto flex-justify-between">
                     <BtnGroup class="BtnGroup">
-                        <router-link to='/' class="btn btn-sm BtnGroup-item">
+                        <router-link v-if="!isBinary" to='/' class="btn btn-sm BtnGroup-item">
                             Raw
                         </router-link>
-                        <router-link to='/' class="btn btn-sm BtnGroup-item">
+                        <router-link v-if="!isBinary" to='/' class="btn btn-sm BtnGroup-item">
                             Blame
                         </router-link>
+                        <a v-else :href="raw" class="btn btn-sm BtnGroup-item">
+                            Download
+                        </a>
                         <router-link to='/' class="btn btn-sm BtnGroup-item">
                             History
                         </router-link>
                     </BtnGroup>
                         
                     <EditOrDelete class="d-flex">
-                        <button class="d-block btn-octicon">
+                        <button v-if="!isBinary()" class="d-block btn-octicon">
                             <svg viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M0 12v3h3l8-8-3-3-8 8zm3 2H1v-2h1v1h1v1zm10.3-9.3L12 6 9 3l1.3-1.3a.996.996 0 011.41 0l1.59 1.59c.39.39.39 1.02 0 1.41z"></path></svg>
                         </button>
                         <button class="d-block btn-octicon">
@@ -25,10 +28,13 @@
                         </button>
                     </EditOrDelete>
                     </Pane>
-                    <LineAndSize v-show="!loading() && !(fileDetailRows.length === 0)" class="text-mono f6 flex-auto pt-2 pr-3 text-normal">
-                    {{fileDetailRows.length}} lines 
+                    <LineAndSize  class="text-mono f6 flex-auto pt-2 pr-3 text-normal">
+                        <span v-if="fileDetailRows.length != 0">
+                            {{fileDetailRows.length}} lines 
+                        </span>
+                        <span class="file-info-divider"></span>
+                        {{byteSize() | fileSize}}
                     </LineAndSize>
-
                 </Header>
             </AnimatedHeightWrapper>
             
@@ -49,11 +55,15 @@
         <Content class="Box-body p-3 content text-center" v-else-if="isSvg" v-html="data()">
         </Content>
 
-         <Content class="Box-body p-0 content" v-else>
+         <Content class="Box-body p-0 content" v-else-if="!isBinary()">
             <BlobRow class="d-flex" v-for="(item,index) in fileDetailRows" :key="item + index">
                 <BlobNumber class="blob-num">{{index + 1}}</BlobNumber>
                 <BlobCode class="blob-code">{{item}}</BlobCode>
             </BlobRow>
+        </Content>
+
+        <Content class="text-center p-3" v-if="isBinary()">
+            <a :href="raw">View raw</a>
         </Content>
 
     </ComplexBubble>
@@ -65,11 +75,7 @@
     import {mapState,mapGetters} from 'vuex'
     import {util_analyseFileType} from '@/util'
     export default {
-        inject: ['data','html','loading'],
-        data() {
-            return {
-            }
-        },
+        inject: ['data','html','byteSize','isBinary'],
         created() {
         },
         computed: {
@@ -124,6 +130,7 @@
             BlobRow: styled.div``,
             BlobNumber: styled.div``,
             BlobCode: styled.div``,
+            ByteSize: styled.div``
         }
     }
 </script>
@@ -170,5 +177,15 @@ button{
     padding-left: 10px;
     line-height: 20px;
     vertical-align: top;
+}
+
+.file-info-divider {
+    display: inline-block;
+    width: 1px;
+    height: 18px;
+    margin-right: 3px;
+    margin-left: 3px;
+    vertical-align: middle;
+    background-color: #ddd;
 }
 </style>

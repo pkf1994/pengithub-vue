@@ -1,12 +1,19 @@
 <template>
-    <Container class="p-3">
-        <transition name="fade" appear>
-            <button v-if="firstLoadedFlag" :disabled="refType.loading || !refType.data" class="btn css-truncate btn-sm" @click="() => openModal('switchBranchOrTagModal')">
-                <i>{{refType.data || 'branch'}}:</i>
-                <span class="css-truncate-target" v-if="ref">{{ref}}</span>
+    <CommonLoadingWrapper class="p-3" :loading="loading || graphqlData.loading || allBranchesAndTags.loading" :position="loading || allBranchesAndTags.loading ? 'center' : 'corner'">
+        <transition-group name="fade-group" appear>
+            <button key="refSwitchBtn" v-if="firstLoadedFlag && !path" class="btn css-truncate btn-sm" @click="() => openModal('switchBranchOrTagModal')">
+                <i>{{refType | capitalize}}:</i>
+                <span class="css-truncate-target" v-if="currentRef">{{currentRef}}</span>
                 <span class="dropdown-caret"></span>
             </button>
-        </transition>
+            
+            <FileNavigation key="fileNavigation" v-if="firstLoadedFlag && path" class="file-path text-bold">
+                <span class="text-normal">History for</span>         
+                <router-link :to="`/${owner()}/${repo()}/commits`">{{repo()}}</router-link> /
+                <Breadcrumb :spaceArround="true" :routePath="$route.fullPath" :displayPath="path && path.replace(/^\//,'').replace(/\/$/,'')">
+                </Breadcrumb>
+            </FileNavigation>
+        </transition-group>
         
         <transition-group name="fade-group" appear>
             <CommitGroup v-for="item in commitGroups" class="the-commit-group" :key="item[0].node_id" :commitGroup="item"></CommitGroup>
@@ -19,46 +26,40 @@
             </div> 
         </Pagination>
 
-        <transition name="fade" appear>
-            <CommonLoading  v-if="loading || graphqlData.loading"
-                            :position="loading ? 'center' : 'corner'"
-                            :preventClickEvent="false"/>
-        </transition> 
- 
-         <Modal ref="switchBranchOrTagModal" title="Switch branches/tags" :modalStyle="{height:'80vh'}" @show="network_getAllBranchesAndTags">
-             <div v-if="allBranchesAndTags.loading" class="flex-row-center height-full">
+        <Modal ref="switchBranchOrTagModal" title="Switch branches/tags" :modalStyle="{height:'80vh'}">
+            <div v-if="allBranchesAndTags.loading" class="flex-row-center height-full">
                 <LoadingIconEx></LoadingIconEx>
             </div>
             <div class="select-menu-text-filter">
                 <div class="p-3">
-                    <input type="text" v-model="allBranchesAndTags.searchQuery" class="form-control" placeholder="Filter spoken languages" autofocus="" autocomplete="off"/>
+                    <input type="text" v-model="switchBranchOrTagModalSearchQuery" class="form-control" placeholder="Filter branches/tags" autofocus="" autocomplete="off"/>
                 </div>
                 <ModalTab class="SelectMenu-tabs" style="background-color: #f6f8fa;">
-                    <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('branch')" :class="{'active-modal-tab':allBranchesAndTags.modalCurrentTab == 'branch'}">Branches</button>
-                    <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('tag')" :class="{'active-modal-tab':allBranchesAndTags.modalCurrentTab == 'tag'}">Tags</button>
+                    <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('branch')" :class="{'active-modal-tab':switchBranchOrTagModalTab == 'branch'}">Branches</button>
+                    <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('tag')" :class="{'active-modal-tab':switchBranchOrTagModalTab == 'tag'}">Tags</button>
                 </ModalTab>
             </div>
-            <transition-group v-if="allBranchesAndTags.modalCurrentTab == 'branch'" name="fade-group" appear>
-                <SelectMenuItem :key="defaultRef" v-if="defaultRef" @click.native="() => routerWithRef(defaultRef)" :selected="ref == defaultRef">
-                    <span class="flex-1">{{defaultRef}}</span>    
+            <transition-group v-if="switchBranchOrTagModalTab == 'branch'" name="fade-group" appear>
+                <SelectMenuItem :key="repoBasicInfo().default_branch" v-if="repoBasicInfo().default_branch" @click.native="() => routerWithRef(repoBasicInfo().default_branch)" :selected="currentRef == repoBasicInfo().default_branch">
+                    <span class="flex-1">{{repoBasicInfo().default_branch}}</span>    
                     <span class="Label Label--gray flex-self-start">default</span>
                 </SelectMenuItem>
-                <SelectMenuItem @click.native="() => routerWithRef(item.name)" v-for="item in filterAllBranches" :key="item.name" :selected="ref == item.name">
-                    <span>{{item.name}}</span>    
+                <SelectMenuItem @click.native="() => routerWithRef(item.ref.replace('refs/heads/',''))" v-for="item in filterAllBranches" :key="item.ref" :selected="currentRef == item.ref.replace('refs/heads/','')">
+                    <span>{{item.ref.replace('refs/heads/','')}}</span>    
                 </SelectMenuItem>
             </transition-group>
-            <transition-group v-if="allBranchesAndTags.modalCurrentTab == 'tag'" name="fade-group" appear>
-                 <SelectMenuItem @click.native="() => routerWithRef(item.name)" v-for="item in filterAllTags" :key="item.name" :selected="ref == item.name">
-                    <span>{{item.name}}</span>    
+            <transition-group v-if="switchBranchOrTagModalTab == 'tag'" name="fade-group" appear>
+                <SelectMenuItem @click.native="() => routerWithRef(item.ref.replace('refs/tags/',''))" v-for="item in filterAllTags" :key="item.ref" :selected="currentRef == item.ref.replace('refs/tags/','')">
+                    <span>{{item.ref.replace('refs/tags/','')}}</span>    
                 </SelectMenuItem>
             </transition-group>
         </Modal>
-    </Container>
+    </CommonLoadingWrapper>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading,SelectMenuItem,LoadingIconEx,Modal} from '@/components'
+    import {CommonLoading,SelectMenuItem,LoadingIconEx,Modal,WithNotFoundNoticeWrapper,CommonLoadingWrapper,Breadcrumb} from '@/components'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
     import {util_queryParse} from '@/util'
     import CommitGroup from './CommitGroup'
@@ -69,7 +70,7 @@
     export default {
         name: 'repository_commits_page',
         mixins: [RouteUpdateAwareMixin,WithModalMixin],
-        inject: ['repoBasicInfo'],
+        inject: ['repoBasicInfo','owner','repo'],
         provide() {
             return {
                 graphqlDataProvided: () => this.graphqlData.data
@@ -82,30 +83,23 @@
                 pageInfo: {},
                 perPage: 20,
                 paramIsBranch: true,
-                refType: {
-                    data: undefined,
-                    loading: false
-                },
                 graphqlData: {
                     data: [],
                     loading: false
                 },
                 firstLoadedFlag: false,
                 allBranchesAndTags: {
-                    modalCurrentTab: 'branch',
-                    searchQuery: '',
                     branches: [],
                     tags: [],
                     loading: false
-                }
+                },
+                switchBranchOrTagModalTab: "branch",
+                switchBranchOrTagModalSearchQuery: "",
             }
         },
         computed: {
             defaultRef() {
-                return this.repoBasicInfo().defaultBranchRef && this.repoBasicInfo().defaultBranchRef.name
-            },
-            ref() {
-                return this.$route.params.pathMatch || this.defaultRef
+                return this.repoBasicInfo().default_branch
             },
             owner() {
                 return this.$route.params.owner
@@ -115,9 +109,6 @@
             },
             page() {
                 return this.$route.query.page || 1
-            },
-            refTypeUpdateFlag() {
-                return `${this.ref}-${this.owner}-${this.repo}`
             },
             commitGroups() {
                 let commitGroups = []
@@ -136,34 +127,106 @@
                 })
                 return commitGroups
             },
+            currentRef() {
+                if(!this.$route.params.pathMatch) return this.defaultRef
+                if(this.$route.params.pathMatch.match(/^[^\/]+\/?$/)) return this.$route.params.pathMatch.replace('/','')
+                if(this.allBranchesAndTags.branches.length == 0) return
+                   
+                let ref
+                let routePathMatch = this.$route.params.pathMatch
+                //if(routePathMatch[routePathMatch.length - 1] !== '/') routePathMatch = `${routePathMatch}/`
+                this.allBranchesAndTags.branches.forEach(item => {
+                    let regExp =  new RegExp(`^(${item.ref.replace('refs/heads/','')})(\/\.*)?`)
+                    let branchMatch = routePathMatch.match(regExp)
+                    if(branchMatch){
+                        if(!ref) ref = branchMatch[1]
+                        if(branchMatch[1].length > ref.length) ref = branchMatch[1]
+                    }
+                })
+
+                this.allBranchesAndTags.tags.forEach(item => {
+                    let regExp =  new RegExp(`^(${item.ref.replace('refs/tags/','')})(\/\.*)?`)
+                    let tagMatch = routePathMatch.match(regExp)
+                    if(tagMatch){
+                        if(!ref) ref = tagMatch[1]
+                        if(tagMatch[1].length > ref.length) ref = tagMatch[1]
+                    }
+                })
+                return ref
+            },
+            refType() {
+                let refType
+                try{
+                    this.allBranchesAndTags.branches.forEach( i => {
+                        let branchName = i.ref.replace('refs/heads/','')
+                        if(branchName == this.currentRef) {
+                            refType = 'branch'
+                            throw new Error('forEach abort')
+                        }
+                    })
+                    this.allBranchesAndTags.tags.forEach( i => {
+                        let tagName = i.ref.replace('refs/tags/','')
+                        if(tagName == this.currentRef) {
+                            refType = 'tag'
+                            throw new Error('forEach abort')
+                        }
+                    })
+                }catch(e) {
+                    //do nothing
+                }
+                return refType
+            },
+            path() {
+                if(!this.$route.params.pathMatch) return 
+                if(!this.currentRef) return 
+                return this.$route.params.pathMatch.replace(this.currentRef,'')
+            },
             filterAllBranches() {
-                 return this.allBranchesAndTags.branches.filter(i => (i.name.indexOf(this.allBranchesAndTags.searchQuery) != -1) && i.name !== this.defaultRef)
+                return this.allBranchesAndTags.branches.filter(i => {
+                    let branchName = i.ref.replace('refs/heads/','')
+                    return branchName.toLowerCase().indexOf(this.switchBranchOrTagModalSearchQuery.toLowerCase()) != -1 && branchName != this.repoBasicInfo().default_branch
+                })
             },
             filterAllTags() {
-                 return this.allBranchesAndTags.tags.filter(i => (i.name.indexOf(this.allBranchesAndTags.searchQuery) != -1))
-            }
+                return this.allBranchesAndTags.tags.filter(i => {
+                    let tagName = i.ref.replace('tags/heads/','')
+                    return tagName.toLowerCase().indexOf(this.switchBranchOrTagModalSearchQuery.toLowerCase()) != -1
+                })
+            },
         },
-        created() {
-            console.log(this.$route)
+        async created() {
+            console.log(this.$route.params)
+            await Promise.all([
+                this.network_getAllBranches(),
+                this.network_getAllTags()
+            ])
             this.network_getData()
-            this.network_determineRefType()
+            /* this.network_getData()
+            this.network_determineRefType() */
         },
         methods: {
             async network_getData() {
                 try{
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let url = api.API_REPOSITORY_COMMITS(this.owner,this.repo,{
-                        perPage: this.perPage,
-                        ...this.$route.query,
-                        sha: this.ref,
+                    let url = api.API_REPOSITORY_COMMITS({
+                        owner: this.owner(),
+                        repo: this.repo(),
+                        params: {
+                            per_page: this.perPage,
+                            ...this.$route.query,
+                            path: this.path,
+                            sha: this.currentRef,
+                        }
                     })
                     let res = await authRequiredGet(url,{cancelToken})
 
+                    window.scrollTo(0,0)
                     this.data = res.data
                     this.pageInfo = parse(res.headers.link) || {}
 
-                    this.network_getGraphqlData(this.data)
+                    if(this.accessToken) this.network_getGraphqlData(this.data)
+                    
                     this.firstLoadedFlag = true
                 }catch(e) {
                     this.handleError(e)
@@ -192,52 +255,64 @@
                     this.graphqlData.loading = false
                 }
             },
-            async network_determineRefType() {
-                if(!this.ref) return 
+           
+            async network_getAllBranches(){
                 try{
-                    this.refType.loading = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' determine_ref_type')
-                    let graphql_determineRefType = graphql.GRAPHQL_BRANCH_OR_TAG({
-                        owner: this.owner,
-                        repo: this.repo,
-                        ref: this.ref
-                    })
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_determineRefType,{cancelToken})
-                    if(!res.data.data.repository.ref) {
-                        throw new Error('404')
+                    this.allBranchesAndTags.loading = true 
+                    let lastPage = 1
+                    let currentPage = 1
+                    let branches = []
+                    while(currentPage <= lastPage) {
+                        let url_branches = api.API_GIT_MATCHING_REFS({
+                            owner: this.owner(),
+                            repo: this.repo(),
+                            ref: 'heads/',
+                            params: {
+                                per_page: 100,
+                                page: currentPage
+                            }
+                        })
+                        let res = await authRequiredGet(url_branches)
+                        let pageInfo = parse(res.headers.link) || {}
+                        if(pageInfo.last) lastPage = pageInfo.last.page
+                        branches = branches.concat(res.data)
+                        currentPage += 1
                     }
-                    let refPrefix = res.data.data.repository.ref.prefix
-                    if(refPrefix == 'refs/tags/') {
-                        this.refType.data = 'tag'
-                    } else {
-                        this.refType.data = 'branch'
-                    }
-
+                    
+                    this.allBranchesAndTags.branches = branches
                 }catch(e) {
                     console.log(e)
-                }finally{
-                    this.refType.loading = false
+                } finally {
+                    this.allBranchesAndTags.loading = false
                 }
             },
-            async network_getAllBranchesAndTags() {
-                if(this.allBranchesAndTags.branches.length > 0) return 
+            async network_getAllTags(){
                 try{
-                    this.allBranchesAndTags.loading = true
+                    this.allBranchesAndTags.loading = true 
+                    let lastPage = 1
+                    let currentPage = 1
+                    let tags = []
+                    while(currentPage <= lastPage) {
+                        let url_tags = api.API_GIT_MATCHING_REFS({
+                            owner: this.owner(),
+                            repo: this.repo(),
+                            ref: 'tags/',
+                            params: {
+                                per_page: 100,
+                                page: currentPage
+                            }
+                        })
+                        let res = await authRequiredGet(url_tags)
+                        let pageInfo = parse(res.headers.link) || {}
+                        if(pageInfo.last) lastPage = pageInfo.last.page
+                        tags = tags.concat(res.data)
+                        currentPage += 1
+                    }
                     
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_all_refs')
-                    let graphql_allRefs = graphql.GRAPHQL_ALL_REFS({
-                        repo: this.repo,
-                        owner: this.owner
-                    })
-
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_allRefs,{cancelToken})
-
-                    this.allBranchesAndTags.branches = res.data.data.repository.allBranches.nodes
-                    this.allBranchesAndTags.tags = res.data.data.repository.allTags.nodes
-
+                    this.allBranchesAndTags.tags = tags
                 }catch(e) {
                     console.log(e)
-                }finally{
+                } finally {
                     this.allBranchesAndTags.loading = false
                 }
             },
@@ -250,16 +325,11 @@
             },
             routerWithRef(ref) {
                 this.closeModal()
-                this.$router.push(`/${this.owner}/${this.repo}/commits/${ref}`)
+                this.$router.push(`/${this.owner()}/${this.repo()}/commits/${ref}`)
             },
             switchModalTab(payload) {
-                this.allBranchesAndTags.modalCurrentTab = payload
-            }
-        },
-        watch: {
-            refTypeUpdateFlag() {
-                this.network_determineRefType()
-            }
+                this.switchBranchOrTagModalTab = payload
+            },
         },
         components: {
             CommonLoading,
@@ -267,9 +337,13 @@
             Modal,
             SelectMenuItem,
             LoadingIconEx,
+            WithNotFoundNoticeWrapper,
+            CommonLoadingWrapper,
+            Breadcrumb,
             Container: styled.div``,
             Pagination: styled.div``,
             ModalTab: styled.div``,
+            FileNavigation: styled.div``,
         }
     }
 </script>
@@ -304,6 +378,15 @@
         border: 1px solid #dfe2e5;
         border-radius: 3px;
     }
+}
+
+.active-modal-tab{
+    background: white
+}
+
+.file-path{
+    font-size: 16px;
+    color: #586069;
 }
 
 .active-modal-tab{

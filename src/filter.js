@@ -15,7 +15,7 @@ Vue.filter('thousands2K2M', function(number,reservedDecimal = 2) {
 })
 
 Vue.filter('dateFormat', function (dateStr,fmt) {
-    return util_dateFormat.dateFormat(dateStr,fmt)
+    return util_dateFormat.dateFormat(fmt,dateStr)
 })
 
 Vue.filter('getDateDiff', function (standardDateString) {

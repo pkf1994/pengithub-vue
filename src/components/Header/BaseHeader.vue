@@ -116,11 +116,11 @@
                     await this.signOut()
                     this.closeNav()
                 }catch(e) {
-                    console.log(e)
                     if(e.response && e.response.data && e.response.data.detailMessage) {
                         this.$toast(e.response.data.detailMessage,'error')
+                        console.log(e)
                     }else{
-                        this.$toast(e)
+                        this.handleError(e)
                     }
                 }
             }

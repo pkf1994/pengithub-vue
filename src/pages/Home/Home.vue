@@ -18,9 +18,6 @@
                 }
             })
         },
-        created() {
-            console.log(this.$router.history)
-        },
         components:{
             Hola,
             LoginedHome

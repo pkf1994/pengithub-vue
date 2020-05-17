@@ -14,10 +14,10 @@
            
         },
         computed: {
-            owner: function() {
+            owner() {
                 return this.$route.path.split("/")[1]
             },
-            repo: function() {
+            repo() {
                 return this.$route.path.split("/")[2]
             }
         },

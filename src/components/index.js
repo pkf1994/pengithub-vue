@@ -25,6 +25,7 @@ import SimpleDiffView from './SimpleDiffView'
 import ImgWrapper from './ImgWrapper'
 import HyperlinkWrapper from './HyperlinkWrapper'
 import WithSignInNoticeWrapper from './WithSignInNoticeWrapper'
+import WithNotFoundNoticeWrapper from './WithNotFoundNoticeWrapper'
 export {
     Button,
     BaseHeader,
@@ -71,5 +72,6 @@ export {
     SimpleDiffView,
     ImgWrapper,
     HyperlinkWrapper,
-    WithSignInNoticeWrapper
+    WithSignInNoticeWrapper,
+    WithNotFoundNoticeWrapper
 }

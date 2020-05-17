@@ -65,8 +65,8 @@
                         routerLink: path,
                         exact: true,
                         extraActiveRouterLinks: [
-                            `${path}/tree`,
-                            `${path}/blob`,
+                            `${path}/dir`,
+                            `${path}/file`,
                             `${path}/branches`,
                             `${path}/branches/all`,
                             `${path}/branches/stale`,
