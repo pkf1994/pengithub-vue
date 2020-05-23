@@ -4,7 +4,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
+    import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGet} from '@/network'
     import * as api from '@/network/api'
     var parse = require('parse-link-header');
     import {mapState} from 'vuex'

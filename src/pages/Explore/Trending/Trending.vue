@@ -311,9 +311,16 @@
 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_viewerHasStarred,{cancelToken})
 
+                    let dataHolder 
+                    try{
+                        dataHolder = res.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+
                     let data = []
-                    for(let key in res.data.data) {
-                        data.push(res.data.data[key])
+                    for(let key in dataHolder) {
+                        data.push(dataHolder[key])
                     }
                     this.repositories.viewerHasStarred.data = data
                 }catch(e) {
@@ -331,9 +338,16 @@
 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_viewerIsFollowing,{cancelToken})
 
+                    let dataHolder
+                    try{
+                        dataHolder = res.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+
                     let data = []
-                    for(let key in res.data.data) {
-                        data.push(res.data.data[key])
+                    for(let key in dataHolder) {
+                        data.push(dataHolder[key])
                     }
                     this.developers.viewerIsFollowing.data = data
                 }catch(e) {

@@ -49,7 +49,11 @@
 
                     let graphql_codeBasicInfo = graphql.GRAPHQL_REPOSITORY_CODE_BASIC_INFO(this.owner(),this.repo())
                     const res = await authRequiredGitHubGraphqlApiQuery(graphql_codeBasicInfo,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.data = res.data.data.repository
+                    try{
+                        this.data = res.data.data.repository
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                 }catch(e) {
                     this.handleError(e)
                 }finally{

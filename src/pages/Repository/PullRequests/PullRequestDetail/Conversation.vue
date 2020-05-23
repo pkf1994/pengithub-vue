@@ -369,7 +369,13 @@
                         number: this.number(),
                     })
                     let res_bodyHTML = await authRequiredGitHubGraphqlApiQuery(graphql_bodyHTML,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.data = res_bodyHTML.data.data.repository.pullRequest
+
+                    try{
+                        this.data = res_bodyHTML.data.data.repository.pullRequest
+                    }catch(e) {
+                        this.handleGraphqlError(res_bodyHTML)
+                    }
+                    
 
                     //获取timeline(异步)
                     this.network_getTimeline()
@@ -462,6 +468,12 @@
                     let res_commentsAndReviewExtraData = await authRequiredGitHubGraphqlApiQuery(graphql_commentsAndReviewExtraData,{cancelToken:cancelTokenAndSource.cancelToken})
 
                     if(!payload.changePage) this.timeline.extraData.data = []
+                    let dataHolder
+                    try{
+                        dataHolder = res_commentsAndReviewExtraData.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res_commentsAndReviewExtraData)
+                    }
                     for(let key in res_commentsAndReviewExtraData.data.data) {
                         this.timeline.extraData.data.push(res_commentsAndReviewExtraData.data.data[key])
                     }
@@ -491,10 +503,17 @@
 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_timelineCount,{cancelToken:sourceAndCancelToken.cancelToken})
 
+                    let dataHolder
+                    try{
+                        dataHolder = res.data.data.node
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+
                     let timelineCount = 0
 
-                    for(let key in res.data.data.node) {
-                        timelineCount = timelineCount + res.data.data.node[key].totalCount
+                    for(let key in dataHolder) {
+                        timelineCount = timelineCount + dataHolder[key].totalCount
                     }
 
                     this.timeline.count.data = timelineCount

@@ -1,18 +1,25 @@
 <template>
-    <Container class="px-3 pt-3 bg-white">
+    <CommonLoadingWrapper class="px-3 pt-3 bg-white" :loading="loading || extraData.loading || comments.loading" :position="(loading  || extraData.loading) ? 'center' : 'corner'">
         <AnimatedHeightWrapper>
-            <BasicInfo v-if="data.node_id && extraData.data.id" class="basic-info mt-0 px-2 pt-2">
-                <router-link  to="/" class="float-right btn-outline btn" >
+            <BasicInfo v-if="data.node_id" class="basic-info mt-0 px-2 pt-2">
+                <router-link  :to="browseFilesRouterLink" class="float-right btn-outline btn" >
                     Browse files
                 </router-link>
-                <Status class="mr-1 mt-1 float-left">
+                <Status v-if="extraData.data.status" class="mr-1 mt-1 float-left">
                     <svg v-if="extraData.data.status && extraData.data.status.state === 'SUCCESS'" class="octicon octicon-check v-align-middle text-green" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
                     <svg v-else-if="extraData.data.status && extraData.data.status.state === 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
                 </Status>
                 <p class="title" v-if="extraData.data.messageHeadlineHTML" v-html="extraData.data.messageHeadlineHTML">
+                </p> 
+
+                <p class="title" v-else>
+                    {{data.commit.message}}
                 </p>   
+
                 <p class="desc" style="margin-top:10px;" v-if="extraData.data.messageBodyHTML" v-html="extraData.data.messageBodyHTML">
                 </p>
+
+
                 <Branches class="branches">
                     <!-- associated pulls -->
                     <svg v-if="associatedPulls.length > 0" class="octicon octicon-git-branch" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 5c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v.3c-.02.52-.23.98-.63 1.38-.4.4-.86.61-1.38.63-.83.02-1.48.16-2 .45V4.72a1.993 1.993 0 00-1-3.72C.88 1 0 1.89 0 3a2 2 0 001 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-.53-.2-1-.53-1.36.09-.06.48-.41.59-.47.25-.11.56-.17.94-.17 1.05-.05 1.95-.45 2.75-1.25S8.95 7.77 9 6.73h-.02C9.59 6.37 10 5.73 10 5zM2 1.8c.66 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2C1.35 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2zm0 12.41c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm6-8c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
@@ -22,7 +29,6 @@
                             <router-link :to="item.resourcePath" class="text-gray">#{{item.number}}</router-link><span v-if="index < associatedPulls.length -1">,&nbsp;</span>
                         </span>)
                     </span>
-                    
 
                     <!-- tag info -->
                     <svg class="octicon octicon-tag" v-if="tags.length > 0" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
@@ -33,10 +39,10 @@
 
                 <Meta class="meta p-2 d-flex flex-wrap">
                     <ImgWrapper>
-                        <img class="avatar flex-self-start mr-1" height="20" width="20" :alt="`@${data.committer && data.committer.login}`" :src="data.committer && data.committer.avatar_url">
+                        <img class="avatar flex-self-start mr-1" height="20" width="20" :alt="`@${data.author && data.author.login}`" :src="data.author && data.author.avatar_url">
                     </ImgWrapper>  
                     <WhoDidWhat class="flex-self-start no-wrap mr-md-4 mr-0">
-                        <router-link  class="user-mention" :to="`/${data.committer && data.committer.login}`">{{data.committer && data.committer.login}}</router-link>
+                        <router-link  class="user-mention" :to="`/${data.author && data.author.login}`">{{data.author && data.author.login}}</router-link>
                         <span>committed on {{committedAt}}</span>
                     </WhoDidWhat>
                     <ParentInfo class="flex-auto no-wrap text-left overflow-x-auto">
@@ -57,7 +63,7 @@
         </AnimatedHeightWrapper>
         
         <AnimatedHeightWrapper class="my-3">
-            <DiffStatus v-if="extraData.data.id && data.node_id">
+            <DiffStatus v-if="data.node_id">
                 <DiffStyleBtn class="float-right ml-2 BtnGroup">
                     <router-link :to="`${$route.path}`" class="btn btn-sm BtnGroup-item" :class="{selected:viewStyle == 'unified'}"> 
                         Unified
@@ -71,26 +77,26 @@
                     <svg class="octicon octicon-diff" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6 7h2v1H6v2H5V8H3V7h2V5h1v2zm-3 6h5v-1H3v1zM7.5 2L11 5.5V15c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h6.5zM10 6L7 3H1v12h9V6zM8.5 0H3v1h5l4 4v8h1V4.5L8.5 0z"></path></svg>
                     Showing 
                     <button class="btn-link">
-                        {{data.files && data.files.length}} changed {{(data.files && data.files.length) > 1 ? 'files' : 'file'}}
+                        {{data.files && data.files.length | thousands}} changed {{(data.files && data.files.length) > 1 ? 'files' : 'file'}}
                     </button>
                     with 
-                    <strong>{{additions}} additions</strong>
+                    <strong>{{additions | thousands}} additions</strong>
                     and
-                    <strong>{{deletions}} deletions</strong>.
+                    <strong>{{deletions | thousands}} deletions</strong>.
                 </div>
 
             </DiffStatus>
         </AnimatedHeightWrapper>
 
-        <div v-if="showDiff">
+        <div>
             <transition-group appear name="fade">
                 <Diff v-for="item in data.files || []" :key="item.raw_url" :file="item" :viewStyle="viewStyle"></Diff>
             </transition-group>
         </div>     
 
 
-        <h4 v-if="showDiff">
-            {{comments.totalCount}} {{comments.totalCount > 1 ? 'comments' : 'comment'}} on commit <code class="commit-sha">{{data.sha && data.sha.substring(0,7)}}</code> 
+        <h4 v-if="data.commit">
+            {{data.commit.comment_count}} {{data.commit.comment_count > 1 ? 'comments' : 'comment'}} on commit <code class="commit-sha">{{data.sha && data.sha.substring(0,7)}}</code> 
         </h4>
 
         <AnimatedHeightWrapper :stretch="comments.loading && (comments.data.length === 0)">
@@ -99,7 +105,7 @@
             </div> 
         </AnimatedHeightWrapper>   
 
-        <CommentWrapper v-for="item in comments.data" :key="item.id" class="comment-wrapper py-3 relative">
+        <CommentWrapper v-for="item in comments.data" :key="item.id" class="comment-wrapper py-3 position-relative">
             <Comment :data="item">
 
             </Comment>
@@ -111,41 +117,39 @@
             {{comments.totalCount - comments.data.length - comments.latestData.data.length}}
         </HiddenItemLoading>
 
-        <CommentWrapper v-for="item in comments.latestData.data" :key="item.id" class="comment-wrapper py-3 relative">
+        <CommentWrapper v-for="item in comments.latestData.data" :key="item.id" class="comment-wrapper py-3 position-relative">
             <Comment :data="item">
 
             </Comment>
         </CommentWrapper>
 
-         <Editor v-if="showDiff" 
+        <Editor v-if="accessToken && firstLoadFlag" 
                 ref="editor"
                 class="pt-3 mb-5" 
                 :withGidelines="false"
                 :locked="viewerCannotComment" 
                 :lockedReason="extraData.data.activeLockReason">
-              <button class="btn btn-primary ml-1" :disabled="$refs.editor && $refs.editor.markdownRaw === ''">
-                    <span class="">Comment on this commit</span>
-                </button>        
+            <button class="btn btn-primary ml-1" :disabled="$refs.editor && $refs.editor.markdownRaw === ''">
+                <span class="">Comment on this commit</span>
+            </button>        
         </Editor>
 
-        <Subscription v-if="showDiff" class="pb-3" :viewerSubscription="extraData.data.viewerSubscription">
+        <SignInToComment class="my-3" v-else-if="firstLoadFlag">
+            Please 
+            <span @click="signIn" style="color: #0366d6;">sign in</span>
+            to view or add comment.
+        </SignInToComment>
 
+        <Subscription v-if="accessToken && firstLoadFlag" class="pb-3" :viewerSubscription="extraData.data.viewerSubscription">
         </Subscription>
 
-
-  
-        <transition name="fade" appear>
-            <CommonLoading v-if="loading || extraData.loading || !showDiff || comments.loading"
-                            :position="(loading  || extraData.loading) ? 'center' : 'corner'"
-                            :preventClickEvent="false"/>
-        </transition>  
-    </Container>
+    </CommonLoadingWrapper>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading,AnimatedHeightWrapper,LoadingIconEx,HiddenItemLoading,Editor,Subscription,ImgWrapper} from '@/components'
+    import {CommonLoading,AnimatedHeightWrapper,LoadingIconEx,HiddenItemLoading,Editor,Subscription,ImgWrapper,CommonLoadingWrapper} from '@/components'
     import {Diff,Comment} from './components'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery } from '@/network'
     import * as api from '@/network/api'
@@ -157,7 +161,8 @@
         inject: ['owner','repo'],
         provide() {
             return {
-                commit: () => Object.assign({},this.data,this.extraData.data)
+                commit: () => Object.assign({},this.data,this.extraData.data),
+                
             }
         },
         data() {
@@ -181,7 +186,7 @@
                     pageInfo: {},
                     totalCount: 0
                 },
-                showDiff: false
+                firstLoadFlag: false
             }
         },
         computed: {
@@ -236,6 +241,14 @@
             viewerCannotComment() {
                 return this.data.locked && !this.data.viewerCanUpdate
             },
+            browseFilesRouterLink() {
+                return `/${this.owner()}/${this.repo()}/tree/${this.data.sha}`
+            },
+            committedByAuthor() {
+                if(!this.data.author.login) return 
+                if(!this.data.committer.login) return 
+                return this.data.author.login == this.data.committer.login
+            }
         },
         created() {
             this.network_getData()
@@ -244,8 +257,7 @@
             async network_getData() {
                 try{
                     this.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name)
-                    this.cancelSources.push(sourceAndCancelToken.source)
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name)
 
                     let url = api.API_COMMIT({
                         owner: this.owner(),
@@ -253,12 +265,16 @@
                         sha: this.sha,
                     })
 
-                    let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
+                    let res = await authRequiredGet(url,{cancelToken})
                     //let res_ = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken,headers:{"Accept":"application/vnd.github.VERSION.html"}})
                     //console.log(res.data)
                     this.data = res.data
 
-                    this.network_getExtraData()
+                    this.network_getComments()
+
+                    if(this.accessToken) this.network_getExtraData()
+
+                    this.firstLoadFlag = true
 
                 }catch(e) {
                     this.handleError(e)
@@ -269,20 +285,20 @@
             async network_getExtraData() {
                 try{
                     this.extraData.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name + ' get_extra_data')
-                    this.cancelSources.push(sourceAndCancelToken.source)
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name + ' get_extra_data')
 
                     let graphql_extraData = graphql.GRAPHQL_COMMIT_EXTRA_DATA({nodeId:this.data.node_id})
 
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.extraData.data = res.data.data.node
-                    this.associatedPulls = res.data.data.node.associatedPullRequests.nodes
-
+                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
+                    try{
+                        this.extraData.data = res.data.data.node
+                        this.associatedPulls = res.data.data.node.associatedPullRequests.nodes
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                   
                     this.network_getComments()
-
-                    setTimeout(() => {
-                        this.showDiff = true
-                    },400)
+                  
                 }catch(e) {
                     console.log(e)
                 }finally{
@@ -292,8 +308,7 @@
             async network_getComments() {
                 try{
                     this.comments.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name + ' get_comments')
-                    this.cancelSources.push(sourceAndCancelToken.source)
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name + ' get_comments')
 
                     let graphql_comments = graphql.GRAPHQL_COMMIT_COMMENTS(
                         {
@@ -303,12 +318,18 @@
                         }
                     )
 
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_comments,{cancelToken:sourceAndCancelToken.cancelToken})
+                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_comments,{cancelToken})
 
                     //尝试获取末端数据
                     if(this.comments.data.length == 0) {
-                        if(res.data.data.node.comments.totalCount > this.comments.perPage) {
-                            let itemCountRemained = res.data.data.node.comments.totalCount - this.comments.perPage
+                        let commentsCountHolder
+                        try{
+                            commentsCountHolder = res.data.data.node.comments.totalCount
+                        }catch(e) {
+                            this.handleGraphqlError(res)
+                        }
+                        if(commentsCountHolder > this.comments.perPage) {
+                            let itemCountRemained = commentsCountHolder - this.comments.perPage
                             let lastPageScale = itemCountRemained > this.comments.perPage ? this.comments.perPage : itemCountRemained
 
                             let graphql_commentsLatest = graphql.GRAPHQL_COMMIT_COMMENTS(
@@ -320,13 +341,22 @@
                             )
 
                             let res_commentsLatest = await authRequiredGitHubGraphqlApiQuery(graphql_commentsLatest,{cancelToken:sourceAndCancelToken.cancelToken})
-                            this.comments.latestData.data = res_commentsLatest.data.data.node.comments.nodes
+                            try{
+                                this.comments.latestData.data = res_commentsLatest.data.data.node.comments.nodes
+                            }catch(e) {
+                                this.handleGraphqlError(res_commentsLatest)
+                            }
                         }
                     }
 
-                    this.comments.data = this.comments.data.concat(res.data.data.node.comments.nodes)
-                    this.comments.pageInfo = res.data.data.node.comments.pageInfo
-                    this.comments.totalCount = res.data.data.node.comments.totalCount
+                    try{
+                        this.comments.data = this.comments.data.concat(res.data.data.node.comments.nodes)
+                        this.comments.pageInfo = res.data.data.node.comments.pageInfo
+                        this.comments.totalCount = res.data.data.node.comments.totalCount
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
                 }catch(e) {
                     console.log(e)
                 }finally{
@@ -336,6 +366,7 @@
         },
         components: {
             CommonLoading,
+            CommonLoadingWrapper,
             AnimatedHeightWrapper,
             Diff,
             ImgWrapper,
@@ -356,6 +387,7 @@
             DiffStatus: styled.div``,
             DiffStyleBtn: styled.div``,
             CommentWrapper: styled.div``,
+            SignInToComment: styled.div``,
         }
     }
 </script>

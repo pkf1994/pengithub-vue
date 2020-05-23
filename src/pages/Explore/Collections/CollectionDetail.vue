@@ -40,7 +40,7 @@
     import * as graphql from './graphql'
     import * as api from '@/network/api'
     import {util_markdownParse} from '@/util'
-    import {authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
+    import {authRequiredGet} from '@/network'
     export default {
         name: 'explore_collection_detail_page',
         mixins: [RouteUpdateAwareMixin],

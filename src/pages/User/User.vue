@@ -179,7 +179,11 @@
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
                     let graphql_userInfo = graphql.GRAPHQL_USER_INFO(this.login)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_userInfo,{cancelToken})
-                    this.data = res.data.data.user || {}
+                    try{
+                        this.data = res.data.data.user || {}
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                 }catch(e) {
                     this.handleError(e)
                 }finally{

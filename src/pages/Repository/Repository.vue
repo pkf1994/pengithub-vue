@@ -14,7 +14,7 @@
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
-    import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
+    import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet } from '@/network'
     let parse = require('parse-link-header')
     export default {
         name: 'repository_page',
@@ -54,21 +54,14 @@
             },
             tabs: function() {
                 let path = `/${this.owner}/${this.repo}`
-                let extraActiveRouterLinks = [
-                    `${path}/dir`,
-                    `${path}/file`,
-                    `${path}/branches`,
-                    `${path}/branches/all`,
-                    `${path}/branches/stale`,
-                ]
                 return [
                     {
                         label: "Code",
                         routerLink: path,
                         exact: true,
                         active: [
-                            `${path}/dir`,
-                            `${path}/file`,
+                            `${path}/tree`,
+                            `${path}/blob`,
                             `${path}/branches`,
                             `${path}/branches/all`,
                             `${path}/branches/stale`,
@@ -80,7 +73,13 @@
                         label: "Issues",
                         routerLink: `${path}/issues`,
                         disabled: !this.data.has_issues,
-                        meta: this.openIssuesCount
+                        meta: this.openIssuesCount,
+                        active: [
+                            `${path}/labels`,
+                            `${path}/milestones`,
+                        ].filter(i => {
+                            return this.$route.path.indexOf(i) != -1
+                        }).length > 0
                     },
                     {
                         label: "Pull requests",

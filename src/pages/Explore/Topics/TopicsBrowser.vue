@@ -133,8 +133,15 @@
                         let res_viewerHasStarred = await authRequiredGitHubGraphqlApiQuery(graphql_viewerHasStarred)
 
                         let viewerHasStarredArr = []
-                        for(let key in  res_viewerHasStarred.data.data) {
-                            viewerHasStarredArr.push(res_viewerHasStarred.data.data[key])
+
+                        let dataHolder
+                        try{
+                            dataHolder = res_viewerHasStarred.data.data
+                        }catch(e) {
+                            this.handleGraphqlError(res_viewerHasStarred)
+                        }
+                        for(let key in dataHolder) {
+                            viewerHasStarredArr.push(dataHolder[key])
                         }
 
                         this.viewerHasStarred = this.viewerHasStarred.concat(viewerHasStarredArr)
@@ -187,8 +194,14 @@
                         let graphql_viewerHasStarred = graphql.GRAPHQL_TOPICS_VIEWER_HAS_STARRED(topicsSketchRosterToLoad)
                         let res_viewerHasStarred = await authRequiredGitHubGraphqlApiQuery(graphql_viewerHasStarred)
 
-                        for(let key in  res_viewerHasStarred.data.data) {
-                            let item = res_viewerHasStarred.data.data[key]
+                        let dataHolder
+                        try{
+                            dataHolder = res_viewerHasStarred.data.data
+                        }catch(e) {
+                            this.handleGraphqlError(res_viewerHasStarred)
+                        }
+                        for(let key in dataHolder) {
+                            let item = dataHolder[key]
                             if(this.viewerHasStarred.indexOf(item) == -1) this.viewerHasStarred.push(item)
                         }
                     }

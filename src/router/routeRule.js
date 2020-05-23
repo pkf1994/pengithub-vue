@@ -60,6 +60,9 @@ const RepositoryFindFile = () => import('../pages/Repository/FindFile/FindFile.v
 const RepositoryReleases = () => import('../pages/Repository/Releases/Releases.vue')
 const RepositoryReleaseDetail = () => import('../pages/Repository/Releases/ReleaseDetail.vue')
 const RepositoryTags = () => import('../pages/Repository/Tags/Tags.vue')
+const RepositoryBlame = () => import('../pages/Repository/Blame/Blame.vue')
+const RepositoryLabels = () => import('../pages/Repository/Labels/Labels.vue')
+const RepositoryMilestones = () => import('../pages/Repository/Milestones/Milestones.vue')
 const SignOut = () => import('../pages/SignOut/SignOut.vue')
 const Notifications = () => import('../pages/Notifications/Notifications.vue')
 const NotFoundPage = () => import('../pages/NotFoundPage/NotFoundPage.vue')
@@ -306,14 +309,14 @@ export default [
                         }
                     },
                     {
-                        path: 'dir/(\.*)+',
+                        path: 'tree/(\.*)+',
                         name: 'repositoryCodeFileBrowser',
                         components: {
                             RepositoryCodeFileBrowser: RepositoryCodeFileBrowser
                         }
                     },
                     {
-                        path: 'file/(\.*)+',
+                        path: 'blob/(\.*)+',
                         name: 'repositoryCodeFileDetail',
                         components: {
                             RepositoryCodeFileDetail: RepositoryCodeFileDetail
@@ -393,9 +396,24 @@ export default [
                 component: RepositoryCommits,
             },
             {
-                path: 'find/:sha',
+                path: 'find/(\.*)+',
                 name: 'repositoryFindFile',
                 component: RepositoryFindFile
+            },
+            {
+                path: 'blame/(\.*)+',
+                name: 'repositoryBlame',
+                component: RepositoryBlame
+            },
+            {
+                path: 'labels',
+                name: 'repositoryLabels',
+                component: RepositoryLabels
+            },
+            {
+                path: 'milestones',
+                name: 'repositoryMilestones',
+                component: RepositoryMilestones
             },
             {   
                 path: 'branches',
@@ -440,7 +458,6 @@ export default [
         name: 'unknow',
         components: {
             default: NotFoundPage,
-            footer: ComplexFooter
         }
     },
 ]

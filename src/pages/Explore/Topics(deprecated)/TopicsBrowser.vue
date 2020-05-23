@@ -61,14 +61,25 @@
                     let graphql_topicsSketchRoster = graphql.GRAPHQL_TOPICS_ROSTER
 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_topicsSketchRoster)
-                    let topicsSketchRoster = res.data.data.repository.object.entries
+                    let topicsSketchRoster
+                    try{
+                        topicsSketchRoster = res.data.data.repository.object.entries
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
 
                     let graphql_topicsSketch = graphql.GRAPHQL_TOPICS_SKETCH(topicsSketchRoster)
                     let res_topicsSketch = await authRequiredGitHubGraphqlApiQuery(graphql_topicsSketch)
                     let topicSketchRosterArr = []
+                    let topicSketchRosterArrHolder
+                    try{
+                        topicSketchRosterArrHolder = res_topicsSketch.data.data.repository
+                    }catch(e) {
+                        this.handleGraphqlError(res_topicsSketch)
+                    }
 
-                    for(let key in res_topicsSketch.data.data.repository) {
-                        let TopicAvatarObject = res_topicsSketch.data.data.repository[key].entries.filter(i => i.name.match(/.png$/) != null) [0] 
+                    for(let key in topicSketchRosterArrHolder) {
+                        let TopicAvatarObject = topicSketchRosterArrHolder[key].entries.filter(i => i.name.match(/.png$/) != null) [0] 
                         let TopicSketchItem = {
                             name: topicsSketchRoster[parseInt(key.replace('object',''))].name,
                             expression: `master:topics/${topicsSketchRoster[parseInt(key.replace('object',''))].name}/index.md`,
@@ -97,8 +108,15 @@
                     let graphql_topics = graphql.GRAPHQL_TOPICS(topicsSketchRosterToLoad)
                     let res_topics = await authRequiredGitHubGraphqlApiQuery(graphql_topics)
 
-                    for(let key in res_topics.data.data.repository) {
-                        topicsSketchRosterToLoad[parseInt(key.replace('object',''))].content = res_topics.data.data.repository[key].text
+                    let dataHolder 
+                    try{
+                        dataHolder = res_topics.data.data.repository
+                    }catch(e) { 
+                        this.handleGraphqlError(res_topics)
+                    }
+
+                    for(let key in dataHolder) {
+                        topicsSketchRosterToLoad[parseInt(key.replace('object',''))].content = dataHolder[key].text
                     }
 
                     topicsSketchRosterToLoad.forEach((item,index) => {
@@ -117,8 +135,14 @@
                     let res_viewerHasStarred = await authRequiredGitHubGraphqlApiQuery(graphql_viewerHasStarred)
 
                     let viewerHasStarredArr = []
-                    for(let key in  res_viewerHasStarred.data.data) {
-                        viewerHasStarredArr.push(res_viewerHasStarred.data.data[key])
+                    let viewerHasStarredArrHolder
+                    try{
+                        viewerHasStarredArrHolder = res_viewerHasStarred.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res_viewerHasStarred)
+                    }
+                    for(let key in  viewerHasStarredArrHolder) {
+                        viewerHasStarredArr.push(viewerHasStarredArrHolder[key])
                     }
 
                     this.viewerHasStarred = this.viewerHasStarred.concat(viewerHasStarredArr)
@@ -143,8 +167,15 @@
                     let graphql_topics = graphql.GRAPHQL_TOPICS(topicsSketchRosterToLoad)
                     let res_topics = await authRequiredGitHubGraphqlApiQuery(graphql_topics)
 
-                    for(let key in res_topics.data.data.repository) {
-                        topicsSketchRosterToLoad[parseInt(key.replace('object',''))].content = res_topics.data.data.repository[key].text
+                    let topicsHolder
+                    try{
+                        topicsHolder = res_topics.data.data.repository
+                    }catch(e) {
+                        this.handleGraphqlError(res_topics)
+                    }
+
+                    for(let key in topicsHolder) {
+                        topicsSketchRosterToLoad[parseInt(key.replace('object',''))].content = topicsHolder[key].text
                     }
 
                     topicsSketchRosterToLoad.forEach((item,index) => {
@@ -160,8 +191,15 @@
                     let graphql_viewerHasStarred = graphql.GRAPHQL_TOPICS_VIEWER_HAS_STARRED(topicsSketchRosterToLoad)
                     let res_viewerHasStarred = await authRequiredGitHubGraphqlApiQuery(graphql_viewerHasStarred)
 
-                    for(let key in  res_viewerHasStarred.data.data) {
-                        let item = res_viewerHasStarred.data.data[key]
+                    let viewerHasStarredDataHolder
+                    try{
+                        viewerHasStarredDataHolder = res_viewerHasStarred.data.data
+                    }catch(e) {
+                       this.handleGraphqlError(res_viewerHasStarred) 
+                    }
+
+                    for(let key in  viewerHasStarredDataHolder) {
+                        let item = viewerHasStarredDataHolder[key]
                         if(this.viewerHasStarred.indexOf(item) == -1) this.viewerHasStarred.push(item)
                     }
 

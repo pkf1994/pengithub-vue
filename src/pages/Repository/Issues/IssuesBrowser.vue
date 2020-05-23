@@ -31,7 +31,7 @@
             <template v-slot:searchInput>
                 <ButtonLeftSearchInput v-model="searchQuery" 
                                 :search="search" 
-                                :clickButtonHandler="() => triggerModel('filter')"
+                                :clickButtonHandler="() => triggerModel('filterModal')"
                                 placeholder="Search all issues">
                                 Filters
                                 <span class="dropdown-caret"></span>
@@ -39,12 +39,12 @@
             </template>
 
             <template v-slot:entriesFilterRow>
-                    <EntriesFilterItem class="px-3" @click="() => triggerModel('author')">
+                    <EntriesFilterItem class="px-3" @click="() => triggerModel('authorModal')">
                             Author
                     </EntriesFilterItem>
-                    <EntriesFilterItem class="px-3" @click="() => triggerModel('label')">Label</EntriesFilterItem>
-                    <EntriesFilterItem class="px-3" @click="() => triggerModel('assignee')">Assignee</EntriesFilterItem>
-                    <EntriesFilterItem class="px-3" @click="() => triggerModel('sort')">Sort</EntriesFilterItem>
+                    <EntriesFilterItem class="px-3" @click="() => triggerModel('labelModal')">Label</EntriesFilterItem>
+                    <EntriesFilterItem class="px-3" @click="() => triggerModel('assigneeModal')">Assignee</EntriesFilterItem>
+                    <EntriesFilterItem class="px-3" @click="() => triggerModel('sortModal')">Sort</EntriesFilterItem>
             </template>
 
             <SimplePagination   v-if="pageInfo && (pageInfo.next || pageInfo.prev)"   
@@ -55,22 +55,22 @@
 
         </IssuesPageTemplate>
 
-        <Modal title="Filter by author" ref="authorModal" :modalStyle="{height:'80vh'}">
-            <div v-if="associatedUsers.author.loading" class="flex-row-center height-full">
+        <Modal title="Filter by author" ref="authorModal" :modalStyle="{height:'80vh'}" @show="network_getAvailableAuthors">
+            <div v-if="availableAuthors.loading" class="flex-row-center height-full">
                 <LoadingIconEx></LoadingIconEx>
             </div>
             <SimpleSearchInput  class="p-3 modal-search-input"
                                 placeholder="Filter users" 
-                                v-if="!associatedUsers.author.loading"
+                                v-if="!availableAuthors.loading"
                                 v-model="authorModalSearchQuery"/>
           
             <transition-group name="slide-up" appear>
-                <SelectMenuItem v-for="item in associatedUsers.author.data" :key="item.id" :selected="query.indexOf(`author:${item.login}`) > -1"  @click.native="() => selectTheAuthorOrNot(item.login)">
-                    <ImgWrapper>
-                        <img class="avatar mr-2" width="20" height="20" :src="item.avatar_url">
+                <SelectMenuItem v-for="item in filteredAvailableAuthors" :key="item.login" :selected="query.indexOf(`author:${item.login}`) > -1"  @click.native="() => selectTheAuthorOrNot(item.login)">
+                    <ImgWrapper class="mr-2">
+                        <img class="avatar" width="20" height="20" :src="item.avatarUrl">
                     </ImgWrapper>
                     <strong class='mr-1'>{{item.login}}</strong>
-                    <span>{{((associatedUsers.userName.data || []).filter(_item => _item.id === item.node_id)[0] || {name:''}).name}}</span>    
+                    <span>{{item.name}}</span>    
                 </SelectMenuItem>
             </transition-group>
             <router-link  @click.native="closeModal" v-if="authorModalSearchQuery !== ''" class="d-block p-3 text-gray-light bg-white" :to='authorModalSearchRouterLink'>
@@ -79,28 +79,28 @@
             </router-link> 
         </Modal>
 
-        <Modal title="Filter by label" ref="labelModal" :modalStyle="{height:'80vh'}">
-            <div v-if="labels.loading" class="flex-row-center height-full">
+        <Modal title="Filter by label" ref="labelModal" :modalStyle="{height:'80vh'}" @show="network_getAvailableLabels">
+            <div v-if="availableLabels.loading" class="flex-row-center height-full">
                 <LoadingIconEx></LoadingIconEx>
             </div>
             <SimpleSearchInput  class="p-3 modal-search-input" 
-                                placeholder="Filter labels" 
-                                v-if="!labels.loading"
+                                placeholder="Filter availableLabels" 
+                                v-if="!availableLabels.loading"
                                 v-model="labelModalSearchQuery"/>
             <router-link  @click.native="closeModal" 
-                            v-if="!labels.loading && labels.length !== 0"
+                            v-if="!availableLabels.loading && availableLabels.length !== 0"
                             class="d-block text-gray-light bg-white" 
                             :to='unlabeledRouterLink'>
                 <SelectMenuItem class="text-bold f5" :selected="query.indexOf('no:label') > -1">
                     Unlabeled
                 </SelectMenuItem>    
             </router-link> 
-            <div v-if="!labels.loading && labels.length === 0" class="p-3" style="color: #586069;">
-                No labels found. Sorry about that.
+            <div v-if="!availableLabels.loading && availableLabels.length === 0" class="p-3" style="color: #586069;">
+                No availableLabels found. Sorry about that.
             </div>  
             <transition-group name="slide-up" appear>
-                <SelectMenuItem v-for="item in labels.data" :key="item.name" :selected="query.indexOf(`label:${item.name}`) > -1"  @click.native="() => selectTheLabelOrNot(item.name)">
-                    <LabelBadge class="avatar mr-2 label-badge flex-shrink-0" :style="{background:`#${item.color}`}" />
+                <SelectMenuItem v-for="item in filteredAvailableLabels" :key="item.name" :selected="query.indexOf(`label:${item.name}`) > -1"  @click.native="() => selectTheLabelOrNot(item.name)">
+                    <LabelBadge class="avatar mr-2 label-badge flex-shrink-0" :style="{background: item.color}" />
                     <LabelContent style="min-width:0">
                         <LabelName class="text-bold">{{item.name}}</LabelName>    
                         <LabelDescription v-if="item.description && item.description !== ''" class="label-description">{{item.description}}</LabelDescription>    
@@ -109,13 +109,13 @@
             </transition-group>
         </Modal>
 
-        <Modal title="Filter by who's assigned" ref="assigneeModal" :modalStyle="{height:'80vh'}">
-            <div v-if="associatedUsers.assignee.loading" class="flex-row-center height-full">
+        <Modal title="Filter by who's assigned" ref="assigneeModal" :modalStyle="{height:'80vh'}" @show="network_getAvailableAssignees">
+            <div v-if="availableAssignees.loading" class="flex-row-center height-full">
                 <LoadingIconEx></LoadingIconEx>
             </div>
             <SimpleSearchInput  class="p-3 modal-search-input" 
                                 placeholder="Filter users" 
-                                v-if="!associatedUsers.assignee.loading"
+                                v-if="!availableAssignees.loading"
                                 v-model="assigneeModalSearchQuery"/>
             <router-link  @click.native="closeModal" 
                             class="d-block text-gray-light bg-white" 
@@ -125,12 +125,12 @@
                 </SelectMenuItem>    
             </router-link> 
             <transition-group name="slide-up" appear>
-                <SelectMenuItem :selected="query.indexOf(`assignee:${item.login}`) > -1"  @click.native="() => selectTheAssigneeOrNot(item.login)" v-for="item in associatedUsers.assignee.data" :key="item.id">
-                    <ImgWrapper>
-                        <img class="avatar mr-2" width="20" height="20" :src="item.avatar_url">
+                <SelectMenuItem :selected="query.indexOf(`assignee:${item.login}`) > -1"  @click.native="() => selectTheAssigneeOrNot(item.login)" v-for="item in filteredAvailableAssignees" :key="item.login">
+                    <ImgWrapper class="mr-2">
+                        <img class="avatar" width="20" height="20" :src="item.avatarUrl">
                     </ImgWrapper>
                     <strong class='mr-1'>{{item.login}}</strong>
-                    <span>{{((associatedUsers.userName.data || []).filter(_item => _item.id === item.node_id)[0] || {name:''}).name}}</span>    
+                    <span>{{item.name}}</span>    
                 </SelectMenuItem>
             </transition-group>
             
@@ -196,7 +196,7 @@
         SimplePagination,
         ButtonLeftSearchInput,
         LoadingIconEx} from '@/components'
-    import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
+    import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet,commonGet} from '@/network'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
     import {RouteUpdateAwareMixin} from '@/mixins'
@@ -242,10 +242,7 @@
                     first: undefined,
                     prev: undefined
                 },
-                labels: {
-                    data: undefined,
-                    loading: false
-                },
+                
                 associatedUsers: {
                     author: {
                         data: undefined,
@@ -259,7 +256,19 @@
                         data: undefined,
                         loading:false
                     }
-                }
+                },
+                availableAuthors: {
+                    data: [],
+                    loading: false
+                },
+                availableLabels: {
+                    data: [],
+                    loading: false
+                },
+                availableAssignees: {
+                    data: [],
+                    loading: false
+                },
             }
         },
         computed: {
@@ -399,7 +408,22 @@
             },
             unlabeledRouterLink() {
                 return `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/assignee:\S*/g,'').replace(/label:\S*/g,'').replace(/no:\S*/g,'').trim() + ` no:label`
-            }
+            },
+            filteredAvailableAuthors() {
+                return this.availableAuthors.data.filter(i => {
+                    return i.login.toLowerCase().indexOf(this.authorModalSearchQuery.toLowerCase()) != -1 || i.name.toLowerCase().indexOf(this.authorModalSearchQuery.toLowerCase()) != -1
+                })
+            },
+            filteredAvailableLabels() {
+                return this.availableLabels.data.filter(i => {
+                    return i.name.toLowerCase().indexOf(this.labelModalSearchQuery.toLowerCase()) != -1
+                })
+            },
+            filteredAvailableAssignees() {
+                return this.availableAssignees.data.filter(i => {
+                      return i.login.toLowerCase().indexOf(this.assigneeModalSearchQuery.toLowerCase()) != -1 || i.name.toLowerCase().indexOf(this.assigneeModalSearchQuery.toLowerCase()) != -1
+                })
+            },
         },
         created() {
             this.network_getData()
@@ -429,7 +453,7 @@
                     this.pageInfo = parse(res.headers.link)
 
                     //获取其他数据
-                    if(res.data.items.length > 0)this.network_getExtraData(res.data.items)
+                    if(res.data.items.length > 0 && this.accessToken)this.network_getExtraData(res.data.items)
                     if(!payload || !payload.url)this.network_getIssueCountByState()
                 }catch(e) {
                     this.handleError(e)
@@ -445,9 +469,15 @@
                     let graphql_issueExtraData =  graphql.GRAPHQL_GET_ISSUES(issues)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_issueExtraData,{cancelToken:sourceAndCancelToken.cancelToken})
 
+                    let dataHolder
+                    try{
+                        dataHolder = res.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                     let issueArr = []
-                    for(let key in res.data.data){
-                        issueArr.push(res.data.data[key])
+                    for(let key in dataHolder){
+                        issueArr.push(dataHolder[key])
                     }
                     this.extraData.data = this.extraData.data.concat(issueArr)
 
@@ -484,104 +514,66 @@
                     this.countByState.loading = false
                 }
             },
-            async network_getAssociateUsers(meta) {
+            async network_getAvailableAuthors() {
+                if(this.availableAuthors.data.length > 0 || this.availableAuthors.loading ) return 
                 try{
-                    this.associatedUsers[meta].loading = true
-
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(`${this.name} ${this.routerPathFragment} get_associate_users`)
-                    this.cancelSources.push(sourceAndCancelToken.source)
-
-                    const url_contributors = api.API_REPOSITORY_CONTRIBUTORS(this.owner(),this.repo()) 
-                    const res_contributors = await authRequiredGet(url_contributors,{cancelToken:sourceAndCancelToken.cancelToken})
-
-                      const graphql_issueCountByAssociateUser = graphql.GRAPHQL_SEARCH_FOR_ISSUES_COUNT_BY_ASSOCIATE_USER({
-                        users: res_contributors.data,
-                        meta: meta,
-                        query: `repo:${this.owner()}/${this.repo()} is:issue`
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_available_authors')
+                    this.availableAuthors.loading = true
+                    let url = api.API_REPOSITORY_ISSUES_AVAILABLE_AUTHORS({
+                        repo: this.repo(),
+                        owner: this.owner(),
+                        query: this.query
                     })
-
-                    const res_issueCountByAssociateUser = await authRequiredGitHubGraphqlApiQuery(graphql_issueCountByAssociateUser,{cancelToken:sourceAndCancelToken.cancelToken})
-                    let avaliableUsers = []
-                    for(let key in res_issueCountByAssociateUser.data.data) {
-                        if(res_issueCountByAssociateUser.data.data[key].issueCount > 0) {
-                            avaliableUsers.push(res_contributors.data[parseInt(key.replace('issueCount',''))])
-                        }
-                    }
-
-                    this.associatedUsers[meta].data = avaliableUsers
-
-                    this.network_getAssociateUserName(avaliableUsers)
-
+                    let res = await commonGet(url,{cancelToken})
+                    this.availableAuthors.data = this.parseAvailableUsersFromHTML(res.data)
                 }catch(e) {
                     console.log(e)
                 }finally{
-                    this.associatedUsers[meta].loading = false
+                    this.availableAuthors.loading = false
                 }
             },
-            async network_getAssociateUserName(avaliableUsers) {
+            async network_getAvailableLabels() {
+                if(this.availableLabels.data.length > 0 || this.availableLabels.loading) return 
                 try{
-                    this.associatedUsers.userName.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(`${this.name} ${this.routerPathFragment} get_associate_user_name`)
-                    const graphql_userName = graphql.GRAPHQL_REPOSITORY_GET_USER_NAME_BY_LOGIN({
-                        users: avaliableUsers
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_available_labels')
+                    this.availableLabels.loading = true
+                    let url = api.API_REPOSITORY_ISSUES_AVAILABLE_LABELS({
+                        repo: this.repo(),
+                        owner: this.owner(),
+                        query: this.query
                     })
-                    const res_userName = await authRequiredGitHubGraphqlApiQuery(graphql_userName,{cancelToken:sourceAndCancelToken.cancelToken})
-                    let userName = []
-                    for(let key in res_userName.data.data) {
-                        userName.push(res_userName.data.data[key])
-                    }
-                    this.associatedUsers.userName.data = userName
+                    let res = await commonGet(url,{cancelToken})
+                    this.parseAvailableLabelsFromHTML(res.data)
                 }catch(e){
                     console.log(e)
                 }finally{
-                    this.associatedUsers.userName.loading = false
+                    this.availableLabels.loading = false
                 }
             },
-            async network_getLabels() {
+             async network_getAvailableAssignees() {
+                if(this.availableAssignees.data.length > 0 || this.availableAssignees.loading) return 
                 try{
-                    this.labels.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(`${this.name} ${this.routerPathFragment} get_labels`)
-                    this.cancelSources.push(sourceAndCancelToken.source)
-                    let url = api.API_REPO_LABELS(this.owner(),this.repo())
-                    let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.labels.data = res.data
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_available_Assgnees')
+                    this.availableAssignees.loading = true
+                    let url = api.API_REPOSITORY_ISSUES_AVAILABLE_ASSIGNEES({
+                        repo: this.repo(),
+                        owner: this.owner(),
+                        query: this.query
+                    })
+                    let res = await commonGet(url,{cancelToken})
+                    this.availableAssignees.data = this.parseAvailableUsersFromHTML(res.data)
                 }catch(e){
                     console.log(e)
                 }finally{
-                    this.labels.loading = false
+                    this.availableAssignees.loading = false
                 }
             },
             search() {
                 this.searchQuery = this.searchQuery.replace(/is:(issue|pr)/g,'is:issue').replace(/repo:\S*\/\S*/g,'').replace(/\s+/g,' ').trim()
                 this.$router.replace(`/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=repo:${this.owner()}/${this.repo()} ${this.searchQuery}`)
             },
-            triggerModel(meta) {
-                switch(meta){
-                    case 'author':
-                        this.$refs.authorModal.show = true
-                        if(!this.associatedUsers.author.data) {
-                             this.network_getAssociateUsers('author')
-                        }
-                        break
-                    case 'sort':
-                        this.$refs.sortModal.show = true
-                        break
-                    case 'assignee':
-                        this.$refs.assigneeModal.show = true
-                        if(!this.associatedUsers.assignee.data) {
-                             this.network_getAssociateUsers('assignee')
-                        }
-                        break
-                    case 'label':
-                        this.$refs.labelModal.show = true
-                        if(!this.labels.data) {
-                             this.network_getLabels()
-                        }
-                        break
-                    case 'filter':
-                        this.$refs.filterModal.show = true
-                        break
-                }
+            triggerModel(modalRef) {
+                this.$refs[modalRef].show = true
             },
             async goNext() {
                 if(this.loading) return
@@ -603,12 +595,12 @@
                 this.$refs.filterModal.show = false
             },
             selectTheAuthorOrNot(authorLogin) {
-                 let authorQueryFragment = `author:${authorLogin}`
+                let authorQueryFragment = `author:${authorLogin}`
                 if(this.query.indexOf(authorQueryFragment) > -1) {
                     let q = this.query.replace(authorQueryFragment,'').trim()
                     this.$router.push(`/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=${q}`)
                 }else {
-                    let q = this.query + ` ${authorQueryFragment}`
+                    let q = this.query.replace(/author:\s?\S*/g,'') + ` ${authorQueryFragment}`
                     this.$router.push(`/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=${q}`)
                 }
                 this.closeModal()
@@ -641,6 +633,32 @@
             },
             routeResetHook() {
                 Object.assign(this.$data, this.$options.data())
+            },
+            parseAvailableUsersFromHTML(HTML) {
+                let execPattern = /<img class="avatar mr-2 avatar-user" src="(.*)" width="20" height="20" alt="@.*" \/>\n\s*<strong class="mr-2">(.*)<\/strong>\n\s*<span class="text-gray-light">(.*)<\/span>/g
+                let execResult
+                let availableAuthors = []
+                while((execResult = execPattern.exec(HTML)) != null) {
+                    availableAuthors.push({
+                        avatarUrl: execResult[1],
+                        login: execResult[2],
+                        name: execResult[3],
+                    })
+                }
+                return availableAuthors
+            },
+            parseAvailableLabelsFromHTML(HTML) {
+                let execPattern = /<span class="ColorSwatch f5 mr-2 flex-shrink-0" style="background-color: (.*); margin-top: 1px;"><\/span>\n\s*<div class="lh-condensed css-truncate min-width-0">\n\s*<div class="css-truncate-overflow text-bold">(.*)<\/div>\n\s*(<div class="css-truncate-overflow text-gray mt-1">\n\s*(.*)\n\s*<\/div>\n\s*)?<\/div>/g
+                let execResult
+                let availableLabels = []
+                while((execResult = execPattern.exec(HTML)) != null) {
+                    availableLabels.push({
+                        color: execResult[1],
+                        name: execResult[2],
+                        description: execResult[4]
+                    })
+                }
+                this.availableLabels.data = availableLabels
             }
         },
         components: {

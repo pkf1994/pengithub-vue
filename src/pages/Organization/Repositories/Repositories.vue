@@ -348,9 +348,15 @@
                         let graphql_extraData = graphql.GRAPHQL_ORG_REPOSITORY_EXTRA(this.data)
                         let res_graphql = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
 
+                        let dataHolder
+                        try{
+                            dataHolder = res_graphql.data.data
+                        }catch(e) {
+                            this.handleGraphqlError(res_graphql)
+                        }
                         let extraData = []
-                        for(let key in res_graphql.data.data) {
-                            extraData.push(res_graphql.data.data[key])
+                        for(let key in dataHolder) {
+                            extraData.push(dataHolder[key])
                         }
 
                         this.extraData = extraData
@@ -378,7 +384,12 @@
                             }
                         )
                     
-                    this.pinnedRepositories.data = res.data.data.organization.pinnableItems.nodes
+                    try{
+                        this.pinnedRepositories.data = res.data.data.organization.pinnableItems.nodes
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
 
                 }catch(e) {
                     this.handleError(e)
@@ -487,9 +498,14 @@
                                 }
                             }
                         )
-                        repos = repos.concat(res.data.data.search.nodes)
-                        hasNextPage = res.data.data.search.pageInfo.hasNextPage
-                        endCursor = res.data.data.search.pageInfo.endCursor
+                        try{
+                            repos = repos.concat(res.data.data.search.nodes)
+                            hasNextPage = res.data.data.search.pageInfo.hasNextPage
+                            endCursor = res.data.data.search.pageInfo.endCursor
+                        }catch(e) {
+                            this.handleGraphqlError(res)
+                        }
+                       
                         organization = this.organization
                     }
 

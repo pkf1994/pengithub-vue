@@ -178,8 +178,14 @@
 
 
                     let repositoryCountData = []
-                    for(let key in res[1].data.data) {
-                        repositoryCountData.push(res[1].data.data[key])
+                    let repositoryCountDataHolder
+                    try{
+                        repositoryCountDataHolder = res[1].data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res[1])
+                    }
+                    for(let key in repositoryCountDataHolder) {
+                        repositoryCountData.push(repositoryCountDataHolder[key])
                     }
 
                     repositoryCountData.forEach((item,index) => {
@@ -189,8 +195,14 @@
                     this.extraData.data.repositoryCount = repositoryCountData
 
                     let relatedTopicsAndViewerStarStatus = []
-                    for(let key in res[0].data.data) {
-                        relatedTopicsAndViewerStarStatus.push(res[0].data.data[key])
+                    let relatedTopicsAndViewerStarStatusHolder
+                    try{
+                        relatedTopicsAndViewerStarStatusHolder = res[0].data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res[0])
+                    }
+                    for(let key in relatedTopicsAndViewerStarStatusHolder) {
+                        relatedTopicsAndViewerStarStatus.push(relatedTopicsAndViewerStarStatusHolder[key])
                     }
 
                     this.extraData.data.relatedTopicsAndViewerStarStatus = relatedTopicsAndViewerStarStatus

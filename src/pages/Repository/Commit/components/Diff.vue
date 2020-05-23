@@ -1,5 +1,5 @@
 <template>
-    <Container class="container">
+    <Container class="the-container">
         <Header class="header d-flex flex-column">
             <Info class="info flex-auto min-width-0 mb-md-0 mb-2">
                 <button class="btn-octicon" style="width: 22px;" @click="triggerStretch">
@@ -21,8 +21,13 @@
                 <svg v-else class="octicon octicon-check js-clipboard-check-icon mx-1 d-inline-block text-green d-none" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
             </Info>    
 
-            <Actions class="actions pt-0 mb-2 flex-shrink-0 text-right">
+            <Actions class="actions pt-0 mb-2 flex-shrink-0 text-right position-relative" @click="openPopover">
                 <svg aria-label="Show options" class="octicon octicon-kebab-horizontal mx-2" viewBox="0 0 13 16" version="1.1" width="13" height="16" role="img"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
+                <Popover ref="popover" class="f5" :popoverStyle="{right:0}">
+                    <router-link :to="viewFileRouterLink" class="pl-5 btn-link py-2 dropdown-item">
+                        View file
+                    </router-link>
+                </Popover>
             </Actions>
         </Header>
 
@@ -143,7 +148,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {AnimatedHeightWrapper} from '@/components'
+    import {AnimatedHeightWrapper,Popover} from '@/components'
     import {authRequiredGet} from '@/network'
     export default {
         props: {
@@ -345,13 +350,13 @@
                 })
                 return entries
             },
-            splitDiffHunkEntries() {
-
+            viewFileRouterLink() {
+                return this.file.blob_url.replace('https://github.com','')
             }
         },
         created() {
             this.patch.unified = this.file.patch
-            this.patch.split = this.file.patch.replace(/\n /g,'\n').replace(/\+ /g,'+').replace(/- /g,'-')
+            this.patch.split = this.file.patch && this.file.patch.replace(/\n /g,'\n').replace(/\+ /g,'+').replace(/- /g,'-')
             this.network_getData()
         },
         methods: {
@@ -484,9 +489,13 @@
                     this.loading = false
                 }
             },
+            openPopover() {
+                this.$refs.popover.show = true
+            }
         },
         components: {
             AnimatedHeightWrapper,
+            Popover,
             Container: styled.div``,
             Header: styled.div``,
             Info: styled.div``,
@@ -504,7 +513,8 @@
 </script>
 
 <style scoped lang="scss">
-.container{
+@import 'node_modules/@primer/css/dropdown/index.scss';
+.the-container{
     position: relative;
     margin-top: 16px;
     margin-bottom: 16px;

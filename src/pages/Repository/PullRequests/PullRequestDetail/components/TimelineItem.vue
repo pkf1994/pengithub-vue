@@ -567,7 +567,12 @@
                     }
                     `
                 )
-                this.transferredFrom = res.data.data.node.fromRepository.nameWithOwner
+                try{
+                    this.transferredFrom = res.data.data.node.fromRepository.nameWithOwner
+                }catch(e) {
+                    this.handleGraphqlError(res)
+                }
+                
                 this.loading = false
             },
             async getBlockedUser() {
@@ -586,7 +591,12 @@
                     }
                     `
                 )
-                this.blockedUser = res.data.data.node.subject
+                
+                try{
+                    this.blockedUser = res.data.data.node.subject
+                }catch(e) {
+                    this.handleGraphqlError(res)
+                }
                 this.loading = false
             },
             async getLockReason() {
@@ -603,7 +613,12 @@
                     }
                     `
                 )
-                this.lockReason = res.data.data.node.lockReason
+                
+                try{
+                    this.lockReason = res.data.data.node.lockReason
+                }catch(e) {
+                    this.handleGraphqlError(res)
+                }
                 this.loading = false
             },
             async getHeadRefDeletedName(nodeId) {
@@ -618,7 +633,12 @@
                             }
                         }
                     `)
-                    this.headRefName = res.data.data.node.headRefName
+                    
+                    try{
+                        this.headRefName = res.data.data.node.headRefName
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
 
                 }catch(e) {
                     console.log(e)
@@ -638,8 +658,12 @@
                             }
                         }
                     `)
-                    this.commitStatus = res.data.data.node.status && res.data.data.node.status.state
-
+                    
+                    try{
+                        this.commitStatus = res.data.data.node.status && res.data.data.node.status.state
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                 }catch(e) {
                     console.log(e)
                 }

@@ -296,7 +296,13 @@
                     this.repliesExtraData.loading = true
                     let graphql_replies = graphql.GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID({nodeIds:nodeIds.slice(this.repliesExtraData.cursor,this.repliesExtraData.cursor + 5)})
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_replies)
-                    this.repliesExtraData.data = this.repliesExtraData.data.concat(res.data.data.nodes)
+
+                    try{
+                        this.repliesExtraData.data = this.repliesExtraData.data.concat(res.data.data.nodes)
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
                     this.repliesExtraData.cursor += 5
                 }catch(e) {
                     console.log(e)

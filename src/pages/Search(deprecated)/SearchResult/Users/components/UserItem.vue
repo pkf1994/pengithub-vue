@@ -50,14 +50,13 @@
 <script>
     import styled from 'vue-styled-components'
     import {mapState} from "vuex";
-    import {util_adjustStyle} from '../../../../../util'
+    import {util_adjustStyle} from '@/util'
     import {
         AnimatedWidthWrapper,
-        AnimatedHeightWrapper} from '../../../../../components'
+        AnimatedHeightWrapper} from '@/components'
     import {
         WithRandomMetaMixin,
-        CancelNetworkOnDestroyMixin} from '../../../../../mixins'
-    import {authRequiredGitHubGraphqlApiQuery} from '../../../../../store/modules/network'
+        CancelNetworkOnDestroyMixin} from '@/mixins'
     export default {
         mixins: [WithRandomMetaMixin],
         props: {

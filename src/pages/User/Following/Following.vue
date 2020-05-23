@@ -81,9 +81,15 @@
                     let graphql_extraData = graphql.GRAPHQL_USER_FOLLOWING_EXTRA(this.data)
                     let res_extra = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
 
+                    let dataHolder 
+                    try{
+                        dataHolder = res_extra.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res_extra)
+                    }
                     let extraData = []
-                    for(let key in res_extra.data.data) {
-                        extraData.push(res_extra.data.data[key])
+                    for(let key in dataHolder) {
+                        extraData.push(dataHolder[key])
                     }
                     this.extraData = extraData
                 }catch(e) {

@@ -1,9 +1,16 @@
 <template>
-    <Container>
+    <Container v-if="!disableLastFragment"> 
         <span v-for="(item,index) in pathArr"
                 class="text-gray"
                 :key="item + index">
                 <router-link  class="text-gray" :to="item.routePath" >{{item.fragment}}</router-link><span v-if="index < pathArr.length - 1">{{spaceArround ? ' / ':'/'}}</span>
+        </span>
+    </Container>
+    <Container v-else> 
+        <span v-for="(item,index) in pathArr"
+                class="text-gray"
+                :key="item + index">
+                <router-link v-if="index < pathArr.length - 1"  class="text-gray" :to="item.routePath" >{{item.fragment}}</router-link><span v-else>{{item.fragment}}</span><span v-if="index < pathArr.length - 1">{{spaceArround ? ' / ':'/'}}</span>
         </span>
     </Container>
 </template>
@@ -23,6 +30,10 @@
             routePath:{
                 type: String,
                 required: false
+            },
+            disableLastFragment: {
+                type: Boolean,
+                default: false
             }
         },
         computed: {

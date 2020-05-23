@@ -7,7 +7,7 @@
                     <template v-slot:summary>
                             <span>{{currentRef ? currentRef : "loading..."}}</span>
                     </template>
-                        <router-link @click.native="triggerSummaryAndDetail" v-for="item in otherBranches"  :to="`/${owner()}/${repo()}/dir/${accessToken ? item.name : item.ref.replace('refs/heads/','')}`" class="branch-item d" :key="item.ref || item.name" >
+                        <router-link @click.native="triggerSummaryAndDetail" v-for="item in otherBranches"  :to="`/${owner()}/${repo()}/tree/${accessToken ? item.name : item.ref.replace('refs/heads/','')}`" class="branch-item d" :key="item.ref || item.name" >
                             {{accessToken ? item.name : item.ref.replace('refs/heads/','')}}
                         </router-link>
                         <router-link to="/" class="to-all-branches">View more branches</router-link>
@@ -22,14 +22,14 @@
         </Header>
 
         <CurrentPath class="path" style="border-bottom: 1px solid #eaecef;">
-            <router-link class="text-gray" :to="`/${owner()}/${repo()}/dir/${currentRef}`">
-                {{repo()}}</router-link>/<Breadcrumb :path="path"/>
+            <router-link class="text-gray" :to="`/${owner()}/${repo()}/tree/${currentRef}`">
+                {{repo()}}</router-link>/<Breadcrumb :displayPath="path"/>
         </CurrentPath>    
 
         <transition-group name="slide-up" appear>
             <router-link class="d-block bg-white list-item" 
                          v-for="item in sortedContents" 
-                        :to="adjustPath(`/${owner()}/${repo()}/${item.type}/${currentRef}/` + path + '/' + item.name)"
+                        :to="adjustPath(`/${owner()}/${repo()}/${item.type == 'dir' ? 'tree' : 'blob'}/${currentRef}/` + path + '/' + item.name)"
                         :key="item.name" >
                 <FileItem   :branch="currentRef"
                             :file="item"/>
@@ -52,6 +52,7 @@
     import {util_numberFormat} from '@/util'
     import FileItem from './FileItem'
     import {RouteUpdateAwareMixin} from '@/mixins'
+    import {WithRefDistinguishMixin} from '../../components'
     import * as graphql from '../graphql'
     import * as api from '@/network/api'
     import {authRequiredGet, authRequiredGitHubGraphqlApiQuery } from '@/network'
@@ -59,7 +60,7 @@
     let parse = require('parse-link-header')
     export default {
         name: 'repository_code_file_browser_page',
-        mixins: [RouteActiveAwareMixin,RouteUpdateAwareMixin],
+        mixins: [RouteUpdateAwareMixin,WithRefDistinguishMixin],
         inject: ['owner','repo','codeBasicInfo','repoBasicInfo'],
         provide() {
             return {
@@ -107,39 +108,6 @@
                 })
                 return sortedContents
             },
-            path() {
-                if(!this.$route.params.pathMatch) return
-                if(this.$route.params.pathMatch.indexOf('/') === -1) return ''
-                if(!this.currentRef) return undefined
-                return this.$route.params.pathMatch.replace(this.currentRef,'')
-            },
-            currentRef() {
-                if(!this.$route.params.pathMatch) return 
-                if(this.$route.params.pathMatch.match(/^[^\/]+\/?$/)) return this.$route.params.pathMatch.replace('/','')
-                if(this.allBranchesAndTags.branches.length == 0) return
-                   
-                let ref
-                let routePathMatch = this.$route.params.pathMatch
-                //if(routePathMatch[routePathMatch.length - 1] !== '/') routePathMatch = `${routePathMatch}/`
-                this.allBranchesAndTags.branches.forEach(item => {
-                    let regExp =  new RegExp(`^(${item.ref.replace('refs/heads/','')})(\/\.*)?`)
-                    let branchMatch = routePathMatch.match(regExp)
-                    if(branchMatch){
-                        if(!ref) ref = branchMatch[1]
-                        if(branchMatch[1].length > ref.length) ref = branchMatch[1]
-                    }
-                })
-
-                this.allBranchesAndTags.tags.forEach(item => {
-                    let regExp =  new RegExp(`^(${item.ref.replace('refs/tags/','')})(\/\.*)?`)
-                    let tagMatch = routePathMatch.match(regExp)
-                    if(tagMatch){
-                        if(!ref) ref = tagMatch[1]
-                        if(tagMatch[1].length > ref.length) ref = tagMatch[1]
-                    }
-                })
-                return ref
-            },
             processedCountOfCommits() {
                 return  util_numberFormat.thousands(this.countOfCommitsByBranch.data) 
             },
@@ -166,10 +134,7 @@
             }
         },
         async created() {
-            await Promise.all([
-                this.network_getAllBranches(),
-                this.network_getAllTags()
-            ])
+            await this.network_getAllBranchesAndTags()
             this.network_getData()
             this.network_getCommitsCountByBranch()
         },
@@ -212,9 +177,15 @@
                         branch: this.currentRef
                     }) 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphQL_contentsLastUpdateInfo,{cancelToken})
+                    let dataHolder
+                    try{
+                        dataHolder = res.data.data.repository.object
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                     let i = 0
-                    for(let key in res.data.data.repository.object) {
-                       Vue.set(this.data[i],'committedDate',res.data.data.repository.object[key].nodes[0].committedDate)
+                    for(let key in dataHolder) {
+                       Vue.set(this.data[i],'committedDate',dataHolder[key].nodes[0].committedDate)
                         i += 1
                     }
                 }catch(e) {
@@ -245,75 +216,9 @@
                     this.countOfCommitsByBranch.loading = false
                 }
             },
-            async network_getAllBranches(){
-                try{
-                    this.allBranchesAndTags.loading = true 
-                    let lastPage = 1
-                    let currentPage = 1
-                    let branches = []
-                    while(currentPage <= lastPage) {
-                        let url_branches = api.API_GIT_MATCHING_REFS({
-                            owner: this.owner(),
-                            repo: this.repo(),
-                            ref: 'heads/',
-                            params: {
-                                per_page: 100,
-                                page: currentPage
-                            }
-                        })
-                        let res = await authRequiredGet(url_branches)
-                        let pageInfo = parse(res.headers.link) || {}
-                        if(pageInfo.last) lastPage = pageInfo.last.page
-                        branches = branches.concat(res.data)
-                        currentPage += 1
-                    }
-                    
-                    this.allBranchesAndTags.branches = branches
-                }catch(e) {
-                    console.log(e)
-                } finally {
-                    this.allBranchesAndTags.loading = false
-                }
-            },
-            async network_getAllTags(){
-                try{
-                    this.allBranchesAndTags.loading = true 
-                    let lastPage = 1
-                    let currentPage = 1
-                    let tags = []
-                    while(currentPage <= lastPage) {
-                        let url_tags = api.API_GIT_MATCHING_REFS({
-                            owner: this.owner(),
-                            repo: this.repo(),
-                            ref: 'tags/',
-                            params: {
-                                per_page: 100,
-                                page: currentPage
-                            }
-                        })
-                        let res = await authRequiredGet(url_tags)
-                        let pageInfo = parse(res.headers.link) || {}
-                        if(pageInfo.last) lastPage = pageInfo.last.page
-                        tags = tags.concat(res.data)
-                        currentPage += 1
-                    }
-                    
-                    this.allBranchesAndTags.tags = tags
-                }catch(e) {
-                    console.log(e)
-                } finally {
-                    this.allBranchesAndTags.loading = false
-                }
-            },
             adjustPath(path) {
                 let reg = /\/\//g
                 return path.replace(reg,'/')
-            },
-            routeUpdateHook() {
-                console.log("routeUpdateHook")
-                if(this.routeActive) {
-                    this.network_getData()
-                }
             },
             /* analyseBranch(){
                 if(this.$route.params.pathMatch.indexOf('/') === -1) return this.$route.params.pathMatch

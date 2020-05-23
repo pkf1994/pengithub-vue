@@ -66,10 +66,11 @@
     import * as api from '@/network/api'
     import * as graphql from './graphql'
     import {RouteUpdateAwareMixin,WithModalMixin} from '@/mixins'
+    import {WithRefDistinguishMixin} from '../components'
     var parse = require('parse-link-header');
     export default {
         name: 'repository_commits_page',
-        mixins: [RouteUpdateAwareMixin,WithModalMixin],
+        mixins: [RouteUpdateAwareMixin,WithModalMixin,WithRefDistinguishMixin],
         inject: ['repoBasicInfo','owner','repo'],
         provide() {
             return {
@@ -88,11 +89,6 @@
                     loading: false
                 },
                 firstLoadedFlag: false,
-                allBranchesAndTags: {
-                    branches: [],
-                    tags: [],
-                    loading: false
-                },
                 switchBranchOrTagModalTab: "branch",
                 switchBranchOrTagModalSearchQuery: "",
             }
@@ -127,82 +123,22 @@
                 })
                 return commitGroups
             },
-            currentRef() {
-                if(!this.$route.params.pathMatch) return this.defaultRef
-                if(this.$route.params.pathMatch.match(/^[^\/]+\/?$/)) return this.$route.params.pathMatch.replace('/','')
-                if(this.allBranchesAndTags.branches.length == 0) return
-                   
-                let ref
-                let routePathMatch = this.$route.params.pathMatch
-                //if(routePathMatch[routePathMatch.length - 1] !== '/') routePathMatch = `${routePathMatch}/`
-                this.allBranchesAndTags.branches.forEach(item => {
-                    let regExp =  new RegExp(`^(${item.ref.replace('refs/heads/','')})(\/\.*)?`)
-                    let branchMatch = routePathMatch.match(regExp)
-                    if(branchMatch){
-                        if(!ref) ref = branchMatch[1]
-                        if(branchMatch[1].length > ref.length) ref = branchMatch[1]
-                    }
-                })
-
-                this.allBranchesAndTags.tags.forEach(item => {
-                    let regExp =  new RegExp(`^(${item.ref.replace('refs/tags/','')})(\/\.*)?`)
-                    let tagMatch = routePathMatch.match(regExp)
-                    if(tagMatch){
-                        if(!ref) ref = tagMatch[1]
-                        if(tagMatch[1].length > ref.length) ref = tagMatch[1]
-                    }
-                })
-                return ref
-            },
-            refType() {
-                let refType
-                try{
-                    this.allBranchesAndTags.branches.forEach( i => {
-                        let branchName = i.ref.replace('refs/heads/','')
-                        if(branchName == this.currentRef) {
-                            refType = 'branch'
-                            throw new Error('forEach abort')
-                        }
-                    })
-                    this.allBranchesAndTags.tags.forEach( i => {
-                        let tagName = i.ref.replace('refs/tags/','')
-                        if(tagName == this.currentRef) {
-                            refType = 'tag'
-                            throw new Error('forEach abort')
-                        }
-                    })
-                }catch(e) {
-                    //do nothing
-                }
-                return refType
-            },
-            path() {
-                if(!this.$route.params.pathMatch) return 
-                if(!this.currentRef) return 
-                return this.$route.params.pathMatch.replace(this.currentRef,'')
-            },
             filterAllBranches() {
                 return this.allBranchesAndTags.branches.filter(i => {
                     let branchName = i.ref.replace('refs/heads/','')
-                    return branchName.toLowerCase().indexOf(this.switchBranchOrTagModalSearchQuery.toLowerCase()) != -1 && branchName != this.repoBasicInfo().default_branch
+                    return (branchName.toLowerCase().indexOf(this.switchBranchOrTagModalSearchQuery.toLowerCase()) != -1) && (branchName != this.repoBasicInfo().default_branch)
                 })
             },
             filterAllTags() {
                 return this.allBranchesAndTags.tags.filter(i => {
-                    let tagName = i.ref.replace('tags/heads/','')
+                    let tagName = i.ref.replace('refs/tags/','')
                     return tagName.toLowerCase().indexOf(this.switchBranchOrTagModalSearchQuery.toLowerCase()) != -1
                 })
             },
         },
         async created() {
-            console.log(this.$route.params)
-            await Promise.all([
-                this.network_getAllBranches(),
-                this.network_getAllTags()
-            ])
+            await this.network_getAllBranchesAndTags()
             this.network_getData()
-            /* this.network_getData()
-            this.network_determineRefType() */
         },
         methods: {
             async network_getData() {
@@ -243,9 +179,16 @@
 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_,{cancelToken})
 
+                    let dataHolder
+                    try{
+                        dataHolder = res.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+
                     let graphqlData = []
-                    for(let key in res.data.data){
-                        graphqlData.push(res.data.data[key])
+                    for(let key in dataHolder){
+                        graphqlData.push(dataHolder[key])
                     }
                     this.graphqlData.data = graphqlData
 
@@ -253,67 +196,6 @@
                     console.log(e)
                 }finally{
                     this.graphqlData.loading = false
-                }
-            },
-           
-            async network_getAllBranches(){
-                try{
-                    this.allBranchesAndTags.loading = true 
-                    let lastPage = 1
-                    let currentPage = 1
-                    let branches = []
-                    while(currentPage <= lastPage) {
-                        let url_branches = api.API_GIT_MATCHING_REFS({
-                            owner: this.owner(),
-                            repo: this.repo(),
-                            ref: 'heads/',
-                            params: {
-                                per_page: 100,
-                                page: currentPage
-                            }
-                        })
-                        let res = await authRequiredGet(url_branches)
-                        let pageInfo = parse(res.headers.link) || {}
-                        if(pageInfo.last) lastPage = pageInfo.last.page
-                        branches = branches.concat(res.data)
-                        currentPage += 1
-                    }
-                    
-                    this.allBranchesAndTags.branches = branches
-                }catch(e) {
-                    console.log(e)
-                } finally {
-                    this.allBranchesAndTags.loading = false
-                }
-            },
-            async network_getAllTags(){
-                try{
-                    this.allBranchesAndTags.loading = true 
-                    let lastPage = 1
-                    let currentPage = 1
-                    let tags = []
-                    while(currentPage <= lastPage) {
-                        let url_tags = api.API_GIT_MATCHING_REFS({
-                            owner: this.owner(),
-                            repo: this.repo(),
-                            ref: 'tags/',
-                            params: {
-                                per_page: 100,
-                                page: currentPage
-                            }
-                        })
-                        let res = await authRequiredGet(url_tags)
-                        let pageInfo = parse(res.headers.link) || {}
-                        if(pageInfo.last) lastPage = pageInfo.last.page
-                        tags = tags.concat(res.data)
-                        currentPage += 1
-                    }
-                    
-                    this.allBranchesAndTags.tags = tags
-                }catch(e) {
-                    console.log(e)
-                } finally {
-                    this.allBranchesAndTags.loading = false
                 }
             },
             changePage(goPrevPageFlag) {

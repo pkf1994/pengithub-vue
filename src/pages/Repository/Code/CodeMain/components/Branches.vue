@@ -10,7 +10,7 @@
                         <template v-slot:summary>
                              <span>{{repoBasicInfo().default_branch}}</span>
                         </template>
-                        <router-link :to="`/${owner()}/${repo()}/dir/${item.name}`" class="branch-item d" v-for="item in activeBranchList" :key="item.name">
+                        <router-link :to="`/${owner()}/${repo()}/tree/${item.name}`" class="branch-item d" v-for="item in activeBranchList" :key="item.name">
                             {{item.name}}
                         </router-link>
                         <router-link :to="`/${owner()}/${repo()}/branches`" class="branch-item d" style="font-weight: 400;">
@@ -73,7 +73,7 @@
                 }
             },
             codeFileBrowserRouterLink() {
-                return `/${this.owner()}/${this.repo()}/dir/${this.repoBasicInfo().default_branch}`
+                return `/${this.owner()}/${this.repo()}/tree/${this.repoBasicInfo().default_branch}`
             },
             findFileRouterLink() {
                 return `/${this.owner()}/${this.repo()}/find/${this.repoBasicInfo().default_branch}`
@@ -107,8 +107,16 @@
                 this.stretch = !this.stretch
             },
             network_getData() {
-                let url_lastCommit = api.API_REPOSITORY_COMMITS(this.owner(),this.repo(),{per_page:1})
-                let url_branches = api.API_REPOSITORY_BRANCHES(this.owner(),this.repo(),{per_page:5})
+                let url_lastCommit = api.API_REPOSITORY_COMMITS({
+                    owner: this.owner(),
+                    repo: this.repo(),
+                    params: {per_page:1}
+                })
+                let url_branches = api.API_REPOSITORY_BRANCHES({
+                    owner: this.owner(),
+                    repo: this.repo(),
+                    params: {per_page:5}
+                })
                 authRequiredGet(url_lastCommit).then(res => {
                     this.lastCommit = res.data[0]
                 }).catch(e => {

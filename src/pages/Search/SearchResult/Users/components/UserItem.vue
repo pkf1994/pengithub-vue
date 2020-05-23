@@ -60,7 +60,6 @@
     import {
         WithRandomMetaMixin,
         CancelNetworkOnDestroyMixin} from '@/mixins'
-    import {authRequiredGitHubGraphqlApiQuery} from '@/store/modules/network'
     export default {
         mixins: [WithRandomMetaMixin],
         inject: ['userExtraDataProvided','query'],

@@ -47,7 +47,7 @@
                 return this.$route.params.repo
             },
             sha() {
-                return this.$route.params.sha
+                return this.$route.params.pathMatch
             },
         },
         created() {
@@ -58,7 +58,10 @@
                 try{
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let url = api.API_TREE_LIST(this.$route.params)
+                    let url = api.API_TREE_LIST({
+                        ...this.$route.params,
+                        sha: this.sha
+                    })
                     let res = await authRequiredGet(url,{cancelToken})
                     this.data = res.data.tree
                 }catch(e) {

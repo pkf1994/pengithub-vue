@@ -199,10 +199,16 @@
                             cancelToken: sourceAndCancelToken.cancelToken,
                         }
                     )
+                    let dataHolder
+                    try{
+                        dataHolder = res.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
 
                     let extraData = []
-                    for(let key in res.data.data) {
-                        extraData.push(res.data.data[key])
+                    for(let key in dataHolder) {
+                        extraData.push(dataHolder[key])
                     }
                     this.extraData.data = extraData
                 } catch(e) {
@@ -234,11 +240,18 @@
                     PROGRAMMING_LIST.forEach((item,index) => {
                         languageCursor[`language${index}`] = item.name
                     })
-                    for(let key in res.data.data) {
-                        if(res.data.data[key].userCount > 0) {
+
+                    let dataHolder 
+                    try{
+                        dataHolder = res.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    for(let key in dataHolder) {
+                        if(dataHolder[key].userCount > 0) {
                             countByLanguage.push({
                                 language: languageCursor[key],
-                                count: res.data.data[key].userCount
+                                count: dataHolder[key].userCount
                             })
                         }
                     }

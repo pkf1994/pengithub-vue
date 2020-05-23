@@ -216,17 +216,21 @@
                     })
                     let res_graphql = await authRequiredGitHubGraphqlApiQuery(graphql_projects,{cancelToken})
 
-                    if(loadingMoreFlag) {
-                        this.data = this.data.concat(res_graphql.data.data.user.projects.nodes)
-                    }else{
-                        this.data = res_graphql.data.data.user.projects.nodes
+                    try{
+                        if(loadingMoreFlag) {
+                            this.data = this.data.concat(res_graphql.data.data.user.projects.nodes)
+                        }else{
+                            this.data = res_graphql.data.data.user.projects.nodes
+                        }
+                        this.pageInfo = res_graphql.data.data.user.projects.pageInfo
+                        this.totalCount = res_graphql.data.data.user.projects.totalCount
+
+                        this.countByState.open = res_graphql.data.data.user.openProjectCount.totalCount
+                        this.countByState.closed = res_graphql.data.data.user.closedProjectCount.totalCount
+                    }catch(e) {
+                        this.handleGraphqlError(res_graphql)
                     }
-                    this.pageInfo = res_graphql.data.data.user.projects.pageInfo
-                    this.totalCount = res_graphql.data.data.user.projects.totalCount
-
-                    this.countByState.open = res_graphql.data.data.user.openProjectCount.totalCount
-                    this.countByState.closed = res_graphql.data.data.user.closedProjectCount.totalCount
-
+                    
                     this.firstLoadedFlag = true
                 }catch(e) {
                     this.handleError(e)

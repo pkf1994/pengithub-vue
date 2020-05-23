@@ -159,8 +159,15 @@
                         }
                     )
 
+                    let dataHolder
+                    try{
+                        dataHolder = res.data.data.repository.pullRequest.timelineItems.nodes
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+
                     let reviewComment = []
-                    res.data.data.repository.pullRequest.timelineItems.nodes.forEach(reviewItem => {
+                    dataHolder.forEach(reviewItem => {
                         reviewComment = reviewComment.concat(reviewItem.comments.nodes)
                     })
 
@@ -186,7 +193,12 @@
                             cancelToken: sourceAndCancelToken.cancelToken
                         }
                     )
-                    this.changedFiles.data = res.data
+
+                    try{
+                        this.changedFiles.data = res.data
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
 
                 }catch(e) {
                     console.log(e)

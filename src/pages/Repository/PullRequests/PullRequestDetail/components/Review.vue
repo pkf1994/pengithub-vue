@@ -134,8 +134,16 @@
                     
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_reviewComments)
                     //当review的state为pending时，返回的数据中将包含review comment reply
+                    let dataHolder
+                    try{
+                        dataHolder =  res.data.data.node.comments.nodes
+                        this.pageInfo = res.data.data.node.comments.pageInfo
+                        this.totalCount = res.data.data.node.comments.totalCount
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                     let data_temp = {}
-                    res.data.data.node.comments.nodes.forEach(i => {
+                    dataHolder.forEach(i => {
                         if(!data_temp[i.path]) data_temp[i.path] = []
                         data_temp[i.path].push(i)
                     })
@@ -146,9 +154,6 @@
                         })
                     }
                     this.data = data
-                    this.pageInfo = res.data.data.node.comments.pageInfo
-                    this.totalCount = res.data.data.node.comments.totalCount
-
                 }catch(e) {
                     console.log(e)
                 }finally{

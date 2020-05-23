@@ -477,7 +477,12 @@
                     }
                 `
                 let res = await authRequiredGitHubGraphqlApiQuery(graphql)
-                this.pullRequest = res.data.data.node
+                try{
+                    this.pullRequest = res.data.data.node
+                }catch(e) {
+                    this.handleGraphqlError(res)
+                }
+                
                 this.loading = false
             },
             async getRelevantProject() {
@@ -510,7 +515,11 @@
                     }
                     `
                 )
-                this.transferredFrom = res.data.data.node.fromRepository.nameWithOwner
+                try{
+                    this.transferredFrom = res.data.data.node.fromRepository.nameWithOwner 
+                }catch(e) {
+                    this.handleGraphqlError(res)
+                }
                 this.loading = false
             },
             async getBlockedUser() {
@@ -529,7 +538,11 @@
                     }
                     `
                 )
-                this.blockedUser = res.data.data.node.subject
+                try{
+                    this.blockedUser = res.data.data.node.subject 
+                }catch(e) {
+                    this.handleGraphqlError(res)
+                }
                 this.loading = false
             },
             async getLockReason() {
@@ -546,7 +559,11 @@
                     }
                     `
                 )
-                this.lockReason = res.data.data.node.lockReason
+                try{
+                    this.lockReason = res.data.data.node.lockReason 
+                }catch(e) {
+                    this.handleGraphqlError(res)
+                }
                 this.loading = false
             }
         },

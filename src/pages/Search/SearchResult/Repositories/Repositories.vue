@@ -202,11 +202,18 @@
                     PROGRAMMING_LIST.forEach((item,index) => {
                         languageCursor[`language${index}`] = item.name
                     })
-                    for(let key in res.data.data) {
-                        if(res.data.data[key].repositoryCount > 0) {
+
+                    let dataHolder
+                    try{
+                        dataHolder = res.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    for(let key in dataHolder) {
+                        if(dataHolder[key].repositoryCount > 0) {
                             countByLanguage.push({
                                 language: languageCursor[key],
-                                count: res.data.data[key].repositoryCount
+                                count: dataHolder[key].repositoryCount
                             })
                         }
                     }

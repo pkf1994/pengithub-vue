@@ -98,8 +98,12 @@
                     })
                     const res = await authRequiredGitHubGraphqlApiQuery(graphql_contentAndLastCommitAndCommitHistory,{cancelToken:sourceAndCancelToken.cancelToken})
 
-                    this.lastCommit.data = res.data.data.repository.commit.history.nodes[0]
-                    
+                    try{
+                        this.lastCommit.data = res.data.data.repository.commit.history.nodes[0]
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                   
                     //根据提交历史提取contributors
                     let contributors = []
                     res.data.data.repository.commitHistory.history.nodes.forEach(item => {
@@ -127,7 +131,7 @@
                             this.html = res_html.data
                         }
                     }else{
-                        this.raw = `https://github.com/${this.owner()}/${this.repo()}/file/${this.currentBranch}/${this.path}?raw=true`
+                        this.raw = `https://github.com/${this.owner()}/${this.repo()}/blob/${this.currentBranch}/${this.path}?raw=true`
                     }
 
                 }catch(e){

@@ -194,8 +194,12 @@
                     this.loading = true
                     let graphql_ = graphql.GRAPHQL_DASHBOARD(this.login)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_)
-                    this.repositoriesContributedTo = res.data.data.viewer.repositoriesContributedTo.nodes
-                    this.starredRepositories = res.data.data.viewer.starredRepositories.nodes
+                    try{
+                        this.repositoriesContributedTo = res.data.data.viewer.repositoriesContributedTo.nodes
+                        this.starredRepositories = res.data.data.viewer.starredRepositories.nodes
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                 }catch(e) {
                     this.handleError(e)
                     this.exception.starredRepositories = true

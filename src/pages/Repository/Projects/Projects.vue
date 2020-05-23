@@ -188,12 +188,16 @@
                         getMoreData: getMoreDataFlag
                     })
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_projects,{cancelToken:sourceAndCancelToken.cancelToken})
-                    if(getMoreDataFlag) {
-                        this.data = this.data.concat(res.data.data.repository.projects.nodes)
-                    }else {
-                        this.data = res.data.data.repository.projects.nodes
+                    try{
+                        if(getMoreDataFlag) {
+                            this.data = this.data.concat(res.data.data.repository.projects.nodes)
+                        }else {
+                            this.data = res.data.data.repository.projects.nodes
+                        }
+                        this.pageInfo = res.data.data.repository.projects.pageInfo
+                    }catch(e) {
+                        this.handleGraphqlError(res)
                     }
-                    this.pageInfo = res.data.data.repository.projects.pageInfo
 
                 }catch(e){
                     this.handleError(e)
@@ -218,9 +222,13 @@
                     })
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_countInfoByState,{cancelToken:sourceAndCancelToken.cancelToken})
 
-                    this.countInfoByState.totalCountOpen = res.data.data.repository.totalCountOpen.totalCount
-                    this.countInfoByState.totalCountClosed = res.data.data.repository.totalCountClosed.totalCount
-                    this.noData = res.data.data.repository.totalCountOpenWithoutSearchQuery.totalCount === 0 ? true : false
+                    try{
+                        this.countInfoByState.totalCountOpen = res.data.data.repository.totalCountOpen.totalCount
+                        this.countInfoByState.totalCountClosed = res.data.data.repository.totalCountClosed.totalCount
+                        this.noData = res.data.data.repository.totalCountOpenWithoutSearchQuery.totalCount === 0 ? true : false
+                    }catch(e) { 
+                        this.handleGraphqlError(res)
+                    }
 
                 }catch(e){
                     console.log(e)

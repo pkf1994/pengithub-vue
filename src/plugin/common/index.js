@@ -1,7 +1,7 @@
 import {mapState,mapActions} from 'vuex'
 import axios from 'axios'
 import * as api from '@/network/api'
-import {util_ramdonString} from '@/util'
+import {util_ramdonString,util_throttle} from '@/util'
 import {CommonLoadingWrapper} from '@/components'
 import {ACTION_SIGN_OUT} from "@/store/modules/oauth/actionTypes"
 export default {
@@ -49,8 +49,19 @@ export default {
                     }
                     this.$toast(e,'error')
                     if(!e.response && !this.accessToken) {
-                        this.$toast(this.loginNotice)
+                        util_throttle.throttleByGap(() => {
+                            this.$toast(this.loginNotice)
+                        },500,'login-notice')
                     }
+                },
+                handleGraphqlError(graphqlRes) {
+                    let errors = graphqlRes.data.errors
+                    if(errors) {
+                        errors.forEach(i => {
+                            this.$toast(i.message,'error')
+                        })
+                    }
+                    throw new Error('GraphQL response error')
                 },
                 async signOut() {
                     let fromRoute = {

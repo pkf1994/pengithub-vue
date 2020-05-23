@@ -14,7 +14,7 @@
                         {{title}}
                     </slot>
                 </Title>
-                <Content class="Box-body bg-white overflow-auto p-0 flex-grow-1">
+                <Content class="Box-body bg-white overflow-auto p-0 flex-grow-1 d-flex flex-column">
                     <slot></slot>
                 </Content>
             </Main>

@@ -87,7 +87,12 @@
                         ...this.$route.params
                     })
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_,{cancelToken})
-                    this.data = res.data.data.repository.project
+                    try{
+                        this.data = res.data.data.repository.project
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
                     this.firstLoadedFlag = true
                 }catch(e) {
                     this.handleError(e)

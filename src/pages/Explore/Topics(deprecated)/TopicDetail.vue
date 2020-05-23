@@ -295,11 +295,17 @@
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
                     let graphql_topicSketchAndRaw = graphql.GRAPHQL_TOPIC_SKETCH_AND_RAW(this.topic)
                     let res_topicSketchAndRaw = await authRequiredGitHubGraphqlApiQuery(graphql_topicSketchAndRaw,{cancelToken})
-                    res_topicSketchAndRaw.data.data.repository.sketch.entries.forEach(i => {
+                    let dataHolder
+                    try{
+                        dataHolder = res_topicSketchAndRaw.data.data.repository.sketch.entries
+                        this.rawContent = res_topicSketchAndRaw.data.data.repository.raw.text
+                        this.viewerHasStarred = res_topicSketchAndRaw.data.data.topic.viewerHasStarred
+                    }catch(e) {
+                        this.handleGraphqlError(res_topicSketchAndRaw)
+                    }
+                    dataHolder.forEach(i => {
                         if(i.name.match(/\.png$/) != null) this.avatar = `https://raw.githubusercontent.com/github/explore/master/topics/${this.topic}/${i.name}`
                     })
-                    this.rawContent = res_topicSketchAndRaw.data.data.repository.raw.text
-                    this.viewerHasStarred = res_topicSketchAndRaw.data.data.topic.viewerHasStarred
                     //this.network_getRepositories()
                 }catch(e) {
                     this.handleError(e)
@@ -378,7 +384,11 @@
                     let graphql_repositories = graphql.GRAPHQL_TOPIC_REPOS(payload)
 
                     let res_repositories = await authRequiredGitHubGraphqlApiQuery(graphql_repositories,{cancelToken})
-                    this.repositories.extraData.data = this.repositories.extraData.data.concat(res_repositories.data.data.nodes)
+                    try{
+                        this.repositories.extraData.data = this.repositories.extraData.data.concat(res_repositories.data.data.nodes)
+                    }catch(e) {
+                        this.handleGraphqlError(res_repositories)
+                    }
                 }catch(e) {
                     this.handleError(e)
                 }finally{

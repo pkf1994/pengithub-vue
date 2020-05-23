@@ -77,10 +77,24 @@
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
                     let graphql_collectionSketchAndRaw = graphql.GRAPHQL_COLLECTION_SKETCH_AND_RAW(this.collection)
                     let res_collectionSketchAndRaw = await authRequiredGitHubGraphqlApiQuery(graphql_collectionSketchAndRaw,{cancelToken})
-                    res_collectionSketchAndRaw.data.data.repository.sketch.entries.forEach(i => {
+
+                    let dataHolder
+                    try{
+                        let dataHolder =  res_collectionSketchAndRaw.data.data.repository.sketch.entries
+                    }catch(e) {
+                        this.handleGraphqlError(res_collectionSketchAndRaw)
+                    }
+
+                    dataHolder.forEach(i => {
                         if(i.name.match(/\.png$/) != null) this.avatar = `https://raw.githubusercontent.com/github/explore/master/collections/${this.collection}/${i.name}`
                     })
-                    this.rawContent = res_collectionSketchAndRaw.data.data.repository.raw.text
+
+                    try{
+                        this.rawContent = res_collectionSketchAndRaw.data.data.repository.raw.text
+                    }catch(e) {
+                        this.handleGraphqlError(res_collectionSketchAndRaw)
+                    }
+
                     this.network_getRepositories()
                 }catch(e) {
                     this.handleError(e)
@@ -93,7 +107,7 @@
                     this.repositories.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_repositories')
 
-                     let magicArr = this.rawContent.split('\n')
+                    let magicArr = this.rawContent.split('\n')
                     let reposMetaArr = []
                     magicArr.forEach(i => {
                         if(i.indexOf(' - ') == 0) {
@@ -109,8 +123,15 @@
                     let res_repos = await authRequiredGitHubGraphqlApiQuery(graphql_repos,{cancelToken})
                     let repos = []
 
-                    for(let key in res_repos.data.data) {
-                        repos.push(res_repos.data.data[key])
+                    let dataHolder
+                    try{
+                        dataHolder = res_repos.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res_repos)
+                    }
+
+                    for(let key in dataHolder) {
+                        repos.push(dataHolder[key])
                     }
 
                     this.repositories.data = repos.filter(i => i != null)

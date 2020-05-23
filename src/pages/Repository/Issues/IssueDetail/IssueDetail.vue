@@ -461,8 +461,13 @@
                     this.extraData.loading = true
                     let graphql_extraData = graphql.GRAPHQL_ISSUE_BODY_HTML_AND_REACTIONS_AND_PROJECTS({nodeId:res_issue.data.node_id})
                     let res_extraData = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
-                    this.extraData.data = res_extraData.data.data.node
-                    this.projects = res_extraData.data.data.node.projectCards.nodes
+                    try{
+                        this.extraData.data = res_extraData.data.data.node
+                        this.projects = res_extraData.data.data.node.projectCards.nodes
+                    }catch(e) {
+                        this.handleGraphqlError(res_extraData)
+                    }
+                    
                     this.extraData.loading = false
 
                     //获取issue projects
@@ -565,8 +570,14 @@
                     let res_issueCommentBodyAndReactions = await authRequiredGitHubGraphqlApiQuery(graphql_issueCommentBodyAndReactions,{cancelToken:cancelTokenAndSource.cancelToken})
 
                     if(!payload.changePage) this.timeline.commentExtraGraphqlData.data = []
-                    for(let key in res_issueCommentBodyAndReactions.data.data) {
-                        this.timeline.commentExtraGraphqlData.data.push(res_issueCommentBodyAndReactions.data.data[key])
+                    let dataHolder
+                    try{
+                        dataHolder = res_issueCommentBodyAndReactions.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res_issueCommentBodyAndReactions)
+                    }
+                    for(let key in dataHolder) {
+                        this.timeline.commentExtraGraphqlData.data.push(dataHolder[key])
                     }
 
                 }catch(e){
@@ -594,10 +605,15 @@
 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_timelineCount,{cancelToken})
 
+                    let dataHolder 
+                    try{
+                        dataHolder = res.data.data.node
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                     let timelineCount = 0
-
-                    for(let key in res.data.data.node) {
-                        timelineCount = timelineCount + res.data.data.node[key].totalCount
+                    for(let key in dataHolder) {
+                        timelineCount = timelineCount + dataHolder[key].totalCount
                     }
 
                     this.timeline.count.data = timelineCount

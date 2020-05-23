@@ -96,19 +96,26 @@
                     await this.action_oauth_requestAccessToken({code: code})
                     await this.action_oauth_requestViewerInfo()
                 }catch(e) {
-                    this.handleError(e)
+                    console.log(e)
+                    if(e.response && e.response.data.detailMessage) {
+                        this.$toast(e.response.data.detailMessage,'error')
+                    }else {
+                        this.$toast(e,'error')
+                    }
                     this.exception = true
                 }finally{
                     this.loading = false
-                    let signInFromPath = sessionStorage.getItem('signInFromPath')
-                    if(signInFromPath) {
-                        this.$router.replace({
-                            path: signInFromPath
-                        })
-                    }else{
-                        this.$router.replace({
-                            path: '/'
-                        })
+                    if(!this.exception) {
+                         let signInFromPath = sessionStorage.getItem('signInFromPath')
+                        if(signInFromPath) {
+                            this.$router.replace({
+                                path: signInFromPath
+                            })
+                        }else{
+                            this.$router.replace({
+                                path: '/'
+                            })
+                        }
                     }
                 }
             }

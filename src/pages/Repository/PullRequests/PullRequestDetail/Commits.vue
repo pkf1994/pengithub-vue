@@ -92,9 +92,14 @@
                         after: this.pageInfo.endCursor
                     })
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_commits,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.data = this.data.concat(res.data.data.repository.pullRequest.commits.nodes)
-                    this.totalCount = res.data.data.repository.pullRequest.commits.totalCount
-                    this.pageInfo = res.data.data.repository.pullRequest.commits.pageInfo
+                    try{
+                        this.data = this.data.concat(res.data.data.repository.pullRequest.commits.nodes)
+                        this.totalCount = res.data.data.repository.pullRequest.commits.totalCount
+                        this.pageInfo = res.data.data.repository.pullRequest.commits.pageInfo
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
                 }catch(e) {
                     this.handleError(e)
                 }finally{

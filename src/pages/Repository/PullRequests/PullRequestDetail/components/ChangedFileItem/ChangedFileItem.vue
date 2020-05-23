@@ -85,7 +85,7 @@
     import HiddenItemLoading from '../HiddenItemLoading'
     import Editor from '../Editor'
     import Comment from './Comment'
-    import {authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
+    import { authRequiredGet } from '@/network'
     export default {
         inject: ['owner','repo','number','reviewCommentsProvided'],
         props: {

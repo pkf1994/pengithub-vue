@@ -1,8 +1,8 @@
 <template>
-    <Container class="relative timeline-item">
+    <Container class="position-relative timeline-item">
         <Inner v-if="!data.isMinimized" class="inner bg-white">
             <Header class="px-3 header text-normal f5" :style="headerStyle">
-                <Action class="action py-2 px-1 ml-2 relative" style="align-self:start" @click="showActionPopover">
+                <Action class="action py-2 px-1 ml-2 position-relative" style="align-self:start" @click="showActionPopover">
                     <svg class="octicon" viewBox="0 0 13 16" version="1.1" width="13" height="16" role="img"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
                     <Popover ref="actionPopover" :popoverStyle="popoverStyle">
                             <button class="popover-item btn-link" :data-clipboard-text="location.href">
@@ -100,7 +100,7 @@
 
 
         <Inner v-else class="inner bg-white">
-            <Header class="px-2 bg-gray d-flex flex-justify-between flex-items-center relative" :style="headerStyle">
+            <Header class="px-2 bg-gray d-flex flex-justify-between flex-items-center position-relative" :style="headerStyle">
                 <h3 class="header-minimized-title f5 text-gray text-normal text-italic">
                     This comment was marked as {{data.minimizedReason}}
                 </h3>

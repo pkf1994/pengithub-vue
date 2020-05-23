@@ -13,7 +13,6 @@
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {
         authRequiredGet,
-        authRequiredGitHubGraphqlApiQuery,
         cancelAndUpdateAxiosCancelTokenSource} from '@/network'
     import * as api from '@/network/api'
     import * as graphql from './graphql'

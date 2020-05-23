@@ -303,7 +303,11 @@
                         let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_org_id').cancelToken
                         let graphql_organization = graphql.GRAPHQL_ORG(this.org)
                         let res_organization = await authRequiredGitHubGraphqlApiQuery(graphql_organization,{cancelToken})
-                        this.organizations.currentOrgID = res_organization.data.data.organization.id
+                        try{
+                            this.organizations.currentOrgID = res_organization.data.data.organization.id
+                        }catch(e) {
+                            this.handleGraphqlError(res_organization)
+                        }
                     }
 
                     let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name).cancelToken
@@ -323,12 +327,22 @@
                         authRequiredGitHubGraphqlApiQuery(graphql_periodContributionsCollection,{cancelToken})
                     ])
 
-                    this.contributionsCollectionLastYear = res[0].data.data.user.contributionsCollection
-                    this.contributionsCollectionWithPeriod = [
-                        res[1].data.data.user.contributionsCollection
-                    ]
-                    this.organizations.data = res[0].data.data.user.organizations.nodes
-                    this.organizations.totalCount = res[0].data.data.user.organizations.totalCount
+                    try{
+                        this.contributionsCollectionLastYear = res[0].data.data.user.contributionsCollection
+                        this.organizations.data = res[0].data.data.user.organizations.nodes
+                        this.organizations.totalCount = res[0].data.data.user.organizations.totalCount
+                    }catch(e) {
+                        this.handleGraphqlError(res[0])
+                    }
+                   
+                    try{
+                        this.contributionsCollectionWithPeriod = [
+                            res[1].data.data.user.contributionsCollection
+                        ]
+                    }catch(e) {
+                        this.handleGraphqlError(res[1])
+                    }
+                    
                 }catch(e) {
                     console.log(e)
                 }finally{
@@ -376,9 +390,13 @@
                         from: util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",fromDate),
                         to: util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",toDate)
                     })
-                    console.log(graphql_periodContributionsCollection)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_periodContributionsCollection)
-                    this.contributionsCollectionWithPeriod.push(res.data.data.user.contributionsCollection)
+                    try{
+                        this.contributionsCollectionWithPeriod.push(res.data.data.user.contributionsCollection)
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
                 }catch(e) {
                     this.handleError(e)
                 }finally {

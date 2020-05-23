@@ -21,7 +21,7 @@
     import styled from 'vue-styled-components'
     import {CommonLoading,SimplePaginationRest} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
+    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery, commonGet} from '@/network'
     import {util_queryParse} from '@/util'
     import MemberListItem from './MemberListItem'
     import * as graphql from './graphql'
@@ -72,7 +72,8 @@
                     this.data = res.data
                     this.pageInfo = parse(res.headers.link) || {}
 
-                    this.network_getExtraData()
+                    if(this.accessToken) this.network_getExtraData()
+                   
 
                 }catch(e) {
                     this.handleError(e,{handle404:true})
@@ -81,20 +82,22 @@
                 }
             },
             async network_getExtraData() {
-                if(!this.accessToken) return 
                 if(this.data.length == 0) return
                 try{
                     this.extraData.loading = true
-
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data')
-
                     let graphql_extraData = graphql.GRAPHQL_ORG_MEMBER(this.data)
-
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
 
+                    let dataHolder 
+                    try{
+                        dataHolder = res.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                     let extraData = []
-                    for(let key in res.data.data) {
-                        extraData.push(res.data.data[key])
+                    for(let key in dataHolder) {
+                        extraData.push(dataHolder[key])
                     }
 
                     this.extraData.data = extraData
@@ -104,7 +107,8 @@
                 }finally{
                     this.extraData.loading = false
                 }
-            }
+            },
+           
         },
         watch: {
             publicMemberUrl(newOne,oldOne) {

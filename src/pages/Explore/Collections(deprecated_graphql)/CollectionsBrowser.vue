@@ -60,14 +60,26 @@
                     let graphql_collectionsSketchRoster = graphql.GRAPHQL_COLLECTIONS_ROSTER
 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_collectionsSketchRoster)
-                    let collectionsSketchRoster = res.data.data.repository.object.entries
+
+                    let collectionsSketchRoster
+                    try{
+                        collectionsSketchRoster = res.data.data.repository.object.entries
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
 
                     let graphql_collectionsSketch = graphql.GRAPHQL_COLLECTIONS_SKETCH(collectionsSketchRoster)
                     let res_collectionsSketch = await authRequiredGitHubGraphqlApiQuery(graphql_collectionsSketch)
                     let collectionSketchRosterArr = []
+                    let collectionSketchRosterArrHolder
+                    try{
+                        collectionSketchRosterArrHolder = res_collectionsSketch.data.data.repository
+                    }catch(e) {
+                        this.handleGraphqlError(res_collectionsSketch)
+                    }
 
-                    for(let key in res_collectionsSketch.data.data.repository) {
-                        let collectionAvatarObject = res_collectionsSketch.data.data.repository[key].entries.filter(i => i.name.match(/.png$/) != null) [0] 
+                    for(let key in collectionSketchRosterArrHolder) {
+                        let collectionAvatarObject = collectionSketchRosterArrHolder[key].entries.filter(i => i.name.match(/.png$/) != null) [0] 
                         let collectionSketchItem = {
                             name: collectionsSketchRoster[parseInt(key.replace('object',''))].name,
                             expression: `master:collections/${collectionsSketchRoster[parseInt(key.replace('object',''))].name}/index.md`,
@@ -96,8 +108,15 @@
                     let graphql_collections = graphql.GRAPHQL_COLLECTIONS(collectionsSketchRosterToLoad)
                     let res_collections = await authRequiredGitHubGraphqlApiQuery(graphql_collections)
 
-                    for(let key in res_collections.data.data.repository) {
-                        collectionsSketchRosterToLoad[parseInt(key.replace('object',''))].content = res_collections.data.data.repository[key].text
+                    let collectionsSketchRosterToLoadHolder 
+                    try{
+                        collectionsSketchRosterToLoadHolder = res_collections.data.data.repository
+                    }catch(e) {
+                        this.handleGraphqlError(res_collections)
+                    }
+
+                    for(let key in collectionsSketchRosterToLoadHolder) {
+                        collectionsSketchRosterToLoad[parseInt(key.replace('object',''))].content = collectionsSketchRosterToLoadHolder[key].text
                     }
 
                     collectionsSketchRosterToLoad.forEach((item,index) => {
@@ -129,8 +148,15 @@
                     let graphql_collections = graphql.GRAPHQL_COLLECTIONS(collectionsSketchRosterToLoad)
                     let res_collections = await authRequiredGitHubGraphqlApiQuery(graphql_collections)
 
-                    for(let key in res_collections.data.data.repository) {
-                        collectionsSketchRosterToLoad[parseInt(key.replace('object',''))].content = res_collections.data.data.repository[key].text
+                    let collectionsSketchRosterToLoadHolder 
+                    try{
+                        collectionsSketchRosterToLoadHolder = res_collections.data.data.repository
+                    }catch(e) {
+                        this.handleGraphqlError(res_collections)
+                    }
+
+                    for(let key in collectionsSketchRosterToLoadHolder) {
+                        collectionsSketchRosterToLoad[parseInt(key.replace('object',''))].content = collectionsSketchRosterToLoadHolder[key].text
                     }
 
                     collectionsSketchRosterToLoad.forEach((item,index) => {

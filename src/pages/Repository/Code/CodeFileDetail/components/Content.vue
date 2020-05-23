@@ -5,16 +5,16 @@
                 <Header class="Box-header py-2 d-flex flex-column flex-shrink-0">
                     <Pane class="d-flex py-1 py-md-0 flex-auto flex-justify-between">
                     <BtnGroup class="BtnGroup">
-                        <router-link v-if="!isBinary" to='/' class="btn btn-sm BtnGroup-item">
+                        <a v-if="!isBinary()" :href="raw" class="btn btn-sm BtnGroup-item">
                             Raw
-                        </router-link>
-                        <router-link v-if="!isBinary" to='/' class="btn btn-sm BtnGroup-item">
+                        </a>
+                        <router-link v-if="!isBinary()" :to='blameRouterLink' class="btn btn-sm BtnGroup-item">
                             Blame
                         </router-link>
                         <a v-else :href="raw" class="btn btn-sm BtnGroup-item">
                             Download
                         </a>
-                        <router-link to='/' class="btn btn-sm BtnGroup-item">
+                        <router-link :to='historyRouterLink' class="btn btn-sm BtnGroup-item">
                             History
                         </router-link>
                     </BtnGroup>
@@ -49,7 +49,7 @@
             </div>
         </Content>
 
-        <Content class="Box-body py-3 px-4 content" v-else-if="isBook" v-html="html()">
+        <Content class="Box-body py-3 px-4 content markdown-body" v-else-if="isBook" v-html="html()">
         </Content>
 
         <Content class="Box-body p-3 content text-center" v-else-if="isSvg" v-html="data()">
@@ -75,9 +75,7 @@
     import {mapState,mapGetters} from 'vuex'
     import {util_analyseFileType} from '@/util'
     export default {
-        inject: ['data','html','byteSize','isBinary'],
-        created() {
-        },
+        inject: ['data','html','byteSize','isBinary','currentRef','path','owner','repo'],
         computed: {
            /*  ...mapState({
                 loading: state => state.repository.code.codeFile.fileDetail.loading,
@@ -113,8 +111,14 @@
                 return false
             },
             raw() {
-                let pathFragment = this.$route.path.replace('/blob','')
-                return `https://raw.githubusercontent.com${pathFragment}`
+                let pathFragment = this.$route.params.pathMatch
+                return `https://raw.githubusercontent.com/${this.owner()}/${this.repo()}/${pathFragment}`
+            },
+            historyRouterLink() {
+                return `/${this.owner()}/${this.repo()}/commits/${this.currentRef()}/${this.path()}`
+            },
+            blameRouterLink() {
+                return `/${this.owner()}/${this.repo()}/blame/${this.currentRef()}/${this.path()}`
             }
         },
         components: {
@@ -134,6 +138,10 @@
         }
     }
 </script>
+
+<style lang="scss">
+@import 'node_modules/@primer/css/markdown/index.scss';
+</style>
 
 <style scoped lang='scss'>
 @import 'node_modules/@primer/css/box/index.scss';

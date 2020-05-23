@@ -46,7 +46,7 @@
     import {SearchResultMixin} from "../components";
     import {util_numberFormat,util_queryParse} from '@/util'
     import * as api from '@/network/api'
-    import { authRequiredGet,cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery } from '@/network';
+    import { authRequiredGet,cancelAndUpdateAxiosCancelTokenSource } from '@/network';
     var parse = require('parse-link-header');
     export default {
         name: 'search_result_code_page',

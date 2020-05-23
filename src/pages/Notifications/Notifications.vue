@@ -221,9 +221,15 @@
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data')
                     let graphql_extraData = graphql.GRAPHQL_NOTIFICATION_SUBJECTS(this.data)
                     let res_extraData = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
+                    let dataHolder
+                    try{
+                        dataHolder = res_extraData.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res_extraData)
+                    }
                     let extraData = []
-                    for(let key in res_extraData.data.data) {
-                        extraData.push(res_extraData.data.data[key])
+                    for(let key in dataHolder) {
+                        extraData.push(dataHolder[key])
                     }
                     this.extraData.data = extraData
                 }catch(e) {

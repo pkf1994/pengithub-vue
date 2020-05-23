@@ -62,8 +62,12 @@
                         owner: this.owner(),
                     })
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_activeAndStaleBranches,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.defaultBranch = res.data.data.repository.defaultBranchRef
-                    this.allBranches = res.data.data.repository.refs.nodes
+                    try{
+                        this.defaultBranch = res.data.data.repository.defaultBranchRef
+                        this.allBranches = res.data.data.repository.refs.nodes
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                 }catch(e) {
                     this.handleError(e)
                     if(e.response && e.response.status == 401) {

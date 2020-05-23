@@ -154,7 +154,7 @@
                 return this.extraDataHolder && this.extraDataHolder.tag.target.oid
             },
             resourcePath() {
-                return `/${this.owner()}/${this.repo()}/dir/${this.release.tag_name}`
+                return `/${this.owner()}/${this.repo()}/tree/${this.release.tag_name}`
             },
             commitIsVerified() {
                 return this.extraDataHolder && this.extraDataHolder.tag.target.signature && this.extraDataHolder.tag.target.signature.isValid

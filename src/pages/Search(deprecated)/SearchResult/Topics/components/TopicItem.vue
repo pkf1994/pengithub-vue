@@ -134,7 +134,11 @@
                     }
                 `
                 const res = await authRequiredGitHubGraphqlApiQuery(graphql,{cancelToken: this.source.token})
-                this.avatarUrl = res.data.data.search.nodes[0].owner.avatarUrl
+                try{
+                    this.avatarUrl = res.data.data.search.nodes[0].owner.avatarUrl
+                }catch(e) {
+                    this.handleGraphqlError(res)
+                }
             }
         },
         components: {

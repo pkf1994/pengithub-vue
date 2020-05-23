@@ -80,8 +80,7 @@
     import * as graphql from './graphql'
     var parse = require('parse-link-header');
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {util_parseQuery} from '@/util' 
-    import { util_queryParse } from '../../../util'
+    import {util_parseQuery,util_queryParse} from '@/util' 
     export default {
         mixins: [RouteUpdateAwareMixin],
         props: {
@@ -329,9 +328,15 @@
                     let graphql_issueExtraData =  graphql.GRAPHQL_GET_ISSUES(issues)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_issueExtraData,{cancelToken:sourceAndCancelToken.cancelToken})
 
+                    let dataHolder
+                    try{
+                        dataHolder = res.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                     let issueArr = []
-                    for(let key in res.data.data){
-                        issueArr.push(res.data.data[key])
+                    for(let key in dataHolder){
+                        issueArr.push(dataHolder[key])
                     }
                     this.extraData.data = this.extraData.data.concat(issueArr)
                 }catch(e) {

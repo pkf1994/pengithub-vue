@@ -49,13 +49,13 @@
                 <a href="https://twitter.com/githubstatus" class="link-gray">@githubstatus</a>
             </HyperlinkWrapper>
         </TheLinks>
-        <SimpleFooter></SimpleFooter>
+        <ComplexFooter></ComplexFooter>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {HyperlinkWrapper,LogoHeader,SimpleFooter} from '@/components'
+    import {HyperlinkWrapper,LogoHeader,ComplexFooter} from '@/components'
     import {WithSearchInputMixin} from '@/mixins'
     export default {
         name: 'not_found_page',
@@ -63,7 +63,7 @@
         components: {
             HyperlinkWrapper,
             LogoHeader,
-            SimpleFooter,
+            ComplexFooter,
             Container: styled.div``,
             Jumbotron: styled.div``,
             The404Headline: styled.div``,

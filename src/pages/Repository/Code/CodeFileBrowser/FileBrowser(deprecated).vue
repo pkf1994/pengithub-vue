@@ -7,7 +7,7 @@
                     <template v-slot:summary>
                             <span>{{currentBranch ? currentBranch : "loading..."}}</span>
                     </template>
-                        <router-link @click.native="triggerSummaryAndDetail" :to="`/${owner()}/${repo()}/dir/${item.name}`" class="branch-item d" v-for="item in otherBranches" :key="item.name">
+                        <router-link @click.native="triggerSummaryAndDetail" :to="`/${owner()}/${repo()}/tree/${item.name}`" class="branch-item d" v-for="item in otherBranches" :key="item.name">
                             {{item.name}}
                         </router-link>
                         <router-link to="/" class="to-all-branches">View more branches</router-link>
@@ -22,7 +22,7 @@
         </Header>
 
         <CurrentPath class="path" style="border-bottom: 1px solid #eaecef;">
-            <router-link class="text-gray" :to="`/${owner()}/${repo()}/dir/${currentBranch}`">
+            <router-link class="text-gray" :to="`/${owner()}/${repo()}/tree/${currentBranch}`">
                 {{repo()}}</router-link>/<Breadcrumb :path="path"/>
         </CurrentPath>    
 
@@ -167,7 +167,11 @@ import Vue from 'vue'
                         branch: this.currentBranch
                     }) 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_contents,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.data = res.data.data.repository.object.entries
+                    try{
+                        this.data = res.data.data.repository.object.entries
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                     this.network_getContentsLastUpdateInfo()
                     this.network_getCommitsCountByBranch()
                 }catch(e) {
@@ -190,9 +194,15 @@ import Vue from 'vue'
                         branch: this.currentBranch
                     }) 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphQL_contentsLastUpdateInfo,{cancelToken:sourceAndCancelToken.cancelToken})
+                    let dataHolder
+                    try{
+                        dataHolder = res.data.data.repository.object
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                     let i = 0
-                    for(let key in res.data.data.repository.object) {
-                       Vue.set(this.data[i],'committedDate',res.data.data.repository.object[key].nodes[0].committedDate)
+                    for(let key in dataHolder) {
+                       Vue.set(this.data[i],'committedDate',dataHolder[key].nodes[0].committedDate)
                         i += 1
                     }
                 }catch(e) {
@@ -218,7 +228,12 @@ import Vue from 'vue'
                         branch: this.currentBranch
                     }) 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphQL_countOfCommitsByBranch,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.countOfCommitsByBranch.data = res.data.data.repository.ref.target.history.totalCount
+
+                    try{
+                        this.countOfCommitsByBranch.data = res.data.data.repository.ref.target.history.totalCount
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
 
                     this.cachedBranch = JSON.stringify({
                         owner: this.owner(),

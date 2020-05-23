@@ -196,9 +196,15 @@
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data')
                     let graphql_extraData = graphql.GRAPHQL_RELEASES([{...this.data}])
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
+                    let dataHolder
+                    try{
+                        dataHolder = res.data.data
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                     let extraData = []
-                    for(let key in res.data.data) {
-                        extraData.push(res.data.data[key])
+                    for(let key in dataHolder) {
+                        extraData.push(dataHolder[key])
                     }
                     this.extraData.data = extraData
                 }catch(e) {
@@ -273,7 +279,12 @@
                     this.tagger.loading = true
                     let graphql_tag = graphql.GRAPHQL_TAG(this.data.node_id)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_tag)
-                    this.tagger.data = res.data.data.node.tagger.user || {}
+                    try{
+                        this.tagger.data = res.data.data.node.tagger.user || {}
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
                 }catch(e) {
                     console.log(e)
                 }finally{

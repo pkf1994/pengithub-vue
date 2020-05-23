@@ -26,7 +26,7 @@
                 this.$router.back()
             },
             go() {
-                this.$router.push('/')
+                this.signIn()
             }
         },
         components: {

@@ -3,6 +3,7 @@
         <router-link class="px-2 py-3 mr-3 router-link flex-row-center flex-shrink-0" 
                         :class="{active:tabItem.active}"
                         :style="tabStyle"
+                        :exact="tabItem.exact"
                         v-for="tabItem in tabs"
                         :key="tabItem.label"
                         :to="tabItem.to">
@@ -45,7 +46,7 @@
         text-align: center;
         border-bottom: 2px solid transparent;
     }
-    .active {
+    .router-link-active {
         font-weight: 600;
         color: #24292e;
         border-bottom-color: #e36209

@@ -92,10 +92,14 @@
                     })
 
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_comments)
-                    this.data =  this.data.concat(res.data.data.node.comments.nodes)
-                    this.pageInfo = res.data.data.node.comments.pageInfo
-                    this.totalCount = res.data.data.node.comments.totalCount
-
+                    try{
+                        this.data =  this.data.concat(res.data.data.node.comments.nodes)
+                        this.pageInfo = res.data.data.node.comments.pageInfo
+                        this.totalCount = res.data.data.node.comments.totalCount
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
                 }catch(e) {
                     console.log(e)
                 }finally{

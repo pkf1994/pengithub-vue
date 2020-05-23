@@ -65,8 +65,8 @@
                         routerLink: path,
                         exact: true,
                         extraActiveRouterLinks: [
-                            `${path}/dir`,
-                            `${path}/file`,
+                            `${path}/tree`,
+                            `${path}/blob`,
                             `${path}/branches`,
                             `${path}/branches/all`,
                             `${path}/branches/stale`,
@@ -117,7 +117,11 @@
                     this.cancelSources.push(sourceAndCancelToken.source)
                     let graphql_repoBasicInfo = graphql.GRAPHQL_REPOSITORY_BASIC_INFO(this.owner,this.repo)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_repoBasicInfo,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.data = res.data.data.repository
+                    try{
+                        this.data = res.data.data.repository  
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
                 }catch(e) {
                     this.handleError(e)
                 }finally{

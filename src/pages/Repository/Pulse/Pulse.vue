@@ -106,8 +106,12 @@
                         since: this.afterDateByPastPeriod
                     })
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_commitsInPastPeriod,{cancelToken})
-
-                    this.commitStatisitc.data = res.data.data.repository.refs.nodes
+                    try{
+                        this.commitStatisitc.data = res.data.data.repository.refs.nodes
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
                 }catch(e) {
                     this.handleError(e)
                 }finally{
@@ -132,7 +136,12 @@
                             headers: {"Accept":"application/vnd.github.cloak-preview"}
                         }
                     )
-                    this.commitCount.data = res.data.total_count
+                    try{
+                        this.commitCount.data = res.data.total_count
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
                 }catch(e) {
                     this.handleError(e)
                 }finally{
@@ -153,9 +162,14 @@
 
                     const res = await authRequiredGitHubGraphqlApiQuery(graphql_pullsMergedInPastPeriod,{cancelToken:sourceAndCancelToken.cancelToken})
                     
-                    this.pullsMerged.data = this.pullsMerged.data.concat(res.data.data.search.nodes)
-                    this.pullsMerged.pageInfo =  res.data.data.search.pageInfo
-                    this.pullsMerged.totalCount =  res.data.data.search.issueCount
+                    try{
+                        this.pullsMerged.data = this.pullsMerged.data.concat(res.data.data.search.nodes)
+                        this.pullsMerged.pageInfo =  res.data.data.search.pageInfo
+                        this.pullsMerged.totalCount =  res.data.data.search.issueCount
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
                 }catch(e) {
                     this.handleError(e)
                 }finally{
@@ -176,9 +190,14 @@
 
                     const res = await authRequiredGitHubGraphqlApiQuery(graphql_issuesClosedInPastPeriod,{cancelToken:sourceAndCancelToken.cancelToken})
                     
-                    this.issuesClosed.data = this.issuesClosed.data.concat(res.data.data.search.nodes)
-                    this.issuesClosed.pageInfo =  res.data.data.search.pageInfo
-                    this.issuesClosed.totalCount =  res.data.data.search.issueCount
+                    try{
+                        this.issuesClosed.data = this.issuesClosed.data.concat(res.data.data.search.nodes)
+                        this.issuesClosed.pageInfo =  res.data.data.search.pageInfo
+                        this.issuesClosed.totalCount =  res.data.data.search.issueCount
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
                 }catch(e) {
                     this.handleError(e)
                 }finally{

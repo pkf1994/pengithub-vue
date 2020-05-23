@@ -42,7 +42,6 @@
     import {SimpleBubble,CommonLoading} from '@/components'
     import BranchItem from './BrancheItem'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {authRequiredGitHubGraphqlApiQuery } from '@/network'
     import * as graphql from './graphql.js'
     export default {
         name: 'repository_branches_overview_page',

@@ -3,6 +3,8 @@ import {util_queryParse} from "../util";
 const CLIENT_ID = "125cb651f63615c6d362"
 const SCOPE = "user repo repo_deployment repo:invite admin:repo_hook home admin:org admin:public_key admin:org_hook gist notifications delete_repo write:discussion read:discussion write:packages read:packages delete:packages admin:gpg_key workflow"
 const GITHUB_REST_API_BASE = "https://api.github.com"
+const BACK_END_API_BASE = "http://127.0.0.1:8088"
+const PROXY_API_BASE = "http://127.0.0.1:8888"
 
 export const API_GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
 
@@ -21,9 +23,11 @@ export const API_OAUTH2 = payload => {
     return `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=${SCOPE}&state=${payload.state}`
 }
 
-export const API_OAUTH2_ACCESS_TOKEN = code => `http://127.0.0.1:8088/oauth2server/oauth2/access_token.do?code=${code}`
+export const API_OAUTH2_ACCESS_TOKEN = code => `${BACK_END_API_BASE}/oauth2server/oauth2/access_token.do?code=${code}`
 
-export const API_OAUTH2_REVOKE_ACCESS_TOKEN = accessToken => `http://127.0.0.1:8088/oauth2server/oauth2/revoke.do?accessToken=${accessToken}`
+export const API_OAUTH2_REVOKE_ACCESS_TOKEN = accessToken => `${BACK_END_API_BASE}/oauth2server/oauth2/revoke.do?accessToken=${accessToken}`
+
+export const API_PROXY = payload => `${BACK_END_API_BASE}/oauth2server/proxy/proxy.do?url=${payload}`
 
 export const API_OAUTH2_USER_INFO = `${GITHUB_REST_API_BASE}/user`
 
@@ -102,9 +106,9 @@ export const API_REPOSITORY_COMMITS = payload=> {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/commits?${query}`
 }
 
-export const API_REPOSITORY_BRANCHES = (owner,repo,params) => {
-    let query = util_queryParse.querify(params)
-    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/branches?${query}`
+export const API_REPOSITORY_BRANCHES = payload => {
+    let query = util_queryParse.querify(payload.API_OAUTH2params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/branches?${query}`
 }
 
 export const API_REPOSITORY_RELEASES = (owner,repo,params) => {
@@ -181,3 +185,33 @@ export const API_TREE_LIST = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/trees/${payload.sha}?recursive=1`
 }
 
+export const API_REPOSITORY_ISSUES_AVAILABLE_AUTHORS = payload => {
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/issues/show_menu_content?partial=issues%2Ffilters%2Fauthors_content&q=${payload.query}`
+}
+
+export const API_REPOSITORY_ISSUES_AVAILABLE_ASSIGNEES = payload => {
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/issues/show_menu_content?partial=issues%2Ffilters%2Fassigns_content&q=${payload.query}`
+}
+
+export const API_REPOSITORY_ISSUES_AVAILABLE_LABELS = payload => {
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/issues/show_menu_content?partial=issues%2Ffilters%2Flabels_content&q=${payload.query}`
+}
+
+export const API_REPOSITORY_CODE_FILE_DETAIL_AVAILABLE_BRANCHES = payload => {
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/refs/${payload.ref}/${payload.path}?source_action=show&source_controller=blob`
+}
+
+export const API_REPOSITORY_CODE_FILE_DETAIL_AVAILABLE_TAGS = payload => {
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/refs-tags/${payload.ref}/${payload.path}?source_action=show&source_controller=blob&tag_name=${payload.ref}`
+}
+
+
+export const API_REPOSITORY_LABELS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/labels?${query}`
+}
+
+export const API_REPOSITORY_MILESTONES = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/milestones?${query}`
+}
