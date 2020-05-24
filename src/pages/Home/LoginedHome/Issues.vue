@@ -161,39 +161,39 @@
             },
             visibilityModalRouterLink() {
                 return {
-                    private: '/${this.routerPathFragment}?q=' + this.query.replace(/is:(private|public)/g,'').trim() + ' is:private',
-                    public: '/${this.routerPathFragment}?q=' + this.query.replace(/is:(private|public)/g,'').trim() + ' is:public',
+                    private: `/${this.routerPathFragment}?q=` + this.query.replace(/is:(private|public)/g,'').trim() + ' is:private',
+                    public: `/${this.routerPathFragment}?q=` + this.query.replace(/is:(private|public)/g,'').trim() + ' is:public',
                 }
             },
             sortModalRouterLink() {
                 return [
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:created-desc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:created-desc',
                         label: 'Newest',
                         queryFragment: 'sort:created-desc'
                     },
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:created-asc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:created-asc',
                         label: 'Oldest',
                         queryFragment: 'sort:created-asc'
                     },
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:comments-desc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:comments-desc',
                         label: 'Most commented',
                         queryFragment: 'sort:comments-desc'
                     },
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:comments-asc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:comments-asc',
                         label: 'Least commented',
                         queryFragment: 'sort:comments-asc'
                     },
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:updated-desc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:updated-desc',
                         label: 'Recently updated',
                         queryFragment: 'sort:updated-desc'
                     },
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:updated-asc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:updated-asc',
                         label: 'Least recently updated',
                         queryFragment: 'sort:updated-asc'
                     },
@@ -202,42 +202,42 @@
             sortModalReactionRouterLink() {
                 return [
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-%2B1-desc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-%2B1-desc',
                         label: '👍',
                         queryFragment: 'sort:reactions-+1-desc'
                     },
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions--1-desc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions--1-desc',
                         label: '👎',
                         queryFragment: 'sort:reactions--1-desc'
                     },
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-smile-desc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-smile-desc',
                         label: '😄',
                         queryFragment: 'sort:reactions-smile-desc'
                     },
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-tada-desc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-tada-desc',
                         label: '🎉',
                         queryFragment: 'sort:reactions-tada-desc'
                     },
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-thinking_face-desc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-thinking_face-desc',
                         label: '😕',
                         queryFragment: 'sort:reactions-thinking_face-desc'
                     },
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-heart-desc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-heart-desc',
                         label: '❤️',
                         queryFragment: 'sort:reactions-heart-desc'
                     },
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-rocket-desc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-rocket-desc',
                         label: '🚀',
                         queryFragment: 'sort:reactions-rocket-desc'
                     },
                     {
-                        routerLink: '/${this.routerPathFragment}?q=' + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-eyes-desc',
+                        routerLink: `/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-eyes-desc',
                         label: '👀',
                         queryFragment: 'sort:reactions-eyes-desc'
                     },

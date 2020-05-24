@@ -165,7 +165,7 @@
 
 .statistic{
     a{
-     color: #24292e;
+        color: #24292e;
     }
 }
 

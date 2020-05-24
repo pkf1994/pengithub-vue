@@ -1,18 +1,20 @@
 <template>
     <Container class="p-3 container"> 
-        <h2 class="mb-1 title">{{milestone.title}}</h2>
+        <router-link :to="`/${owner()}/${repo()}/milestone/${milestone.number}`" style="color: #6a737d;">
+            <h2 class="mb-1 title">{{milestone.title}}</h2>
+        </router-link>  
         <TheMeta>
             <span class="mr-2" v-if="milestone.state == 'closed'">
                 <strong>{{milestone.state | capitalize}}</strong>
                 on
                 {{milestone.closed_at | dateFormat('d zzz yyyy')}}
             </span>
-            <span  v-else-if="milestone.due_on">
+            <span class="mr-2" v-else-if="milestone.due_on">
                 <strong>Due</strong>
                 on
                 {{milestone.due_on | dateFormat('d zzz yyyy')}}
             </span>
-            <span v-else>
+            <span class="mr-2" v-else>
                 No due date
             </span>
 
@@ -29,14 +31,14 @@
                 <strong>{{donePercent}}%</strong>
                 complete
             </span>
-            <span class="mr-2">
+            <router-link :to="`/${owner()}/${repo()}/milestone/${milestone.number}`" class="mr-2" style="color: #6a737d;">
                 <strong>{{milestone.open_issues}}</strong>
                 open
-            </span>
-            <span class="mr-2">
+            </router-link>
+            <router-link :to="`/${owner()}/${repo()}/milestone/${milestone.number}/closed`" class="mr-2" style="color: #6a737d;">
                 <strong>{{milestone.closed_issues}}</strong>
                 closed
-            </span>
+            </router-link>
         </TheMeta>
     </Container>
 </template>
@@ -45,6 +47,7 @@
     import styled from 'vue-styled-components'
     import {Progress} from '@/components'
     export default {
+        inject: ['owner','repo'],
         props: {
             milestone: {
                 type: Object,

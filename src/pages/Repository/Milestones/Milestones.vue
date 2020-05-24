@@ -17,19 +17,19 @@
                 <template v-slot:title>
                     <Header class="Box-header d-flex flex-justify-between flex-shrink-0">
                         <StateStatistic>
-                            <router-link class="btn-link" :to="filterOpenRouterLink" active-class="state-router-link-active" :class="{'state-router-link-active':state == 'open'}">
+                            <router-link class="btn-link" exact :to="filterOpenRouterLink" active-class="state-router-link-active" :class="{'state-router-link-active':state == 'open'}">
                                 <svg class="octicon octicon-milestone mr-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2H6V0h2v2zm4 5H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h10l2 2-2 2zM8 4H6v2h2V4zM6 16h2V8H6v8z"></path></svg>
                                 {{stateCount.open}}
                                 Open
                             </router-link>
-                            <router-link class="btn-link ml-2" :to="filterClosedRouterLink"  active-class="state-router-link-active" :class="{'state-router-link-active':state == 'closed'}">
+                            <router-link class="btn-link ml-2" exact :to="filterClosedRouterLink"  active-class="state-router-link-active" :class="{'state-router-link-active':state == 'closed'}">
                                 <svg class="octicon octicon-check" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
                                 {{stateCount.closed}}
                                 Closed
                             </router-link>
                         </StateStatistic>
 
-                        <button class="btn-link px-3 select-menu-button" @click="() => openModal('sortModal')">
+                        <button class="btn-link pl-3 select-menu-button" @click="() => openModal('sortModal')">
                            Sort
                         </button>
                     </Header>
@@ -70,7 +70,6 @@
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
     import * as api from '@/network/api'
-    import * as graphql from './graphql'
     import {util_queryParse} from '@/util'
     import MilestoneListItem from './MilestoneListItem'
     let parse = require("parse-link-header")

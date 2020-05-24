@@ -63,6 +63,7 @@ const RepositoryTags = () => import('../pages/Repository/Tags/Tags.vue')
 const RepositoryBlame = () => import('../pages/Repository/Blame/Blame.vue')
 const RepositoryLabels = () => import('../pages/Repository/Labels/Labels.vue')
 const RepositoryMilestones = () => import('../pages/Repository/Milestones/Milestones.vue')
+const RepositoryMilestoneDetail = () => import('../pages/Repository/MilestoneDetail/MilestoneDetail.vue')
 const SignOut = () => import('../pages/SignOut/SignOut.vue')
 const Notifications = () => import('../pages/Notifications/Notifications.vue')
 const NotFoundPage = () => import('../pages/NotFoundPage/NotFoundPage.vue')
@@ -414,6 +415,11 @@ export default [
                 path: 'milestones',
                 name: 'repositoryMilestones',
                 component: RepositoryMilestones
+            },
+            {
+                path: 'milestone/:number',
+                name: 'repositoryMilestoneDetail',
+                component: RepositoryMilestoneDetail
             },
             {   
                 path: 'branches',

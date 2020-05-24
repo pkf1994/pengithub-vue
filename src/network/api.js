@@ -215,3 +215,7 @@ export const API_REPOSITORY_MILESTONES = payload => {
     let query = util_queryParse.querify(payload.params)
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/milestones?${query}`
 }
+
+export const API_REPOSITORY_MILESTONE = payload => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/milestones/${payload.number}`
+}
