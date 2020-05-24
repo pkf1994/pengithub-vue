@@ -94,31 +94,10 @@
         computed: {
             emptyFlag() {
                 return this.data.length == 0 && this.loading == false && !this.pageInfo.prev
+            },
+            documentTitle() {
+                return `Labels · ${this.owner()}/${this.repo()}`
             }
-            /* sortModalRouterLinkData() {
-                return [
-                    {
-                        label: "Alphabetically",
-                        to: `/${this.owner()}/${this.repo()}/labels?sort=name-asc`,
-                        sort: 'name-asc'
-                    },
-                    {
-                        label: "Reverse alphabetically",
-                        to: `/${this.owner()}/${this.repo()}/labels?sort=name-desc`,
-                        sort: 'name-desc'
-                    },
-                    {
-                        label: "Most issues",
-                        to: `/${this.owner()}/${this.repo()}/labels?sort=count-desc`,
-                        sort: 'count-desc'
-                    },
-                    {
-                        label: "Fewest issues",
-                        to: `/${this.owner()}/${this.repo()}/labels?sort=count-asc`,
-                        sort: 'count-asc'
-                    },
-                ]
-            } */
         },
         created() {
             this.network_getData()

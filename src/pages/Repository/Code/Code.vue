@@ -31,6 +31,12 @@
                 }
             }
         },
+        computed: {
+            documentTitle() {
+                if(!this.data.description) return location.href
+                return `${this.owner()}/${this.repo()}: ${this.data.description}`
+            }
+        },
         created() {
             if(this.accessToken) this.network_getData()
         },

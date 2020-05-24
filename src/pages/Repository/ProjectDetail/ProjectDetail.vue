@@ -72,6 +72,10 @@
                     return (i.note && i.note.toLowerCase().indexOf(this.filterQuery.toLowerCase()) != -1) || 
                             (i.content && i.content.title.toLowerCase().indexOf(this.filterQuery.toLowerCase()) != -1)
                 }) : []
+            },
+            documentTitle() {
+                if(!this.data.name) return location.href
+                return this.data.name
             }
         },
         created() {

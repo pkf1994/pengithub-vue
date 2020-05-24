@@ -52,6 +52,10 @@
                         to: `${basePath}/files`
                     },
                 ]
+            },
+            documentTitle() {
+                if(!this.data.title) return location.href
+                return this.data.title
             }
         },
         created() {

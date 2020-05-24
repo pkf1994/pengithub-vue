@@ -31,7 +31,8 @@
             return {
                 searchQuery: '',
                 data: [],
-                loading: false
+                loading: false,
+                documentTitle: 'File Finder'
             }
         },
         computed: {

@@ -12,6 +12,12 @@
     import IssuesBrowser from '../Issues/IssuesBrowser.vue'
     export default {
         mixins: [RouteUpdateAwareMixin],
+        inject: ['owner','repo'],
+        computed: {
+            documentTitle() {
+                return `Pull Requests · ${this.owner()}/${this.repo()}`
+            }
+        },
         components: {
             IssuesBrowser
         },

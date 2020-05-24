@@ -1,13 +1,19 @@
 <template>
     <Container class="flex-column flex-items-stretch py-4 px-3">
-        <Head class="head mx-3">
+        <Head class="head">
             <h2>Community profile</h2>  
         </Head>
-        <SubHead class="my-5 mx-3">
-            <p class="f3-light">Here’s how this project compares to <a href="https://opensource.guide">recommended community standards</a>.</p>
+        <SubHead class="my-5">
+            <p class="f3-light">
+                Here’s how this project compares to 
+                <HyperlinkWrapper>
+                    <a href="https://opensource.guide">recommended community standards</a>
+                </HyperlinkWrapper>
+                .
+            </p>
         </SubHead>
 
-        <Title class="mb-2 mx-3">
+        <Title class="mb-2">
             <span class="f4 text-bold">Checklist</span>
         </Title>
 
@@ -20,26 +26,54 @@
                     Description
             </CheckItem>
             <CheckItem :checked="data.files && data.files.readme">
+                <router-link v-if="data.files && data.files.readme && data.files.readme.html_url" :to="data.files.readme.html_url.replace('https://github.com','')">
                     README
+                </router-link>
+                <span v-else>
+                    README
+                </span>
             </CheckItem>
-            <CheckItem :checked="data.files && data.files.code_of_conduct" :withProposeBtn="true">
-                   Code of conduct
+            <CheckItem :checked="data.files && data.files.code_of_conduct">
+                <router-link v-if="data.files && data.files.code_of_conduct && data.files.code_of_conduct.html_url" :to="data.files.code_of_conduct.html_url.replace('https://github.com','')">
+                    Code of conduct
+                </router-link>
+                <span v-else>
+                    Code of conduct
+                </span>
             </CheckItem>
             <CheckItem :checked="data.files && data.files.contributing" 
-                        :withProposeBtn="true" 
                         subNotice="Writing contributing guidelines">
+                <router-link v-if="data.files && data.files.contributing && data.files.contributing.html_url" :to="data.files.contributing.html_url.replace('https://github.com','')">
                     Contributing
+                </router-link>
+                <span v-else>
+                    Contributing
+                </span>
             </CheckItem>
             <CheckItem :checked="data.files && data.files.license" 
-                        :withProposeBtn="true" 
                         subNotice="Choosing a license">
+                <router-link v-if="data.files && data.files.license && data.files.license.html_url" :to="data.files.license.html_url.replace('https://github.com','')">
                     License
+                </router-link>
+                <span v-else>
+                    License
+                </span>
             </CheckItem>
             <CheckItem :checked="data.files && data.files.issue_template">
+                <router-link v-if="data.files && data.files.issue_template && data.files.issue_template.html_url" :to="data.files.issue_template.html_url.replace('https://github.com','')">
                     Issue templates
+                </router-link>
+                <span v-else>
+                    Issue templates
+                </span>
             </CheckItem>
             <CheckItem :checked="data.files && data.files.pull_request_template">
+                <router-link v-if="data.files && data.files.pull_request_template && data.files.pull_request_template.html_url" :to="data.files.pull_request_template.html_url.replace('https://github.com','')">
                     Pull request template
+                </router-link>
+                <span v-else>
+                    Pull request template
+                </span>
             </CheckItem>
         </ComplexBubble>
 
@@ -49,7 +83,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble} from '../../../components'
+    import {ComplexBubble,HyperlinkWrapper} from '@/components'
     import CheckItem from './CheckItem'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as api from '@/network/api'
@@ -62,6 +96,11 @@
             return {
                data: {},
                loading: false
+            }
+        },
+        computed: {
+             documentTitle() {
+                return `Community · ${this.owner()}/${this.repo()}`
             }
         },
         created() {
@@ -95,6 +134,7 @@
         components: {
             ComplexBubble,
             CheckItem,
+            HyperlinkWrapper,
             Container: styled.div``,
             Head: styled.div``,
             SubHead: styled.div``,

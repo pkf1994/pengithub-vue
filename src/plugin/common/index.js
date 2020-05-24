@@ -22,7 +22,6 @@ export default {
                 if(this.documentTitle) {
                     document.title = this.documentTitle
                 }
-                
             },
             watch: {
                 documentTitle(newOne){

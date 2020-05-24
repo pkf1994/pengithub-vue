@@ -72,6 +72,9 @@
             },
             tabOrReleaseRouterParam() {
                 return this.$route.params.tabOrRelease
+            },
+            documentTitle() {
+                return `Releases · ${this.owner()}/${this.repo()}`
             }
         },
         created() {

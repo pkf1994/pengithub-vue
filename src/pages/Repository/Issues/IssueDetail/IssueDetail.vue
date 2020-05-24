@@ -392,7 +392,6 @@
         },
        
         computed: {
-           
             number() {
                 return this.$route.params.number
             },
@@ -424,9 +423,10 @@
                 
                 return this.timeline.count.data - alreadyCount
             },
-            /* subscriptionNotice() {
-                return this.extraData.viewerSubscription.toLowerCase()
-            } */
+            documentTitle() {
+                if(!this.data.title) return location.href
+                return this.data.title
+            }
         },
         created() {
             this.network_getData()

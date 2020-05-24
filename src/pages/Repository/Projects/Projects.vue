@@ -156,6 +156,9 @@
                     },
                 ]
             },
+            documentTitle() {
+                return `Project · ${this.owner()}/${this.repo()}`
+            }
         },
         created() {
             this.network_getData()

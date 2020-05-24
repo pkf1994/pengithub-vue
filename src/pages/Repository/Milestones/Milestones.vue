@@ -169,6 +169,9 @@
                         selected: this.sort == 'count' && this.direction == 'asc'
                     },
                 ]
+            },
+            documentTitle() {
+                return `Milestones · ${this.owner()}/${this.repo()}`
             }
         },
         created() {
@@ -211,7 +214,7 @@
                             state: 'open'
                         }
                     })
-                    let url_closedCount = api.API_REPOSITORY_LABELS({
+                    let url_closedCount = api.API_REPOSITORY_MILESTONES({
                         repo: this.repo(),
                         owner: this.owner(),
                         params: {

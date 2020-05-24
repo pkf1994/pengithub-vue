@@ -82,6 +82,9 @@
             afterDateByPastPeriod() {
                 return  util_dateFormat.dateFormat('yyyy-MM-ddThh:mm:ss',util_timeZoneTransfer.East8ToWest8(new Date(Date.parse(new Date()) - (this.selectedValue === 'weekly' ? 7 * 24 * 3600000 : 30 * 24 * 3600000))))
             },
+            documentTitle() {
+                return `Pulse · ${this.owner()}/${this.repo()}`
+            }
         },
         created() {
            this.network_getContributorStatistic()

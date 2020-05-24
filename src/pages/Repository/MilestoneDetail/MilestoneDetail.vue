@@ -131,6 +131,10 @@
             },
             filterClosedStateRouterLink() {
                 return `/${this.owner()}/${this.repo()}/milestone/${this.number}?closed=1`
+            },
+            documentTitle() {
+                if(!this.data.title) return location.href
+                return `${this.data.title} Milestone`
             }
         },
         created() {

@@ -78,8 +78,11 @@
                         activeFlag: true
                     },
                 ]
+            },
+            documentTitle() {
+                return `Tags · ${this.owner()}/${this.repo()}`
             }
-        },
+        }, 
         created() {
             this.network_getData()
         },
