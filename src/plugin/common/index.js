@@ -46,7 +46,11 @@ export default {
                             window.location.href = API_OAUTH2
                         }
                     }
-                    this.$toast(e,'error')
+                    if(e.response && e.response.data.message) {
+                        this.$toast(e.response.data.message,'error')
+                    }else{
+                        this.$toast(e,'error')
+                    }
                     if(!e.response && !this.accessToken) {
                         util_throttle.throttleByGap(() => {
                             this.$toast(this.loginNotice)

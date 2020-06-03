@@ -13,6 +13,7 @@ import util_markdownParse from './markdownParse'
 import util_timeZoneTransfer from './timeZoneTransfer'
 import util_ramdonString from './ramdonString'
 import util_fileSize from './fileSize'
+import util_json from './json'
 import './protoExtend'
 
 export {
@@ -30,4 +31,5 @@ export {
     util_markdownParse,
     util_ramdonString,
     util_fileSize,
+    util_json,
     util_adjustStyle}

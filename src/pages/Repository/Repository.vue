@@ -12,7 +12,6 @@
     import { mapState } from 'vuex'
     import {HeaderDetachTopTab} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import * as graphql from './graphql'
     import * as api from '@/network/api'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet } from '@/network'
     let parse = require('parse-link-header')
@@ -45,7 +44,6 @@
             ...mapState({
                 viewerLogin: state => state.oauth.viewerInfo.login
             }),
-            
             owner: function() {
                 return this.$attrs.owner
             },
@@ -133,9 +131,12 @@
                 }).finally(() =>  this.loading = false)
 
                 //获取open issues count
-                let url_openIssuesCount = api.API_SEARCH('issues',{
-                    q:`repo:${this.owner}/${this.repo} state:open is:issue`,
-                    per_page: 1
+                let url_openIssuesCount = api.API_SEARCH({
+                    type: 'issues',
+                    params: {
+                        q:`repo:${this.owner}/${this.repo} state:open is:issue`,
+                        per_page: 1
+                    }
                 })
                 authRequiredGet(url_openIssuesCount).then(res => {
                     this.openIssuesCount = res.data.total_count
@@ -144,10 +145,14 @@
                 })
 
                  //获取open pull requests count
-                let url_openPullRequestsCount = api.API_SEARCH('issues',{
-                    q:`repo:${this.owner}/${this.repo} state:open is:pr`,
-                    per_page: 1
-                })
+                let url_openPullRequestsCount = api.API_SEARCH(
+                    {
+                        type: 'issues',
+                        params: {
+                            q:`repo:${this.owner}/${this.repo} state:open is:pr`,
+                            per_page: 1
+                        }
+                    })
                 authRequiredGet(url_openPullRequestsCount).then(res => {
                     this.openPullRequestsCount = res.data.total_count
                 }).catch(e => {

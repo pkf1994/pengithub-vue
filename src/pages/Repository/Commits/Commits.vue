@@ -26,33 +26,35 @@
             </div> 
         </Pagination>
 
-        <Modal ref="switchBranchOrTagModal" title="Switch branches/tags" :modalStyle="{height:'80vh'}">
-            <div v-if="allBranchesAndTags.loading" class="flex-row-center height-full">
-                <LoadingIconEx></LoadingIconEx>
-            </div>
+        <Modal ref="switchBranchOrTagModal" title="Switch branches/tags" :modalStyle="{height:'80vh'}" @show="network_getAvailableRef">
             <div class="select-menu-text-filter">
                 <div class="p-3">
                     <input type="text" v-model="switchBranchOrTagModalSearchQuery" class="form-control" placeholder="Filter branches/tags" autofocus="" autocomplete="off"/>
                 </div>
                 <ModalTab class="SelectMenu-tabs" style="background-color: #f6f8fa;">
-                    <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('branch')" :class="{'active-modal-tab':switchBranchOrTagModalTab == 'branch'}">Branches</button>
-                    <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('tag')" :class="{'active-modal-tab':switchBranchOrTagModalTab == 'tag'}">Tags</button>
+                    <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('branches')" :class="{'active-modal-tab':switchBranchOrTagModalTab == 'branches'}">Branches</button>
+                    <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('tags')" :class="{'active-modal-tab':switchBranchOrTagModalTab == 'tags'}">Tags</button>
                 </ModalTab>
             </div>
-            <transition-group v-if="switchBranchOrTagModalTab == 'branch'" name="fade-group" appear>
-                <SelectMenuItem :key="repoBasicInfo().default_branch" v-if="repoBasicInfo().default_branch" @click.native="() => routerWithRef(repoBasicInfo().default_branch)" :selected="currentRef == repoBasicInfo().default_branch">
-                    <span class="flex-1">{{repoBasicInfo().default_branch}}</span>    
-                    <span class="Label Label--gray flex-self-start">default</span>
-                </SelectMenuItem>
-                <SelectMenuItem @click.native="() => routerWithRef(item.ref.replace('refs/heads/',''))" v-for="item in filterAllBranches" :key="item.ref" :selected="currentRef == item.ref.replace('refs/heads/','')">
-                    <span>{{item.ref.replace('refs/heads/','')}}</span>    
-                </SelectMenuItem>
-            </transition-group>
-            <transition-group v-if="switchBranchOrTagModalTab == 'tag'" name="fade-group" appear>
-                <SelectMenuItem @click.native="() => routerWithRef(item.ref.replace('refs/tags/',''))" v-for="item in filterAllTags" :key="item.ref" :selected="currentRef == item.ref.replace('refs/tags/','')">
-                    <span>{{item.ref.replace('refs/tags/','')}}</span>    
-                </SelectMenuItem>
-            </transition-group>
+            <div v-if="(switchBranchOrTagModalTab == 'branches' && modalAvailableBranches.loading) || (switchBranchOrTagModalTab == 'tags' && modalAvailableTags.loading)" class="flex-row-center height-full">
+                <LoadingIconEx></LoadingIconEx>
+            </div>
+            <div v-else style="overflow:auto">
+                <transition-group v-if="switchBranchOrTagModalTab == 'branches'" name="fade-group" appear>
+                    <SelectMenuItem :key="repoBasicInfo().default_branch" v-if="repoBasicInfo().default_branch" @click.native="() => routerWithRef(repoBasicInfo().default_branch)" :selected="currentRef == repoBasicInfo().default_branch">
+                        <span class="flex-1">{{repoBasicInfo().default_branch}}</span>    
+                        <span class="Label Label--gray flex-self-start">default</span>
+                    </SelectMenuItem>
+                    <SelectMenuItem @click.native="() => routerWithRef(item)" v-for="item in modalFilteredAvailableBranches" :key="item" :selected="currentRef == item">
+                        <span>{{item}}</span>    
+                    </SelectMenuItem>
+                </transition-group>
+                <transition-group v-if="switchBranchOrTagModalTab == 'tags'" name="fade-group" appear>
+                    <SelectMenuItem @click.native="() => routerWithRef(item)" v-for="item in modalFilteredAvailableTags" :key="item" :selected="currentRef == item">
+                        <span>{{item}}</span>    
+                    </SelectMenuItem>
+                </transition-group>
+            </div>
         </Modal>
     </CommonLoadingWrapper>
 </template>
@@ -60,9 +62,9 @@
 <script>
     import styled from 'vue-styled-components'
     import {CommonLoading,SelectMenuItem,LoadingIconEx,Modal,WithNotFoundNoticeWrapper,CommonLoadingWrapper,Breadcrumb} from '@/components'
-    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
+    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet} from '@/network'
     import {util_queryParse} from '@/util'
-    import CommitGroup from './CommitGroup'
+    import {CommitGroup} from './components'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
     import {RouteUpdateAwareMixin,WithModalMixin} from '@/mixins'
@@ -89,8 +91,16 @@
                     loading: false
                 },
                 firstLoadedFlag: false,
-                switchBranchOrTagModalTab: "branch",
+                switchBranchOrTagModalTab: "branches",
                 switchBranchOrTagModalSearchQuery: "",
+                modalAvailableBranches: {
+                    data: [],
+                    loading: false
+                },
+                modalAvailableTags: {
+                    data: [],
+                    loading: false
+                }
             }
         },
         computed: {
@@ -123,16 +133,14 @@
                 })
                 return commitGroups
             },
-            filterAllBranches() {
-                return this.allBranchesAndTags.branches.filter(i => {
-                    let branchName = i.ref.replace('refs/heads/','')
-                    return (branchName.toLowerCase().indexOf(this.switchBranchOrTagModalSearchQuery.toLowerCase()) != -1) && (branchName != this.repoBasicInfo().default_branch)
+            modalFilteredAvailableBranches() {
+                return this.modalAvailableBranches.data.filter(i => {
+                    return (i.toLowerCase().indexOf(this.switchBranchOrTagModalSearchQuery.toLowerCase()) != -1) && (i != this.repoBasicInfo().default_branch)
                 })
             },
-            filterAllTags() {
-                return this.allBranchesAndTags.tags.filter(i => {
-                    let tagName = i.ref.replace('refs/tags/','')
-                    return tagName.toLowerCase().indexOf(this.switchBranchOrTagModalSearchQuery.toLowerCase()) != -1
+            modalFilteredAvailableTags() {
+                return this.modalAvailableTags.data.filter(i => {
+                    return i.toLowerCase().indexOf(this.switchBranchOrTagModalSearchQuery.toLowerCase()) != -1
                 })
             },
         },
@@ -198,6 +206,67 @@
                     this.graphqlData.loading = false
                 }
             },
+            network_getAvailableRef() {
+                if(this.switchBranchOrTagModalTab == 'branches') {
+                    this.network_getAvailableBranches()
+                }else{
+                    this.network_getAvailableTags()
+                }
+            },
+            async network_getAvailableBranches() {
+                if(this.modalAvailableBranches.loading) return
+                if(this.modalAvailableBranches.data.length > 0) return
+                try{
+                    this.modalAvailableBranches.loading = true
+                    let url = api.API_REPOSITORY_COMMITS_AVAILABLE_BRANCHES({
+                        owner: this.owner(),
+                        repo: this.repo(),
+                        branch: this.currentRef
+                    })
+                    let res = await commonGet(url)
+                    this.modalAvailableBranches.data = this.parseBranchesFromHTML(res.data)
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.modalAvailableBranches.loading = false
+                }
+            },
+            async network_getAvailableTags() {
+                if(this.modalAvailableTags.loading) return
+                if(this.modalAvailableTags.data.length > 0) return
+                try{
+                    this.modalAvailableTags.loading = true
+                    let url = api.API_REPOSITORY_COMMITS_AVAILABLE_TAGS({
+                        owner: this.owner(),
+                        repo: this.repo(),
+                        branch: this.currentRef
+                    })
+                    let res = await commonGet(url)
+                    this.modalAvailableTags.data = this.parseTagsFromHTML(res.data)
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.modalAvailableTags.loading = false
+                }
+            },
+            parseBranchesFromHTML(HTML) {
+                let pattern = /<span class="(?:flex-1 )?break-word" data-menu-button-text data-filter-item-text>(.*)<\/span>/g
+                let execResult
+                let branches = []
+                while((execResult = pattern.exec(HTML)) != null) {
+                    if(execResult[1]) branches.push(execResult[1])
+                }
+                return branches
+            },
+            parseTagsFromHTML(HTML) {
+                let pattern = /<span class="css-truncate css-truncate-overflow" title="(?:.*)" >\n\s*(.*)\n\s*<\/span>/g
+                let execResult
+                let tags = []
+                while((execResult = pattern.exec(HTML)) != null) {
+                    if(execResult[1])tags.push(execResult[1])
+                }
+                return tags
+            },
             changePage(goPrevPageFlag) {
                 let queryStr = util_queryParse.querify({
                     ...this.$route.query,
@@ -211,7 +280,9 @@
             },
             switchModalTab(payload) {
                 this.switchBranchOrTagModalTab = payload
+                this.network_getAvailableRef()
             },
+            
         },
         components: {
             CommonLoading,
@@ -248,8 +319,6 @@
 }
 
 .select-menu-text-filter{
-    position: sticky;
-    top: 0px;
     background-color: #f6f8fa;
     border-bottom: 1px solid #dfe2e5;
     input {
@@ -271,7 +340,4 @@
     color: #586069;
 }
 
-.active-modal-tab{
-    background: white
-}
 </style>

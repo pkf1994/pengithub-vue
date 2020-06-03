@@ -130,18 +130,42 @@
                         per_page: 1
                     }
                     const res_rest_arr = await Promise.all([
-                        authRequiredGet(api.API_SEARCH("code",restParam),{
-                            headers: {"Accept": "application/vnd.github.mercy-preview+json"},
-                            cancelToken:sourceAndCancelToken.cancelToken
-                        }),
-                        authRequiredGet(api.API_SEARCH("commits",restParam),{
-                            headers: {"Accept": "application/vnd.github.cloak-preview"},
-                            cancelToken:sourceAndCancelToken.cancelToken
-                        }),
-                        authRequiredGet(api.API_SEARCH("topics",restParam),{
-                            headers: {"Accept": "application/vnd.github.mercy-preview+json"},
-                            cancelToken:sourceAndCancelToken.cancelToken
-                        }),
+                        authRequiredGet(
+                            api.API_SEARCH(
+                                {
+                                    type: 'code',
+                                    params: restParam
+                                }
+                            ),
+                            {
+                                headers: {"Accept": "application/vnd.github.mercy-preview+json"},
+                                cancelToken:sourceAndCancelToken.cancelToken
+                            }
+                        ),
+                        authRequiredGet(
+                            api.API_SEARCH(
+                                {
+                                    type: 'commits',
+                                    params: restParam
+                                }
+                            ),
+                            {
+                                headers: {"Accept": "application/vnd.github.cloak-preview"},
+                                cancelToken:sourceAndCancelToken.cancelToken
+                            }
+                        ),
+                        authRequiredGet(
+                            api.API_SEARCH(
+                                {
+                                    type: 'topcis',
+                                    params: restParam
+                                }
+                            ),
+                            {
+                                headers: {"Accept": "application/vnd.github.mercy-preview+json"},
+                                cancelToken:sourceAndCancelToken.cancelToken
+                            }
+                        )
                     ])
 
                     this.data = {

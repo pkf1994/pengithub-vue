@@ -1,5 +1,5 @@
 
-export const GRAPHQL_USER_OVERVIEW = payload => `
+export const GRAPHQL_USER_PINNED_REPOSITORIES = payload => `
 {
   user(login: "${payload}") {
     id

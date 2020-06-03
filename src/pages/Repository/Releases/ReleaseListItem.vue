@@ -170,8 +170,7 @@
                     let url = api.API_COMMITS_COMPARE({
                         owner: this.owner(),
                         repo: this.repo(),
-                        base: this.release.tag_name,
-                        head: this.release.target_commitish
+                        baseHead: `${this.release.tag_name}...${this.release.target_commitish}`
                     })
                     let res = await authRequiredGet(url)
                     this.commitsCountSinceThisRelease = res.data.total_commits

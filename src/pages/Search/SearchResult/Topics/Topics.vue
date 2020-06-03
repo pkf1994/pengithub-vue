@@ -136,13 +136,15 @@
                     this.cancelSources.push(sourceAndCancelToken.source)
 
                      let url = api.API_SEARCH(
-                        this.searchType,
                         {
-                            q: this.m_query,
-                            sort: this.m_sort,
-                            order: this.m_order,
-                            page: this.m_page,
-                            per_page: this.perPage,
+                            type: this.searchType,
+                            params: {
+                                q: this.m_query,
+                                sort: this.m_sort,
+                                order: this.m_order,
+                                page: this.m_page,
+                                per_page: this.perPage,
+                            }
                         }
                     )
 

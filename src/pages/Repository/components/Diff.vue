@@ -150,6 +150,7 @@
     import styled from 'vue-styled-components'
     import {AnimatedHeightWrapper,Popover} from '@/components'
     import {authRequiredGet} from '@/network'
+    import {util_json} from '@/util'
     export default {
         props: {
             file: {
@@ -339,7 +340,12 @@
             },
             fileContentEntries() {
                 if(!this.fileContent) return []
-                let lines = this.fileContent.split('\n')
+                let lines
+                if(typeof this.fileContent == 'object') {
+                    lines = JSON.stringify(this.fileContent).split('\n')
+                }else{
+                    lines = this.fileContent.split('\n')
+                }
                 let entries = []
                 lines.forEach((item,index) => {
                     entries.push({
@@ -481,7 +487,6 @@
                             }
                         }
                     )
-                    
                     this.fileContent = res.data
                 }catch(e) {
                     console.log(e)

@@ -72,7 +72,7 @@
                         routePath:(this.routePath ? this.routePath : this.$route.path).replace(fragmentAggregate,'').replace(/\/\//g,'/')
                     })
                 }) 
-
+                    
                 return pathArr.reverse()
             }
         },

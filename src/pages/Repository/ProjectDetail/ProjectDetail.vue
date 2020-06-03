@@ -12,7 +12,6 @@
                 </IconSearchInput>
             </FilterInput>
         </transition>
-        
 
         <CardList class="p-2">
             <transition-group appear name="fade-group">
@@ -57,6 +56,7 @@
                         exact: true
                     })
                 })
+                
                 return tabs
             },
             column() {

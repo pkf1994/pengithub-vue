@@ -2,7 +2,7 @@
     <Container class="position-relative">
         
         <transition name="fade" appear>
-             <Main v-if="id">
+             <Main v-if="firstLoadedFlag">
                 <Pinned class="mt-4" v-if="pinnedRepositories.length > 0">
                     <Title class="f4 mb-2 text-normal">
                         Pinned
@@ -11,6 +11,10 @@
                     <RepoListItem class="mb-3" v-for="item in pinnedRepositories" :key="item.id" :repository="item">
 
                     </RepoListItem>
+
+                    <LoginNecessaryNotice v-if="!accessToken" class="d-flex flex-justify-center px-3 py-4 text-gray-light">
+                        Sign up with Oauth to show pinned repositories.
+                    </LoginNecessaryNotice>
                 </Pinned>
 
                 <Contribution :class="{'mt-4':pinnedRepositories.length == 0,'mt-6':pinnedRepositories.length > 0}">
@@ -40,7 +44,7 @@
         inject: ['loadingUserBasicInfoProvided'],
         data() {
             return {
-                id: undefined,
+                firstLoadedFlag: false,
                 pinnedRepositories: [],
                 loading: false
             }
@@ -52,17 +56,19 @@
         },
         created() {
             this.network_getData()
+            
         },
         methods: {
             async network_getData() {
+                if(!this.accessToken) return 
                 try{
                     this.loading = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let graphql_overview = graphql.GRAPHQL_USER_OVERVIEW(this.login)
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_overview,{cancelToken})
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_pinned_repositories')
+                    let graphql_pinnedRepositories = graphql.GRAPHQL_USER_PINNED_REPOSITORIES(this.login)
+                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_pinnedRepositories,{cancelToken})
                     try{
-                        this.id = res.data.data.user.id
                         this.pinnedRepositories = res.data.data.user.pinnedItems.nodes
+                        this.firstLoadedFlag = true
                     }catch(e) {
                         this.handleGraphqlError(res)
                     }
@@ -85,6 +91,7 @@
             LoadingWrapper: styled.div``,
             Title: styled.h2``,
             ContributionStatisticWrapper: styled.div``,
+            LoginNecessaryNotice: styled.div``
         }
     }
 </script>

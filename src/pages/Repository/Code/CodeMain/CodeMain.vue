@@ -177,11 +177,15 @@
                 try{
                     this.pinnedIssues.loading = false
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_pinned_issues')
-                    let url = api.API_SEARCH('issues',{
-                        q:`repo:${this.owner()}/${this.repo()} is:issue state:open is:public`,
-                        sort: 'updated',
-                        per_page: 5
-                    })
+                    let url = api.API_SEARCH(
+                        {
+                            type: 'issues',
+                            params: {
+                                q:`repo:${this.owner()}/${this.repo()} is:issue state:open is:public`,
+                                sort: 'updated',
+                                per_page: 5
+                            }
+                        })
                     let res = await authRequiredGet(url,{cancelToken})
                     this.pinnedIssues.data = res.data.items
                 }catch(e) {
@@ -195,11 +199,15 @@
                 try{
                     this.pinnedPullRequests.loading = false
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_pinned_pull')
-                    let url = api.API_SEARCH('issues',{
-                        q:`repo:${this.owner()}/${this.repo()} is:pr state:open is:public`,
-                        sort: 'updated',
-                        per_page: 5
-                    })
+                    let url = api.API_SEARCH(
+                        {
+                            type: 'issues',
+                            params: {
+                                q:`repo:${this.owner()}/${this.repo()} is:pr state:open is:public`,
+                                sort: 'updated',
+                                per_page: 5
+                            }
+                        })
                     let res = await authRequiredGet(url,{cancelToken})
                     this.pinnedPullRequests.data = res.data.items
                 }catch(e) {

@@ -218,12 +218,17 @@
                 try{
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let url = api.API_SEARCH('repositories', {
-                        q: `user:${this.login} ${this.language ? 'language:' + this.language + ' ' : ''}${this.typeQueryFragment}`.trim(),
-                        per_page: this.perPage,
-                        page: this.page,
-                        sort: 'updated'
-                    })
+                    let url = api.API_SEARCH(
+                        {
+                            type: 'repositories',
+                            params: {
+                                q: `user:${this.login} ${this.language ? 'language:' + this.language + ' ' : ''}${this.typeQueryFragment}`.trim(),
+                                per_page: this.perPage,
+                                page: this.page,
+                                sort: 'updated'
+                            }
+                        }
+                    )
                     let res_rest = await authRequiredGet(url,{
                         cancelToken,
                         headers: {
@@ -307,7 +312,7 @@
             FilterRow: styled.div``,
             ClearFilterRow: styled.div``,
             Pagination: styled.div``,
-
+            LoginNecessaryNotice: styled.div``
         }
     }
 </script>

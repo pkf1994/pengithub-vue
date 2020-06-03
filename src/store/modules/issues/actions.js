@@ -44,10 +44,12 @@ export const actions = {
                 }
             }else{
                 url = API_SEARCH(
-                    'issues',
                     {
-                        q: payload.q,
-                        per_page: perPage
+                        type: 'issues',
+                        params: {
+                            q: payload.q,
+                            per_page: perPage
+                        }
                     }
                 )
             }

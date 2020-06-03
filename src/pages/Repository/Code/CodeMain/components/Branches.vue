@@ -10,7 +10,7 @@
                         <template v-slot:summary>
                              <span>{{repoBasicInfo().default_branch}}</span>
                         </template>
-                        <router-link :to="`/${owner()}/${repo()}/tree/${item.name}`" class="branch-item d" v-for="item in activeBranchList" :key="item.name">
+                        <router-link :to="`/${owner()}/${repo()}/tree/${item.name}`" class="branch-item d" v-for="item in activeBranches.data" :key="item.name">
                             {{item.name}}
                         </router-link>
                         <router-link :to="`/${owner()}/${repo()}/branches`" class="branch-item d" style="font-weight: 400;">
@@ -22,12 +22,11 @@
         </template>
 
         <AnimatedHeightWrapper>
-            <Content class="bubble-content" v-if="codeBasicInfo().defaultBranchRef && codeBasicInfo().defaultBranchRef.target">
-                Last commit by <strong>{{codeBasicInfo().defaultBranchRef.target.history.nodes[0].author.user.login}}</strong> {{commitAt}}
-            </Content>
-
-            <Content class="bubble-content" v-else-if="lastCommit.node_id">
-                Last commit by <strong>{{lastCommit.author.login}}</strong> {{lastCommit.commit.committer.data | getDateDiff}}
+            <Content class="bubble-content">
+                Last commit by 
+                <strong v-if="lastCommit.data.author">{{lastCommit.data.author.login}}</strong>
+                <strong v-else-if="lastCommit.data.commit.author">{{lastCommit.data.commit.author.name}}</strong>
+                {{lastCommit.data.commit.committer.data | getDateDiff}}
             </Content>
         </AnimatedHeightWrapper>
 
@@ -42,7 +41,6 @@
                     Jump to file 
                 </router-link>
             </span>
-           
         </template>
     </ComplexBubble>
 </template>
@@ -52,16 +50,22 @@
     import {ComplexBubble,AnimatedHeightWrapper,SummaryAndDetail} from '@/components'
     import {util_dateFormat} from '@/util'
     import * as api from '@/network/api'
-    import {authRequiredGet} from '@/network'
+    import {authRequiredGet,cancelAndUpdateAxiosCancelTokenSource,commonGet} from '@/network'
     import { mapState, mapGetters } from 'vuex'
     export default {
         name: 'repository_code_main_branches',
         inject: ['owner','repo','codeBasicInfo','repoBasicInfo'],
-        
         data() {
             return {
                 data: [],
-                lastCommit: {},
+                lastCommit: {
+                    data: {},
+                    loading: false
+                },
+                activeBranches: {
+                    data: [],
+                    loading: false
+                },
                 loading: false,
                 stretch: false
             }
@@ -83,7 +87,7 @@
                 if(this.codeBasicInfo().refs) {
                     this.codeBasicInfo().refs.nodes.forEach(item => {
                         let lastCommitDate = new Date(item.target.history.nodes[0].committedDate)
-                        if(Date.parse(new Date()) - Date.parse(lastCommitDate) < 90 * 24 * 3600000 ) {
+                        if(Date.parse(new Date()) - Date.parse(lastCommit.Date) < 90 * 24 * 3600000 ) {
                             if(item.name != (this.codeBasicInfo().defaultBranchRef && this.codeBasicInfo().defaultBranchRef.name)) activeBranchList.push(item)
                         }
                     })
@@ -98,16 +102,16 @@
             }
         },
         created() {
-            if(!this.accessToken) {
-                this.network_getData()
-            }
+            this.network_getData()
         },
         methods: {
             triggerStretch() {
                 this.stretch = !this.stretch
             },
             network_getData() {
-                let url_lastCommit = api.API_REPOSITORY_COMMITS({
+                this.network_getLastCommit()
+                this.network_getActiveBranches()
+                /* let url_lastCommit.data = api.API_REPOSITORY_COMMITS({
                     owner: this.owner(),
                     repo: this.repo(),
                     params: {per_page:1}
@@ -117,8 +121,8 @@
                     repo: this.repo(),
                     params: {per_page:5}
                 })
-                authRequiredGet(url_lastCommit).then(res => {
-                    this.lastCommit = res.data[0]
+                authRequiredGet(url_lastCommit.data).then(res => {
+                    this.lastCommit.data = res.data[0]
                 }).catch(e => {
                     console.log(e)
                 })
@@ -126,7 +130,52 @@
                     this.data = res.data
                 }).catch(e => {
                     console.log(e)
-                })
+                }) */
+            },
+            async network_getLastCommit() {
+                try{
+                    this.lastCommit.loading = true
+                    let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_last_commit').cancelToken
+                    let url_lastCommit = api.API_REPOSITORY_COMMITS({
+                        owner: this.owner(),
+                        repo: this.repo(),
+                        params: {per_page:1}
+                    })
+                    let res = await authRequiredGet(url_lastCommit,{cancelToken})
+                    this.lastCommit.data = res.data[0]
+                }catch(e) { 
+                    console.log(e)
+                }finally{
+                    this.lastCommit.loading = false
+                }
+            },
+            async network_getActiveBranches() {
+                try{
+                    this.activeBranches.loading = true
+                    let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_active_branches').cancelToken
+                    let url_activeBranches = api.API_REPOSITORY_ACTIVE_BRANCHES({
+                        owner: this.owner(),
+                        repo: this.repo(),
+                    })
+                    let res = await commonGet(url_activeBranches,{cancelToken})
+                    this.activeBranches.data = this.parseActiveBranchesFromHTML(res.data)
+                }catch(e) { 
+                    console.log(e)
+                }finally{
+                    this.activeBranches.loading = false
+                }
+            },
+            parseActiveBranchesFromHTML(HTML) {
+                let execPattern = /<a class="d-block d-md-none position-absolute top-0 bottom-0 left-0 right-0" aria-label="Link to (.*)\." href="(.*)"><\/a>/g
+                let execResult
+                let result = []
+                while((execResult = execPattern.exec(HTML)) != null) {
+                    result.push({
+                        routerLink: execResult[1],
+                        name: execResult[2]
+                    })
+                }
+                return result
             }
         },
         watch: {

@@ -2,16 +2,20 @@
     <transition-group name="fade-group">
         <Container v-if="authenticated" class="header p-3" style="align-self: stretch" key="1">
             <MainRow class="d-flex flex-items-center text-white flex-justify-between">
+
                 <Menu class="btn-link text-white mr-3 d-flex flex-items-center" @click="triggerShowPullDown">
                     <svg display="d-inline-block v-align-text-bottom" height="24" class="" viewBox="0 0 12 16" version="1.1" width="18" aria-hidden="true"><path fill-rule="evenodd" fill="currentColor" d="M11.41 9H.59C0 9 0 8.59 0 8c0-.59 0-1 .59-1H11.4c.59 0 .59.41.59 1 0 .59 0 1-.59 1h.01zm0-4H.59C0 5 0 4.59 0 4c0-.59 0-1 .59-1H11.4c.59 0 .59.41.59 1 0 .59 0 1-.59 1h.01zM.59 11H11.4c.59 0 .59.41.59 1 0 .59 0 1-.59 1H.59C0 13 0 12.59 0 12c0-.59 0-1 .59-1z"></path></svg>
                 </Menu>
+
                 <slot></slot>
+
                 <router-link to="/notifications">
                     <Notification class="notification flex-row-center position-relative">
                         <WithUnreadNoticationIndicator v-if="unreadNotificationsCount" class="with-unread-notification-indicator"></WithUnreadNoticationIndicator>
                         <svg class="d-inline-block v-align-text-bottom" :class="{disabled:loadingUnreadNotificationsCount}" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" fill="currentColor" d="M14 12v1H0v-1l.73-.58c.77-.77.81-2.55 1.19-4.42C2.69 3.23 6 2 6 2c0-.55.45-1 1-1s1 .45 1 1c0 0 3.39 1.23 4.16 5 .38 1.88.42 3.66 1.19 4.42l.66.58H14zm-7 4c1.11 0 2-.89 2-2H5c0 1.11.89 2 2 2z"></path></svg>
                     </Notification>
                 </router-link>
+
             </MainRow>
             <AnimatedHeightWrapper :stretch="stretch">
                 <MenuPullDown class="pt-3" ref="menuPullDown">
@@ -41,7 +45,9 @@
                 </MenuPullDown>
             </AnimatedHeightWrapper>
         </Container>
-        <LogoutedHeader v-else key="2"></LogoutedHeader>
+        <LogoutedHeader v-else key="2">
+            <slot name="logout-slot"></slot>
+        </LogoutedHeader>
     </transition-group>
 </template>
 

@@ -64,7 +64,7 @@
             <RepoListItem v-for="item in repositories.data" :key="item.id" :repository="item"/>
         </transition-group>
 
-        <LoadingMore v-if="repositories.pageInfo.next  && rawContent" :loading="repositories.loading" :dataGetter="() => network_getRepositories(true)"/>
+        <SimpleLoadingMore v-if="repositories.pageInfo.next  && rawContent" :loading="repositories.loading" :dataGetter="() => network_getRepositories(true)"/>
 
         <transition name="fade" appear>
             <RelatedTopics v-if="relatedTopics && relatedTopics.length > 0 && rawContent" class="mb-4">
@@ -127,8 +127,7 @@
 <script>
     import {util_markdownParse,util_queryParse,util_numberFormat} from '@/util'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading,Modal,LoadingIconEx,SelectMenuItem,ImgWrapper} from '@/components'
-    import {LoadingMore} from '../components'
+    import {CommonLoading,Modal,LoadingIconEx,SelectMenuItem,ImgWrapper,SimpleLoadingMore} from '@/components'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
     import styled from 'vue-styled-components'
@@ -372,19 +371,21 @@
                     this.repositories.filterLanguageList.loading = false
                 }
             },
-            async network_getRepositories(loadingMoreFlag) {
+            async network_getRepositories(SimpleloadingMoreFlag) {
                  try{
                     this.repositories.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_repositories')
 
                     let url
-                    if(!loadingMoreFlag) {
+                    if(!SimpleloadingMoreFlag) {
                         url = api.API_SEARCH(
-                            'repositories',
                             {
-                                q: `topic:${this.topic} ${this.language ? 'language:' + this.language : ''}`.trim(),
-                                per_page: this.repositories.perPage,
-                                ...this.$route.query
+                                type: 'repositories',
+                                params:  {
+                                    q: `topic:${this.topic} ${this.language ? 'language:' + this.language : ''}`.trim(),
+                                    per_page: this.repositories.perPage,
+                                    ...this.$route.query
+                                }
                             }
                         )
                     } else {
@@ -403,7 +404,7 @@
                     )
                     this.repositories.pageInfo = parse(res.headers.link) || {}
                     
-                    if(!loadingMoreFlag) {
+                    if(!SimpleloadingMoreFlag) {
                         this.repositories.data = res.data.items
                     } else {
                         this.repositories.data = this.repositories.data.concat(res.data.items)    
@@ -453,7 +454,7 @@
         },
         components: {
             CommonLoading,
-            LoadingMore,
+            SimpleLoadingMore,
             Modal,
             SelectMenuItem,
             ImgWrapper,

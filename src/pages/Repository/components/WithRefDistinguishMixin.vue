@@ -24,7 +24,11 @@
             },
             currentRef() {
                 let pathMatch = this.$route.params.pathMatch
-                if(!pathMatch) return 
+                if(!pathMatch) {
+                    if(this.defaultBranch) return this.defaultBranch
+                    if(this.defaultRef) return this.defaultRef
+                    return
+                }
                 if(pathMatch.match(/^[^\/]+\/?$/)) return pathMatch.replace('/','')
                 if(this.allBranchesAndTags.branches.length == 0) return
                 let ref

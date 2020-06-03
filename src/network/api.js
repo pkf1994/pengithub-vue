@@ -79,9 +79,9 @@ export const API_USER_FOLLOWING = (login,params) => {
 
 export const API_TOP_LANGUAGES = "https://api.github.com/repos/drujensen/fib/Hello-World/languages"
 
-export const API_SEARCH = (type,param) => {
-    let query = util_queryParse.querify(param)
-    return `${GITHUB_REST_API_BASE}/search/${type}?${query}`
+export const API_SEARCH = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/search/${payload.type}?${query}`
 }
 
 export const API_REPO = fullName => `${GITHUB_REST_API_BASE}/repos/${fullName}`
@@ -133,7 +133,7 @@ export const API_REPOSITORY_SUBSCRIPTION = (owner,repo) => {
     return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/subscription`
 }
 
-export const API_COMMITS_COMPARE = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/compare/${payload.base}...${payload.head}`
+export const API_COMMITS_COMPARE = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/compare/${payload.baseHead}`
 
 export const API_GIT_REF = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/ref/${payload.ref}`
 
@@ -218,4 +218,34 @@ export const API_REPOSITORY_MILESTONES = payload => {
 
 export const API_REPOSITORY_MILESTONE = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/milestones/${payload.number}`
+}
+
+export const API_MERGEABLE = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/branches/pre_mergeable/${payload.baseHead}`
+
+export const API_REPOSITORY_COMMITS_AVAILABLE_BRANCHES = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/refs/${payload.branch}?source_action=show&source_controller=commits`
+
+export const API_REPOSITORY_COMMITS_AVAILABLE_TAGS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/refs-tags/${payload.branch}?source_action=show&source_controller=commits&tag_name=${payload.branch}`
+
+export const API_REPOSITORY_COMPARE_AVAILABLE_BRANCHES = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/compare/branch-list?range=${payload.baseHead}&type=${payload.type}`
+
+export const API_REPOSITORY_COMPARE_AVAILABLE_TAGS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/compare/tag-list?range=${payload.baseHead}&tag_name=${payload.tag}&type=${payload.type}`
+
+export const API_REPOSITORY_COMPARE_AVALIABLE_REPOSITORY = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/compare`
+
+export const API_REPOSITORY_COMPARE_EXIST_PULL_REQUEST = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/compare/${payload.baseHead}`
+
+export const API_REPOSITORY_ACTIVE_BRANCHES = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/branches/active`
+
+export const API_BRANCHES_OVERVIEW_INFO = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/branches`
+
+export const API_PROXY_ALL_BRANCHES = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/branches/${payload.meta}?${query}`
+}
+
+export const API_CREATE_PULL_REQUEST = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls`
+
+export const API_PROXY_USER_CONTRIBUTION_ILLUSTRATION = payload =>{
+    let query = util_queryParse.querify(payload.params)
+    return `${PROXY_API_BASE}/users/${payload.user}/contributions?${query}`
 }

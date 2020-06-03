@@ -9,6 +9,7 @@
           version="1.1"
           width="32"
           aria-hidden="true"
+          class="mr-4"
         >
           <path
             fill-rule="evenodd"
@@ -17,6 +18,9 @@
           />
         </svg>
       </router-link>
+
+      <slot></slot>  
+
       <PanelRight>
         <Button
           :inline="true"

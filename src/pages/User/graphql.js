@@ -1,17 +1,10 @@
 export const GRAPHQL_USER_INFO = payload => `
 {
     user(login: "${payload}") {
-      id
-      login
-      name
-      avatarUrl
-      company
-      location
       viewerCanFollow
       viewerIsFollowing
-      bioHTML
-      email
-      websiteUrl
+      isDeveloperProgramMember
+      isCampusExpert
       status {
         emojiHTML
         message

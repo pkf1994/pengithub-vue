@@ -326,11 +326,14 @@
                         this.network_getPinnedRepos()
                     }
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let url = api.API_SEARCH('repositories', {
-                        q: this.query,
-                        per_page: this.perPage,
-                        page: this.page,
-                        sort: 'updated'
+                    let url = api.API_SEARCH({
+                        type: 'repositories',
+                        params: {
+                            q: this.query,
+                            per_page: this.perPage,
+                            page: this.page,
+                            sort: 'updated'
+                        }
                     })
                     let res_rest = await authRequiredGet(url,{
                         cancelToken,

@@ -127,10 +127,12 @@
                     let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.name + ' get_commit_count')
                     this.cancelSources.push(sourceAndCancelToken.source)
                     const url = api.API_SEARCH(
-                        'commits',
                         {
-                            q: `repo:${this.owner()}/${this.repo()} committer-date:>${this.afterDateByPastPeriod}`,
-                        }   
+                            type: 'commits',
+                            params: {
+                                q: `repo:${this.owner()}/${this.repo()} committer-date:>${this.afterDateByPastPeriod}`,
+                            }
+                        }
                     )
                     const res = await authRequiredGet(
                         url,
@@ -221,10 +223,12 @@
                         url = this.pullsProposed.pageInfo.next.url
                     } else {
                         url = api.API_SEARCH(
-                            'issues',
                             {
-                                q:`repo:${this.owner()}/${this.repo()} type:pr state:open created:>${this.afterDateByPastPeriod}`,
-                                per_page: this.pullsProposed.perPage
+                                type: 'issues',
+                                params: {
+                                    q:`repo:${this.owner()}/${this.repo()} type:pr state:open created:>${this.afterDateByPastPeriod}`,
+                                    per_page: this.pullsProposed.perPage
+                                }
                             }
                         )
                     }
@@ -255,10 +259,12 @@
                         url = this.issuesOpened.pageInfo.next.url
                     } else {
                         url = api.API_SEARCH(
-                            'issues',
                             {
-                                q:`repo:${this.owner()}/${this.repo()} type:issues state:open created:>${this.afterDateByPastPeriod}`,
-                                per_page: this.issuesOpened.perPage
+                                type: 'issues',
+                                params: {
+                                    q:`repo:${this.owner()}/${this.repo()} type:issues state:open created:>${this.afterDateByPastPeriod}`,
+                                    per_page: this.issuesOpened.perPage
+                                }
                             }
                         )
                     }

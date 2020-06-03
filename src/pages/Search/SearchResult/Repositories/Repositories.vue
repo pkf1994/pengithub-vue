@@ -147,14 +147,16 @@
                         query = query.replace(/language:\S*/g,'') + ` language:${this.m_language}`
                     }
                      let url = api.API_SEARCH(
-                        this.searchType,
-                        {
-                            q: query,
-                            sort: this.m_sort,
-                            order: this.m_order,
-                            page: this.m_page,
-                            per_page: this.perPage,
-                        }
+                         {
+                             type: this.searchType,
+                             params: {
+                                 q: query,
+                                sort: this.m_sort,
+                                order: this.m_order,
+                                page: this.m_page,
+                                per_page: this.perPage,
+                             }
+                         }
                     )
                  
 

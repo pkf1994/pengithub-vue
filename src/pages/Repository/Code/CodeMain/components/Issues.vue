@@ -55,11 +55,16 @@
                 try{
                     this.loading = false
                     let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let url = api.API_SEARCH('issues',{
-                        q:`repo:${this.owner()}/${this.repo()} is:issue state:open is:public`,
-                        sort: 'updated',
-                        per_page: 5
-                    })
+                    let url = api.API_SEARCH(
+                        {
+                            type: 'issues',
+                            params: {
+                                 q:`repo:${this.owner()}/${this.repo()} is:issue state:open is:public`,
+                                sort: 'updated',
+                                per_page: 5
+                            }
+                        }
+                    )
                     let res = await authRequiredGet(url,{cancelToken: sourceAndCancelToken.cancelToken})
                     this.data = res.data.items
                 }catch(e) {

@@ -299,13 +299,13 @@
                     if(payload && payload.url) {
                         url = payload.url
                     } else {
-                         url = api.API_SEARCH(
-                            'issues',
-                            {
+                         url = api.API_SEARCH({
+                             type: 'issues',
+                             params: {
                                 q: this.query,
                                 per_page: this.perPage
                             }
-                        )
+                        })
                     }
                     let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
                     this.data = res.data.items
@@ -350,14 +350,21 @@
                     this.countByState.loading = true
 
                     let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(`${this.name} get_issue_count_by_state`)
-                    let url_issueCountOpen = api.API_SEARCH('issues',{
-                        q: this.query.replace(/is:(open|closed)/g,'').replace(/state:(open:closed)/g,'').trim() + ' is:open',
-                        per_page: 1
+                    let url_issueCountOpen = api.API_SEARCH({
+                        type: 'issues',
+                        params: {
+                            q: this.query.replace(/is:(open|closed)/g,'').replace(/state:(open:closed)/g,'').trim() + ' is:open',
+                            per_page: 1
+                        }
                     })
-                    let url_issueCountClosed = api.API_SEARCH('issues',{
-                        q: this.query.replace(/is:(open|closed)/g,'').replace(/state:(open:closed)/g,'').trim() + ' is:closed',
-                        per_page: 1
-                    })
+                    let url_issueCountClosed = api.API_SEARCH(
+                        {
+                            type: 'issues',
+                            params: {
+                                q: this.query.replace(/is:(open|closed)/g,'').replace(/state:(open:closed)/g,'').trim() + ' is:closed',
+                                per_page: 1
+                            }
+                        })
                     let resArr = await Promise.all([authRequiredGet(url_issueCountOpen),authRequiredGet(url_issueCountClosed)])
 
                     this.countByState.data = {

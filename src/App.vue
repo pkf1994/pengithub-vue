@@ -29,7 +29,7 @@ export default {
         action_oauth_requestViewerInfo: ACTION_OAUTH_REQUEST_VIEWER_INFO
     }),
     async init() {
-      if(!this.login){
+      if(!this.login && this.accessToken){
         await this.action_oauth_requestViewerInfo()
       }
       this.action_getNotificationsCount()

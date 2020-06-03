@@ -16,7 +16,7 @@
             <transition-group name="fade-group" appear>
                 <CollectionListItem v-for="item in data.filter(i => i.content)" :key="item.displayName" :collection="item"></CollectionListItem>
             </transition-group>
-            <LoadingMore v-if="data.filter(i => i.content).length > 0 &&  cursor <= data.length" :loading="loading" :dataGetter="network_getData"/>
+            <SimpleLoadingMore v-if="data.filter(i => i.content).length > 0 &&  cursor <= data.length" :loading="loading" :dataGetter="network_getData"/>
         </Main>
 
         <transition name="fade" appear>
@@ -27,10 +27,10 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {Jumbotron,LoadingMore} from '../components'
+    import {Jumbotron} from '../components'
     import {CollectionListItem,CollectionHighlightListItem} from './components'
     import {mapState} from 'vuex'
-    import {CommonLoading} from '@/components'
+    import {CommonLoading,SimpleLoadingMore} from '@/components'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
@@ -257,7 +257,7 @@
         },
         components: {
             Jumbotron,
-            LoadingMore,
+            SimpleLoadingMore,
             CollectionListItem,
             CollectionHighlightListItem,
             CommonLoading,

@@ -165,11 +165,13 @@
                     this.issues.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_issues')
                     let url = api.API_SEARCH(
-                        'issues',
                         {
-                            ...this.$route.query,
-                            q: `repo:${this.owner()}/${this.repo()} is:issue milestone:${this.data.title} state:${this.state}`,
-                            per_page: 10,
+                            type: 'issues',
+                            params: {
+                                 ...this.$route.query,
+                                q: `repo:${this.owner()}/${this.repo()} is:issue milestone:${this.data.title} state:${this.state}`,
+                                per_page: 10,
+                            }
                         }
                     )
                     let res = await authRequiredGet(url,{cancelToken})

@@ -1,6 +1,5 @@
 <template>
     <Container>
-
         <CutOffNotice class="cut-off-notice" v-if="totalCount > 250">
             This pull request is big! We’re only showing the most recent 250 commits.
         </CutOffNotice>

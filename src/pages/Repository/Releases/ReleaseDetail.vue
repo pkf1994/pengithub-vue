@@ -261,8 +261,7 @@
                     let url = api.API_COMMITS_COMPARE({
                             owner: this.owner(),
                             repo: this.repo(),
-                            base: this.data.tag,
-                            head: this.repoDefaultBranch
+                            baseHead: `${this.data.tag}...${this.repoDefaultBranch}`
                         }
                     )
                     let res = await authRequiredGet(url)

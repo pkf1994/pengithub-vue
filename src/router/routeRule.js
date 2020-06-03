@@ -41,6 +41,7 @@ const RepositoryCodeFileDetail = () => import('../pages/Repository/Code/CodeFile
 const RepositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
 const RepositoryIssuesBrowser = () => import('../pages/Repository/Issues/IssuesBrowser.vue')
 const RepositoryIssueDetail = () => import('../pages/Repository/Issues/IssueDetail/IssueDetail.vue')
+const RepositoryIssuesNew = () => import('../pages/Repository/IssuesNew/IssuesNew.vue')
 const RepositoryPullRequestsBrowser = () => import('../pages/Repository/PullRequests/PullRequestsBrowser.vue')
 const RepositoryPullRequestDetail = () => import('../pages/Repository/PullRequests/PullRequestDetail/PullRequestDetail.vue')
 const RepositoryPullRequestConversation = () => import('../pages/Repository/PullRequests/PullRequestDetail/Conversation.vue')
@@ -56,6 +57,7 @@ const RepositoryBranches = () => import('../pages/Repository/Branches/Branches.v
 const RepositoryBranchesOverview = () => import('../pages/Repository/Branches/Overview.vue')
 const RepositoryBranchesAll = () => import('../pages/Repository/Branches/All.vue')
 const RepositoryBranchesStale = () => import('../pages/Repository/Branches/Stale.vue')
+const RepositoryBranchesActive = () => import('../pages/Repository/Branches/Active.vue')
 const RepositoryFindFile = () => import('../pages/Repository/FindFile/FindFile.vue')
 const RepositoryReleases = () => import('../pages/Repository/Releases/Releases.vue')
 const RepositoryReleaseDetail = () => import('../pages/Repository/Releases/ReleaseDetail.vue')
@@ -64,6 +66,7 @@ const RepositoryBlame = () => import('../pages/Repository/Blame/Blame.vue')
 const RepositoryLabels = () => import('../pages/Repository/Labels/Labels.vue')
 const RepositoryMilestones = () => import('../pages/Repository/Milestones/Milestones.vue')
 const RepositoryMilestoneDetail = () => import('../pages/Repository/MilestoneDetail/MilestoneDetail.vue')
+const RepositoryCompare = () => import('../pages/Repository/Compare/Compare.vue')
 const SignOut = () => import('../pages/SignOut/SignOut.vue')
 const Notifications = () => import('../pages/Notifications/Notifications.vue')
 const NotFoundPage = () => import('../pages/NotFoundPage/NotFoundPage.vue')
@@ -326,6 +329,11 @@ export default [
                 ]
             },
             {
+                path: 'issues/new',
+                name: 'repositoryIssuesNew',
+                component: RepositoryIssuesNew,
+            },
+            {
                 path: 'issues',
                 component: RepositoryIssues,
                 children: [
@@ -345,13 +353,14 @@ export default [
                     }
                 ]
             },
+            
             {
                 path: 'pulls',
                 name: 'repositoryPullRequestsBrowser',
                 component: RepositoryPullRequestsBrowser,
             },
             {   
-                path: 'pull/:number',
+                path: 'pull(s)?/:number',
                 component: RepositoryPullRequestDetail,
                 children: [
                     {
@@ -421,6 +430,11 @@ export default [
                 name: 'repositoryMilestoneDetail',
                 component: RepositoryMilestoneDetail
             },
+            {
+                path: 'compare/(\.*)?',
+                name: 'repositoryCompare',
+                component: RepositoryCompare
+            },
             {   
                 path: 'branches',
                 component: RepositoryBranches,
@@ -439,6 +453,11 @@ export default [
                         path: 'stale',
                         name: 'repositoryBranchesStale',
                         component: RepositoryBranchesStale
+                    },
+                    {
+                        path: 'active',
+                        name: 'repositoryBranchesActive',
+                        component: RepositoryBranchesActive
                     },
                 ]
             },
