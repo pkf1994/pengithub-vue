@@ -108,14 +108,10 @@ export const GRAPHQL_USER_CONTRIBUTION_STATISTIC = payload => `
 }
 `
 
-export const GRAPHQL_USER_PERIOD_CONTRIBUTION_STATISTIC = payload => {
-  
-  let arrStr = `(to:"${payload.to}",from:"${payload.from}"${payload.organizationID ? ',organizationID:"' + payload.organizationID + '"' : ''})`
-
-  return`
-{
-  user(login: "${payload.login}") {
-    contributionsCollection${arrStr} {
+export const GRAPHQL_USER_PERIOD_CONTRIBUTION_STATISTIC = `
+query($login:String!,$to:DateTime,$from:DateTime,$organizationID:ID){
+  user(login:$login) {
+    contributionsCollection(to:$to,from:$from,organizationID:$organizationID) {
       hasAnyContributions
       endedAt
       startedAt
@@ -253,7 +249,7 @@ export const GRAPHQL_USER_PERIOD_CONTRIBUTION_STATISTIC = payload => {
   }
 }
 `
-}
+
 export const GRAPHQL_ORG = payload => `{
   organization(login: "${payload}") {
     id

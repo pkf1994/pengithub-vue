@@ -47,11 +47,10 @@
                     <EntriesFilterItem class="px-3" @click="() => triggerModel('sortModal')">Sort</EntriesFilterItem>
             </template>
 
-            <SimplePagination   v-if="pageInfo && (pageInfo.next || pageInfo.prev)"   
+            <SimplePaginationRest   v-if="pageInfo && (pageInfo.next || pageInfo.prev)"   
                                 :pageInfo="pageInfo" 
-                                scrollElSelector=".fix-full-scrollable"
-                                :goPrev="goPrev"
-                                :goNext="goNext"></SimplePagination>
+                                :loading="loading"
+                                ></SimplePaginationRest>
 
         </IssuesPageTemplate>
 
@@ -193,7 +192,7 @@
         ImgWrapper,
         Modal,
         IssuesPageTemplate,
-        SimplePagination,
+        SimplePaginationRest,
         ButtonLeftSearchInput,
         LoadingIconEx} from '@/components'
     import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet,commonGet} from '@/network'
@@ -681,7 +680,7 @@
             ButtonLeftSearchInput,
             SimpleSearchInput,
             IssuesPageTemplate,
-            SimplePagination,
+            SimplePaginationRest,
             ImgWrapper,
             SubNav: styled.div``,
             Container: styled.div``,

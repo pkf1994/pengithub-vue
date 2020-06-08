@@ -1,21 +1,19 @@
 <template>
     <Container class="commit Box-row Box-row--focus-gray mt-0 p-2 ">
-        <AnimatedHeightWrapper>
-            <CommitTitle class="h5 text-gray-dark pb-2">
-                <router-link style="color: #444d56" :to="commit.html_url.replace('https://github.com','')">
-                    {{commit.commit.message}}
-                </router-link>
-            </CommitTitle>
-        </AnimatedHeightWrapper>
+        <CommitTitle class="h5 text-gray-dark pb-2">
+            <router-link style="color: #444d56" :to="commit.html_url.replace('https://github.com','')">
+                {{messageTitle}}
+            </router-link>
+        </CommitTitle>
         
         <CommitMeta class="commit-meta d-flex flex-commits-center" style="color: #24292e;">
             
             <AvatarStack v-if="commit.author || commit.committer" class="AvatarStack flex-self-start AvatarStack-body" :class="{'AvatarStack--two':committedNotByAuthor}">
-                <ImgWrapper>
-                    <img class="avatar" v-if="commit.author" height="20" width="20" :src="commit.author.avatar_url" :alt="`@${commit.author && commit.author.name}`">
+                <ImgWrapper v-if="commit.author">
+                    <img class="avatar" height="20" width="20" :src="commit.author.avatar_url" :alt="`@${commit.author && commit.author.name}`">
                 </ImgWrapper>
-                <ImgWrapper>
-                    <img v-if="commit.author && committedNotByAuthor" class="avatar" height="20" width="20" :src="commit.committer.avatar_url" :alt="`@${commit.author.name}`">
+                <ImgWrapper v-if="commit.author && committedNotByAuthor" >
+                    <img class="avatar" height="20" width="20" :src="commit.committer.avatar_url" :alt="`@${commit.author.name}`">
                 </ImgWrapper>
             </AvatarStack>
 
@@ -67,6 +65,9 @@
                     return i.id == this.commit.node_id
                 })[0]
                 return dataHolder && dataHolder.status && dataHolder.status.state
+            },
+            messageTitle() {
+                return this.commit.commit.message.split('\n')[0]
             }
         },
         methods: {

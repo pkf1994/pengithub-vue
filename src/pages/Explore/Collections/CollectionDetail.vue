@@ -14,7 +14,7 @@
             </Jumbotron>
         </transition>
        
-        <Avatar class="col-6 mx-auto" v-if="avatar">
+        <Avatar class="col-6 mx-auto mt-3" v-if="avatar">
             <ImgWrapper>
                 <img :src="avatar" :alt="displayName" class="width-full">
             </ImgWrapper>
@@ -123,7 +123,6 @@
                         this.repositories.data.push(r.data)
                         if(this.repositories.data.length == magicArr.length) this.repositories.loading = false
                     }).catch(e => {
-                        this.handleError(e)
                         this.repositories.loading = false
                         console.log(e)
                     })

@@ -152,12 +152,12 @@
             pullRequestContributionActivityTitle() {
                 let totalCount = this.contributionsCollection.pullRequestContributions.totalCount
                 let totalCountOfRepos = this.contributionsCollection.pullRequestContributionsByRepository.length
-                return `Opened ${util_numberFormat.thousands(totalCount)} other ${totalCount > 1 ? 'pull requests' : 'pull request'} in ${totalCountOfRepos >= 10 ? 'more than ' : ''}${totalCountOfRepos} ${totalCountOfRepos > 1 ? 'repositories' : 'repository'}`
+                return `Opened ${util_numberFormat.thousands(totalCount)} ${this.contributionsCollection.popularPullRequestContribution ? 'other ' : ''}${totalCount > 1 ? 'pull requests' : 'pull request'} in ${totalCountOfRepos >= 10 ? 'more than ' : ''}${totalCountOfRepos} ${totalCountOfRepos > 1 ? 'repositories' : 'repository'}`
             },
             issueContributionActivityTitle() {
                 let totalCount = this.contributionsCollection.issueContributions.totalCount
                 let totalCountOfRepos = this.contributionsCollection.issueContributionsByRepository.length
-                return `Opened ${util_numberFormat.thousands(totalCount)} other ${totalCount > 1 ? 'issues' : 'issue'} in ${totalCountOfRepos >= 10 ? 'more than ' : ''}${totalCountOfRepos} ${totalCountOfRepos > 1 ? 'repositories' : 'repository'}`
+                return `Opened ${util_numberFormat.thousands(totalCount)}  ${this.contributionsCollection.popularIssueContribution ? 'other ' : ''}${totalCount > 1 ? 'issues' : 'issue'} in ${totalCountOfRepos >= 10 ? 'more than ' : ''}${totalCountOfRepos} ${totalCountOfRepos > 1 ? 'repositories' : 'repository'}`
             },
             pullRequestReviewContributionActivityTitle() {
                 let totalCount = this.contributionsCollection.pullRequestReviewContributions.totalCount

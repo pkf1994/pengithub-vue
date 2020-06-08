@@ -22,11 +22,11 @@
         </template>
 
         <AnimatedHeightWrapper>
-            <Content class="bubble-content">
+            <Content class="bubble-content" v-if="lastCommit.data.node_id">
                 Last commit by 
                 <strong v-if="lastCommit.data.author">{{lastCommit.data.author.login}}</strong>
                 <strong v-else-if="lastCommit.data.commit.author">{{lastCommit.data.commit.author.name}}</strong>
-                {{lastCommit.data.commit.committer.data | getDateDiff}}
+                {{lastCommit.data.commit.committer.date | getDateDiff}}
             </Content>
         </AnimatedHeightWrapper>
 

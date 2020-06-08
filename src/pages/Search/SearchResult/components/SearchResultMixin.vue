@@ -4,7 +4,7 @@
 
 <script>
     import {util_numberFormat,util_queryParse} from '@/util'
-    import {CommonLoading,SimplePagination} from '@/components'
+    import {CommonLoading,SimplePagination,SimplePaginationRest} from '@/components'
     import {Selector,EmptyNotice} from '../components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import styled from 'vue-styled-components'
@@ -61,7 +61,7 @@
             },
         },
         components: {
-            Selector,EmptyNotice,CommonLoading,SimplePagination,
+            Selector,EmptyNotice,CommonLoading,SimplePagination,SimplePaginationRest,
             Container: styled.div``,
             Title: styled.h3``,
             ResultContent: styled.div``,

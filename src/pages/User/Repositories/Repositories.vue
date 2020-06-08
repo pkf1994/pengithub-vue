@@ -70,7 +70,7 @@
              <div v-if="availableLanguage.loading" class="flex-row-center height-full">
                 <LoadingIconEx></LoadingIconEx>
             </div>
-            <div class="select-menu-text-filter p-3">
+            <div v-else class="select-menu-text-filter p-3">
                 <input type="text" v-model="availableLanguage.searchQuery" class="form-control" placeholder="Filter spoken languages" autofocus="" autocomplete="off"/>
             </div>
             <router-link v-if="language" :to="`${$route.path}${type ? '?type=' + type : '' }`">
@@ -110,7 +110,7 @@
         inject: ['loadingUserBasicInfoProvided'],
         provide() {
             return {
-                extraDataProvided: () => this.extraData
+                extraDataProvided: () => this.extraData.data
             }
         },
         data() {
@@ -122,7 +122,10 @@
                 totalCount: 0,
                 pageInfo: {
                 },
-                extraData: [],
+                extraData: {
+                    data: [],
+                    loading: false
+                },
                 firstLoadedFlag: false,
                 availableLanguage: {
                     searchQuery: '',
@@ -241,6 +244,19 @@
                     this.pageInfo = parse(res_rest.headers.link) || {}
                     this.firstLoadedFlag = true
 
+                    if(this.accessToken) this.network_getExtraData()
+                    
+                }catch(e) {
+                    this.handleError(e)
+                }finally{
+                    this.loading = false
+                }
+            },
+            async network_getExtraData() {
+                 try{
+                    this.extraData.loading = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data')
+
                     let graphql_extraData = graphql.GRAPHQL_USER_REPOSITORY_EXTRA(this.data)
                     let res_graphql = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
                     
@@ -255,12 +271,12 @@
                         extraData.push(dataHolder[key])
                     }
 
-                    this.extraData = extraData
+                    this.extraData.data = extraData
                     
                 }catch(e) {
-                    this.handleError(e)
+                    console.log(e)
                 }finally{
-                    this.loading = false
+                    this.extraData.loading = false
                 }
             },
             async network_getAvailableLanguage() {

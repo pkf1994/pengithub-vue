@@ -16,7 +16,7 @@
             <AnimatedWidthWrapper class="flex-shrink-0">
                 <Commits v-show="!countOfCommitsByBranch.loading && countOfCommitsByBranch.data > 0" class="commits height-full flex flex-items-center no-wrap">
                     <svg class="d-inline-block mr-1 v-align-middle" fill="currentColor" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 13H6V6h5v2H8v5zM7 1C4.81 1 2.87 2.02 1.59 3.59L0 2v4h4L2.5 4.5C3.55 3.17 5.17 2.3 7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 011.3 8c0-.34.03-.67.09-1H.08C.03 7.33 0 7.66 0 8c0 3.86 3.14 7 7 7s7-3.14 7-7-3.14-7-7-7z"></path></svg>
-                    <router-link to="/">{{countOfCommitsByBranch.data | thousands}} commits</router-link>
+                    <router-link :to="`/${owner()}/${repo()}/commits/${currentRef}`">{{countOfCommitsByBranch.data | thousands}} commits</router-link>
                 </Commits>
             </AnimatedWidthWrapper>   
         </Header>
@@ -48,7 +48,6 @@
         SummaryAndDetail,
         CommonLoading,
         Breadcrumb} from '@/components'
-    import {    RouteActiveAwareMixin} from '@/mixins'
     import {util_numberFormat} from '@/util'
     import FileItem from './FileItem'
     import {RouteUpdateAwareMixin} from '@/mixins'

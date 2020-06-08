@@ -13,9 +13,6 @@
                 <router-link v-if="extraData && extraData.name" :to="`/${member.login}`" class="css-truncate-target f4">
                     {{extraData.name}}
                 </router-link> 
-                <router-link v-else-if="member.name" :to="`/${member.login}`" class="css-truncate-target f4">
-                    {{member.name}}
-                </router-link> 
             </AnimatedHeightWrapper>
             <span class="d-block css-truncate-target f5 text-gray-dark">{{member.login}}</span>
         </Name>

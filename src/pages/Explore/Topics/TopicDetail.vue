@@ -294,7 +294,7 @@
                 this.loadingAvatar = true
                 let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
 
-                if(this.accessToken) {
+                if(!this.accessToken) {
                     let url_rawContent = api.API_CONTENTS({
                         owner: 'github',
                         repo: 'explore',
@@ -320,7 +320,7 @@
                     }).finally(() => {
                         this.loadingAvatar = false
                     })
-                }else {
+                }else{
                     let graphql_topicSketchAndRaw = graphql.GRAPHQL_TOPIC_SKETCH_AND_RAW(this.topic)
                     let res_topicSketchAndRaw = await authRequiredGitHubGraphqlApiQuery(graphql_topicSketchAndRaw,{cancelToken})
 
@@ -419,7 +419,7 @@
             },
             async network_getRepositoriesExtraData(payload) {
                 if(!this.accessToken) return
-                  try{
+                try{
                     this.repositories.extraData.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_repositories_extra_data')
 

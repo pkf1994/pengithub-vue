@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <CommonLoadingWrapper :loading="contributionIllustration.loading || contributionActivities.loading" position="corner">
         <Title class="f4 mb-2 text-normal">
             {{contributionIllustration.lastContributionsCount}} contributions in the last year
         </Title>
@@ -23,13 +23,14 @@
                         <div class="d-flex pt-3 pr-1">
                             <WeekItem class="d-flex flex-column" v-for="(weekItem,weekIndex) in contributionIllustration.weeks" :key="weekIndex">
                                 <Day class="contribution-week-item" 
-                                :class="{'not-selected':to && to == from && to != day.date}" 
+                                :class="{'not-selected':selectedDate && (selectedDate != day.date)}" 
                                 @click="() => routerWithSpecificDate(day.date)" 
                                 :date="day.date" 
                                 v-for="(day,dayIndex) in weekItem" 
                                 :day="dayIndex == 0 && generateDateDay(day.date)" 
                                 :month="dayIndex == 0 && generateDateDay(day.date) < 8 && generateMonth(day.date)"
                                 :key="day.date" 
+                                :dataCount="day.dataCount"
                                 :style="{backgroundColor:day.fill}">
                                 </Day>
                             </WeekItem>
@@ -57,44 +58,42 @@
             </Footer>
         </ContributionPerDay>
 
-         <AnimatedHeightWrapper v-if="contributionIllustration.contributionRatio['Issues']">
-            <ContributionClassificationRatio class="Box p-3 contribution-classification-ratio border-top  position-relative" :class="{loading:contributionIllustration.loading}">
-                <OrganizationsRow class="subnav mb-2 d-flex flex-wrap">
-                    <router-link exact="" v-for="item in contributionIllustration.organizations.slice(0,3)" :key="item.login" :to="`/${login}?org=${item.login}`" class="f6 p-1 pr-2 rounded-1 mr-2 mb-2 subnav-item css-truncate css-truncate-target ">
-                        <img class="avatar mr-1" :alt="`item.login`" height="20" width="20" :src="item.avatar">
-                        {{item.login}}
+        <ContributionClassificationRatio  v-if="contributionIllustration.contributionRatio['Issues']" class="Box p-3 contribution-classification-ratio border-top  position-relative" :class="{loading:contributionIllustration.loading}">
+            <OrganizationsRow class="subnav mb-2 d-flex flex-wrap">
+                <router-link exact="" v-for="item in contributionIllustration.organizations.slice(0,3)" :key="item.login" :to="`/${login}?org=${item.login}`" class="f6 p-1 pr-2 rounded-1 mr-2 mb-2 subnav-item css-truncate css-truncate-target ">
+                    <img class="avatar mr-1" :alt="`item.login`" height="20" width="20" :src="item.avatar">
+                    {{item.login}}
+                </router-link>
+                <button class="f6 rounded-1 border link-gray py-1 px-3 height-full" @click="() => showModal('orgsModal')" v-if="contributionIllustration.organizations.length > 3">
+                    <span style="height: 21px" class="d-inline-block v-align-middle" >More</span>
+                </button>
+            </OrganizationsRow>
+
+            <h5 class="mb-3 text-normal">
+                Activity overview
+            </h5>
+
+            <div class="d-flex mb-2">
+                <svg class="octicon octicon-repo text-gray mt-1 mr-2 flex-shrink-0" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9H3V8h1v1zm0-3H3v1h1V6zm0-2H3v1h1V4zm0-2H3v1h1V2zm8-1v12c0 .55-.45 1-1 1H6v2l-1.5-1.5L3 16v-2H1c-.55 0-1-.45-1-1V1c0-.55.45-1 1-1h10c.55 0 1 .45 1 1zm-1 10H1v2h2v-1h3v1h5v-2zm0-10H2v9h9V1z"></path></svg>
+                <div class="profile-break-word">
+                    Contributed to
+                    <router-link v-for="(item,index) in contributionIllustration.repositories" :key="item" :to="`/${item}`" class="context-repo-link text-bold css-truncate css-truncate-target" style="max-width:100%;">
+                        {{item}}<span style="color:#24292e;" v-if="index < contributionIllustration.repositories.length - 1">,&nbsp;</span>
                     </router-link>
-                    <button class="f6 rounded-1 border link-gray py-1 px-3 height-full" @click="() => showModal('orgsModal')" v-if="contributionIllustration.organizations.length > 3">
-                        <span style="height: 21px" class="d-inline-block v-align-middle" >More</span>
-                    </button>
-                </OrganizationsRow>
-
-                <h5 class="mb-3 text-normal">
-                    Activity overview
-                </h5>
-
-                <div class="d-flex mb-2">
-                    <svg class="octicon octicon-repo text-gray mt-1 mr-2 flex-shrink-0" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9H3V8h1v1zm0-3H3v1h1V6zm0-2H3v1h1V4zm0-2H3v1h1V2zm8-1v12c0 .55-.45 1-1 1H6v2l-1.5-1.5L3 16v-2H1c-.55 0-1-.45-1-1V1c0-.55.45-1 1-1h10c.55 0 1 .45 1 1zm-1 10H1v2h2v-1h3v1h5v-2zm0-10H2v9h9V1z"></path></svg>
-                    <div class="profile-break-word">
-                        Contributed to
-                        <router-link v-for="(item,index) in contributionIllustration.repositories" :key="item" :to="`/${item}`" class="context-repo-link text-bold css-truncate css-truncate-target" style="max-width:100%;">
-                            {{item}}<span style="color:#24292e;" v-if="index < contributionIllustration.repositories.length - 1">,&nbsp;</span>
-                        </router-link>
-                        <span class="no-wrap" v-if="contributionIllustration.extraRepositoriesCount != 0">
-                            and {{contributionIllustration.extraRepositoriesCount}} other repositories
-                        </span>
-                    </div>
+                    <span class="no-wrap" v-if="contributionIllustration.extraRepositoriesCount != 0">
+                        and {{contributionIllustration.extraRepositoriesCount}} other repositories
+                    </span>
                 </div>
+            </div>
 
-                <ContributionClassificationSvgWrapper >
-                    <ContributionClassificationSvg 
-                                                    :issuesContributionPercent="parseInt(contributionIllustration.contributionRatio['Issues'])" 
-                                                    :pullRequestsContributionPercent="parseInt(contributionIllustration.contributionRatio['Pull requests'])" 
-                                                    :codeReviewsContributionPercent="parseInt(contributionIllustration.contributionRatio['Code review'])" 
-                                                    :commitsContributionPercent="parseInt(contributionIllustration.contributionRatio['Commits'])"></ContributionClassificationSvg>
-                </ContributionClassificationSvgWrapper>
-            </ContributionClassificationRatio>
-        </AnimatedHeightWrapper>
+            <ContributionClassificationSvgWrapper>
+                <ContributionClassificationSvg 
+                                                :issuesContributionPercent="parseInt(contributionIllustration.contributionRatio['Issues'])" 
+                                                :pullRequestsContributionPercent="parseInt(contributionIllustration.contributionRatio['Pull requests'])" 
+                                                :codeReviewsContributionPercent="parseInt(contributionIllustration.contributionRatio['Code review'])" 
+                                                :commitsContributionPercent="parseInt(contributionIllustration.contributionRatio['Commits'])"></ContributionClassificationSvg>
+            </ContributionClassificationSvgWrapper>
+        </ContributionClassificationRatio>
 
         
         <Title class="f4 mt-5 mb-2 text-normal">
@@ -105,7 +104,12 @@
             <ContributionCollection v-for="item in contributionsCollectionWithPeriod.data"  :contributionsCollection="item" :key="item.endedAt"></ContributionCollection>
         </transition-group>
 
-        <button @click="network_getMoreContributionsCollection" :disabled="contributionsCollectionWithPeriod.loading" :class="{'my-3':contributionsCollectionWithPeriod.data.length == 0}" class="contribution-activity-show-more-btn btn btn-outline border-gray-dark width-full f6 py-2">
+        <LoginNecessaryNotice v-if="!accessToken" class="d-flex flex-justify-center px-3 py-4 text-gray-light">
+            <a href="javascript:void(0)" class="btn-link" @click="signIn">Sign up with Oauth&nbsp;</a>
+            to show contribution activities.
+        </LoginNecessaryNotice>
+
+        <button v-if="contributionsCollectionWithPeriod.data.length > 0 && accessToken" @click="network_getMoreContributionActivities" :disabled="contributionsCollectionWithPeriod.loading" :class="{'my-3':contributionsCollectionWithPeriod.data.length == 0}" class="contribution-activity-show-more-btn btn btn-outline border-gray-dark width-full f6 py-2">
             {{
                 contributionsCollectionWithPeriod.loading ? 'Loading...' : 'Show more activity'
             }}
@@ -125,20 +129,22 @@
             </router-link>
         </Modal>
 
-    </div>
+    </CommonLoadingWrapper>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {Modal,LoadingIconEx,SimpleSearchInput,SelectMenuItem,AnimatedHeightWrapper} from '@/components'
+    import {Modal,LoadingIconEx,SimpleSearchInput,SelectMenuItem,AnimatedHeightWrapper,CommonLoadingWrapper} from '@/components'
     import * as graphql from '../graphql'
     import * as api from '@/network/api'
+    import {ComponentActiveAwareMixin} from '@/mixins'
     import {util_numberFormat,util_dateFormat,util_queryParse} from '@/util'
     import ContributionClassificationSvg from './ContributionClassificationSvg'
     import ContributionCollection from './ContributionCollection'
     import {authRequiredGitHubGraphqlApiQuery,cancelAndUpdateAxiosCancelTokenSource,commonGet} from '@/network' 
     import Vue from 'vue'
     export default {
+        mixins: [ComponentActiveAwareMixin],
         name: 'user_overview_contribution_statistic',
         provide() {
             return {
@@ -171,7 +177,8 @@
                     data: [],
                     loading: false
                 },
-                currentOrganizationID: undefined
+                currentOrganizationID: undefined,
+               
             }
         },
         computed: {
@@ -179,23 +186,17 @@
                 return this.$route.params.login
             },
             from() {
-                let from = this.$route.query.from
-                /* if(!from){
-                    let now = new Date()
-                    now.setDate(1)
-                    from = util_dateFormat.dateFormat("yyyy-MM-dd",now)
-                } */
-                return from
+                return this.$route.query.from
             },
             to() {
-                let to = this.$route.query.to
-                /* if(!to){
-                    let now = new Date()
-                    to = util_dateFormat.dateFormat("yyyy-MM-dd",now)
-                } */
-                return to
+                return this.$route.query.to
             },
-            
+            updateFlag() {
+                return `${this.login}-${this.org}`
+            },
+            contributionActivitiesUpdateFlag() {
+                return `${this.to}-${this.from}`
+            },
             currentOrganization() {
                 return this.$route.query.org
             },
@@ -220,6 +221,15 @@
                 }
                 if(!theDate) return 
                 return util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",theDate)
+            },
+            selectedDate() {
+                if(this.to && this.from) {
+                    let to_date = new Date(this.to)
+                    let from_date = new Date(this.from)
+                    if(util_dateFormat.dateFormat('yyyy-MM-dd',to_date) == util_dateFormat.dateFormat('yyyy-MM-dd',from_date)) {
+                        return util_dateFormat.dateFormat('yyyy-MM-dd',to_date)
+                    }
+                }
             }
         },
         async created() {
@@ -228,6 +238,7 @@
 
         methods: {
             network_getData() {
+                console.log('getData')
                 this.network_getContributionIllustration()
                 if(this.accessToken) this.network_getContributionActivities()
             },
@@ -235,18 +246,6 @@
                 try{
                     this.contributionIllustration.loading = true
                     let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_contribution_illustration').cancelToken
-                    let params
-                    if(this.to  && this.to == this.from) {
-                        params = {
-                            org: this.currentOrganization
-                        }
-                    }else{
-                        params = {
-                            to: this.to,
-                            from: this.from,
-                            org: this.currentOrganization
-                        }
-                    }
                     let url = api.API_PROXY_USER_CONTRIBUTION_ILLUSTRATION({
                         user: this.login,
                         params: {
@@ -275,17 +274,26 @@
                     let now = new Date()
                     let _to 
                     let _from
-                    _to = this.to || now
+                    _to = this.to || util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",now)
                     now.setDate(1)
-                    _from = this.from || now
-                    let graphql_periodContributionsCollection = graphql.GRAPHQL_USER_PERIOD_CONTRIBUTION_STATISTIC({
-                        login: this.login,
-                        organizationID:  this.currentOrganizationID,
-                        from: util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",_from),
-                        to: util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",_to)
-                    })
+                    now.setHours(1)
+                    now.setUTCMinutes(1)
+                    now.setUTCMilliseconds(0)
+                    _from = this.from || util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",now)
+                    let graphql_periodContributionsCollection = graphql.GRAPHQL_USER_PERIOD_CONTRIBUTION_STATISTIC
 
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_periodContributionsCollection,{cancelToken})
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql_periodContributionsCollection,
+                        {
+                            cancelToken,
+                            variables: {
+                                login: this.login,
+                                organizationID:  this.currentOrganizationID,
+                                from: _from,
+                                to: _to
+                            }
+                        }
+                    )
 
                     try{
                         this.contributionsCollectionWithPeriod.data = [
@@ -302,7 +310,7 @@
                 }
                
             },
-            async network_getMoreContributionsCollection() {
+            async network_getMoreContributionActivities() {
                 try{
                     this.contributionsCollectionWithPeriod.loading = true
                     let lastContributionsCollectionStartedAt = this.contributionsCollectionWithPeriod.data[this.contributionsCollectionWithPeriod.data.length - 1].startedAt
@@ -368,7 +376,7 @@
                         ])
                     }
                 }
-                this.contributionIllustration.weeks = weeks
+                this.contributionIllustration.weeks = weeks.reverse()
                 this.contributionIllustration.days = days
 
                 let contributionRatioExecPattern = /(Commits|Pull requests|Code review|Issues)&quot;:([0-9]*)/g
@@ -430,8 +438,8 @@
 
                 let query = util_queryParse.querify({
                     ...this.$route.query,
-                    to: util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",toDate),
-                    from: util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",fromDate),
+                    to: date,
+                    from: date
                 })
                 this.$router.push(`${this.$route.path}?${query}`)
             },
@@ -455,7 +463,6 @@
             },
             routerWithSpecificDate(date) {
                 if(!date.match(/^[1-9][0-9]{3}-[0-1][0-9]-[0-3][0-9]$/)) return
-                this.selectedDate = date
                 let dateInfoHolder = date.split('-')
                 let year = dateInfoHolder[0]
                 let month = dateInfoHolder[1] - 1
@@ -482,8 +489,11 @@
         },
         watch: {
             updateFlag() {
-                this.network_getData()
+                if(this.componentActive) this.network_getData()
             },
+            contributionActivitiesUpdateFlag() {
+                if(this.componentActive) this.network_getContributionActivities()
+            }
         },
         components: {
             ContributionClassificationSvg,
@@ -493,6 +503,7 @@
             SimpleSearchInput,
             SelectMenuItem,
             ContributionCollection,
+            CommonLoadingWrapper,
             Title: styled.h2``,
             ContributionPerDay: styled.div``,
             Content: styled.div``,
@@ -505,7 +516,8 @@
             ContributionClassificationRatio: styled.div``,
             OrganizationsRow: styled.nav``,
             ContributionClassificationSvgWrapper: styled.div``,
-            OrgModalListItem: styled.div``
+            OrgModalListItem: styled.div``,
+            LoginNecessaryNotice: styled.div``,
         }
     }
 </script>
@@ -561,7 +573,8 @@
 }
 .main{
     overflow-x: scroll;
-    overflow-y: visible;;
+    overflow-y: visible;
+    direction: rtl;
 }
 .contrib-footer {
     padding: 0 10px 12px;

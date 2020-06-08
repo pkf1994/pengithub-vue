@@ -109,21 +109,13 @@
                 login: state => state.oauth.viewerInfo.login
             }),
         },
-        created() {
+        async created() {
            this.network_getRecentActivities()
            this.network_getRepositoriesStarredAndContributedByViewer();
-/* 
-        var re = /x/;
-        var i = 0;
-        console.log(re);
 
-        re.toString = function () {
-            return '第 ' + (++i) + ' 次打开控制台';
-        }
-
-         setInterval(()=>console.log(re),1000) */
-
-
+           let u = "https://api.github.com/users/pkf1994/received_events"
+           let r = await authRequiredGet(u)
+           console.log(r)
         },
         methods: {
           /*   ...mapActions({
@@ -134,10 +126,10 @@
                  try{
                     this.recentActivities.loading = true
                     const url_userEvent = api.API_USER_EVENTS(this.login,{
-                        per_page:10
+                        per_page:30
                     })
                     const url_notfications = api.API_USER_NOTIFICATIONS({
-                        per_page: 10,
+                        per_page: 30,
                         all: true
                     })
                     let resArr = await Promise.all([authRequiredGet(url_userEvent),authRequiredGet(url_notfications)])

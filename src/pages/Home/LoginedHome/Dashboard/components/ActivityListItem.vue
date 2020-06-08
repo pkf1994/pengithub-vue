@@ -1,7 +1,7 @@
 <template>
     <Container class="list-item bg-white">
         <Main class="d-flex">
-            <IssueIcon class="repo-icon" v-if="event.payload.issue.state || issue.state" :issue="event.type == 'Assigned' ? issue : event.payload.issue"/> 
+            <IssueIcon class="repo-icon" v-if="payloadIssue || issue.state" :issue="event.type == 'Assigned' ? issue : payloadIssue"/> 
             <Content>
                 <Title>
                     <router-link :to="routerLink" class="lh-condensed ws-normal text-gray-dark text-bold mr-1 mb-2">
@@ -11,32 +11,35 @@
 
                 <AnimatedHeightWrapper>
                     <Labels>
-                        <Label class="mr-1" v-for="item in event.payload.issue.labels" :key="item.name" :name="item.name" :color="`#${item.color}`"/>
+                        <Label v-if="payloadIssue" class="mr-1" v-for="item in payloadIssue.labels" :key="item.name" :name="item.name" :color="`#${item.color}`"/>
                         <Label class="mr-1" v-for="item in issue.labels" :key="item.name" :name="item.name" :color="`#${item.color}`"/>
                     </Labels>
                 </AnimatedHeightWrapper>
                
                 <Body class="f6 mt-1">
-                <ImgWrapper>
-                    <img class="rounded-1 d-inline-block v-align-bottom"
-                                    v-if="event.actor && event.actor.avatar_url"
-                                    height="16"
-                                    width="16"
-                                    :src="event.actor.avatar_url"
-                                    :alt="'@' + event.actor.login">
-                </ImgWrapper>
+                    <router-link :to="`/${event.actor.login}`">
+                        <ImgWrapper>
+                            <img class="rounded-1 d-inline-block v-align-bottom"
+                                            v-if="event.actor && event.actor.avatar_url"
+                                            height="16"
+                                            width="16"
+                                            :src="event.actor.avatar_url"
+                                            :alt="'@' + event.actor.login">
+                        </ImgWrapper>
+                    </router-link>
                 
-                <span class="mx-1" v-if="event.actor && event.actor.avatar_url">·</span>
-                <router-link :to="`/${event.repo.full_name || event.repo.name}`" class="link-gray f6">
-                    {{event.repo.full_name || event.repo.name}}
-                </router-link>
-                <span class="px-1">·</span>
-                <span class="text-gray f6 mt-1 no-wrap">
-                        {{activityDescrioption}}
-                </span>
-                <router-link to="/" class="link-gray f6">
-                    {{formatDate}}
-                </router-link>
+                
+                    <span class="mx-1" v-if="event.actor && event.actor.avatar_url">·</span>
+                    <router-link :to="`/${event.repo.full_name || event.repo.name}`" class="link-gray f6">
+                        {{event.repo.full_name || event.repo.name}}
+                    </router-link>
+                    <span class="px-1">·</span>
+                    <span class="text-gray f6 mt-1 no-wrap">
+                            {{activityDescrioption}}
+                    </span>
+                    <router-link to="/" class="link-gray f6">
+                        {{formatDate}}
+                    </router-link>
                 </Body>
             </Content>
         </Main>
@@ -61,6 +64,11 @@
             }
         },
         computed: {
+            payloadIssue() {
+                if(!this.event.payload) return
+                if(this.event.payload.issue) return this.event.payload.issue
+                if(this.event.payload.pull_request) return this.event.payload.pull_request
+            },
             formatDate: function() {
                 return util_dateFormat.getDateDiff(this.event.created_at)
             },

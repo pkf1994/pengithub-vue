@@ -40,4 +40,5 @@
 
 <style scoped lang="scss">
 @import 'node_modules/@primer/css/header/index.scss';
+@import 'node_modules/@primer/css/truncate/index.scss';
 </style>

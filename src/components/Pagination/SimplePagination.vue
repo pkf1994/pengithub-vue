@@ -1,60 +1,64 @@
 <template>
-    <Container class="container pagination flex-row-center flex-items-stretch bg-white">
-        <Left   class="flex-grow-1 flex-row-center width-full  d-inline-block"
-                :disabled="!pageInfo.prev || loading"
-                 @click="_goPrev">Previous</Left>
-        <PageInfo >
-            <strong style="color: #586069;">
-                {{currentPage}} of {{pageInfo.last ? pageInfo.last.page : currentPage}}
-            </strong>
-        </PageInfo>
-        <Right  class="flex-grow-1 flex-row-center width-full d-inline-block"
-                :disabled="!pageInfo.next || loading"
-                @click="_goNext">Next</Right>
+    <Container class="paginate-container">
+        <div class="BtnGroup">
+            <button class="btn btn-outline BtnGroup-item" :disabled="!withPrev || loading" @click="goPrev">Previous</button>
+            <button class="btn btn-outline BtnGroup-item" :disabled="!withNext || loading"  @click="goNext">Next</button>
+        </div> 
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-   
+    import {util_queryParse} from '@/util'
     export default {
         props: {
             loading: {
                 type: Boolean,
+                required: false
+            },
+            withPrev: {
+                type: Boolean,
                 default: false
             },
-            pageInfo: {
-                type: Object,
-                required: true
+            withNext: {
+                type: Boolean,
+                default: false
             },
-            goNext: {
+            before: {
                 type: Function,
-                default: () => {console.log('go next')}
+                required: false
             },
-            goPrev: {
+            after: {
                 type: Function,
-                default: () => {console.log('go prev')}
-            },
+                required: false
+            }
         },
-     
         computed: {
-            currentPage: function () {
-                if(this.pageInfo.prev) {
-                    return parseInt(this.pageInfo.prev.page) + 1
-                }else if(this.pageInfo.next) {
-                    return parseInt(this.pageInfo.next.page) - 1
-                }
-                return 1
+            page() {
+                return this.$route.query.page || 1
             }
         },
         methods: {
-            _goNext() {
-                if(this.loading) return
-                this.goNext()
+            goPrev() {
+                if(this.page == 1) return 
+                if(this.before) this.before.call()
+                this.$router.push(`${this.$route.path}?${util_queryParse.querify(
+                    {
+                        ...this.$route.query,
+                        page: parseInt(this.page) - 1
+                    }
+                )}`)
+                if(this.after) this.after.call()
             },
-            _goPrev() {
-                if(this.loading) return
-                this.goPrev()
+            goNext() {
+                if(this.before) this.before.call()
+                this.$router.push(`${this.$route.path}?${util_queryParse.querify(
+                    {
+                        ...this.$route.query,
+                        page: parseInt(this.page) + 1
+                    }
+                )}`)
+                if(this.after) this.after.call()
             },
         },
         components: {
@@ -67,34 +71,11 @@
 </script>
 
 <style scoped>
-    .container{
-        padding: 0;
-        margin-top: 0;
-        margin-bottom: -1px;
-        background-color: #fafbfc;
-    }
-    .pagination{
-        border: 1px solid #e1e4e8;
-    }
-    .pagination div{
-        position: relative;
-        float: left;
-        padding: 7px 12px;
-        margin-left: -1px;
-        font-size: 13px;
-        font-style: normal;
-        font-weight: 600;
-        color: #0366d6;
-        white-space: nowrap;
-        vertical-align: middle;
-        cursor: pointer;
-        user-select: none;
-        background: #fff;
-        border: 1px solid #e1e4e8;
-    }
-    button:disabled{
-        color: #d1d5da !important;
-        cursor: default !important;
-        background-color: #fafbfc !important;
-    }
+
+.paginate-container {
+    margin-top: 20px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
 </style>

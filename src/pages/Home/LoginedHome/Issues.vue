@@ -25,11 +25,10 @@
                     <EntriesFilterItem class="px-3" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</EntriesFilterItem>
             </template>
 
-            <SimplePagination   v-if="pageInfo && (pageInfo.next || pageInfo.prev)"   
-                                :pageInfo="pageInfo" 
-                                scrollElSelector="fix-full-scrollable"
-                                :goPrev="goPrev"
-                                :goNext="goNext"></SimplePagination>
+            <SimplePaginationRest   v-if="pageInfo && (pageInfo.next || pageInfo.prev)"
+                                :loading="loading"   
+                                :pageInfo="pageInfo"
+                                ></SimplePaginationRest>
 
             
         </IssuesPageTemplate>
@@ -73,7 +72,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {IssuesPageTemplate,SelectMenuItem,Modal,IconSearchInput,PaddingPageTopTab,HeaderDetachTopTab} from '@/components'
+    import {IssuesPageTemplate,SelectMenuItem,Modal,IconSearchInput,PaddingPageTopTab,HeaderDetachTopTab,SimplePaginationRest} from '@/components'
     import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
     import {mapState} from 'vuex'
     import * as api from '@/network/api'
@@ -285,8 +284,10 @@
                     }
                 ]
             },
-            
-        },
+            page() {
+                return this.$route.query.page
+            }
+        },  
         created() {
             this.network_getData()  
         },
@@ -303,7 +304,8 @@
                              type: 'issues',
                              params: {
                                 q: this.query,
-                                per_page: this.perPage
+                                per_page: this.perPage,
+                                page: this.page
                             }
                         })
                     }
@@ -437,6 +439,7 @@
             HeaderDetachTopTab,
             PaddingPageTopTab,
             IconSearchInput,
+            SimplePaginationRest,
             Container: styled.div``,
             TopTabContainer: styled.div``,
             EntriesFilterItem: styled.div``,

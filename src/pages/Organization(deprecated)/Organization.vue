@@ -6,14 +6,6 @@
                      <router-link class="Header-link" :to="`/orgs/${organization}`">{{organization}}</router-link>
                 </div>
             </div> 
-
-            <template v-slot:logout-slot>
-                <div class="Header-item Header-item--full flex-justify-center d-lg-none position-relative">
-                    <div class="css-truncate css-truncate-target width-fit position-absolute left-0 right-0 text-center">
-                        <router-link class="Header-link" :to="`/orgs/${organization}`">{{organization}}</router-link>
-                    </div>
-                </div> 
-            </template>
         </BaseHeader>
         <HeaderDetachTopTab :tabs="tabs"></HeaderDetachTopTab>
 
@@ -69,18 +61,18 @@
                     {
                         routerLink: `/orgs/${this.organization}/packages`,
                         label: 'Packages',
-                        meta: this.tabCounts.data.registryPackages && this.tabCounts.data.registryPackages.totalCount
+                        meta: this.tabCounts.data.packages && this.tabCounts.data.packages.totalCount
                     },
                     {
                         routerLink: `/orgs/${this.organization}/people`,
                         label: 'People',
                         meta: this.tabCounts.data.repositories && this.tabCounts.data.repositories.totalCount
                     },
-                    /* {
+                    {
                         routerLink: `/orgs/${this.organization}/projects`,
                         label: 'Projects',
                         meta: this.tabCounts.data.projects && this.tabCounts.data.projects.totalCount
-                    }, */
+                    },
                 ]
                /*  if(this.accessToken) {
                      tabs.push({
@@ -98,7 +90,6 @@
         },
         methods: {
             network_getData() {
-                this.network_getBasicInfo()
                 this.network_getTabCounts()
             },
             async network_getTabCounts() {
@@ -125,13 +116,21 @@
                     this.tabCounts.loading = false
                 }
             },
-            async network_getBasicInfo() {
+           /*  async network_getData() {
                 try{
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
                     let url = api.API_ORG(this.organization)
+                    let url_memberCount =  api.API_ORG_PUBLIC_MEMBER(
+                        this.organization,
+                        {
+                            page:  1,
+                            per_page: 1,
+                        }
+                    )
 
-                    let res = await authRequiredGet(
+                    let res = await Promise.all([
+                        authRequiredGet(
                             url,
                             {
                                 cancelToken,
@@ -139,16 +138,24 @@
                                     'Accept': 'application/vnd.github.surtur-preview+json'
                                 }
                             }
-                        )
+                        ),
+                        authRequiredGet(
+                            url_memberCount,
+                            {cancelToken}
+                        ),
+                    ])
                    
-                    this.data = res.data
+                    this.data = res[0].data
+
+                    let memberCountHolder = parse(res[1].headers.link)
+                    this.memberCount = memberCountHolder.last ? memberCountHolder.last.page : 0
 
                 }catch(e) {
-                    this.handleError(e)
+                    this.handleError(e,{handle404:true})
                 }finally{
                     this.loading = false
                 }
-            },
+            }, */
         },
         components: {
             BaseHeader,

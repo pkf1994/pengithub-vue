@@ -2,8 +2,8 @@
     <Container class="position-relative">
         
         <transition name="fade" appear>
-             <Main v-if="firstLoadedFlag">
-                <Pinned class="mt-4" v-if="pinnedRepositories.length > 0">
+             <Main v-if="firstLoadedFlag || !accessToken">
+                <Pinned class="mt-4" v-if="pinnedRepositories.length > 0 || !accessToken">
                     <Title class="f4 mb-2 text-normal">
                         Pinned
                     </Title>
@@ -12,8 +12,9 @@
 
                     </RepoListItem>
 
-                    <LoginNecessaryNotice v-if="!accessToken" class="d-flex flex-justify-center px-3 py-4 text-gray-light">
-                        Sign up with Oauth to show pinned repositories.
+                    <LoginNecessaryNotice v-if="!accessToken" class="px-3 py-4 text-gray-light text-center">
+                        <a href="javascript:void(0)" class="btn-link" @click="signIn">Sign up with Oauth&nbsp;</a> 
+                        to show pinned repositories.
                     </LoginNecessaryNotice>
                 </Pinned>
 

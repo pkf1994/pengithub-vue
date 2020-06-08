@@ -20,6 +20,7 @@ export const GRAPHQL_ORG_REPOSITORY_EXTRA = payload => {
           name
           color
         }
+        viewerHasStarred
       }
     `
   })

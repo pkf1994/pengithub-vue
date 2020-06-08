@@ -29,7 +29,8 @@
                 viewerIsCollaborator: {
                     data: false,
                     loading: true
-                }
+                },
+                viewerHasStarred: false,
             }
         },
         provide() {
@@ -88,12 +89,6 @@
                             return this.$route.path.indexOf(i) != -1
                         }).length > 0,
                         meta: this.openPullRequestsCount
-                    },
-                    {
-                        label: "Projects",
-                        routerLink: `${path}/projects`,
-                        disabled: !this.data.has_projects,
-                        meta: this.openProjectsCount
                     },
                     {
                         label: "Pulse",

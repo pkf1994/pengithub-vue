@@ -56,7 +56,7 @@
                     let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
                     let url = api.API_REPOSITORY_RELEASES(this.owner(),this.repo(),{per_page:1})
                     let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
-                    this.data = res.data[0]
+                    this.data = res.data[0] || {}
                     let releasesCountHolder = parse(res.headers.link) || {}
                     this.releasesCount = releasesCountHolder.last ? releasesCountHolder.last.page : res.data.length 
                 }catch(e) {

@@ -166,10 +166,6 @@
                         label: 'Repositories'
                     },
                     {
-                        to: `/${this.login}/projects`,
-                        label: 'Projects'
-                    },
-                    {
                         to: `/${this.login}/stars`,
                         label: 'Stars'
                     },
@@ -200,9 +196,12 @@
                     let url = api.API_USER(this.login)
 
                     let res = await authRequiredGet(url,{cancelToken})
+                    if(res.data.type == 'Organization') {
+                        this.$router.replace(`/orgs/${this.login}`)
+                        return
+                    }
                     this.data = res.data 
 
-                    this.network_getExtraData()
                 }catch(e) {
                     this.handleError(e)
                 }finally{
@@ -226,9 +225,11 @@
                     this.extraData.loading = false
                 }
             },
+        
             generateRouterMeta() {
                 return this.$route.params.login
             },
+        
         },
         components: {
             CommonLoadingWrapper,

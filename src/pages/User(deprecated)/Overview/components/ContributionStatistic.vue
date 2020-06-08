@@ -105,6 +105,8 @@
             <ContributionCollection v-for="item in contributionsCollectionWithPeriod"  :contributionsCollection="item" :key="item.endedAt"></ContributionCollection>
         </transition-group>
 
+        
+
 
 
         <button v-if="contributionsCollectionWithPeriod.length > 0" @click="network_getMoreContributionsCollection" :disabled="loadingMoreContributionCollections" class="contribution-activity-show-more-btn btn btn-outline border-gray-dark width-full f6 mt-0 py-2">
@@ -484,7 +486,7 @@
             ContributionClassificationRatio: styled.div``,
             OrganizationsRow: styled.nav``,
             ContributionClassificationSvgWrapper: styled.div``,
-            OrgModalListItem: styled.div``
+            OrgModalListItem: styled.div``,
         }
     }
 </script>

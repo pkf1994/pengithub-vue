@@ -1,27 +1,30 @@
 <template>
-    <CommonLoadingWrapper :loading="loadingOrganizationBasicInfo() || loading || extraData.loading" :position="loadingOrganizationBasicInfo() || loading ? 'center' : 'corner'" class="p-3">
-
-        <IconSearchInput class="mb-3" v-if="firstLoadedFlag" v-model="searchQuery" :search="routeWithSearchQuery"></IconSearchInput>
+    <Container class="px-3">
+        <!-- <div class="position-relative search-input-wrapper mb-3">
+            <input class="form-control subnav-search-input width-full" type="text" name="query" value="" placeholder="Find a member…" aria-label="Find a member…" autocomplete="off" data-throttled-autosubmit="">
+            <svg class="octicon octicon-search mt-1" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0013 6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0 .52-.09.7-.3a.996.996 0 000-1.41v.01zM7 10.7c-2.59 0-4.7-2.11-4.7-4.7 0-2.59 2.11-4.7 4.7-4.7 2.59 0 4.7 2.11 4.7 4.7 0 2.59-2.11 4.7-4.7 4.7z"></path></svg>
+        </div> -->
 
         <transition-group tag="div" appear name="fade-group">
-            <MemberListItem class="member-item" v-for="item in data" :key="item.login" :member="item"></MemberListItem>
+            <MemberListItem v-for="item in data" :key="item.node_id" :member="item"></MemberListItem>
         </transition-group>
 
-        <SimplePaginationRest v-if="(pageInfo.next || pageInfo.prev) && !query" :pageInfo="pageInfo" :loading="loading"></SimplePaginationRest>
-        
-        <SimplePagination v-else-if="simplePageInfo.withNext || simplePageInfo.withPrev" :withNext="simplePageInfo.withNext" :withPrev="simplePageInfo.withPrev"></SimplePagination>
-    </CommonLoadingWrapper>
+        <SimplePaginationRest v-if="pageInfo.next || pageInfo.prev " :pageInfo="pageInfo" :loading="loading"></SimplePaginationRest>
+
+        <transition name="fade" appear>
+            <CommonLoading v-if="loadingOrganizationBasicInfo() || loading || extraData.loading" :position="loadingOrganizationBasicInfo() || loading ? 'center' : 'corner'"></CommonLoading>
+        </transition>
+    </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoadingWrapper,SimplePaginationRest,SimplePagination,IconSearchInput} from '@/components'
+    import {CommonLoading,SimplePaginationRest} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet} from '@/network'
+    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery, commonGet} from '@/network'
     import {util_queryParse} from '@/util'
     import MemberListItem from './MemberListItem'
     import * as graphql from './graphql'
-    import * as api from '@/network/api'
     let parse = require('parse-link-header');
     export default { 
         name: 'organization_people_page',
@@ -38,42 +41,22 @@
                 loading: false,
                 pageInfo: {},
                 perPage: 10,
-                searchQuery: '',
-                firstLoadedFlag: false,
                 extraData: {
                     data: [],
                     loading: false
-                },
-                simplePageInfo: {
-                    withNext: false,
-                    withPrev: false
                 }
             }
         },
         computed: {
             publicMemberUrl() {
                 return this.organizationBasicInfo().public_members_url
-            },
-            query() {
-                this.searchQuery = this.$route.query.query
-                return this.$route.query.query
-            },
-            organization() {
-                return this.$route.params.organization
             }
         },
         created() {
             this.network_getData()
         },
         methods: {
-            network_getData() {
-                if(this.query) {
-                    this.network_getDataByProxy()
-                }else{
-                    this.netwokr_getDataFromApi()
-                }
-            },
-            async netwokr_getDataFromApi() {
+            async network_getData() {
                 if(!this.publicMemberUrl) return
                 if(this.loadingOrganizationBasicInfo()) return
                 try{
@@ -87,33 +70,13 @@
                     let res = await authRequiredGet(url,{cancelToken})
 
                     this.data = res.data
-                    this.firstLoadedFlag = true
                     this.pageInfo = parse(res.headers.link) || {}
 
                     if(this.accessToken) this.network_getExtraData()
+                   
 
                 }catch(e) {
                     this.handleError(e,{handle404:true})
-                }finally{
-                    this.loading = false
-                }
-            },
-            async network_getDataByProxy() {
-                try{
-                    this.loading = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let url = api.API_PROXY_ORGANIZATION_PEOPLE({
-                        login: this.organization,
-                        params: this.$route.query
-                    })
-
-                    let res = await commonGet(url,{cancelToken})
-                    this.parseHTML(res.data)
-                    this.firstLoadedFlag = true
-
-                    this.network_getExtraData()
-                }catch(e) {
-                    this.handleError(e)
                 }finally{
                     this.loading = false
                 }
@@ -145,31 +108,7 @@
                     this.extraData.loading = false
                 }
             },
-            routeWithSearchQuery() {
-                this.$router.push(`${this.$route.path}?${util_queryParse.querify({
-                    ...this.$route.query,
-                    query: this.searchQuery
-                })}`)
-            },
-            parseHTML(HTML) {
-                let pattern = /<li[^>]*>(?:.|\r|\n)*?<img.*src="(.*?)".*?\/>(?:.|\r|\n)*?<a.*data-hovercard-type="user".*?>(?:(?:\r|\n)\s*)?(.*)(?:(?:\r|\n)\s*)?<\/a>(?:.|\r|\n)*?<span.*?itemprop="name"[^>]*>(.*)<\/span>/g
-                let execResult
-                let people = []
-                while((execResult = pattern.exec(HTML)) != null) {
-                    people.push({
-                        avatar_url: execResult[1],
-                        name: execResult[2],
-                        login: execResult[3],
-                    })
-                }
-                this.data = people
-
-                let paginationNextPattern = /<a[^>]*>Next<\/a>/g
-                let paginationPreviousPattern = /<a[^>]*>Previous<\/a>/g
-                this.simplePageInfo.withNext = HTML.match(paginationNextPattern) != null
-                this.simplePageInfo.withPrev = HTML.match(paginationPreviousPattern) != null
-
-            }
+           
         },
         watch: {
             publicMemberUrl(newOne,oldOne) {
@@ -177,14 +116,11 @@
             }
         },
         components: {
-            CommonLoadingWrapper,
+            CommonLoading,
             MemberListItem,
-            IconSearchInput,
             SimplePaginationRest,
-            SimplePagination,
             Container: styled.div``
         }
-        
     }
 </script>
 
@@ -209,7 +145,5 @@
         height: 16px;
     }
 }
-.member-item:first-child{
-    border-top: 1px #e1e4e8 solid;
-}
+
 </style>

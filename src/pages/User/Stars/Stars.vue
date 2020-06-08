@@ -55,7 +55,7 @@
         inject: ['loadingUserBasicInfoProvided'],
         provide() {
             return {
-                extraDataProvided: () => this.extraData
+                extraDataProvided: () => this.extraData.data
             }
         },
         data() {
@@ -67,7 +67,10 @@
                 totalCount: 0,
                 pageInfo: {
                 },
-                extraData: [],
+                extraData: {
+                    data: [],
+                    loading: false
+                },
                 firstLoadedFlag: false,
             }
         },
@@ -170,6 +173,19 @@
                     this.totalCount = totalCountHolder.last ? totalCountHolder.last.page : res_rest[1].data.length
                     this.firstLoadedFlag = true
 
+                    if(this.accessToken) this.network_geExtratData()
+                    
+                }catch(e) {
+                    this.handleError(e)
+                }finally{
+                    this.loading = false
+                }
+            },
+            async network_geExtratData() {
+                try{
+                    this.extraData.loading = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data')
+
                     let graphql_extraData = graphql.GRAPHQL_USER_STARRED_REPOSITORY_EXTRA(this.data)
                     let res_graphql = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
 
@@ -184,12 +200,12 @@
                         extraData.push(dataHolder[key])
                     }
 
-                    this.extraData = extraData
+                    this.extraData.data = extraData
                     
                 }catch(e) {
-                    this.handleError(e)
+                    console.log(e)
                 }finally{
-                    this.loading = false
+                    this.extraData.loading = false
                 }
             },
             changePage(goPrevPageFlag) {

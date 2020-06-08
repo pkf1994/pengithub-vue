@@ -38,11 +38,9 @@
             
         </ResultContent>
 
-        <SimplePagination :loading="loading"
+        <SimplePaginationRest :loading="loading"
                           class="pagination mx-3"
                           v-if="pageInfo.next || pageInfo.prev"
-                            :goNext="() => m_routeTo({p:pageInfo.next.page})"
-                          :goPrev="() => m_routeTo({p:pageInfo.prev.page})"
                           :pageInfo="pageInfo"/>
 
         <EmptyNotice v-if="data.length == 0 && !loading"></EmptyNotice>

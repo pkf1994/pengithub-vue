@@ -1,7 +1,7 @@
 <template>
     <Container class="d-flex py-4 border-bottom">
 
-        <AvatarColumn class="col-2">
+        <AvatarColumn class="col-2 mr-2">
             <router-link :to="`/${comprehensiveFollowing.login}`">
                 <ImgWrapper>
                     <img class="avatar" height="50" width="50" :src="comprehensiveFollowing.avatar_url" :alt="`@${comprehensiveFollowing.login}`">
@@ -12,15 +12,17 @@
         
         <Content class="col-10">
             <FollowBtn class="float-right mt-1 ml-1">
-                <button class="btn btn-sm" :disabled="comprehensiveFollowing.viewerIsFollowing == undefined">
+                  <button v-if="accessToken" class="btn btn-sm" :disabled="comprehensiveFollowing.viewerIsFollowing == undefined">
                     {{comprehensiveFollowing.viewerIsFollowing ? 'Unfollow' : 'Follow'}}
+                </button>
+
+                 <button v-else class="btn btn-sm" @click="signIn">
+                    Follow
                 </button>
             </FollowBtn>
 
             <router-link :to="`/${comprehensiveFollowing.login}`" class="mb-1 no-underline d-flex flex-items-center flex-wrap">
-                <AnimatedWidthWrapper>
-                    <span v-if="comprehensiveFollowing.name" class="f4 link-gray-dark no-wrap">{{comprehensiveFollowing.name}}</span>
-                </AnimatedWidthWrapper>
+                <span v-if="comprehensiveFollowing.name" class="f4 link-gray-dark no-wrap">{{comprehensiveFollowing.name}}</span>
                 <span class="link-gray pl-1 d-inline-block">{{comprehensiveFollowing.login}}</span>
             </router-link>
 
@@ -48,7 +50,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {AnimatedHeightWrapper,AnimatedWidthWrapper,ImgWrapper} from '@/components'
+    import {AnimatedHeightWrapper,ImgWrapper} from '@/components'
     export default {
         inject: ['extraDataProvided'],
         props: {
@@ -67,7 +69,6 @@
         },
         components: {
             AnimatedHeightWrapper,
-            AnimatedWidthWrapper,
             ImgWrapper,
             Container: styled.div``,
             FollowBtn: styled.div``,

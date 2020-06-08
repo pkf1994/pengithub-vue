@@ -3,7 +3,9 @@
 
 <script>
     import {cancelAndUpdateAxiosCancelTokenSource} from '@/network'
+    import ComponentActiveAwareMixin from './ComponentActiveAwareMixin' 
     export default {
+        mixins: [ComponentActiveAwareMixin],
         data() {
             return {
                 routerMeta: undefined,
@@ -20,7 +22,7 @@
                 if(vm.routeUpdateAwareMixinDebugFlag) {
                     console.log('beforeRouteEnter')
                 }
-                if(vm.routerMeta && vm.routerMeta != vm.generateRouterMeta()) {
+                if(vm.routerMeta && vm.routerMeta != vm.generateRouterMeta() && vm.componentActive) {
                     vm.routeResetHook()
                     vm.cancelUntimelyAxios()
                     /* await (function(time) {
@@ -33,7 +35,7 @@
         },
         beforeRouteUpdate (to, from, next) {
             next()
-            if(this.routerMeta != this.generateRouterMeta()) {
+            if(this.routerMeta != this.generateRouterMeta() && this.componentActive) {
                 this.cancelUntimelyAxios()
                 this.routeUpdateHook()
                 this.routerMeta = this.generateRouterMeta()

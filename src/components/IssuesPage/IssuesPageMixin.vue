@@ -3,7 +3,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {SimplePagination,IconSearchInput} from '../'
+    import {SimplePagination,SimplePaginationRest,IconSearchInput} from '../'
     import IssuesPageTemplate from './IssuesPageTemplate.vue'
     import {mapState, mapActions} from 'vuex'
     import { ACTION_HOME_REQUEST_ISSUES } from '../../store/modules/home/actionTypes'
@@ -86,7 +86,8 @@
         components: {
           IssuesPageTemplate,
           IconSearchInput,
-          SimplePagination
+          SimplePagination,
+          SimplePaginationRest
         }
     }
 </script>

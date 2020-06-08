@@ -32,7 +32,7 @@ const UserFollowing = () => import('../pages/User/Following/Following.vue')
 const Organization = () => import('../pages/Organization/Organization.vue')
 const OrganizationRepositories = () => import('../pages/Organization/Repositories/Repositories.vue')
 const OrganizationPeople = () => import('../pages/Organization/People/People.vue')
-//const OrganizationPackages = () => import('../pages/Organization/Packages/Packages.vue')
+const OrganizationPackages = () => import('../pages/Organization/Packages/Packages.vue')
 const Repository = () => import('../pages/Repository/Repository.vue')
 const RepositoryCode = () => import('../pages/Repository/Code/Code.vue')
 const RepositoryCodeMain = () => import('../pages/Repository/Code/CodeMain/CodeMain.vue')
@@ -278,6 +278,11 @@ export default [
                 path: 'people',
                 name: 'organizationPeople',
                 component: OrganizationPeople
+            },
+            {
+                path: 'packages',
+                name: 'organizationPackages',
+                component: OrganizationPackages
             }
         ]
     },

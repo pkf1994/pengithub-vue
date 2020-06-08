@@ -51,7 +51,7 @@
         CommonLoading,
         Breadcrumb} from '@/components'
     import {
-        RouteActiveAwareMixin} from '@/mixins'
+        ComponentActiveAwareMixin} from '@/mixins'
     import {util_numberFormat} from '@/util'
     import FileItem from './FileItem'
     import {RouteUpdateAwareMixin} from '@/mixins'
@@ -61,7 +61,7 @@ import { authRequiredGitHubGraphqlApiQuery } from '@/network'
 import Vue from 'vue'
     export default {
         name: 'repository_code_file_browser_page',
-        mixins: [RouteActiveAwareMixin,RouteUpdateAwareMixin],
+        mixins: [ComponentActiveAwareMixin,RouteUpdateAwareMixin],
         inject: ['owner','repo','codeBasicInfo'],
         provide() {
             return {
@@ -252,7 +252,7 @@ import Vue from 'vue'
                 return path.replace(reg,'/')
             },
             routeUpdateHook() {
-                if(this.routeActive) {
+                if(this.componentActive) {
                     this.network_getData()
                 }
             },

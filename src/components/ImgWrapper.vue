@@ -1,5 +1,5 @@
 <template>
-    <Container @load.native="loadHandler" >
+    <Container @load.native="loadHandler">
         <transition-group name="fade-group">
             <span key="1" v-if="showImgFlag">
                 <slot></slot>
@@ -23,14 +23,6 @@
                 showImgFlag: true,
             }
         },
-        computed: {
-            imgSrc() {
-                if(!this.$slots.default) return 
-                if(!this.$slots.default[0]) return 
-                if(!this.$slots.default[0].elm) return 
-                return this.$slots.default[0].elm.src
-            }
-        },
         mounted() {
             this.initCoverStyle()
             this.initLoadHandler()
@@ -41,7 +33,7 @@
                 this.width = this.$slots.default[0].elm.width
                 this.height = this.$slots.default[0].elm.height
                 if(this.$slots.default[0].elm.complete) return
-                if(this.imgSrc) this.showImgFlag = false
+                this.showImgFlag = false
             },
             initLoadHandler() {
                 if(!this.$slots.default) return 
@@ -49,12 +41,7 @@
                 this.$slots.default[0].elm.addEventListener('load',(e) => {
                     this.showImgFlag = true
                 })
-            }
-        },
-        watch: {
-            imgSrc() {
-                this.initLoadHandler()
-            }
+            },
         },
         components: {
             Container: styled.span``,

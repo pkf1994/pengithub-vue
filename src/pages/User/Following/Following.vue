@@ -1,5 +1,5 @@
 <template>
-    <Container class="position-relative">
+    <CommonLoadingWrapper class="position-relative" :loading="extraData.loading" position="corner">
 
         <transition-group name="fade-group" appear>
             <FollowingListItem v-for="item in data" :key="item.id" :following="item"></FollowingListItem>
@@ -18,13 +18,13 @@
             </div>
         </LoadingWrapper>
 
-    </Container>
+    </CommonLoadingWrapper>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {LoadingIcon,AnimatedHeightWrapper} from '@/components'
+    import {LoadingIcon,AnimatedHeightWrapper,CommonLoadingWrapper} from '@/components'
     import FollowingListItem from './FollowingListItem'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
@@ -37,7 +37,7 @@
         inject: ['loadingUserBasicInfoProvided'],
         provide() {
             return {
-                extraDataProvided: () => this.extraData
+                extraDataProvided: () => this.extraData.data
             }
         },
         data() {
@@ -48,7 +48,10 @@
                 pageInfo: {
                 },
                 firstLoadedFlag: false,
-                extraData: []
+                extraData: {
+                    data: [],
+                    loading: false
+                }
             }
         },
         computed: {
@@ -74,9 +77,22 @@
 
                     let res =  await  authRequiredGet(url,{cancelToken,})
 
+                    window.scrollTo(0,0)
                     this.data = res.data
                     this.pageInfo = parse(res.headers.link) || {}
                     this.firstLoadedFlag = true
+
+                    if(this.accessToken) this.network_getExtraData()
+                }catch(e) {
+                    this.handleError(e)
+                }finally{
+                    this.loading = false
+                }
+            },
+            async network_getExtraData() {
+                try{
+                    this.extraData.loading = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data')
 
                     let graphql_extraData = graphql.GRAPHQL_USER_FOLLOWING_EXTRA(this.data)
                     let res_extra = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
@@ -91,11 +107,11 @@
                     for(let key in dataHolder) {
                         extraData.push(dataHolder[key])
                     }
-                    this.extraData = extraData
+                    this.extraData.data = extraData
                 }catch(e) {
-                    this.handleError(e)
+                    console.log(e)
                 }finally{
-                    this.loading = false
+                    this.extraData.loading = false
                 }
             },
             changePage(goPrevPageFlag) {
@@ -110,6 +126,7 @@
         components: {
             FollowingListItem,
             LoadingIcon,
+            CommonLoadingWrapper,
             Container: styled.div``,
             LoadingWrapper: styled.div``,
             Pagination: styled.div``,

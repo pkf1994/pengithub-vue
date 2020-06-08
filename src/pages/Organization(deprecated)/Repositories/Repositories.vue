@@ -37,12 +37,7 @@
             </Jumbotron>
         </AnimatedHeightWrapper>
 
-        <h2 class="f4 text-normal d-md-none my-3" v-if="pinnedRepositories.data.length > 0 || !accessToken">Pinned repositories</h2>
-
-        <LoginNecessaryNotice v-if="!accessToken" class="px-3 py-4 text-gray-light text-center">
-            <a href="javascript:void(0)" class="btn-link" @click="signIn">Sign up with Oauth&nbsp;</a> 
-            to show pinned repositories.
-        </LoginNecessaryNotice>
+        <h2 class="f4 text-normal d-md-none my-3" v-if="pinnedRepositories.data.length > 0">Pinned repositories</h2>
 
         <transition-group name="fade-group" appear>
             <PinnedRepoListItem v-for="item in pinnedRepositories.data" :key="item.id" :repository="item" class="mb-3"></PinnedRepoListItem>
@@ -70,13 +65,7 @@
 
         <AnimatedHeightWrapper>
             <ClearFilterRow v-if="firstLoadedFlag && (type || language) && !loading" class="d-flex flex-justify-between border-bottom border-gray-light py-3">
-                <div class="user-repo-search-results-summary">
-                    <strong>{{totalCount}}</strong>
-                    {{data.length > 1 ? 'results' : 'result'}} for 
-                    <strong v-if="type">{{type}}</strong>
-                    <span v-if="type">repositories</span>
-                    <span v-if="language">written in</span>
-                    <strong v-if="language">{{language}}</strong>
+                <div class="user-repo-search-results-summary" v-if="filterNoticeHTML" v-html="filterNoticeHTML">
                 </div>
 
                 <div class="text-right v-align-top flex-shrink-0">
@@ -88,18 +77,13 @@
             </ClearFilterRow>
         </AnimatedHeightWrapper>
 
-       <h2 class="f4 text-normal d-md-none mt-3" v-if="data.length > 0">Repositories</h2>
+        <h2 class="f4 text-normal d-md-none mt-3" v-if="data.length > 0">Repositories</h2>
 
         <transition-group name="fade-group" appear>
-            <RepoListItem v-for="item in data" :key="item.id" :repository="item"></RepoListItem>
+            <RepoListItem v-for="item in data" :key="item.name" :repository="item"></RepoListItem>
         </transition-group>
 
-        <Pagination class="paginate-container mb-5" v-if="data.length > 0 && (pageInfo.prev || pageInfo.next)">
-            <div class="BtnGroup">
-                <button class="btn btn-outline BtnGroup-item" :disabled="!pageInfo.prev || loading" @click="() => changePage(true)">Previous</button>
-                <button class="btn btn-outline BtnGroup-item" :disabled="!pageInfo.next || loading"  @click="() => changePage(false)">Next</button>
-            </div> 
-        </Pagination>
+        <SimplePagination v-if="pageInfo.withNext || pageInfo.withPrev" :loading="loading" :withPrev="pageInfo.withPrev" :withNext="pageInfo.withNext"></SimplePagination>
 
         <transition name="fade" appear>
             <TopLanguages class="Box mb-3 p-3" v-if="statistic.topLanguages.length > 0">
@@ -140,7 +124,7 @@
              <div v-if="availableLanguage.loading" class="flex-row-center height-full">
                 <LoadingIconEx></LoadingIconEx>
             </div>
-            <div v-else class="select-menu-text-filter p-3">
+            <div class="select-menu-text-filter p-3">
                 <input type="text" v-model="availableLanguage.searchQuery" class="form-control" placeholder="Filter spoken languages" autofocus="" autocomplete="off"/>
             </div>
             <router-link v-if="language" :to="`${$route.path}${type ? '?type=' + type : '' }`">
@@ -184,7 +168,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading,Modal,SelectMenuItem,AnimatedHeightWrapper,LoadingIconEx,ImgWrapper,HyperlinkWrapper} from '@/components'
+    import {CommonLoading,Modal,SelectMenuItem,AnimatedHeightWrapper,LoadingIconEx,ImgWrapper,HyperlinkWrapper,SimplePagination} from '@/components'
     import {RepoListItem,PinnedRepoListItem} from './components'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
@@ -204,11 +188,18 @@
             return {
                 searchQuery: '',
                 data: [],
+                count: 0,
                 loading: false,
                 perPage: 10,
                 totalCount: 0,
                 pageInfo: {
+                    withNext: false,
+                    withPrev: false
                 },
+                filterNoticeHTML: '',
+                topLanguages: [],
+                mostUsedTopics: [],
+                people: [],
                 extraData: [],
                 firstLoadedFlag: false,
                 availableLanguage: {
@@ -236,15 +227,6 @@
             },
             page() {
                 return this.$route.query.page
-            },
-            typeQueryFragment() {
-                let type = this.$route.query.type
-                if(type == 'forks') return 'fork:only'
-                if(type == 'all') return 'fork:true'
-                if(type == 'sources') return ''
-                if(type == 'archived') return 'archived:true'
-                if(type == 'mirrors') return 'mirrors:true'
-                return 'fork:true'
             },
             language() {
                 return this.$route.query.language
@@ -306,9 +288,6 @@
             filterAvailableLanguage() {
                 return this.availableLanguage.data.filter(i => (i.name.toLowerCase().indexOf(this.availableLanguage.searchQuery.toLowerCase()) != -1 || i.urlParam.toLowerCase().indexOf(this.availableLanguage.searchQuery.toLowerCase()) != -1))
             },
-            query() {
-                return `user:${this.organization} ${this.language ? 'language:' + this.language + ' ' : ''}${this.typeQueryFragment}`.trim()
-            },
             orgDomain() {
                 if(!this.organizationBasicInfo().blog) return
                 return this.organizationBasicInfo().blog.replace(/^http(s)?:\/\//,'').split('/')[0]
@@ -316,59 +295,24 @@
         },
         created() {
             this.network_getData()
-            if(this.accessToken) {
-                this.network_getStatisticDataFromGraphqlApi()
-            }else {
-                this.network_getStatisticDataFromRestApi()
-            }
         },
         methods: {
-            async network_getData() {
+            network_getData() {
+                this.network_getRepositoresAndStatisticData()
+                if(this.accessToken) this.network_getPinnedRepos()
+            },
+            async network_getRepositoresAndStatisticData() {
                 try{
                     this.loading = true
-
-                    if(this.accessToken) {
-                        this.network_getPinnedRepos()
-                    }
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let url = api.API_SEARCH({
-                        type: 'repositories',
-                        params: {
-                            q: this.query,
-                            per_page: this.perPage,
-                            page: this.page,
-                            sort: 'updated'
-                        }
+                    let url = api.API_PROXY_OGRANIZATION_REPOSITORIES_AND_STATISTIC({
+                        login: this.organization,
+                        params: this.$route.query
                     })
-                    let res_rest = await authRequiredGet(url,{
-                        cancelToken,
-                        headers: {
-                            'Accept': 'application/vnd.github.mercy-preview+json'
-                        }
-                    })
+                    let res = await commonGet(url,{cancelToken,headers: {"Accept":"*/*"}})
 
-                    this.data = res_rest.data.items
-                    this.totalCount = res_rest.data.total_count
-                    this.pageInfo = parse(res_rest.headers.link) || {}
+                    this.parseHTML(res.data)
                     this.firstLoadedFlag = true
-
-                    if(this.accessToken) {
-                        let graphql_extraData = graphql.GRAPHQL_ORG_REPOSITORY_EXTRA(this.data)
-                        let res_graphql = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
-
-                        let dataHolder
-                        try{
-                            dataHolder = res_graphql.data.data
-                        }catch(e) {
-                            this.handleGraphqlError(res_graphql)
-                        }
-                        let extraData = []
-                        for(let key in dataHolder) {
-                            extraData.push(dataHolder[key])
-                        }
-
-                        this.extraData = extraData
-                    }
                     
                 }catch(e) {
                     this.handleError(e,{handle404: true})
@@ -397,169 +341,201 @@
                     }catch(e) {
                         this.handleGraphqlError(res)
                     }
-                    
-
                 }catch(e) {
                     this.handleError(e)
                 }finally{
                     this.pinnedRepositories.loading = false
                 }
             },
-            async network_getStatisticDataFromRestApi() {
-                try{
-                    this.statistic.loading = true
-                    //let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_statistic')
-                    let currentPage = 1
-                    let lastPage = 1
-                    let repos = []
-                    //记录organization，响应url变化
-                    let organizationOrignal = this.organization
-                    let organization = this.organization
-                    while(currentPage <= lastPage && repos.length < 300) {
-                        if(organization != organizationOrignal) {
-                            throw new Error("cancel")
-                        }
-                        let url = api.API_ORG_REPOS(
-                            this.organization,
-                            {
-                                page: currentPage,
-                                per_page: 100
-                            }
-                        )
-                        console.log(url)
-                        let res = await authRequiredGet(url,{
-                            headers: {
-                                'Accept':"application/vnd.github.mercy-preview+json"
-                            }
-                        })
-                        let pageInfo = parse(res.headers.link) || {}
-                        currentPage += 1
-                        lastPage = pageInfo.last ? pageInfo.last.page : 1
-                        repos = repos.concat(res.data)
-                        organization = this.organization
+            parseHTML(HTML) {
+
+                //let repositoryPattern = /<li [^>]*>(?:.|\r|\n)*?<a.*href="(.*?)".*data-hovercard-type="repository"[^>]*>(?:\r|\n)?\s*(.*)(?:\r|\n)?\s*<\/a>(?:.|\r|\n)*?<p.*itemprop="description">((?:.|\r|\n)*?)<\/p>(?:.|\r|\n)*?<span class="repo-language-color" style="background-color: (.*)">(?:.|\r|\n)*?<span itemprop="programmingLanguage">(.*)<\/span>(?:.|\r|\n)*?<span class="mr-3">(?:\r|\n)\s*<svg.*class="octicon octicon-law mr-1"[^>]*>.*<\/svg>(?:\r|\n)\s*(.*)(?:\r|\n)\s*<\/span>(?:.|\r|\n)*?<a[^>]*>(?:\r|\n)\s*<svg.*aria-label="fork"[^>]*>.*<\/svg>(?:\r|\n)\s*(.*)(?:\r|\n)\s*<\/a>(?:.|\r|\n)*?<a[^>]*>(?:\r|\n)\s*<svg.*class="octicon octicon-star"[^>]*>.*<\/svg>(?:\r|\n)\s*(.*)(?:\r|\n)\s*<\/a>(?:.|\r|\n)*?<a[^>]*>(?:\r|\n)\s*<svg.*class="octicon octicon-issue-opened"[^>]*>.*<\/svg>(?:\r|\n)\s*(.*)(?:\r|\n)\s*<\/a>(?:.|\r|\n)*?<a[^>]*>(?:\r|\n)\s*<svg.*class="octicon octicon-git-pull-request"[^>]*>.*<\/svg>(?:\r|\n)\s*(.*)(?:\r|\n)\s*<\/a>(?:.|\r|\n)*?<relative-time datetime="(.*?)"[^>]*>.*<\/relative-time>/g
+                let repositoriesPattern = /<li [^>]*>(?:.|\r|\n)*?<\/relative-time>/g
+
+                let topicsPattern = /<a class="topic-tag topic-tag-link f6 my-1"[^>]*>(?:\n|\r)\s*(.*)(?:\n|\r)\s*<\/a>/g
+                let namePattern = /<a.*href="(.*?)".*data-hovercard-type="repository"[^>]*>(?:\r|\n)?\s*(.*)(?:\r|\n)?\s*<\/a>/g
+                let forkedFromPattern = /Forked from(?:.|\r|\n)*?<a class=" muted-link " href="(.*?)">(?:\r|\n)\s*(.*)(?:\r|\n)\s*<\/a>/g
+                let descriptionPattern = /<p.*itemprop="description">((?:.|\r|\n)*?)<\/p>/g
+                let languageColorPattern = /<span class="repo-language-color" style="background-color: (.*)">/g
+                let languagePattern = /<span itemprop="programmingLanguage">(.*)<\/span>/g
+                let licensePattern = /<span class="mr-3">(?:\r|\n)\s*<svg.*class="octicon octicon-law mr-1"[^>]*>.*<\/svg>(?:\r|\n)\s*(.*)(?:\r|\n)\s*<\/span>/g
+                let forksCountPattern = /<a[^>]*>(?:\r|\n)\s*<svg.*aria-label="fork"[^>]*>.*<\/svg>(?:\r|\n)\s*(.*)(?:\r|\n)\s*<\/a>/g
+                let starsCountPattern = /<a[^>]*>(?:\r|\n)\s*<svg.*class="octicon octicon-star"[^>]*>.*<\/svg>(?:\r|\n)\s*(.*)(?:\r|\n)\s*<\/a>/g
+                let openIssuesCountPattern = /<a[^>]*>(?:\r|\n)\s*<svg.*class="octicon octicon-issue-opened"[^>]*>.*<\/svg>(?:\r|\n)\s*(.*)(?:\r|\n)\s*<\/a>/g
+                let pullRequestsCountPattern = /<a[^>]*>(?:\r|\n)\s*<svg.*class="octicon octicon-git-pull-request"[^>]*>.*<\/svg>(?:\r|\n)\s*(.*)(?:\r|\n)\s*<\/a>/g
+                let updatedAtPattern = /<relative-time datetime="(.*?)"[^>]*>.*<\/relative-time>/g
+
+                let repositories = []
+                let repositoriesExecResult 
+
+                //解析repositories
+                while((repositoriesExecResult = repositoriesPattern.exec(HTML)) != null) {
+
+                    let repositoryHolder = repositoriesExecResult[0]
+
+                    let topics = []
+                    let topicsExecResult
+                    while((topicsExecResult = topicsPattern.exec(repositoryHolder)) != null) {
+                        topics.push(topicsExecResult[1])
                     }
 
-                    let languages = []
-                    let topics = []
-                    repos.forEach(i => {
-                        let languageRecord = languages.filter(i_ => i.language && i_.language == i.language)[0]
-                        if((!languageRecord) && i.language) {
-                            languages.push({
-                                language: i.language,
-                                count: 1
-                            })
-                        } else if (languageRecord) {
-                            languageRecord.count += 1
-                        }
-
-                        i.topics && i.topics.forEach(i_ => {
-                            let topicRecord = topics.filter(i__ => i_ == i__.topic)[0]
-                            if(!topicRecord) {
-                                topics.push({
-                                    topic: i_,
-                                    count: 1
-                                })
-                            } else {
-                                topicRecord.count += 1
-                            }
-                        })
-                    })
-
-                    languages.sort((a,b) => {
-                        return b.count - a.count
-                    })
-
-                    topics.sort((a,b) => {
-                        return b.count - a.count
-                    })
-                    
-                    this.statistic.topLanguages = languages
-                    this.statistic.mostUsedTopics = topics
-                   
-                }catch(e) {
-                    if(e.message == 'cancel') return
-                    this.handleError(e)
-                }finally{
-                    this.statistic.loading = false
-                }
-            },
-            async network_getStatisticDataFromGraphqlApi() {
-                try{
-                    this.statistic.loading = true
-                    //let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_statistic')
-                    let endCursor
-                    let hasNextPage = true
-                    let repos = []
-                    //记录organization，响应url变化
-                    let organizationOrignal = this.organization
-                    let organization = this.organization
-                    while(hasNextPage && repos.length < 300) {
-                        if(organization != organizationOrignal) {
-                            throw new Error("cancel")
-                        }
-                        let res = await authRequiredGitHubGraphqlApiQuery(
-                            graphql.GRAPHQL_ORG_STATISTIC,
-                            {
-                                variables: {
-                                    query: this.query,
-                                    after: endCursor
-                                }
-                            }
-                        )
-                        try{
-                            repos = repos.concat(res.data.data.search.nodes)
-                            hasNextPage = res.data.data.search.pageInfo.hasNextPage
-                            endCursor = res.data.data.search.pageInfo.endCursor
-                        }catch(e) {
-                            this.handleGraphqlError(res)
-                        }
-                       
-                        organization = this.organization
+                    let name 
+                    let routerLink
+                    let nameExecResult
+                    while((nameExecResult = namePattern.exec(repositoryHolder)) != null) {
+                        routerLink = nameExecResult[1]
+                        name = nameExecResult[2]
                     }
 
-                    let languages = []
-                    let topics = []
-                    repos.forEach(i => {
-                        let languageRecord = languages.filter(i_ => i.primaryLanguage && i_.language == i.primaryLanguage.name)[0]
-                        if((!languageRecord) && i.primaryLanguage && i.primaryLanguage.name) {
-                            languages.push({
-                                language: i.primaryLanguage.name,
-                                count: 1
-                            })
-                        } else if (languageRecord) {
-                            languageRecord.count += 1
+                    let forkedFrom
+                    let forkedFromExecResult
+                    while((forkedFromExecResult = forkedFromPattern.exec(repositoryHolder)) != null) {
+                        forkedFrom = {
+                            routerLink: forkedFromExecResult[1],
+                            fullName: forkedFromExecResult[2]
                         }
+                    }
 
-                        i.repositoryTopics && i.repositoryTopics.nodes.forEach(i_ => {
-                            let topicRecord = topics.filter(i__ => i_.topic && i_.topic.name == i__.topic)[0]
-                            if(!topicRecord) {
-                                topics.push({
-                                    topic: i_.topic.name,
-                                    count: 1
-                                })
-                            } else {
-                                topicRecord.count += 1
-                            }
-                        })
-                    })
+                    let languageColor
+                    let languageColorExecResult
+                    while((languageColorExecResult = languageColorPattern.exec(repositoryHolder)) != null) {
+                        languageColor = languageColorExecResult[1]
+                    }
 
-                    languages.sort((a,b) => {
-                        return b.count - a.count
-                    })
+                    let language
+                    let languageExecResult
+                    while((languageExecResult = languagePattern.exec(repositoryHolder)) != null) {
+                        language = languageExecResult[1]
+                    }
 
-                    topics.sort((a,b) => {
-                        return b.count - a.count
-                    })
+                    let license
+                    let licenseExecResult
+                    while((licenseExecResult = licensePattern.exec(repositoryHolder)) != null) {
+                        license = licenseExecResult[1]
+                    }
+
+                    let descriptionHTML
+                    let descriptionExecResult
+                    while((descriptionExecResult = descriptionPattern.exec(repositoryHolder)) != null) {
+                        descriptionHTML = descriptionExecResult[1]
+                    }
+
+                    let forksCount
+                    let forksCountExecResult
+                    while((forksCountExecResult = forksCountPattern.exec(repositoryHolder)) != null) {
+                        forksCount = forksCountExecResult[1]
+                    }
+
+                    let starsCount
+                    let starsCountExecResult
+                    while((starsCountExecResult = starsCountPattern.exec(repositoryHolder)) != null) {
+                        starsCount = starsCountExecResult[1]
+                    }
+
+                    let openIssuesCount
+                    let openIssuesCountExecResult
+                    while((openIssuesCountExecResult = openIssuesCountPattern.exec(repositoryHolder)) != null) {
+                        openIssuesCount = openIssuesCountExecResult[1]
+                    }
+
+                    let pullRequestsCount
+                    let pullRequestsCountExecResult
+                    while((pullRequestsCountExecResult = pullRequestsCountPattern.exec(repositoryHolder)) != null) {
+                        pullRequestsCount = pullRequestsCountExecResult[1]
+                    }
+
+                    let updatedAt
+                    let updatedAtExecResult
+                    while((updatedAtExecResult = updatedAtPattern.exec(repositoryHolder)) != null) {
+                        updatedAt = updatedAtExecResult[1]
+                    }
                     
-                    this.statistic.topLanguages = languages
-                    this.statistic.mostUsedTopics = topics
-                   
-                }catch(e) {
-                    if(e.message == 'cancel') return
-                    this.handleError(e)
-                }finally{
-                    this.statistic.loading = false
+                    repositories.push({
+                        topics,
+                        routerLink,
+                        name,
+                        descriptionHTML,
+                        languageColor,
+                        language,
+                        license,
+                        forksCount,
+                        starsCount,
+                        openIssuesCount,
+                        pullRequestsCount,
+                        updatedAt,
+                        forkedFrom
+                    })
                 }
+
+                this.data = repositories
+
+                //解析filter notice
+                let filterNoticeHTMLPattern = /<div class="TableObject-item TableObject-item--primary v-align-top">((?:.|\r|\n)*?)<\/div>/g   
+                let filterNoticeHTMLExecResult
+                if((filterNoticeHTMLExecResult = filterNoticeHTMLPattern.exec(HTML)) != null ) {
+                    this.filterNoticeHTML = filterNoticeHTMLExecResult[1]
+                }else{
+                    this.filterNoticeHTML = ''
+                }
+
+                //解析pagination
+                let paginationNextPattern = /<a class="next_page"[^>]*>Next<\/a>/g
+                let paginationPrevPattern = /<a class="next_page"[^>]*>Previous<\/a>/g
+
+                if((HTML.match(paginationNextPattern)) != null) {
+                    this.pageInfo.withNext = true
+                }else{
+                    this.pageInfo.withNext = false
+                }
+                if((HTML.match(paginationPrevPattern)) != null) {
+                    this.pageInfo.withPrev = true
+                }else{
+                    this.pageInfo.withPrev = false
+                }
+
+                //解析top repositories
+                let topLanguagesPattern = /<div class="Box-body">(?:\r|\n)\s*<h4 class="f4 mb-2 text-normal">Top languages<\/h4>((?:.|\r|\n)*?)<\/div>/g
+                let topLanguagesMatchResult
+                let topLanguages = []
+                if((topLanguagesMatchResult = HTML.match(topLanguagesPattern)) != null) {
+                    let topLanguagesHolder = topLanguagesMatchResult[0]
+                    let topLanugageItemPattern = /<a[^>]*>(?:.|\n|\r)*?(?:<span class="repo-language-color" style="background-color: (.*)"><\/span>)?(?:\n|\r)\s*<span itemprop="programmingLanguage">(.*)<\/span>(?:\n|\r)\s*<\/span>(?:\n|\r)\s*<\/a>/g
+                    let topLanguageItemExecResult
+                    while((topLanguageItemExecResult = topLanugageItemPattern.exec(topLanguagesHolder)) != null) {
+                        topLanguages.push({
+                            color: topLanguageItemExecResult[1],
+                            name: topLanguageItemExecResult[2],
+                        })
+                    }
+                }
+                this.topLanguages = topLanguages
+
+                //解析most used topics
+                let mostUsedTopicsPattern = /<h4[^>]*>Most used topics<\/h4>(?:\r|\n)\s*?<\/div>(?:\r|\n)\s*?<div[^>]*>(?:.|\r|\n)*?<\/div>/g
+                let mostUsedTopicsMatchResult
+                let mostUsedTopics = []
+                if((mostUsedTopicsMatchResult = HTML.match(mostUsedTopicsPattern)) != null) {
+                    let mostUsedTopicsHolder = mostUsedTopicsMatchResult[0]
+                    let mostUsedTopicItemExecPattern = /<a[^>]*>(?:\n|\r)\s*(.*)(?:\n|\r)\s*<\/a>/g
+                    let mostUsedTopicItemExecResult
+                    while((mostUsedTopicItemExecResult = mostUsedTopicItemExecPattern.exec(mostUsedTopicsHolder)) != null) {
+                        mostUsedTopics.push(mostUsedTopicItemExecResult[1])
+                    }
+                }
+                this.mostUsedTopics = mostUsedTopics
+
+                //解析people
+                let peoplePattern = /<a.*href="(.*?)"[^>]*>(?:\n|\r)\s*<img.*src="(.*?)".*alt="@(.*)"[^>]*\/>(?:\n|\r)\s*<\/a>/g
+                let peopleExecResult 
+                let people = []
+                while((peopleExecResult = peoplePattern.exec(HTML)) != null) {
+                    people.push({
+                        routerLink: peopleExecResult[1],
+                        avatarUrl: peopleExecResult[2],
+                        login: peopleExecResult[3]
+                    })
+                }
+                this.people = people
             },
             async network_getAvailableLanguage() {
                 if(this.availableLanguage.loading || this.availableLanguage.data.length > 0) return 
@@ -603,7 +579,7 @@
         },
         watch: {
             organization() {
-                this.network_getStatisticData()
+                this.network_getPinnedRepos()
             }
         },
         components: {
@@ -616,6 +592,7 @@
             LoadingIconEx,
             PinnedRepoListItem,
             HyperlinkWrapper,
+            SimplePagination,
             Container: styled.div``,
             LoadingWrapper: styled.div``,
             Jumbotron: styled.div``,
@@ -628,7 +605,6 @@
             Pagination: styled.div``,
             TopLanguages: styled.div``,
             MostUsedTopics: styled.div``,
-            LoginNecessaryNotice: styled.div``,
 
         }
     }

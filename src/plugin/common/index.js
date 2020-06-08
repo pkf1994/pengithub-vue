@@ -46,8 +46,9 @@ export default {
                             window.location.href = API_OAUTH2
                         }
                     }
-                    if(e.response && e.response.data.message) {
-                        this.$toast(e.response.data.message,'error')
+                    if(e.response) {
+                        if(e.response.data.message) this.$toast(e.response.data.message,'error')
+                        if(e.response.data.detailMessage) this.$toast(e.response.data.detailMessage,'error')
                     }else{
                         this.$toast(e,'error')
                     }
@@ -65,6 +66,9 @@ export default {
                         })
                     }
                     throw new Error('GraphQL response error')
+                },
+                routeToSignOut(return_to) {
+                    this.$router.push(`/sign_out${return_to ? '?return_to=' + return_to : ''}`)
                 },
                 async signOut() {
                     let fromRoute = {

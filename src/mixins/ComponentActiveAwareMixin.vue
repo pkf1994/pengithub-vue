@@ -6,14 +6,14 @@
     export default {
         data() {
             return {
-                routeActive: true
+                componentActive: true
             }
         },
         activated() {
-            this.routeActive = true
+            this.componentActive = true
         },
         deactivated() {
-             this.routeActive = false
+             this.componentActive = false
         }
     }
 </script>

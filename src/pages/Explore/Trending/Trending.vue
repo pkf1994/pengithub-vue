@@ -51,7 +51,7 @@
             <div v-else class="select-menu-text-filter p-3">
                 <input type="text" v-model="filterText.spokenLanguage" class="form-control" placeholder="Filter spoken languages" autofocus="" autocomplete="off"/>
             </div>
-            <router-link :to='clearSpokenLanguageRouterLink'>
+            <router-link v-if="!filterSpokenLanguageList.loading" :to='clearSpokenLanguageRouterLink'>
                 <SelectMenuItem>
                     <template v-slot:icon>
                         <svg height="16" class="octicon octicon-x select-menu-item-icon mr-2" class_names="select-menu-item-icon" viewBox="0 0 12 16" version="1.1" width="12" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
@@ -75,7 +75,7 @@
             <div v-else class="select-menu-text-filter p-3">
                 <input type="text" v-model="filterText.language" class="form-control" placeholder="Filter spoken languages" autofocus="" autocomplete="off"/>
             </div>
-            <router-link :to='clearLanguageRouterLink'>
+            <router-link v-if="!filterLanguageList.loading" :to='clearLanguageRouterLink'>
                 <SelectMenuItem>
                     <template v-slot:icon>
                         <svg height="16" class="octicon octicon-x select-menu-item-icon mr-2" class_names="select-menu-item-icon" viewBox="0 0 12 16" version="1.1" width="12" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
@@ -303,6 +303,7 @@
                 }
             },
             async network_getViewerHasStarredInfo() {
+                if(this.data.length == 0) return 
                 try{
                     this.repositories.viewerHasStarred.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_viewer_has_starred')
@@ -330,6 +331,7 @@
                 }
             },
             async network_getViewerIsFollowingInfo() {
+                if(this.data.length == 0) return 
                 try{
                     this.developers.viewerIsFollowing.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_viewer_is_following')
@@ -413,6 +415,7 @@
 
 <style scoped lang="scss">
 @import 'node_modules/@primer/css/box/index.scss';
+@import 'node_modules/@primer/css/forms/index.scss';
 .select-menu-text-filter{
     position: sticky;
     top: 0px;

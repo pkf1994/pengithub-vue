@@ -249,3 +249,23 @@ export const API_PROXY_USER_CONTRIBUTION_ILLUSTRATION = payload =>{
     let query = util_queryParse.querify(payload.params)
     return `${PROXY_API_BASE}/users/${payload.user}/contributions?${query}`
 }
+
+
+export const API_PROXY_ORGANIZATION_TAB_COUNTS = payload => `${PROXY_API_BASE}/users/${payload}/tab_counts?repo=1&project=1&package=1&team=1&member=1`
+
+export const API_PROXY_OGRANIZATION_REPOSITORIES_AND_STATISTIC = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${PROXY_API_BASE}/${payload.login}?${query}`
+}
+
+export const API_PROXY_ORGANIZATION_PACKAGES = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${PROXY_API_BASE}/orgs/${payload.login}/packages?${query}`
+}
+
+export const API_PROXY_ORGANIZATION_PEOPLE = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${PROXY_API_BASE}/orgs/${payload.login}/people?${query}`
+}
+
+export const API_PROXY_USER_HOVERCARD = payload => `${PROXY_API_BASE}/users/${payload}/hovercard`
