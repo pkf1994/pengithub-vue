@@ -1,7 +1,10 @@
 <template>
     <transition name="popover-basic">
-        <Container   class="container top-triangle" ref="cover"  v-if="show"
-                    :style="[popoverStyle,{width:`${width}px`}]">
+        <Container  class="container" 
+                    ref="cover"  
+                    v-if="show"
+                    :class="{'top-triangle':!smooth}"
+                    :style="popoverStyle">
             <Cover class="cover" v-show="show"  @click.stop="close"></Cover>
 
             <Main class="main bg-white">
@@ -17,14 +20,11 @@
     import {AnimatedHeightWrapper} from './'
     export default {
         props: {
-            width: {
-                type: Number,
-                default: 185
-            },
             popoverStyle: {
                 type: Object,
                 required: false
-            }
+            },
+            smooth: Boolean
         },
         data() {
             return {
@@ -34,6 +34,16 @@
         methods: {
             close() {
                 this.show = false
+            }
+        },
+        watch: {
+            show(newOne, oldOne) {
+                if(newOne && !oldOne) {
+                    this.$emit('show')
+                }
+                if(!newOne && oldOne) {
+                    this.$emit('hide')
+                }
             }
         },
         components: {

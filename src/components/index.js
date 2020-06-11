@@ -27,6 +27,7 @@ import HyperlinkWrapper from './HyperlinkWrapper'
 import WithSignInNoticeWrapper from './WithSignInNoticeWrapper'
 import SimpleLoadingMore from './SimpleLoadingMore'
 import WithNotFoundNoticeWrapper from './WithNotFoundNoticeWrapper'
+import WithNotificationPaneWrapper from './WithNotificationPaneWrapper'
 export {
     Button,
     BaseHeader,
@@ -75,5 +76,6 @@ export {
     HyperlinkWrapper,
     WithSignInNoticeWrapper,
     WithNotFoundNoticeWrapper,
-    SimpleLoadingMore
+    SimpleLoadingMore,
+    WithNotificationPaneWrapper
 }

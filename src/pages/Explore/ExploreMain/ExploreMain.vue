@@ -34,21 +34,13 @@
             <AnimatedHeightWrapper>
                 <Jumbotron class="text-center py-6" v-if="!trendingRepoToday.loading && !trendingDevelopers.loading">
                     <div class="col-2 mx-auto">
-                        <ImgWrapper>
-                            <img src="https://github.githubassets.com/images/icons/emoji/tada.png" alt="tada" class="width-full">
-                        </ImgWrapper>
+                        <img src="https://github.githubassets.com/images/icons/emoji/tada.png" alt="tada" class="width-full">
                     </div>
                     <h2 class="lh-condensed my-2 headline" style="font-size:22px">
                         That's everything we found for you, for now.
                     </h2>
                     <p class="f4">
-                        Come back soon to see what we find next,
-                        <span>
-                            or
-                            <a href="/explore/email" data-ga-click="Explore, go to Explore email newsletter, location:explore feed">
-                                get email updates.
-                            </a>
-                        </span>
+                        Come back soon to see what we find next.
                     </p>
                 </Jumbotron>
             </AnimatedHeightWrapper>

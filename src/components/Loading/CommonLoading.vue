@@ -1,5 +1,5 @@
 <template>
-    <Container class="container position-fixed" :class="{'prevent-click-event':!preventClickEvent && !(position == 'corner')}">
+    <Container class="container position-fixed" :class="{'prevent-click-event':!preventClickEvent}">
         <Inner :class="[size,position]" class="position-absolute transition-all">
             <img alt="loading"
                  class="width-fit height-fit"

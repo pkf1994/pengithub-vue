@@ -1,9 +1,7 @@
-import {mapState,mapActions} from 'vuex'
+import {mapState} from 'vuex'
 import axios from 'axios'
 import * as api from '@/network/api'
-import {util_ramdonString,util_throttle} from '@/util'
-import {CommonLoadingWrapper} from '@/components'
-import {ACTION_SIGN_OUT} from "@/store/modules/oauth/actionTypes"
+import {util_throttle} from '@/util'
 export default {
     install: (Vue) => {
         Vue.mixin({
@@ -15,7 +13,8 @@ export default {
             },
             computed: {
                 ...mapState({
-                    accessToken: state => state.oauth.accessToken.accessToken
+                    accessToken: state => state.oauth.accessToken.accessToken,
+                    viewer: state => state.oauth.viewerInfo
                 })
             },
             created() {
@@ -29,9 +28,6 @@ export default {
                 } 
             },
             methods: {
-                ...mapActions({
-                    action_signOut: ACTION_SIGN_OUT
-                }),
                 handleError(e,config = {handle404: false, handle401: false}) {
                     if(!e) return
                     if(axios.isCancel(e)) return
@@ -67,29 +63,22 @@ export default {
                     }
                     throw new Error('GraphQL response error')
                 },
-                routeToSignOut(return_to) {
-                    this.$router.push(`/sign_out${return_to ? '?return_to=' + return_to : ''}`)
-                },
-                async signOut() {
-                    let fromRoute = {
-                        ...this.$route
-                    }
-                    await this.action_signOut(fromRoute)
-                },
-                signIn() {
-                    let state = util_ramdonString.randomString()
-                    let signInFromPath = this.$route.fullPath
-                    sessionStorage.setItem('state',state)
-                    sessionStorage.setItem('signInFromPath',signInFromPath)
-                    let oauthHref = api.API_OAUTH2({
-                        state
-                    })
-                    location.href = oauthHref
-                },
                 emitNotFoundEvent(el) {
                     let event = document.createEvent('HTMLEvents')
                     event.initEvent("not-found",true,false)
                     el.dispatchEvent(event)
+                },
+                showModal(modalRef) {
+                    if(this.$refs[modalRef]) this.$refs[modalRef].show = true
+                },
+                closeModal(theModalRef) {
+                    if(theModalRef) {
+                        if(this.$refs[theModalRef].show) this.$refs[theModalRef].show = false
+                        return 
+                    }
+                    for(let modalRef in this.$refs) {
+                        if(this.$refs[modalRef].show) this.$refs[modalRef].show = false
+                    }
                 }
             },
             activated() {
@@ -97,9 +86,6 @@ export default {
                     document.title = this.documentTitle
                 }
             },
-            components: {
-                CommonLoadingWrapper
-            }
         })
     }
 }

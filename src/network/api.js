@@ -47,6 +47,8 @@ export const API_USER_NOTIFICATIONS = payload => {
     return `${GITHUB_REST_API_BASE}/notifications?${query}`
 }
 
+export const API_USER_NOTIFICATION_THREAD = payload => `${GITHUB_REST_API_BASE}/notifications/threads/${payload}`
+
 export const API_USER = login => `${GITHUB_REST_API_BASE}/users/${login}`
 
 export const API_ORG = organization => `${GITHUB_REST_API_BASE}/orgs/${organization}`
@@ -269,3 +271,6 @@ export const API_PROXY_ORGANIZATION_PEOPLE = payload => {
 }
 
 export const API_PROXY_USER_HOVERCARD = payload => `${PROXY_API_BASE}/users/${payload}/hovercard`
+
+export const API_REPOSITORY_INVITATION_FOR_AUTHENTICATED_USER = `${GITHUB_REST_API_BASE}/user/repository_invitations`
+

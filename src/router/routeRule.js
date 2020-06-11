@@ -62,6 +62,7 @@ const RepositoryFindFile = () => import('../pages/Repository/FindFile/FindFile.v
 const RepositoryReleases = () => import('../pages/Repository/Releases/Releases.vue')
 const RepositoryReleaseDetail = () => import('../pages/Repository/Releases/ReleaseDetail.vue')
 const RepositoryTags = () => import('../pages/Repository/Tags/Tags.vue')
+const RepositoryInvitations = () => import('../pages/Repository/Invitations/Invitations.vue')
 const RepositoryBlame = () => import('../pages/Repository/Blame/Blame.vue')
 const RepositoryLabels = () => import('../pages/Repository/Labels/Labels.vue')
 const RepositoryMilestones = () => import('../pages/Repository/Milestones/Milestones.vue')
@@ -480,6 +481,14 @@ export default [
                 path: 'tags',
                 name: 'repositoryTags',
                 component: RepositoryTags
+            },
+            {
+                path: 'invitations',
+                name: 'repositoryInvitations',
+                component: RepositoryInvitations,
+                meta: {
+                    authRequired: true
+                }
             },
         ]
     },

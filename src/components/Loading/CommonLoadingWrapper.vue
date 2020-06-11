@@ -14,7 +14,7 @@
         props: {
             preventClickEvent: {
                 type: Boolean,
-                default: true
+                default: false
             },
             loading: {
                 type: Boolean,

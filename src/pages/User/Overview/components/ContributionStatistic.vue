@@ -1,5 +1,5 @@
 <template>
-    <CommonLoadingWrapper :loading="contributionIllustration.loading || contributionActivities.loading" position="corner">
+    <Container>
         <Title class="f4 mb-2 text-normal">
             {{contributionIllustration.lastContributionsCount}} contributions in the last year
         </Title>
@@ -44,7 +44,7 @@
                 <div class="float-left">
                     <a href="https://help.github.com/articles/why-are-my-contributions-not-showing-up-on-my-profile">Learn how we count contributions</a>
                 </div>
-                <Legend class="float-right text-gray">
+                <Legend class="float-right text-gray mt-2">
                     Less
                     <ul class="legend">
                         <li style="background-color: #ebedf0"></li>
@@ -56,6 +56,13 @@
                     More
                 </Legend>
             </Footer>
+
+            <LoadingWrapper v-if="contributionIllustration.loading || contributionActivities.loading" class="corner position-absolute">
+                <img    alt="loading"
+                        class="width-fit height-fit"
+                        src="@/assets/image/octocat-spinner-128.gif"/>
+            </LoadingWrapper>
+            
         </ContributionPerDay>
 
         <ContributionClassificationRatio  v-if="contributionIllustration.contributionRatio['Issues']" class="Box p-3 contribution-classification-ratio border-top  position-relative" :class="{loading:contributionIllustration.loading}">
@@ -129,12 +136,14 @@
             </router-link>
         </Modal>
 
-    </CommonLoadingWrapper>
+        
+
+    </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {Modal,LoadingIconEx,SimpleSearchInput,SelectMenuItem,AnimatedHeightWrapper,CommonLoadingWrapper} from '@/components'
+    import {Modal,LoadingIconEx,SimpleSearchInput,SelectMenuItem,AnimatedHeightWrapper} from '@/components'
     import * as graphql from '../graphql'
     import * as api from '@/network/api'
     import {ComponentActiveAwareMixin} from '@/mixins'
@@ -503,7 +512,7 @@
             SimpleSearchInput,
             SelectMenuItem,
             ContributionCollection,
-            CommonLoadingWrapper,
+            Container: styled.div``,
             Title: styled.h2``,
             ContributionPerDay: styled.div``,
             Content: styled.div``,
@@ -518,6 +527,7 @@
             ContributionClassificationSvgWrapper: styled.div``,
             OrgModalListItem: styled.div``,
             LoginNecessaryNotice: styled.div``,
+            LoadingWrapper: styled.div``
         }
     }
 </script>
@@ -636,4 +646,11 @@
 .not-selected{
     opacity: .5;
 }
+
+.corner{
+        bottom: 10px !important;
+        right: 10px !important;
+        height: 30px !important;
+        width: 30px !important;
+    }
 </style>

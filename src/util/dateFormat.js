@@ -148,5 +148,5 @@ export default {
         }else{
             return this.getDateDiff(date)
         }
-    }
+    },
 }
