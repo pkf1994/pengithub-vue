@@ -28,6 +28,7 @@ import WithSignInNoticeWrapper from './WithSignInNoticeWrapper'
 import SimpleLoadingMore from './SimpleLoadingMore'
 import WithNotFoundNoticeWrapper from './WithNotFoundNoticeWrapper'
 import WithNotificationPaneWrapper from './WithNotificationPaneWrapper'
+import WithTopNoticeWrapper from './WithTopNoticeWrapper'
 export {
     Button,
     BaseHeader,
@@ -77,5 +78,6 @@ export {
     WithSignInNoticeWrapper,
     WithNotFoundNoticeWrapper,
     SimpleLoadingMore,
-    WithNotificationPaneWrapper
+    WithNotificationPaneWrapper,
+    WithTopNoticeWrapper,
 }

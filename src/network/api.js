@@ -274,3 +274,5 @@ export const API_PROXY_USER_HOVERCARD = payload => `${PROXY_API_BASE}/users/${pa
 
 export const API_REPOSITORY_INVITATION_FOR_AUTHENTICATED_USER = `${GITHUB_REST_API_BASE}/user/repository_invitations`
 
+export const API_REPOSITORY_INVITATION_ACTION = payload => `${GITHUB_REST_API_BASE}/user/repository_invitations/${payload}`
+

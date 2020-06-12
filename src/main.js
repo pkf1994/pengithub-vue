@@ -13,12 +13,14 @@ import plugin_modal from './plugin/modal'
 import plugin_loading from './plugin/loading'
 import plugin_common from './plugin/common'
 import plugin_githubBusiness from './plugin/githubBusiness'
+import plugin_topNotice from './plugin/topNotice'
 Vue.use(plugin_toast)
 Vue.use(plugin_themeColor)
 Vue.use(plugin_modal)
 Vue.use(plugin_loading)
 Vue.use(plugin_common)
 Vue.use(plugin_githubBusiness)
+Vue.use(plugin_topNotice)
 Vue.config.productionTip = false
 console.log(process.env.NODE_ENV)
 new Vue({

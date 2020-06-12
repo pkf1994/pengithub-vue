@@ -4,5 +4,6 @@ import searchStore from './search'
 import repositoryStore from './repository'
 import issuesStore from './issues'
 import notificationsStore from './notifications'
+import topNoticeStore from './topNotice'
 
-export {oauthStore,homeStore,searchStore,repositoryStore,issuesStore,notificationsStore}
+export {oauthStore,homeStore,searchStore,repositoryStore,issuesStore,notificationsStore,topNoticeStore}

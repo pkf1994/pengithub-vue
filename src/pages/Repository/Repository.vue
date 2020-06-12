@@ -1,16 +1,18 @@
 <template>
     <Container>
         <HeaderDetachTopTab :tabs="tabs" :activeTab="activeTab"></HeaderDetachTopTab>
-        <keep-alive>
-            <router-view></router-view>
-        </keep-alive>
+        <WithTopNoticeWrapper theKey="repository">
+            <keep-alive>
+                <router-view></router-view>
+            </keep-alive>
+        </WithTopNoticeWrapper>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
     import { mapState } from 'vuex'
-    import {HeaderDetachTopTab} from '@/components'
+    import {HeaderDetachTopTab,WithTopNoticeWrapper} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as api from '@/network/api'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet } from '@/network'
@@ -39,6 +41,8 @@
                 repo: () => this.repo,
                 repoBasicInfo: () => this.data,
                 viewerIsCollaborator: () => this.viewerIsCollaborator,
+                viewerIsCollaboratorGetter: () => this.network_ifViewerACollaborator,
+                topNoticeShow: () => this.topNoticeShow
             }
         },
         computed: {
@@ -198,9 +202,12 @@
             generateRouterMeta() {
                 return `${this.$route.params.owner}/${this.$route.params.repo}`
             },
-        },
+          
+        }, 
+       
         components: {
             HeaderDetachTopTab,
+            WithTopNoticeWrapper,
             Container: styled.div``
         }
     }

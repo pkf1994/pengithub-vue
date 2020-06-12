@@ -9,7 +9,8 @@ import {
     searchStore,
     repositoryStore,
     issuesStore,
-    notificationsStore
+    notificationsStore,
+    topNoticeStore
 } from "./modules"
 
 export default new Vuex.Store ({
@@ -20,7 +21,8 @@ export default new Vuex.Store ({
         search: searchStore,
         repository: repositoryStore,
         issues: issuesStore,
-        notifications: notificationsStore
+        notifications: notificationsStore,
+        topNotice: topNoticeStore
     },
     plugins: [
         createPersistedState({

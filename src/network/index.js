@@ -57,6 +57,18 @@ export const authRequiredPost = (url, config = {}) => {
     })
 }
 
+export const authRequiredPatch = (url, config = {}) => {
+    return authRequiredAxios.patch(url,config).then(res => {
+        return res
+    })
+}
+
+export const authRequiredAjax = (url, config = {}, method = 'get',) => {
+    return authRequiredAxios[method](url,config).then(res => {
+        return res
+    })
+}
+
 export const authRequiredGitHubGraphqlApiQuery = (query,config = {}) => {
     return authRequiredPost(API_GRAPHQL_ENDPOINT,
         {

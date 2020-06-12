@@ -1,5 +1,5 @@
 <template>
-    <CommonLoadingWrapper :loading="loading">
+    <CommonLoadingWrapper :loading="loading || loadingInvitationHandle" :position="loading ? 'center' : 'corner'">
         <WithNotificationPaneWrapper>
             <Container>
                 <transition-group name="fade-group" appear>
@@ -22,10 +22,10 @@
                             </h3>
 
                             <div class="my-4">
-                                <button class="btn btn-primary">
+                                <button class="btn btn-primary" @click="network_acceptInvitation" :disabled="loadingInvitationHandle">
                                     Accept invitation
                                 </button>
-                                <button class="btn">
+                                <button class="btn" @click="network_declineInvitation" :disabled="loadingInvitationHandle">
                                     Decline
                                 </button>
                             </div>
@@ -53,7 +53,7 @@
                             </ul>
                         </div>
 
-                        <div class="col-11 col-sm-8 mx-auto mt-3">
+                        <div class="col-11 col-sm-8 mx-auto my-3">
                             <p class="text-gray mb-0">
                                 Is this user sending spam or malicious content?
                             </p>
@@ -62,12 +62,12 @@
                             </button>
                         </div>
                     </InvitationMain>
-
-                    <NoInvitationNotice v-else-if="!loading" class="p-3" key="2">
+<!-- 
+                    <NoInvitationNotice v-else-if="noInvitationFlag" class="p-3" key="2">
                         <div class="no-invitation-notice p-3 border rounded-1"> 
                             Sorry, we couldn't find that repository invitation. It is possible that the invitation was revoked or that you are not logged into the invited account.
                         </div>
-                    </NoInvitationNotice>
+                    </NoInvitationNotice> -->
                 </transition-group>
             </Container>
         </WithNotificationPaneWrapper>
@@ -77,26 +77,35 @@
 <script>
     import styled from 'vue-styled-components'
     import {WithNotificationPaneWrapper,CommonLoadingWrapper,HyperlinkWrapper,ImgWrapper} from '@/components'
-    import {RouteUpdateAwareMixin} from '@/mixins'
+    import {RouteUpdateAwareMixin,ComponentActiveAwareMixin} from '@/mixins'
     let parse = require("parse-link-header")
     import * as api from '@/network/api'
-    import {authRequiredGet} from '@/network'
+    import {authRequiredAjax} from '@/network'
     export default {
         name: 'repository_invitation_page',
-        mixins: [RouteUpdateAwareMixin],
+        mixins: [RouteUpdateAwareMixin,ComponentActiveAwareMixin],
+        inject: ['viewerIsCollaborator','viewerIsCollaboratorGetter'],
         data() {
             return {
                 data: {},
-                noInvitation: false,
-                loading: false
+                noInvitationFlag: false,
+                loading: false,
+                loadingInvitationHandle:false
             }
         },
         computed: {
             repoFullName() {
                 return `${this.$route.params.owner}/${this.$route.params.repo}`
+            },
+            viewerIsCollaboratorFlag() {
+                return this.viewerIsCollaborator().data
             }
         },
-        created() {
+        mounted() {
+            if(this.viewerIsCollaboratorFlag) {
+                this.$router.replace(`/${this.repoFullName}`)
+                return 
+            }
             this.network_getData()
         },
         methods: {
@@ -115,7 +124,7 @@
                             }else{
                                 url = api.API_REPOSITORY_INVITATION_FOR_AUTHENTICATED_USER
                             }
-                            let res = await authRequiredGet(url,{cancelToken})
+                            let res = await authRequiredAjax(url,{cancelToken})
                             res.data.forEach(item => {
                                 if(item.invitee.login == this.viewer.login && this.repoFullName == item.repository.full_name) {
                                     invitation = item
@@ -124,6 +133,15 @@
                             })
                             pageInfo = parse(res.headers.link) || {}
                         }
+
+                        
+
+                        if(!invitation && !this.viewerIsCollaboratorFlag) {
+                            this.topNoticeShow('repository',"Sorry, we couldn't find that repository invitation. It is possible that the invitation was revoked or that you are not logged into the invited account.",'error')
+                        }else {
+                            this.topNoticeShow('repository','')
+                        }
+
                     }catch(e) {
                         if(e.message == 'break while') {
                             //do nothing
@@ -138,6 +156,50 @@
                     this.handleError(e)
                 }finally{
                     this.loading = false
+                }
+            },
+            async network_acceptInvitation() {
+                try{
+                    this.loadingInvitationHandle = true
+                    let url = api.API_REPOSITORY_INVITATION_ACTION(this.data.id)
+
+                    await authRequiredAjax(url,{},'patch')
+                    
+                    this.$router.replace(`/${this.repoFullName}`)
+
+                    this.topNoticeShow('repository',`You now have push access to the ${this.repoFullName} repository.`)
+
+                    this.viewerIsCollaboratorGetter()()
+
+                }catch(e) {
+                    this.handleError(e)
+                }finally{
+                    this.loadingInvitationHandle = false
+                }
+            },
+            async network_declineInvitation() {
+                try{
+                    this.loadingInvitationHandle = true
+                    let url = api.API_REPOSITORY_INVITATION_ACTION(this.data.id)
+
+                    await authRequiredAjax(url,{},'delete')
+                    
+                    this.$router.replace(`/${this.viewer.login}`)
+
+                    this.topNoticeShow('user',`You have declined the invitation to the ${this.repoFullName} repository.`)
+
+                }catch(e) {
+                    this.handleError(e)
+                }finally{
+                    this.loadingInvitationHandle = false
+                }
+            },
+            
+        },
+        watch: {
+            viewerIsCollaboratorFlag() {
+                if(this.viewerIsCollaboratorFlag && this.componentActive) {
+                    this.$router.replace(`/${this.repoFullName}`)
                 }
             }
         },
