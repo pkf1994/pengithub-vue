@@ -7,7 +7,7 @@
                     :style="popoverStyle">
             <Cover class="cover" v-show="show"  @click.stop="close"></Cover>
 
-            <Main class="main bg-white">
+            <Main class="main bg-white" style="z-index:999">
                 <slot></slot>
             </Main>
         </Container>

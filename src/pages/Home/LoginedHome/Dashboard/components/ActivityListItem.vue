@@ -17,7 +17,7 @@
                 </AnimatedHeightWrapper>
                
                 <Body class="f6 mt-1">
-                    <router-link :to="`/${event.actor.login}`">
+                    <router-link v-if="event.actor" :to="`/${event.actor.login}`">
                         <ImgWrapper>
                             <img class="rounded-1 d-inline-block v-align-bottom"
                                             v-if="event.actor && event.actor.avatar_url"

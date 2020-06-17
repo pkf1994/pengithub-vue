@@ -55,7 +55,7 @@ export default {
                     }
                 },
                 handleGraphqlError(graphqlRes) {
-                    let errors = graphqlRes.data.errors
+                    let errors = graphqlRes.data && graphqlRes.data.errors
                     if(errors) {
                         errors.forEach(i => {
                             this.$toast(i.message,'error')
@@ -79,7 +79,11 @@ export default {
                     for(let modalRef in this.$refs) {
                         if(this.$refs[modalRef].show) this.$refs[modalRef].show = false
                     }
-                }
+                },
+                scrollToBottom() {
+                    let bottomY = document && document.body && document.body.scrollHeight
+                    window && window.scrollTo(0,bottomY)
+                },
             },
             activated() {
                 if(this.documentTitle) {

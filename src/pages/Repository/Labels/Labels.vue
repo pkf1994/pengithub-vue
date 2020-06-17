@@ -1,16 +1,33 @@
 <template>
     <CommonLoadingWrapper :loading="loading || totalCount.loading || extraData.loading" class="p-3" :position="loading ? 'center' : 'corner'">
         
-        <nav class="d-flex">
-            <router-link class="subnav-item" :to="`/${owner()}/${repo()}/labels`">
-                <svg class="octicon octicon-tag" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
-                Labels
-            </router-link>
-            <router-link class="subnav-item" :to="`/${owner()}/${repo()}/milestones`">
-                <svg class="octicon octicon-milestone" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2H6V0h2v2zm4 5H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h10l2 2-2 2zM8 4H6v2h2V4zM6 16h2V8H6v8z"></path></svg>
-                Milestones
-            </router-link>
+        <nav class="d-flex flex-justify-between">
+            <div>
+                <router-link class="subnav-item" :to="`/${owner()}/${repo()}/labels`">
+                    <svg class="octicon octicon-tag" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
+                    Labels
+                </router-link>
+                <router-link class="subnav-item" :to="`/${owner()}/${repo()}/milestones`">
+                    <svg class="octicon octicon-milestone" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2H6V0h2v2zm4 5H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h10l2 2-2 2zM8 4H6v2h2V4zM6 16h2V8H6v8z"></path></svg>
+                    Milestones
+                </router-link>
+            </div>
+            
+            <button v-if="viewerIsCollaborator().data && accessToken" class="btn btn-primary" type="button" aria-expanded="true" @click="() => triggerCreateLabelPane(true)">New</button>
         </nav> 
+
+        <AnimatedHeightWrapper :stretch="showCreateLabelPane">
+            <div class="py-1 pt-3">
+                <LabelEditor  ref="labelEditor" @submitable="() => {createdLabelSubmitable = true}" @unsubmitable="() => {createdLabelSubmitable = false}">
+                    <button :disabled="submittingCreatedLabel" class="btn" type="button"  @click="() => triggerCreateLabelPane(false)">Cancel</button>
+                    <button @click="network_createLabel" class="btn btn-primary" type="submit" :disabled="!createdLabelSubmitable || submittingCreatedLabel">
+                        {{submittingCreatedLabel ? 'Saving...' : 'Create label'}}
+                    </button>
+                </LabelEditor>
+            </div>
+           
+        </AnimatedHeightWrapper>
+        
 
         <transition name="fade" appear>
             <ComplexBubble class="mt-3" v-if="firstLoadedFlag">
@@ -26,29 +43,13 @@
                 </template>
 
                 <transition-group name="fade-group" appear>
-                    <LabelItem class="p-3 Box-row" v-for="item in data" :key="item.name">
-                        <Label :name="item.name" :color="`#${item.color}`"></Label>
-                        <AnimatedHeightWrapper>
-                            <Statistic v-if="getOpenIssuesAndPullRequestsCount(item.node_id)" class="description pt-1">{{getOpenIssuesAndPullRequestsCount(item.node_id)}} open issues and pull requests</Statistic>
-                        </AnimatedHeightWrapper>
-                        <Description class="description mt-1" style="font-size:14px">
-                           {{item.description}}
-                        </Description>
-                    </LabelItem>
+                    <LabelItem v-for="item in data" :key="item.name" :label="item" @label-deleted="labelDeletedHandler" @label-updated="labelUpdatedHandler"/>
                 </transition-group>
 
             </ComplexBubble>
         </transition>
 
         <SimplePaginationRest v-if="pageInfo.prev || pageInfo.next" :loading="loading" :pageInfo="pageInfo"></SimplePaginationRest>
-
-        <!--  <Modal ref="sortModal" title="Sort by">
-            <router-link class="d-block" v-for="item in sortModalRouterLinkData" :key="item.to" :to='item.to'>
-                <SelectMenuItem :selected="$route.query.sort == item.sort" @click.native="closeModal">
-                    <span>{{item.label}}</span>    
-                </SelectMenuItem>
-            </router-link> 
-        </Modal> -->
 
         <EmptyNotice v-if="emptyFlag" class="empty-notice">
             <div class="blankslate"> 
@@ -63,16 +64,23 @@
 </template>
 
 <script>
-    import {CommonLoadingWrapper,ComplexBubble,AnimatedHeightWrapper,Label,Modal,SelectMenuItem,SimplePaginationRest} from '@/components'
+    import {CommonLoadingWrapper,ComplexBubble,AnimatedHeightWrapper,Label,Modal,SelectMenuItem,SimplePaginationRest,Popover} from '@/components'
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
+    import {authRequiredGitHubGraphqlApiQuery,authRequiredGet,authRequiredAjax} from '@/network'
+    import {util_color} from '@/util'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
+    import {LabelItem,LabelEditor} from './components'
     let parse = require("parse-link-header")
     export default {
         name: 'repository_labels_page',
-        inject: ['owner','repo'],
+        inject: ['owner','repo','viewerIsCollaborator'],
+        provide() {
+            return {
+                extraDataProvided: () => this.extraData.data
+            }
+        },
         mixins: [RouteUpdateAwareMixin],
         data() {
             return {
@@ -88,7 +96,11 @@
                 extraData: {
                     data: [],
                     loading: false
-                }
+                },
+
+                showCreateLabelPane: false,
+                submittingCreatedLabel: false,
+                createdLabelSubmitable: false
             }
         },
         computed: {
@@ -97,7 +109,7 @@
             },
             documentTitle() {
                 return `Labels · ${this.owner()}/${this.repo()}`
-            }
+            },
         },
         created() {
             this.network_getData()
@@ -169,10 +181,63 @@
                     this.extraData.loading = false
                 }
             },
+            async network_createLabel() {
+                if(this.submittingCreatedLabel) return 
+                if(!this.viewerIsCollaborator().data) return 
+                if(!this.accessToken) return
+                try{
+                    this.submittingCreatedLabel = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' create_label')
+                    let url = api.API_REPOSITORY_LABELS(this.$route.params)
+                    let res = await authRequiredAjax(
+                        url,
+                        {
+                            cancelToken,
+                            name: this.$refs.labelEditor.name,
+                            color: this.$refs.labelEditor.color.replace('#',''),
+                            description: this.$refs.labelEditor.description,
+                        },
+                        'post'
+                    )
+
+                    this.data.unshift(res.data)
+                    await this.network_getExtraData()
+                    this.showCreateLabelPane = false
+
+                }catch(e) {
+                    handleError(e)
+                }finally{
+                    this.submittingCreatedLabel = false
+                }
+            },
             getOpenIssuesAndPullRequestsCount(id) {
                 let dataHolder = this.extraData.data.filter(i => i.id == id)[0]
                 if(!dataHolder) return
                 return dataHolder.issues.totalCount + dataHolder.pullRequests.totalCount
+            },
+            triggerCreateLabelPane(flag) {
+                this.showCreateLabelPane = flag
+            },
+            triggerPopover() {
+                if(!this.$refs.popover) return 
+                this.$refs.popover.show = true
+            },
+            labelUpdatedHandler(e) {
+                let updatedLabel = this.data.filter(i => i.name == e.prev.name)[0]
+                if(updatedLabel) {
+                    updatedLabel.name = e.name
+                    updatedLabel.color = e.color,
+                    updatedLabel.description = e.description
+                }
+            },
+            labelDeletedHandler(e) {
+                let idx
+                this.data.forEach((i,index) => {
+                    if(i.name == e.name) {
+                        idx = index
+                    }
+                })
+                this.data.splice(idx,1)
             }
         },
         components: {
@@ -183,11 +248,14 @@
             Modal,
             SelectMenuItem,
             SimplePaginationRest,
+            Popover,
+            LabelItem,
+            LabelEditor,
             Header: styled.div``,
-            LabelItem: styled.div``,
-            Description: styled.div``,
-            Statistic: styled.div``,
             EmptyNotice: styled.div``,
+            CreateLabelPane: styled.div``,
+            LabelPreviewRow: styled.div``,
+            LabelInfoRow: styled.div``,
         }
     }
 </script>
@@ -196,6 +264,7 @@
 @import 'node_modules/@primer/css/box/index.scss';
 @import 'node_modules/@primer/css/navigation/index.scss';
 @import 'node_modules/@primer/css/blankslate/index.scss';
+@import 'node_modules/@primer/css/forms/index.scss';
 .select-menu-button:after {
     display: inline-block;
     width: 0;

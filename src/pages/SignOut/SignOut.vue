@@ -10,7 +10,7 @@
             <DialogTitle class="text-center f2-light">
                 Are you sure you want to sign out?
             </DialogTitle>
-            <button class="btn-block btn py-3 mt-5 width-full f4" @click="signOut">Sign out</button>
+            <button class="btn-block btn py-3 mt-5 width-full f4" @click="_signOut">Sign out</button>
         </Dialog>
 
         <Footer class="mt-6 py-6 px-3">
@@ -52,6 +52,17 @@
                 ]
             }
         },
+        computed: {
+            returnTo() {
+                return this.$route.query.return_to
+            }
+        },
+        methods: {
+            async _signOut() {
+                await this.signOut()
+                this.$router.replace(this.returnTo)
+            }
+        },
         components: {
             HyperlinkWrapper,
             Container: styled.div``,
@@ -66,7 +77,8 @@
 <style scoped lang="scss">
 @import 'node_modules/@primer/css/box/index.scss';
 .dialog{
-    width: 340px;
+    width: 90%;
+    max-width: 340px;
     margin: 0 auto;
 }
 </style>

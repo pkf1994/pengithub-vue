@@ -11,7 +11,7 @@ import {
     AnimatedHeightWrapper,
     AnimatedWidthWrapper} from "./AnimatedSizeWrapper";
 import LoadingAndCatchErrorTemplate from './LoadingAndCatchErrorTemplate'
-import {LoadingIcon,CommonLoadingEx,CommonLoading,CommonLoadingWrapper,LoadingIconEx,HiddenItemLoading} from './Loading'
+import {LoadingIcon,CommonLoadingEx,CommonLoading,CommonLoadingWrapper,LoadingIconEx,HiddenItemLoading,TinyLoadingIcon} from './Loading'
 import {IssuesPageMixin,IssueListItem,IssuesPageTemplate} from './IssuesPage'
 import SelectMenuItem from './SelectMenuItem'
 import Modal from './Modal'
@@ -51,6 +51,7 @@ export {
     Label,
     SimpleBubble,
     CommonLoadingEx,
+    TinyLoadingIcon,
     IconPagination,
     SimplePagination,
     SimplePaginationRest,

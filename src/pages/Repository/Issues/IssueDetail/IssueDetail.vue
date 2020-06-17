@@ -1,13 +1,13 @@
 <template>
-    <Container class="px-3 pt-3 bg-white flex-grow-1">
+    <CommonLoadingWrapper :loading="loading || timeline.loading || timeline.extraData.loading" :position="loading ? 'center' : 'corner'" class="px-3 pt-3 bg-white flex-grow-1">
         <AnimatedHeightWrapper>
-            <Header v-if="data.id" @click="() => {$router.push('/vuejs/vue/issues/11256')}">
+            <Header v-if="data.id">
                 <HeaderActions class="d-flex flex-justify-between flex-items-center mb-3">
                     <router-link to="/" class="btn btn-primary d-inline-block btn-sm">
                         New issue
                     </router-link>
 
-                    <a href="javascript:return false">Jump to bottom</a>
+                    <button class="btn-link" @click="scrollToBottom">Jump to bottom</button>
                 </HeaderActions>
 
                 <HeaderTitle class="title f1">
@@ -16,7 +16,7 @@
                 </HeaderTitle>
 
                 <HeaderMeta class="d-flex mt-2 mb-3 flex-items-center header-meta">
-                    <State class="State State--green mr-2 d-inline-flex flex-items-center" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize;">
+                    <State class="State State--green mr-2 d-inline-flex flex-items-center flex-self-start" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize;">
                         <IssueIcon color="#fff" :issue="data"></IssueIcon>
                         &nbsp;{{data.state}}
                     </State>   
@@ -32,7 +32,7 @@
         
 
         <Info   class="border-bottom border-top pt-3 mt-3" 
-                v-if="(data.assignees && data.assignees.length !== 0) || (data.labels && data.labels.length !== 0) || (projects.length > 0) || (data.milestone && data.milestone !== null)"
+                v-if="(data.assignees && data.assignees.length !== 0) || (data.labels && data.labels.length !== 0) || (data.milestone && data.milestone !== null)"
                 >
             <!-- assignee -->
                  <div class="d-flex pb-3" v-if="data.assignees && data.assignees.length !== 0">
@@ -58,18 +58,6 @@
                     </div>
                 </div> 
             </AnimatedHeightWrapper>
-            <!-- project -->
-            <AnimatedHeightWrapper>
-                <div class="d-flex pb-3" v-if="projects.length !== 0">
-                    <span class="text-gray text-bold flex-shrink-0 col-3 f6">Projects</span>    
-                    <div class="min-width-0 d-flex flex-wrap mt-n1 f6">
-                        <router-link v-for="item in projects" :key="item.project.name" to="/" class="d-inline-block text-bold mr-2 link-gray-dark">
-                            <svg class="octicon octicon-project text-gray p-0" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 12h3V2h-3v10zm-4-2h3V2H6v8zm-4 4h3V2H2v12zm-1 1h13V1H1v14zM14 0H1a1 1 0 00-1 1v14a1 1 0 001 1h13a1 1 0 001-1V1a1 1 0 00-1-1z"></path></svg>
-                            {{item.project.name}}
-                        </router-link> 
-                    </div>
-                </div> 
-            </AnimatedHeightWrapper>
             <!-- milestone -->
             <AnimatedHeightWrapper>
                 <div class="d-flex pb-3" v-if="data.milestone && data.milestone !== null">
@@ -83,7 +71,7 @@
                 </div> 
             </AnimatedHeightWrapper>
         </Info>
-
+      
         <Comment    :data="data"
                     v-if="data.user" 
                     style="padding-top:0px!important;margin-top:16px;"
@@ -92,40 +80,31 @@
                         borderBottomColor:'#c0d3eb'}"
                     :extraData="extraData.data" 
                     :loading="extraData.loading"/>
+                
+        <LoadingTimeline v-if="data.node_id && timeline.data.length == 0 && timeline.loading" class="loading-timeline d-flex flex-items-center flex-justify-center">
+            <LoadingIconEx/>
+        </LoadingTimeline> 
 
         <transition-group tag="div" appear name="fade">
-            <TimelineItem v-for="(item,index) in mergedTimelineData(timeline.data)" :data="item" :key="(item.id || '') + index"/>
+            <TimelineItem v-for="(item,index) in timeline.data" :data="item" :key="(item.id || '') + index"/>
         </transition-group>
 
-        <AnimatedHeightWrapper :stretch="timeline.loading && (timeline.data.length === 0)">
-            <LoadingTimeline class="loading-timeline d-flex flex-items-center flex-justify-center">
-                <LoadingIconEx/>
-            </LoadingTimeline> 
-        </AnimatedHeightWrapper>   
-
-        <HiddenItemLoading v-if="(timeline.pageInfo) && (timeline.pageInfo.next) && (timeline.pageInfo.next.page < timeline.pageInfo.last.page - 1) && (timeline.data.length !== 0)"
-                            :loading="timeline.loading"
-                            :dataGetter="loadingMore">
-            {{hiddenItemCount}}
-        </HiddenItemLoading>
-
-        <transition-group tag="div" appear name="fade">
-                <TimelineItem v-for="(item,index) in mergedTimelineData(timeline.lastData)" :data="item" :key="(item.id || '') + index"/>
-        </transition-group>
-
-        <Editor v-if="data.id" 
-                class="pt-3 mb-5" 
-                style="border-top: 2px solid #e1e4e8;" 
-                :locked="viewerCannotComment" 
-                :lockedReason="extraData.data.activeLockReason"></Editor>
+        <CommentEditor class="pt-3 mb-5" 
+                        v-if="data.id"
+                        :locked="this.data.locked"
+                        :viewerDidAuthor="extraData.data.viewerDidAuthor" 
+                        :lockedReason="extraData.data.activeLockReason" 
+                        :viewerIsCollaborator="viewerIsCollaborator.data"></CommentEditor>
 
 
         <InfoBottom v-if="data.id">
             <!-- assignee -->
             <InfoBottomItem class="info-bottom-item">
+                <span v-if="viewerIsCollaborator().data" @click="() => showModal('chooseAssigneesModal')" class="float-right">
+                    <svg class="octicon octicon-gear" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.429 1.525a6.593 6.593 0 011.142 0c.036.003.108.036.137.146l.289 1.105c.147.56.55.967.997 1.189.174.086.341.183.501.29.417.278.97.423 1.53.27l1.102-.303c.11-.03.175.016.195.046.219.31.41.641.573.989.014.031.022.11-.059.19l-.815.806c-.411.406-.562.957-.53 1.456a4.588 4.588 0 010 .582c-.032.499.119 1.05.53 1.456l.815.806c.08.08.073.159.059.19a6.494 6.494 0 01-.573.99c-.02.029-.086.074-.195.045l-1.103-.303c-.559-.153-1.112-.008-1.529.27-.16.107-.327.204-.5.29-.449.222-.851.628-.998 1.189l-.289 1.105c-.029.11-.101.143-.137.146a6.613 6.613 0 01-1.142 0c-.036-.003-.108-.037-.137-.146l-.289-1.105c-.147-.56-.55-.967-.997-1.189a4.502 4.502 0 01-.501-.29c-.417-.278-.97-.423-1.53-.27l-1.102.303c-.11.03-.175-.016-.195-.046a6.492 6.492 0 01-.573-.989c-.014-.031-.022-.11.059-.19l.815-.806c.411-.406.562-.957.53-1.456a4.587 4.587 0 010-.582c.032-.499-.119-1.05-.53-1.456l-.815-.806c-.08-.08-.073-.159-.059-.19a6.44 6.44 0 01.573-.99c.02-.029.086-.075.195-.045l1.103.303c.559.153 1.112.008 1.529-.27.16-.107.327-.204.5-.29.449-.222.851-.628.998-1.189l.289-1.105c.029-.11.101-.143.137-.146zM8 0c-.236 0-.47.01-.701.03-.743.065-1.29.615-1.458 1.261l-.29 1.106c-.017.066-.078.158-.211.224a5.994 5.994 0 00-.668.386c-.123.082-.233.09-.3.071L3.27 2.776c-.644-.177-1.392.02-1.82.63a7.977 7.977 0 00-.704 1.217c-.315.675-.111 1.422.363 1.891l.815.806c.05.048.098.147.088.294a6.084 6.084 0 000 .772c.01.147-.038.246-.088.294l-.815.806c-.474.469-.678 1.216-.363 1.891.2.428.436.835.704 1.218.428.609 1.176.806 1.82.63l1.103-.303c.066-.019.176-.011.299.071.213.143.436.272.668.386.133.066.194.158.212.224l.289 1.106c.169.646.715 1.196 1.458 1.26a8.094 8.094 0 001.402 0c.743-.064 1.29-.614 1.458-1.26l.29-1.106c.017-.066.078-.158.211-.224a5.98 5.98 0 00.668-.386c.123-.082.233-.09.3-.071l1.102.302c.644.177 1.392-.02 1.82-.63.268-.382.505-.789.704-1.217.315-.675.111-1.422-.364-1.891l-.814-.806c-.05-.048-.098-.147-.088-.294a6.1 6.1 0 000-.772c-.01-.147.039-.246.088-.294l.814-.806c.475-.469.679-1.216.364-1.891a7.992 7.992 0 00-.704-1.218c-.428-.609-1.176-.806-1.82-.63l-1.103.303c-.066.019-.176.011-.299-.071a5.991 5.991 0 00-.668-.386c-.133-.066-.194-.158-.212-.224L10.16 1.29C9.99.645 9.444.095 8.701.031A8.094 8.094 0 008 0zm1.5 8a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM11 8a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </span>    
                 <InfoBottomItemTitle class="info-bottom-item-title">
                     Assignees
-                    <svg v-if="data.assignees && data.assignees.length > 0" class="octicon octicon-gear" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path></svg>
                 </InfoBottomItemTitle>
                 <div style="margin-bottom:10px" v-for="item in data.assignees.slice(0,21)" :key="item.id">
                     <router-link to="/">
@@ -141,26 +120,17 @@
 
              <!-- labels -->
             <InfoBottomItem class="info-bottom-item">
+                <span v-if="viewerIsCollaborator().data" @click="() => showModal('applyLabelsModal')" class="float-right">
+                    <svg class="octicon octicon-gear" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.429 1.525a6.593 6.593 0 011.142 0c.036.003.108.036.137.146l.289 1.105c.147.56.55.967.997 1.189.174.086.341.183.501.29.417.278.97.423 1.53.27l1.102-.303c.11-.03.175.016.195.046.219.31.41.641.573.989.014.031.022.11-.059.19l-.815.806c-.411.406-.562.957-.53 1.456a4.588 4.588 0 010 .582c-.032.499.119 1.05.53 1.456l.815.806c.08.08.073.159.059.19a6.494 6.494 0 01-.573.99c-.02.029-.086.074-.195.045l-1.103-.303c-.559-.153-1.112-.008-1.529.27-.16.107-.327.204-.5.29-.449.222-.851.628-.998 1.189l-.289 1.105c-.029.11-.101.143-.137.146a6.613 6.613 0 01-1.142 0c-.036-.003-.108-.037-.137-.146l-.289-1.105c-.147-.56-.55-.967-.997-1.189a4.502 4.502 0 01-.501-.29c-.417-.278-.97-.423-1.53-.27l-1.102.303c-.11.03-.175-.016-.195-.046a6.492 6.492 0 01-.573-.989c-.014-.031-.022-.11.059-.19l.815-.806c.411-.406.562-.957.53-1.456a4.587 4.587 0 010-.582c.032-.499-.119-1.05-.53-1.456l-.815-.806c-.08-.08-.073-.159-.059-.19a6.44 6.44 0 01.573-.99c.02-.029.086-.075.195-.045l1.103.303c.559.153 1.112.008 1.529-.27.16-.107.327-.204.5-.29.449-.222.851-.628.998-1.189l.289-1.105c.029-.11.101-.143.137-.146zM8 0c-.236 0-.47.01-.701.03-.743.065-1.29.615-1.458 1.261l-.29 1.106c-.017.066-.078.158-.211.224a5.994 5.994 0 00-.668.386c-.123.082-.233.09-.3.071L3.27 2.776c-.644-.177-1.392.02-1.82.63a7.977 7.977 0 00-.704 1.217c-.315.675-.111 1.422.363 1.891l.815.806c.05.048.098.147.088.294a6.084 6.084 0 000 .772c.01.147-.038.246-.088.294l-.815.806c-.474.469-.678 1.216-.363 1.891.2.428.436.835.704 1.218.428.609 1.176.806 1.82.63l1.103-.303c.066-.019.176-.011.299.071.213.143.436.272.668.386.133.066.194.158.212.224l.289 1.106c.169.646.715 1.196 1.458 1.26a8.094 8.094 0 001.402 0c.743-.064 1.29-.614 1.458-1.26l.29-1.106c.017-.066.078-.158.211-.224a5.98 5.98 0 00.668-.386c.123-.082.233-.09.3-.071l1.102.302c.644.177 1.392-.02 1.82-.63.268-.382.505-.789.704-1.217.315-.675.111-1.422-.364-1.891l-.814-.806c-.05-.048-.098-.147-.088-.294a6.1 6.1 0 000-.772c-.01-.147.039-.246.088-.294l.814-.806c.475-.469.679-1.216.364-1.891a7.992 7.992 0 00-.704-1.218c-.428-.609-1.176-.806-1.82-.63l-1.103.303c-.066.019-.176.011-.299-.071a5.991 5.991 0 00-.668-.386c-.133-.066-.194-.158-.212-.224L10.16 1.29C9.99.645 9.444.095 8.701.031A8.094 8.094 0 008 0zm1.5 8a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM11 8a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </span>
                 <InfoBottomItemTitle class="info-bottom-item-title">
                     Labels
-                    <svg v-if="data.labels && data.labels.length > 0" class="octicon octicon-gear" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path></svg>
                 </InfoBottomItemTitle>
                 <router-link class="d-block mt-1" to="/" v-for="item in data.labels.slice(0,21)" :key="item.id">
                     <Label class="width-full" :name="item.name" :color="`#${item.color}`"></Label>      
                 </router-link> 
                 <span v-if="!(data.labels && data.labels.length > 0)">None yet</span>    
                 <span v-if="data.labels.length > 21">and others</span> 
-            </InfoBottomItem>
-
-             <!-- projects -->
-            <InfoBottomItem class="info-bottom-item">
-                <InfoBottomItemTitle class="info-bottom-item-title">
-                    Projects
-                    <svg v-if="projects.length > 0" class="octicon octicon-gear" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M14 8.77v-1.6l-1.94-.64-.45-1.09.88-1.84-1.13-1.13-1.81.91-1.09-.45-.69-1.92h-1.6l-.63 1.94-1.11.45-1.84-.88-1.13 1.13.91 1.81-.45 1.09L0 7.23v1.59l1.94.64.45 1.09-.88 1.84 1.13 1.13 1.81-.91 1.09.45.69 1.92h1.59l.63-1.94 1.11-.45 1.84.88 1.13-1.13-.92-1.81.47-1.09L14 8.75v.02zM7 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"></path></svg>
-                </InfoBottomItemTitle>
-                <ProjectCard v-for="item in projects.slice(0,21)" :key="item.id" :data="item"></ProjectCard>
-                <span v-if="!(projects.length > 0)">None yet</span>  
-                <span v-if="projects.length > 21">and others</span>   
             </InfoBottomItem>
 
              <!-- milestones -->
@@ -182,8 +152,11 @@
                     Notifications
                     <span class="text-normal">Customize</span>
                 </InfoBottomItemTitle>
-               <button type="submit" class="btn btn-block btn-sm d-block width-full" data-disable-with="">
-                    <svg class="octicon octicon-mute" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2.81v10.38c0 .67-.81 1-1.28.53L3 10H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h2l3.72-3.72C7.19 1.81 8 2.14 8 2.81zm7.53 3.22l-1.06-1.06-1.97 1.97-1.97-1.97-1.06 1.06L11.44 8 9.47 9.97l1.06 1.06 1.97-1.97 1.97 1.97 1.06-1.06L13.56 8l1.97-1.97z"></path></svg> Unsubscribe
+               <button type="submit" class="btn btn-block d-block width-full d-flex flex-items-center flex-justify-center" data-disable-with="">
+                    <span class="mr-2">
+                        <svg class="octicon octicon-mute v-align-middle" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2.81v10.38c0 .67-.81 1-1.28.53L3 10H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h2l3.72-3.72C7.19 1.81 8 2.14 8 2.81zm7.53 3.22l-1.06-1.06-1.97 1.97-1.97-1.97-1.06 1.06L11.44 8 9.47 9.97l1.06 1.06 1.97-1.97 1.97 1.97 1.06-1.06L13.56 8l1.97-1.97z"></path></svg> 
+                    </span> 
+                    Unsubscribe
                 </button>
                 <span class="mt-1 d-inline-block" v-if="extraData.data.viewerSubscription">You're {{extraData.data.viewerSubscription.toLowerCase()}} to this thread.</span>
             </InfoBottomItem>
@@ -204,11 +177,6 @@
             </InfoBottomItem>
         </InfoBottom>
 
-        <transition name="fade" appear>
-            <CommonLoading v-if="loading || timeline.loading || timeline.commentExtraGraphqlData.loading"
-                            :preventClickEvent="false"
-                            :position="loading ? 'center' : 'corner'"/>
-        </transition>  
 
         <transition name="fade" appear>
             <StickyTop v-if="scrollTop > 300" class="sticky-top px-3 py-2">
@@ -234,27 +202,82 @@
 
                 </StickyTopContent>
             </StickyTop>
-        </transition>     
+        </transition> 
         
-    </Container>
+        <Modal title="Assign up to 10 people to this issue" ref="chooseAssigneesModal" :modalStyle="{height:'80vh'}" @show="network_getAssignableUsers"> 
+             <div v-if="chooseAssigneesModal.assignableUsers.loading" class="flex-row-center height-full">
+                <LoadingIconEx></LoadingIconEx>
+            </div>
+            <SimpleSearchInput v-else class="p-3 modal-search-input border-bottom"
+                                placeholder="Filter users" 
+                                v-model="chooseAssigneesModal.searchQuery"/>
+          
+            <transition-group name="fade-group" appear>
+                <SelectMenuItem v-for="item in filteredAssignableUsers" :selected="data.assignees.some(i => i.node_id == item.id)" :key="item.login" @click.native="() => network_selectTheAssigneeOrNot(item.id)">
+                    <ImgWrapper class="mr-2">
+                        <img class="avatar" width="20" height="20" :src="item.avatarUrl">
+                    </ImgWrapper>
+                    <strong class='mr-1'>{{item.login}}</strong>
+                    <span>{{item.name}}</span>    
+
+                    <template v-slot:icon v-if="chooseAssigneesModal.loading.indexOf(item.id) != -1">
+                        <TinyLoadingIcon class="mr-2"></TinyLoadingIcon>
+                    </template>    
+                </SelectMenuItem>
+            </transition-group>
+        </Modal>
+
+        <Modal title="Apply labels to this issue" ref="applyLabelsModal" :modalStyle="{height:'80vh'}" @show="network_getAvailableLabels">
+            <div v-if="applyLabelsModal.labels.loading" class="flex-row-center height-full">
+                <LoadingIconEx></LoadingIconEx>
+            </div>
+            <SimpleSearchInput  v-else 
+                                 class="p-3 modal-search-input" 
+                                placeholder="Filter labels" 
+                                v-model="applyLabelsModal.searchQuery"/>
+            <div v-if="!applyLabelsModal.labels.loading && applyLabelsModal.labels.data.length === 0" class="p-3" style="color: #586069;">
+                No available labels found. Sorry about that.
+            </div>  
+
+            <transition-group name="fade-group" appear style="overflowY:auto">
+                <SelectMenuItem v-for="item in filteredAvailableLabels" :iconStyle="{alignSelf:'flex-start'}" :key="item.name" :selected="data.labels.some(i => i.name == item.name)"  @click.native="() => network_applyTheLabelOrNot(item.name)">
+                    <div class="d-flex flex-items-start" >
+                        <LabelBadge class="avatar mt-1 mr-2 label-badge flex-shrink-0" :style="{background: `#${item.color}`}" />
+                        <LabelContent style="min-width:0">
+                            <LabelName class="text-bold">{{item.name}}</LabelName>    
+                            <LabelDescription v-if="item.description && item.description !== ''" class="label-description">{{item.description}}</LabelDescription>    
+                        </LabelContent>
+                    </div>
+
+                    <template v-slot:icon v-if="applyLabelsModal.loading.indexOf(item.name) != -1">
+                        <TinyLoadingIcon class="mr-2"></TinyLoadingIcon>
+                    </template>    
+                </SelectMenuItem>
+            </transition-group>
+        </Modal>
+    </CommonLoadingWrapper>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading,
+    import {CommonLoadingWrapper,
             Label,
             AnimatedHeightWrapper,
             LoadingIconEx,
             Progress,
             IssueIcon,
             ImgWrapper,
-            Editor,
+            Modal,
+            TinyLoadingIcon,
+            SimpleSearchInput,
+            SelectMenuItem,
             HiddenItemLoading} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
-    import {TimelineItem,Comment,ProjectCard} from './components'
+    import {TimelineItem,Comment,ProjectCard,CommentEditor} from './components'
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
+        authRequiredAjax,
         authRequiredGitHubGraphqlApiQuery,
         cancelAndUpdateAxiosCancelTokenSource} from '@/network'
     import * as api from '@/network/api'
@@ -264,11 +287,11 @@
     var parse = require('parse-link-header');
     export default {
         name: 'issueDetail',
-        inject: ['owner','repo'],
+        inject: ['owner','repo','viewerIsCollaborator'],
         mixins: [ScrollTopListenerMixin,RouteUpdateAwareMixin],
         provide() {
             return {
-                commentExtraGraphqlDataGetter: () => this.timeline.commentExtraGraphqlData.data,
+                commentExtraDataProvided: () => this.timeline.extraData.data,
                 issueGetter: () => Object.assign({},this.data,this.extraData.data)
             }
         },
@@ -276,7 +299,6 @@
             return {
                 data: {},
                 loading: false,
-                loadingAdditionalData: false,
                 //bodyHTML reactions viewerAssociation
                 extraData: {
                     data: {},
@@ -285,19 +307,13 @@
                 timeline: {
                     data: [],
                     loading: false,
-                    commentExtraGraphqlData: {
+                    extraData: {
                         data: [],
                         loading: false
                     },
                     perPage: 20,
-                    lastData: [],
-                    pageInfo: {},
-                    count: {
-                        data: 0,
-                        loading: false
-                    }
+                    pageInfo: {}
                 },
-                projects: [],
                 timelineTypes: [
                     {
                         graphql:'CROSS_REFERENCED_EVENT',
@@ -387,7 +403,23 @@
                         graphql:'USER_BLOCKED_EVENT',
                         rest:'user_blocked',
                     }
-                ]
+                ],
+                chooseAssigneesModal: {
+                    searchQuery: '',
+                    assignableUsers: {
+                        data: [],
+                        loading: false
+                    },
+                    loading: []
+                },
+                applyLabelsModal: {
+                    searchQuery: '',
+                    labels: {
+                        data: [],
+                        loading: false
+                    },
+                    loading: []
+                }
             }
         },
        
@@ -404,28 +436,22 @@
             viewerCannotComment() {
                 return this.data.locked && !this.extraData.data.viewerCanUpdate
             },
-            hiddenItemCount() {
-                let alreadyCount = 0
-                this.timeline.data.forEach(item => {
-                    if(this.timelineTypes.some(_item => {
-                        return _item.rest === item.event
-                    })){
-                        alreadyCount ++
-                    }
-                })
-                this.timeline.lastData.forEach(item => {
-                    if(this.timelineTypes.some(_item => {
-                        return _item.rest === item.event
-                    })){
-                        alreadyCount ++
-                    }
-                })
-                
-                return this.timeline.count.data - alreadyCount
-            },
             documentTitle() {
                 if(!this.data.title) return location.href
                 return this.data.title
+            },
+            filteredAssignableUsers() {
+                return this.chooseAssigneesModal.assignableUsers.data.filter(i => {
+                    return (i.login.toLowerCase().indexOf(this.chooseAssigneesModal.searchQuery.toLowerCase()) != -1) || (i.name && i.name.toLowerCase().indexOf(this.chooseAssigneesModal.searchQuery.toLowerCase()) != -1)
+                })
+            },
+            filteredAvailableLabels() {
+                return this.applyLabelsModal.labels.data.filter(i => {
+                    return i.name.toLowerCase().indexOf(this.applyLabelsModal.searchQuery.toLowerCase()) != -1
+                })
+            },
+            repoFullName() {
+                return `${this.$route.params.owner}/${this.$route.params.repo}`
             }
         },
         created() {
@@ -438,87 +464,70 @@
                     changePage: true
                 })
             },
-            async network_getData() {
+            network_getData() {
+                this.network_getIssueRest()
+                this.network_getTimeline()
+            },
+            async network_getIssueRest() {
                
                 try{
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name).cancelToken
-
-                    //获取issue基本数据
                     this.loading = true
-                    let url_issue = api.API_ISSUE({
-                        repo: this.repo(),
-                        owner: this.owner(),
-                        number: this.number
-                    })
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
+
+                    let url_issue = api.API_ISSUE(this.$route.params)
                     let res_issue = await authRequiredGet(url_issue,{cancelToken})
                     this.data = res_issue.data
                     this.loading = false
-
-                    //获取issue timeline(异步)
-                    this.network_getTimeline()
-
-                    //获取issue bodyHTML & projects
-                    this.extraData.loading = true
-                    let graphql_extraData = graphql.GRAPHQL_ISSUE_BODY_HTML_AND_REACTIONS_AND_PROJECTS({nodeId:res_issue.data.node_id})
-                    let res_extraData = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
-                    try{
-                        this.extraData.data = res_extraData.data.data.node
-                        this.projects = res_extraData.data.data.node.projectCards.nodes
-                    }catch(e) {
-                        this.handleGraphqlError(res_extraData)
-                    }
-                    
-                    this.extraData.loading = false
-
-                    //获取issue projects
-                  /*   this.projects.loading = true
-                    let graphql_projects = graphql.GRAPHQL_ISSUE_PROJECTS({
-                        repo: this.repo(),
-                        owner: this.owner(),
-                        number: this.number
-                    })
-                    let res_projects = await authRequiredGitHubGraphqlApiQuery(graphql_projects,{cancelToken})
-                    this.projects.data = res_projects.data.data.repository.issue.projectCards.nodes
-                    this.projects.loading = false */
-                    
-                    
+                    if(this.accessToken) this.network_getIssueExtraData()
                 }catch(e){
                     this.handleError(e)
                 }finally{
                     this.loading = false
+                }
+            },
+            async network_getIssueExtraData() {
+                try{
+                    this.extraData.loading = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data')
+                    let graphql_extraData = graphql.GRAPHQL_ISSUE
+
+                    let res_extraData = await authRequiredGitHubGraphqlApiQuery(
+                        graphql_extraData,
+                        {
+                            cancelToken,
+                            variables: {
+                                nodeID: this.data.node_id
+                            }
+                        }
+                    )
+
+                    try{
+                        this.extraData.data = res_extraData.data.data.node
+                    }catch(e) {
+                        this.handleGraphqlError(res_extraData)
+                    }
+                    
+                }catch(e) {
+                    console.log(e)
+                }finally{
                     this.extraData.loading = false
                 }
             },
-            async network_getTimeline(payload) {
-                 payload = {
-                    changePage: false,
-                    ...payload
-                }
+            async network_getTimeline() {
                 try{
                     this.timeline.loading = true
 
                     let url_timeline
-                    if(payload.changePage) {
-                        if(this.timeline.pageInfo.next.page > this.timeline.pageInfo.last.page - 2) {
-                            throw new Error("No data avaliable.")
-                        }
+                    if(this.timeline.pageInfo.next && this.timeline.pageInfo.next.url) {
                         url_timeline = this.timeline.pageInfo.next.url
                     } else {
-                        url_timeline = api.API_ISSUE_TIMELINE({
-                            repo: this.repo(),
-                            owner: this.owner(),
-                            number: this.number
-                        }) + `?per_page=${this.timeline.perPage}`
+                        url_timeline = api.API_ISSUE_TIMELINE(this.$route.params) + `?per_page=${this.timeline.perPage}`
                     }
 
-                    let cancelTokenAndSource = this.cancelAndUpdateAxiosCancelTokenSource(this.name + '_timeline_' + url_timeline)
-                    this.cancelTokenArr_timeline = [
-                        ...(this.cancelTokenArr_timeline || []),
-                        cancelTokenAndSource
-                    ]
-
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + 'get_timeline')
+                 
                     let config = {
-                        cancelToken:cancelTokenAndSource.cancelToken,
+                        cancelToken: cancelToken,
                         headers:{
                             'Accept': 'application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json'
                         }   
@@ -528,225 +537,227 @@
 
                     this.timeline.pageInfo = parse(res_timeline.headers.link)
 
-                    //获取末端数据
-                    if((!payload.changePage) && this.timeline.pageInfo && this.timeline.pageInfo.last) {
-                        let res_issueTimeline_last = await authRequiredGet(this.timeline.pageInfo.last.url,config)
-                        let lastData = res_issueTimeline_last.data
+                    this.timeline.data = this.timeline.data.concat(res_timeline.data)
 
-                        let pageInfo_atLast = parse(res_issueTimeline_last.headers.link)
-                        if(pageInfo_atLast.prev.page > 1) {
-                           //获取issue timeline count(异步)
-                            this.network_getTimelineCount()
-                            let res_issueTimeline_lastButOne = await authRequiredGet(pageInfo_atLast.prev.url,config)
-                            lastData = res_issueTimeline_lastButOne.data.concat(lastData)
-                        }
-                        this.timeline.lastData = lastData
-                    }
+                    if(this.accessToken) this.network_getTimelineExtraData(res_timeline.data)
 
-                    if(payload.changePage) {
-                        this.timeline.data = this.timeline.data.concat(res_timeline.data)
-                    }else{
-                        this.timeline.data = res_timeline.data
-                    }
-
+                }catch(e){
+                    console.log(e)
+                }finally{
                     this.timeline.loading = false
+                }
+            },
+            async network_getTimelineExtraData(timeline) {
+                try{
+                    this.timeline.extraData.loading = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_timeline_extra_data')
 
-                    //获取comment bodyHTML 以及 comment reactions
-                    this.timeline.commentExtraGraphqlData.loading = true
-                       
                     let comments = []
-                    this.timeline.data.forEach(item => {
+                    timeline.forEach(item => {
                         if(item.event === 'commented') {
-                            comments.push(item)
-                        }
-                    })
-                    this.timeline.lastData.forEach(item => {
-                        if(item.event === 'commented') {
-                            comments.push(item)
+                            comments.push(item.node_id)
                         }
                     })
 
-                    let graphql_issueCommentBodyAndReactions = graphql.GRAPHQL_ISSUE_COMMENT_BODY_AND_REACTIONS(comments)
-                    let res_issueCommentBodyAndReactions = await authRequiredGitHubGraphqlApiQuery(graphql_issueCommentBodyAndReactions,{cancelToken:cancelTokenAndSource.cancelToken})
-
-                    if(!payload.changePage) this.timeline.commentExtraGraphqlData.data = []
-                    let dataHolder
+                    let res_issueCommentBodyAndReactions = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_ISSUE_COMMENTS,
+                        {
+                            cancelToken,
+                            variables: {
+                                ids: comments
+                            }
+                        }
+                    )
+                  
                     try{
-                        dataHolder = res_issueCommentBodyAndReactions.data.data
+                        this.timeline.extraData.data = this.timeline.extraData.data.concat(res_issueCommentBodyAndReactions.data.data.nodes)
                     }catch(e) {
                         this.handleGraphqlError(res_issueCommentBodyAndReactions)
                     }
-                    for(let key in dataHolder) {
-                        this.timeline.commentExtraGraphqlData.data.push(dataHolder[key])
-                    }
-
-                }catch(e){
+                }catch(e) {
                     console.log(e)
-                }finally{
-                    this.timeline.loading = false
-                    this.timeline.commentExtraGraphqlData.loading = false
+                }finally{   
+                    this.timeline.extraData.loading = false
                 }
             },
-            async network_getTimelineCount() {
+            async network_getAssignableUsers() {
+                if(this.chooseAssigneesModal.assignableUsers.data.length > 0 || this.chooseAssigneesModal.assignableUsers.loading) return
                 try{
-                    this.timeline.count.loading = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name + '_timeline_count').cancelToken
-                    
-                    let timelineTypes_graphql = []
-                    this.timelineTypes.forEach(item => {
-                        timelineTypes_graphql.push(item.graphql)
-                    })
-                    let graphql_timelineCount = graphql.GRAPHQL_ISSUE_TIMELINE_COUNT(
+                    this.chooseAssigneesModal.assignableUsers.loading = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_assignable_users')
+
+                    let pageInfo = undefined
+                    let assignableUsers = []
+
+                    while(!pageInfo || pageInfo.hasNextPage) {
+                        let res = await authRequiredGitHubGraphqlApiQuery(
+                            graphql.GRAPHQL_ASSIGNABLE_USERS,
                             {
-                                timelineTypes: timelineTypes_graphql,
-                                nodeId: this.data.node_id
+                                cancelToken,
+                                variables: {
+                                    name: this.$route.params.repo,
+                                    owner: this.$route.params.owner,
+                                    after: pageInfo && pageInfo.endCursor
+                                }
                             }
                         )
 
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_timelineCount,{cancelToken})
-
-                    let dataHolder 
-                    try{
-                        dataHolder = res.data.data.node
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-                    let timelineCount = 0
-                    for(let key in dataHolder) {
-                        timelineCount = timelineCount + dataHolder[key].totalCount
+                        try{
+                            assignableUsers = assignableUsers.concat(res.data.data.repository.assignableUsers.nodes)
+                            pageInfo =  res.data.data.repository.assignableUsers.pageInfo
+                        }catch(e) {
+                            this.handleGraphqlError(res)
+                        }   
                     }
 
-                    this.timeline.count.data = timelineCount
+                    this.chooseAssigneesModal.assignableUsers.data = assignableUsers
+
+                }catch(e) { 
+                    this.handleError(e)
+                }finally{
+                    this.chooseAssigneesModal.assignableUsers.loading = false
+                }
+            },  
+            async network_selectTheAssigneeOrNot(id) {
+                if(this.chooseAssigneesModal.loading.indexOf(id) != -1) return 
+                if(this.data.assignees.length == 10) {
+                    if(!this.data.assignees.some(i => i.node_id == id)) {
+                        this.$toast('You can only assign up to 10 people to each issue or pull request.','warn')
+                        return 
+                    }
+                }
+                try{
+                    this.chooseAssigneesModal.loading.push(id)
+
+                    let graphql_selectTheAssigneeOrNot
+                    if(this.data.assignees.some(i => i.node_id == id)) {
+                        graphql_selectTheAssigneeOrNot = graphql.GRAPHQL_MUTATION_REMOVE_ASSIGNEES_TO_ASSIGNABLE
+                    }else{
+                        graphql_selectTheAssigneeOrNot = graphql.GRAPHQL_MUTATION_ADD_ASSIGNEES_TO_ASSIGNABLE
+                    }
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql_selectTheAssigneeOrNot,
+                        {
+                            variables: {
+                                assignableId: this.data.node_id,
+                                assigneeIds: [id]
+                            }
+                        }
+                    )
+
+                    if(res.data && res.data.errors) this.handleGraphqlError(res)
                     
-                }catch(e){
+                    await this.network_getIssueRest()
+
+                    await new Promise((resolve,reject) => {
+                        setTimeout(() => {
+                            resolve()
+                        },3000)
+                    })
+                }catch(e) {
                     console.log(e)
                 }finally{
-                    this.timeline.count.loading = false
+                    let idx = this.chooseAssigneesModal.loading.indexOf(id)
+                    this.chooseAssigneesModal.loading.splice(idx,1)
                 }
             },
-            mergedTimelineData(timelineData) {
-                let mergedTimelineData = []
-                let lastOne = {}
-                timelineData.forEach(item => {
-                    //console.log(lastOne)
-                    switch(item.event) {
-                        case 'assigned':
-                        case 'unassigned':
-                            if(lastOne.event === 'assigned' || lastOne.event === 'unassigned') {
-                                if(mergedTimelineData[mergedTimelineData.length - 1].event === 'assigned' || mergedTimelineData[mergedTimelineData.length - 1].event === 'unassigned') {
-                                    let prev_assignedEvent = mergedTimelineData.pop()
-                                    let assignedEvent_merged = {
-                                        ...prev_assignedEvent,
-                                        event: 'assigned_merged',
-                                        assignee_added: [],
-                                        assignee_removed: [],
-                                    }
-                                    mergedTimelineData.push(assignedEvent_merged)
-                                    if(prev_assignedEvent.event === 'assigned') {
-                                        mergedTimelineData[mergedTimelineData.length - 1].assignee_added.push(prev_assignedEvent.assignee)
-                                    }else{
-                                        mergedTimelineData[mergedTimelineData.length - 1].assignee_removed.push(prev_assignedEvent.assignee)
-                                    }
-                                }
-                                if(item.event === 'assigned') {
-                                    mergedTimelineData[mergedTimelineData.length - 1].assignee_added.push(item.assignee)
-                                }else{
-                                    mergedTimelineData[mergedTimelineData.length - 1].assignee_removed.push(item.assignee)
-                                }
-                            }else{
-                                mergedTimelineData.push(item)
-                            }
-                            lastOne = item
-                            break
-                        case 'milestoned':
-                        case 'demilestoned':
-                            if(lastOne.event === 'milestoned' || lastOne.event === 'demilestoned') {
-                                if(mergedTimelineData[mergedTimelineData.length - 1].event === 'milestoned' || mergedTimelineData[mergedTimelineData.length - 1].event === 'demilestoned') {
-                                    let prev_milestonedEvent = mergedTimelineData.pop()
-                                    let milestonedEvent_merged = {
-                                        ...prev_milestonedEvent,
-                                        event: 'milestoned_merged',
-                                        milestones: [],
-                                    }
-                                    mergedTimelineData.push(milestonedEvent_merged)
-                                    mergedTimelineData[mergedTimelineData.length - 1].milestones.push(prev_milestonedEvent.milestone)
-                                }
-                                if(!mergedTimelineData[mergedTimelineData.length - 1].milestones.some(_item => {
-                                    return _item.title === item.milestone.title
-                                })) {
-                                    mergedTimelineData[mergedTimelineData.length - 1].milestones.push(item.milestone)
-                                }
-                            }else{
-                                mergedTimelineData.push(item)
-                            }
-                            lastOne = item
-                            break
-                        case 'labeled':
-                        case 'unlabeled':
-                            if(lastOne.event === 'labeled' || lastOne.event === 'unlabeled') {
-                                if(mergedTimelineData[mergedTimelineData.length - 1].event === 'labeled' || mergedTimelineData[mergedTimelineData.length - 1].event === 'unlabeled') {
-                                    let prev_labeledEvent = mergedTimelineData.pop()
-                                    let labeledEvent_merged = {
-                                        ...prev_labeledEvent,
-                                        event: 'labeled_merged',
-                                        labels_added: [],
-                                        labels_removed: [],
-                                    }
-                                    mergedTimelineData.push(labeledEvent_merged)
-                                    if(prev_labeledEvent.event === 'labeled') {
-                                        mergedTimelineData[mergedTimelineData.length - 1].labels_added.push(prev_labeledEvent.label)
-                                    }else{
-                                        mergedTimelineData[mergedTimelineData.length - 1].labels_removed.push(prev_labeledEvent.label)
-                                    }
-                                }
-                                if(item.event === 'labeled') {
-                                    mergedTimelineData[mergedTimelineData.length - 1].labels_added.push(item.label)
-                                }else{
-                                    mergedTimelineData[mergedTimelineData.length - 1].labels_removed.push(item.label)
-                                }
-                            }else{
-                                mergedTimelineData.push(item)
-                            }
-                            lastOne = item
-                            break
-                        case 'commented': 
-                            if(lastOne.event === 'commented' && lastOne.user.login === item.user.login && lastOne.body === item.body) {
-                                mergedTimelineData.push({
-                                    id: item.id,
-                                    event:'similar_comment',
-                                    comments: [item]
-                                })
-                                lastOne = mergedTimelineData[mergedTimelineData.length - 1]
-                            }else if(lastOne.event === 'similar_comment' && lastOne.comments[0].user.login === item.user.login && lastOne.comments[0].body === item.body){
-                                mergedTimelineData[mergedTimelineData.length - 1].comments.push(item)
-                                lastOne = mergedTimelineData[mergedTimelineData.length - 1]
-                            }else{
-                                mergedTimelineData.push(item)
-                                lastOne = item
-                            }
-                            break
-                        default:
-                            mergedTimelineData.push(item)
-                            lastOne = item
+            async network_applyTheLabelOrNot(labelName) {
+                if(this.applyLabelsModal.loading.indexOf(labelName) != -1) return 
+                try{
+                    this.applyLabelsModal.loading.push(labelName)
+                    
+                    let res 
+
+                    if(this.data.labels.some(i => i.name == labelName)) {
+                        let url = api.API_REMOVE_LABELS_TO_ISSUE({
+                            ...this.$route.params,
+                            number: this.data.number,
+                            label: labelName
+                        })
+
+                        res = await authRequiredAjax(
+                            url,
+                            {
+                                labels: [labelName]
+                            },
+                            'delete'
+                        )
+                    }else{
+
+                        let url = api.API_ADD_LABELS_TO_ISSUE({
+                            ...this.$route.params,
+                            number: this.data.number
+                        })
+
+                        res = await authRequiredAjax(
+                            url,
+                            {
+                                labels: [labelName]
+                            },
+                            'post'
+                        )
                     }
-                })
-                return mergedTimelineData
+
+                    this.data.labels = res.data
+
+                }catch(e) {
+                    this.handleError(e)
+                }finally{
+                     let idx = this.applyLabelsModal.loading.indexOf(labelName)
+                    this.applyLabelsModal.loading.splice(idx,1)
+                }
             },
+            async network_getAvailableLabels() {
+                if(this.applyLabelsModal.labels.data.length > 0) return 
+                if(this.applyLabelsModal.labels.loading) return 
+                try{
+                    this.applyLabelsModal.labels.loading = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_available_labels')
+                    let url = api.API_REPOSITORY_LABELS({
+                        ...this.$route.params,
+                        params: {
+                            per_page: 100
+                        }
+                    })
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            cancelToken
+                        }
+                    )
+
+                    this.applyLabelsModal.labels.data = res.data
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.applyLabelsModal.labels.loading = false
+                }
+            },
+    
         },
-       
+        watch: {
+            repoFullName() {
+                this.chooseAssigneesModal.assignableUsers.data = []
+                this.applyLabelsModal.labels.data = []
+            }
+        },
         components: {
-            CommonLoading,
+            CommonLoadingWrapper,
             Label,
             Comment,
             TimelineItem,
             HiddenItemLoading,
             LoadingIconEx,
             ImgWrapper,
-            AnimatedHeightWrapper,
-            Editor,
+            AnimatedHeightWrapper,   
             Progress,
             IssueIcon,
             ProjectCard,
+            CommentEditor,
+            Modal,
+            SimpleSearchInput,
+            TinyLoadingIcon,
+            SelectMenuItem,
             Container: styled.div``,
             Header: styled.div``,
             HeaderActions: styled.div``,
@@ -762,6 +773,10 @@
             InfoBottomItemTitle: styled.div``,
             StickyTop: styled.div``,
             StickyTopContent: styled.div``,
+            LabelBadge: styled.div``,
+            LabelContent: styled.div``,
+            LabelName: styled.div``,
+            LabelDescription: styled.div``,
         }
     }
 </script>
@@ -839,5 +854,14 @@
     display: block;
     background-color: #fff;
     border-bottom: 1px solid rgba(0,0,0,.15);
+}
+
+.label-badge{
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+    border: 1px solid rgba(27,31,35,.15);
+    border-radius: 3px;
 }
 </style>

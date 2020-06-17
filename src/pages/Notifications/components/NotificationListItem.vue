@@ -71,6 +71,7 @@
                 return extraDataHolder
             },
             routerLink() {
+                if(this.notification.subject.type == 'RepositoryInvitation') return `/${this.notification.repository.full_name}/invitations`
                 if(this.notification.subject.url) return this.notification.subject.url.replace('https://api.github.com/repos','')
                 return this.notification.repository.url.replace('https://api.github.com/repos','')
             }

@@ -78,6 +78,15 @@ export const authRequiredGitHubGraphqlApiQuery = (query,config = {}) => {
     )
 }
 
+export const authRequiredGitHubGraphqlApiMutation = (mutation,config = {}) => {
+    return authRequiredPost(API_GRAPHQL_ENDPOINT,
+        {
+            mutation,
+            ...config
+        }
+    )
+}
+
 export function cancelAndUpdateAxiosCancelTokenSource(meta) {
     axiosCancelTokenSourceStore[meta] && axiosCancelTokenSourceStore[meta].cancel()
     try{

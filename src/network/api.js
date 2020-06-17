@@ -93,8 +93,6 @@ export const API_REPO_PROJECTS = (fullName,params) => {
     return `${GITHUB_REST_API_BASE}/repos/${fullName}/projects?${query}`
 }
 
-export const API_REPO_LABELS = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/labels?per_page=100`
-
 export const API_README = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/readme`
 
 export const API_CONTENTS = (payload) => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/contents/${payload.path}${payload.branch?'?ref='+payload.branch:''}`
@@ -276,3 +274,8 @@ export const API_REPOSITORY_INVITATION_FOR_AUTHENTICATED_USER = `${GITHUB_REST_A
 
 export const API_REPOSITORY_INVITATION_ACTION = payload => `${GITHUB_REST_API_BASE}/user/repository_invitations/${payload}`
 
+export const API_ADD_LABELS_TO_ISSUE = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/labels`
+
+export const API_REMOVE_LABELS_TO_ISSUE = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/labels/${payload.label}`
+
+export const API_HANDLE_LABEL = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/labels/${payload.label}`

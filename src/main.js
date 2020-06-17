@@ -7,6 +7,8 @@ import './directives'
 import './filter'
 import './scss'
 import './css'
+import { ReactiveRefs } from 'vue-reactive-refs'
+Vue.use(ReactiveRefs)
 import plugin_toast from './plugin/toast'
 import plugin_themeColor from './plugin/themeColors'
 import plugin_modal from './plugin/modal'

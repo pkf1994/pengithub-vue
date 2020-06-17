@@ -1,8 +1,7 @@
-export const GRAPHQL_ISSUE = `
-      query($nodeID:ID!){
+export const GRAPHQL_ISSUE_EXTRA_DATA = `
+      query($nodeID:String!){
         node(id: $nodeID) {
           ... on Issue {
-            
             activeLockReason
             viewerCannotUpdateReasons
             viewerDidAuthor
@@ -50,11 +49,15 @@ export const GRAPHQL_ISSUE = `
       }  
     `
 
-  export const GRAPHQL_ISSUE_COMMENTS = `
-      query($ids:[ID!]!){
-        nodes(ids: $ids) {
+  export const GRAPHQL_ISSUE_COMMENT_BODY_AND_REACTIONS = payload => {
+    let graphql = ''
+    payload.forEach((item,index) => {
+      graphql = `
+        ${graphql}
+        commentBodyHTML${index}:node(id: "${item.node_id}") {
           ... on IssueComment {
             id
+            bodyHTML
             isMinimized
             minimizedReason
             viewerCanDelete
@@ -93,8 +96,11 @@ export const GRAPHQL_ISSUE = `
             }
           }
         }
-      }
-  `
+       
+      `
+    })
+    return `{${graphql}}`
+  }
 
   export const GRAPHQL_ISSUE_PROJECTS = payload => {
     return `
@@ -135,53 +141,3 @@ export const GRAPHQL_ISSUE = `
       }
       `
   }
-
-  export const GRAPHQL_ASSIGNABLE_USERS = `
-  query($name:String!,$owner:String!,$after:String){
-    repository(name: $name, owner: $owner) {
-      assignableUsers(first: 100,after: $after) {
-        totalCount
-        pageInfo {
-          hasNextPage
-        }
-        nodes {
-          id
-          avatarUrl
-          login
-          name
-        }
-      }
-    }
-  }
-  `
-
-
-export const GRAPHQL_MUTATION_ADD_ASSIGNEES_TO_ASSIGNABLE = `
-mutation($assignableId:ID!,$assigneeIds:[ID!]!){
-  addAssigneesToAssignable(input: {assignableId: $assignableId, assigneeIds: $assigneeIds}) {
-    clientMutationId
-    assignable {
-      assignees(first: 10) {
-        nodes {
-          id
-        }
-      }
-    }
-  }
-}
-`
-
-export const GRAPHQL_MUTATION_REMOVE_ASSIGNEES_TO_ASSIGNABLE = `
-mutation($assignableId:ID!,$assigneeIds:[ID!]!){
-  removeAssigneesFromAssignable(input: {assignableId: $assignableId, assigneeIds: $assigneeIds}) {
-    clientMutationId
-    assignable {
-      assignees(first: 10) {
-        nodes {
-          id
-        }
-      }
-    }
-  }
-}
-`

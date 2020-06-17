@@ -2,7 +2,7 @@
     <Container>
         <slot></slot>
         <transition name="fade" appear>
-            <CommonLoading :preventClickEvent="preventClickEvent" :position="position" v-if="loading"/>
+            <CommonLoading :preventClickEvent="preventClickEvent" :position="position" v-if="loading" :size="size"/>
         </transition>
     </Container>
 </template>
@@ -23,6 +23,10 @@
             position: {
                 type: String,
                 default: 'center'
+            },
+            size: {
+                type: String,
+                default: 'middle'
             }
         },
         components: {

@@ -1,5 +1,7 @@
 import {mapState,mapActions} from 'vuex'
 import {ACTION_SIGN_OUT} from "@/store/modules/oauth/actionTypes"
+import {util_ramdonString} from '@/util'
+import * as api from '@/network/api'
 export default {
     install: Vue => {
         Vue.mixin({

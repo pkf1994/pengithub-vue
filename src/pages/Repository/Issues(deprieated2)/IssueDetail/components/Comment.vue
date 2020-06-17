@@ -63,18 +63,13 @@
             </Header>
 
             <AnimatedHeightWrapper>
-                <Body v-if="bodyHTML" v-html="bodyHTML" style="padding:15px" class="markdown-body comment-body">
+                <Body v-if="!loading && commentExtraDataHolder.bodyHTML" v-html="commentExtraDataHolder.bodyHTML" style="padding:15px" class="markdown-body comment-body">
+            
                 </Body>
 
-                <Body v-else>
-                    <p class="text-gray p-3 mb-0">
-                        <em>No description provided.</em>
-                    </p>
-                </Body>
-
-                <!-- <LoadingWrapper v-else class="loading-wrapper d-flex flex-justify-center flex-items-center">
+                <LoadingWrapper v-else class="loading-wrapper d-flex flex-justify-center flex-items-center">
                     <LoadingIconEx/>
-                </LoadingWrapper> -->
+                </LoadingWrapper>
 
                 <Reaction v-if="commentExtraDataHolder.viewerCanReact || withReaction" class="reactions border-top">
                     <button class="reaction-item btn-link" :disabled="!commentExtraDataHolder.viewerCanReact" v-if="reactionStatistic.THUMBS_UP > 0">
@@ -188,11 +183,10 @@
     import styled from 'vue-styled-components'
     import {util_dateFormat} from '@/util'
     import {LoadingIconEx,AnimatedHeightWrapper,Popover,ImgWrapper} from '@/components'
-    import {util_markdownParse} from '@/util'
     import {mapState} from 'vuex'
     import ClipboardJS from 'clipboard';
     export default {
-        inject: ['commentExtraDataProvided','issueGetter'],
+        inject: ['commentExtraGraphqlDataGetter','issueGetter'],
         data() {
             return {
                 showMinimized: false,
@@ -227,7 +221,7 @@
             }),
             commentExtraDataHolder() {
                 if(this.extraData) return this.extraData
-                let commentExtraDataHolder = this.commentExtraDataProvided().filter(item => {
+                let commentExtraDataHolder = this.commentExtraGraphqlDataGetter().filter(item => {
                     return item.id === this.data.node_id
                 })[0] || {}
                 if(commentExtraDataHolder.bodyHTML) {
@@ -288,9 +282,6 @@
             },
             location() {
                 return location
-            },
-            bodyHTML() {
-                return util_markdownParse.markdownToHTML(this.data.body)
             }
         },
         methods: {
