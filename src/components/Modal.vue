@@ -1,12 +1,13 @@
 <template>
-    <Container class="container"
+    <Container class="container modal-container"
+                ref="container"
                 :style="{'pointer-events':show ? 'auto' : 'none'}">
         <transition name='fade'>
-            <Cover class="cover" v-if="show"  @click="close"></Cover>
+            <Cover class="cover" id="modal-cover" v-if="show" @click="close"></Cover>
         </transition>
         <transition name="modal-basic">
             <Main class="main Box d-flex flex-column transition-all" v-if="show" :style="modalStyle" style="width: 640px;">
-                <Title class="p-3 Box-title Box-header">
+                <Title class="p-3 Box-title Box-header modal-title">
                     <button @click="close" class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog="">
                         <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
                     </button>
@@ -39,10 +40,26 @@
                 show: false,
             }
         },
+        
+        mounted() {
+            this.init()
+        },
         methods: {
             close() {
                 this.show = false
-            }
+            },
+            init() {
+                this.$refs.container.$el.ontouchmove = this.touchMoveHandler
+            },
+            touchMoveHandler(e) {
+                e.stopPropagation && e.stopPropagation()
+                if(e.path.some(i => i.className && i.className.indexOf('modal-title') != -1)) {
+                    e.preventDefault && e.preventDefault()
+                }
+                if(e.path[0].className.indexOf("cover") != -1) {
+                    e.preventDefault && e.preventDefault()
+                }
+            },
         },
         watch: {
             show(newValue,oldValue) {
@@ -52,7 +69,7 @@
                 if(oldValue && !newValue) {
                     this.$emit('hide')
                 }
-            }
+            },
         },
         components: {
             AnimatedHeightWrapper,
@@ -77,7 +94,6 @@
         display: flex;
         justify-content: center;
         align-content: center;
-        
     }
 
     .cover{

@@ -279,3 +279,5 @@ export const API_ADD_LABELS_TO_ISSUE = payload => `${GITHUB_REST_API_BASE}/repos
 export const API_REMOVE_LABELS_TO_ISSUE = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/labels/${payload.label}`
 
 export const API_HANDLE_LABEL = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/labels/${payload.label}`
+
+export const API_ISSUE_LOCK = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/lock`

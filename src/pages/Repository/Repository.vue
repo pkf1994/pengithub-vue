@@ -50,10 +50,10 @@
                 viewerLogin: state => state.oauth.viewerInfo.login
             }),
             owner: function() {
-                return this.$attrs.owner
+                return this.$route.params.owner
             },
             repo: function() {
-                return this.$attrs.repo
+                return this.$route.params.repo
             },
             tabs: function() {
                 let path = `/${this.owner}/${this.repo}`

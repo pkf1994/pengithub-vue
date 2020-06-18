@@ -9,6 +9,13 @@ import store from '@/store'
 const routerCreator = () => new Router({
     mode: 'history',
     routes: routes,
+    scrollBehavior (to, from, savedPosition) {
+        if (savedPosition) {
+          return savedPosition
+        } else {
+          return { x: 0, y: 0 }
+        }
+    }
 })
 
 const router = routerCreator()

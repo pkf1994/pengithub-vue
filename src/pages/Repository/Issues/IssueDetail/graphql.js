@@ -185,3 +185,14 @@ mutation($assignableId:ID!,$assigneeIds:[ID!]!){
   }
 }
 `
+
+export const GRAPHQL_MUTATION_UPDATE_SUBSCRIPTION = `
+mutation($subscribableId:ID!,$state:SubscriptionState!){
+  updateSubscription(input: {subscribableId: $subscribableId, state: $state}) {
+    subscribable {
+      viewerCanSubscribe
+      viewerSubscription
+    }
+  }
+}
+`

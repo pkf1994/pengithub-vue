@@ -36,6 +36,10 @@
         beforeRouteUpdate (to, from, next) {
             next()
             if(this.routerMeta != this.generateRouterMeta() && this.componentActive) {
+                if(this.debug) {
+                    console.log(this.routerMeta)
+                    console.log(this.generateRouterMeta())
+                }
                 this.cancelUntimelyAxios()
                 this.routeUpdateHook()
                 this.routerMeta = this.generateRouterMeta()
