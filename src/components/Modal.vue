@@ -64,9 +64,13 @@
         watch: {
             show(newValue,oldValue) {
                 if(newValue && !oldValue) {
+                    let body = document.getElementsByTagName("body")[0]
+                    body.style.overflowY = 'hidden'
                     this.$emit('show')
                 }
                 if(oldValue && !newValue) {
+                    let body = document.getElementsByTagName("body")[0]
+                    body.style.overflowY = 'auto'
                     this.$emit('hide')
                 }
             },
@@ -90,7 +94,7 @@
         left: 0;
         right: 0;
         top: 0;
-        z-index: 999;
+        z-index: 9;
         display: flex;
         justify-content: center;
         align-content: center;

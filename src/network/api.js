@@ -281,3 +281,11 @@ export const API_REMOVE_LABELS_TO_ISSUE = payload => `${GITHUB_REST_API_BASE}/re
 export const API_HANDLE_LABEL = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/labels/${payload.label}`
 
 export const API_ISSUE_LOCK = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/lock`
+
+export const API_CREATE_ISSUE_COMMENT = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/comments`
+
+export const API_HANDLE_ISSUE_COMMENT = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.comment}`
+
+export const API_ISSUE_COMMENT_REACTIONS = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.comment}/reactions`
+
+

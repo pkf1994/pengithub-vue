@@ -424,7 +424,7 @@
             documentTitle() {
                 if(!this.data.title) return location.href
                 return this.data.title
-            }
+            },
         },
         created() {
             this.network_getData()

@@ -1,6 +1,8 @@
 import TimelineItem from './TimelineItem.vue'
 import Comment from './Comment.vue'
 import ProjectCard from './ProjectCard'
-import CommentEditor from './CommentEditor'
+import CommentEditPane from './CommentEditPane'
+import CommentCreatePane from './CommentCreatePane'
+import LoadMore from './LoadMore'
 
-export {TimelineItem,Comment,ProjectCard,CommentEditor}
+export {TimelineItem,Comment,ProjectCard,CommentEditPane,CommentCreatePane,LoadMore}

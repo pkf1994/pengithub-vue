@@ -340,13 +340,17 @@
                     }
                     to = util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",(new Date(to)).setDate(1))
                     let from = util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",(new Date(to)).setDate(1))
-                    let graphql_periodContributionsCollection = graphql.GRAPHQL_USER_PERIOD_CONTRIBUTION_STATISTIC({
-                        login: this.login,
-                        organizationID: this.currentOrganizationID,
-                        from: util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",fromDate),
-                        to: util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",toDate)
-                    })
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_periodContributionsCollection)
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_USER_PERIOD_CONTRIBUTION_STATISTIC,
+                        {
+                           variables: {
+                                login: this.login,
+                                organizationID:  this.currentOrganizationID,
+                                from: util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",fromDate),
+                                to: util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",toDate)
+                           }
+                        }
+                    )
                     try{
                         this.contributionsCollectionWithPeriod.data.push(res.data.data.user.contributionsCollection)
                     }catch(e) {

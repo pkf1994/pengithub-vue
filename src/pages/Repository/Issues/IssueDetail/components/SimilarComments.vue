@@ -46,6 +46,7 @@
 </script>
 
 <style scoped lang='scss'>
+@import 'node_modules/@primer/css/box/index.scss';
 .similar-notice {
     background-color: #fff;
     background-image: url(https://github.githubassets.com/images/modules/pulls/progressive-disclosure-line@2x.png);

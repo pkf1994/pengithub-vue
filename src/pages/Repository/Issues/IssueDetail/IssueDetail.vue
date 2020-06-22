@@ -31,7 +31,7 @@
         </AnimatedHeightWrapper>
         
 
-        <Info   class="border-bottom border-top pt-3 mt-3" 
+        <Info  class="border-bottom border-top pt-3 mt-3" 
                 v-if="(data.assignees && data.assignees.length !== 0) || (data.labels && data.labels.length !== 0) || (data.milestone && data.milestone !== null)"
                 >
             <!-- assignee -->
@@ -79,23 +79,46 @@
                         backgroundColor:'#f1f8ff',
                         borderBottomColor:'#c0d3eb'}"
                     :extraData="extraData.data" 
+                    @quote="quoteReply"
                     :loading="extraData.loading"/>
                 
         <LoadingTimeline v-if="data.node_id && timeline.data.length == 0 && timeline.loading" class="loading-timeline d-flex flex-items-center flex-justify-center">
             <LoadingIconEx/>
-        </LoadingTimeline> 
+        </LoadingTimeline>
+
+        <div v-if="data.id">
+            <transition-group tag="div" appear name="fade">
+                <TimelineItem v-for="(item,index) in handleSimilarCommentTimeline" 
+                        :data="item" :key="(item.id || '') + index"
+                        @quote="quoteReply" 
+                        @unminimize-comment="unminimizeCommentPostHook"
+                        @update-comment="updateCommentPostHook"
+                        @minimize-comment="minimizeCommentPostHook"/>
+            </transition-group>
+
+            <LoadMore v-if="timeline.pageInfo.next" :loading="timeline.loading" :dataGetter="network_getTimeline"></LoadMore>
+        </div>  
+
+       
 
         <transition-group tag="div" appear name="fade">
-            <TimelineItem v-for="(item,index) in timeline.data" :data="item" :key="(item.id || '') + index"/>
+            <Comment   v-for="item in createdComments" 
+                        @delete-comment="deleteCommentPostHook"
+                        @minimize-comment="minimizeCommentPostHook"
+                        :data="item" 
+                        :key="item.id" 
+                        @quote="quoteReply"/>
         </transition-group>
 
-        <CommentEditor class="pt-3 mb-5" 
+        <CommentCreatePane class="mb-5 comment-create-edit-pane" 
+                        ref="commentEditor"
+                        @create-comment="createIssuePostHook"
+                        @close-issue="closeIssuePostHook"
                         v-if="data.id"
                         :locked="this.data.locked"
                         :viewerDidAuthor="extraData.data.viewerDidAuthor" 
                         :lockedReason="extraData.data.activeLockReason" 
-                        :viewerIsCollaborator="viewerIsCollaborator.data"></CommentEditor>
-
+                        :viewerIsCollaborator="viewerIsCollaborator().data"></CommentCreatePane>
 
         <InfoBottom v-if="data.id">
             <!-- assignee -->
@@ -193,20 +216,18 @@
                 <svg class="octicon octicon-key" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.5 5.5a4 4 0 112.731 3.795.75.75 0 00-.768.18L7.44 10.5H6.25a.75.75 0 00-.75.75v1.19l-.06.06H4.25a.75.75 0 00-.75.75v1.19l-.06.06H1.75a.25.25 0 01-.25-.25v-1.69l5.024-5.023a.75.75 0 00.181-.768A3.995 3.995 0 016.5 5.5zm4-5.5a5.5 5.5 0 00-5.348 6.788L.22 11.72a.75.75 0 00-.22.53v2C0 15.216.784 16 1.75 16h2a.75.75 0 00.53-.22l.5-.5a.75.75 0 00.22-.53V14h.75a.75.75 0 00.53-.22l.5-.5a.75.75 0 00.22-.53V12h.75a.75.75 0 00.53-.22l.932-.932A5.5 5.5 0 1010.5 0zm.5 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
                 <strong>Unlock conversation</strong>
             </div> 
-            <div v-if="!data.locked" class="text-bold link-gray-dark pt-3" >
+            <div v-if="!data.locked" class="text-bold link-gray-dark pt-3" @click="() => showModal('transferIssueModal')">
                 <svg class="octicon octicon-arrow-right" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.22 2.97a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06l2.97-2.97H3.75a.75.75 0 010-1.5h7.44L8.22 4.03a.75.75 0 010-1.06z"></path></svg>
                 <strong>Transfer issue</strong>
             </div> 
-            <div class="text-bold link-gray-dark pt-3" >
+            <div class="text-bold link-gray-dark pt-3" @click="() => showModal('deleteIssueModal')" >
                 <svg class="octicon octicon-trashcan" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6z"></path></svg>
                 <strong>Delete issue</strong>
             </div> 
         </IssueHandle>
 
-        
-
         <transition name="fade" appear>
-            <StickyTop v-if="scrollTop > 300" class="sticky-top px-3 py-2">
+            <StickyTop v-if="scrollTop > 300 && data.id" class="sticky-top px-3 py-2">
                 <StickyTopContent class="d-flex flex-items-center flex-justify-between">
                     <State class="State mr-2 d-inline-flex flex-items-center flex-shrink-0" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize;">
                         <IssueIcon color="#fff" :issue="data"></IssueIcon>
@@ -292,7 +313,7 @@
         </Modal>
 
         <Modal title="Set milestone" ref="setMilestoneModal" :modalStyle="{height:'80vh'}" @show="network_getAvailableMilestones"> 
-             <div v-if="setMilestoneModal.milestones.loading" class="flex-row-center height-full">
+            <div v-if="setMilestoneModal.milestones.loading" class="flex-row-center height-full">
                 <LoadingIconEx></LoadingIconEx>
             </div>
             <SimpleSearchInput v-else class="p-3 modal-search-input"
@@ -370,7 +391,7 @@
                     </p>
                 </div> 
             </div> 
-            <div class="Box-footer bg-white">
+            <div class="Box-footer modal-footer  bg-white">
                 <button type="submit" class="btn btn-block" :disabled="lockConversationModal.loading" @click="network_lockConversation">
                     {{lockConversationModal.loading ? 'Trying...' : 'Lock conversation on this issue'}}
                 </button>
@@ -398,32 +419,65 @@
                     <li li>You can always lock this issue again in the future.</li>
                 </ul>
             </div> 
-            <div class="Box-footer bg-white">
+            <div class="Box-footer modal-footer bg-white">
                 <button class="btn btn-block" :disabled="unlockConversationModal.loading" @click="network_unlockConversation">
                     {{unlockConversationModal.loading ? 'Trying...' : 'Unlock conversation on this issue'}}
                 </button>
             </div>
         </Modal>
 
-        <Modal title="Transfer this issue" ref="transferIssueModal" :modalStyle="{maxHeight:'80vh'}" @show="network_getAvailableTransferTargetRepositories"> 
-             <transition-group name="fade-group" appear>
-                <SelectMenuItem v-for="item in transferIssueModal.availableRepositories.data" 
-                                :key="item.node_id" 
-                                :iconStyle="{alignSelf:'flex-start'}" 
-                                :selected="transferIssueModal.selectedRepository == item.node_id" 
-                                @click.native="() => selectTransferTargetRepository(item.node_id)">
-                    <div>
-                        <span class="milestone-title">{{item.name}}</span>
-                        <span class="milestone-description">{{item.description}}</span>
-                    </div> 
-                </SelectMenuItem>
-            </transition-group>
-            <div class="Box-footer bg-white">
-                <button class="btn btn-block" :disabled="transferIssueModal.loading" @click="network_transferIssue">
+        <Modal title="Transfer this issue" ref="transferIssueModal" :modalStyle="{height:'80vh'}" @show="network_getAvailableTransferTargetRepositories"> 
+            <div v-if="transferIssueModal.availableRepositories.loading" class="flex-row-center height-full">
+                <LoadingIconEx></LoadingIconEx>
+            </div>
+            <SimpleSearchInput v-else class="p-3 modal-search-input"
+                                placeholder="Find a repository" Milestones
+                                v-model="transferIssueModal.searchQuery"/>
+            <div style="overflowY: auto">
+                <transition-group name="fade-group" appear>
+                    <SelectMenuItem v-for="item in filteredTransferTargetRepositories" 
+                                    :key="item.id" 
+                                    :iconStyle="{alignSelf:'flex-start'}" 
+                                    :selected="transferIssueModal.selectedRepository == item.id" 
+                                    @click.native="() => selectTransferTargetRepository(item.id)">
+                        <div class="flex-grow-1">
+                            <span>
+                                <svg v-if="item.isPrivate" class="octicon octicon-lock float-right mr-3" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 4v2h-.25A1.75 1.75 0 002 7.75v5.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-5.5A1.75 1.75 0 0012.25 6H12V4a4 4 0 10-8 0zm6.5 2V4a2.5 2.5 0 00-5 0v2h5zM12 7.5h.25a.25.25 0 01.25.25v5.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-5.5a.25.25 0 01.25-.25H12z"></path></svg>
+                            </span>    
+                            <span class="milestone-title">{{item.name}}</span>
+                            <span class="milestone-description">{{item.description}}</span>
+                        </div> 
+                    </SelectMenuItem>
+                </transition-group>
+            </div>
+           
+            <div class="Box-footer bg-white border-top modal-footer" v-if="!transferIssueModal.availableRepositories.loading">
+                <button class="btn btn-block" :disabled="transferIssueModal.loading || !transferIssueModal.selectedRepository" @click="network_transferIssue">
                     {{transferIssueModal.loading ? 'Trying...' : 'Transfer issue'}}
                 </button>
             </div>
         </Modal>
+
+        <Modal title="Delete this issue" ref="deleteIssueModal" :modalStyle="{maxHeight:'80vh'}"> 
+            <div class="d-flex flex-column p-3 flex-items-center bg-white">
+                <svg class="octicon octicon-circle-slash text-red ml-1" height="40" width="40" viewBox="0 0 24 24" version="1.1" aria-hidden="true"><path fill-rule="evenodd" d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zM2.5 12A9.5 9.5 0 0112 2.5c2.353 0 4.507.856 6.166 2.273L4.773 18.166A9.462 9.462 0 012.5 12zm3.334 7.227A9.462 9.462 0 0012 21.5a9.5 9.5 0 009.5-9.5 9.462 9.462 0 00-2.273-6.166L5.834 19.227z"></path></svg>
+                <h4 class="mt-4 text-center">Are you sure you want to delete this issue?</h4>
+                <div class="col-9 mx-auto mt-1 mb-2">
+                    <ul class="text-left">
+                    <li>This cannot be undone</li>
+                    <li>Only administrators can delete issues</li>
+                    <li>Deletion will remove the issue from search and previous references will point to a placeholder</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="Box-footer bg-white border-top modal-footer">
+                <button class="btn text-red btn-block" :disabled="deleteIssueModal.loading" @click="network_deleteIssue">
+                    {{deleteIssueModal.loading ? 'Deleting issue...' : 'Delete this issue.'}}
+                </button>
+            </div>
+        </Modal>
+
+        
     </CommonLoadingWrapper>
 </template>
 
@@ -443,7 +497,7 @@
             HyperlinkWrapper,
             HiddenItemLoading} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
-    import {TimelineItem,Comment,ProjectCard,CommentEditor} from './components'
+    import {TimelineItem,Comment,ProjectCard,CommentCreatePane,LoadMore} from './components'
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
@@ -460,6 +514,7 @@
         mixins: [ScrollTopListenerMixin,RouteUpdateAwareMixin],
         provide() {
             return {
+                deletedCommentsProvided: () => this.deletedComments,
                 commentExtraDataProvided: () => this.timeline.extraData.data,
                 issueGetter: () => Object.assign({},this.data,this.extraData.data)
             }
@@ -628,13 +683,19 @@
                     loading: false
                 },
                 transferIssueModal: {
+                    searchQuery: '',
                     availableRepositories: {
                         data: [],
                         loading: false
                     },
                     selectedRepository: undefined,
                     loading: false
-                }
+                },
+                deleteIssueModal: {
+                    loading: false
+                },
+                createdComments: [],
+                deletedComments: []
             }
         },
        
@@ -673,18 +734,47 @@
             },
             repoFullName() {
                 return `${this.$route.params.owner}/${this.$route.params.repo}`
+            },
+            filteredTransferTargetRepositories() {
+                let searchQuery = this.transferIssueModal.searchQuery.toLowerCase()
+                return this.transferIssueModal.availableRepositories.data.filter(i => {
+                    return i.hasIssuesEnabled && i.name != this.$route.params.repo && (i.name.toLowerCase().indexOf(searchQuery) != -1 || (i.description && i.description.toLowerCase().indexOf(searchQuery) != -1))
+                })
+            },
+            handleSimilarCommentTimeline() {
+                let mergedTimelineData = []
+                let lastOne = {}
+                this.timeline.data.forEach(item => {
+                    //console.log(lastOne)
+                    switch(item.event) {
+                        case 'commented': 
+                            if(lastOne.event === 'commented' && lastOne.user.login === item.user.login && lastOne.body === item.body) {
+                                mergedTimelineData.push({
+                                    id: item.id,
+                                    event:'similar_comment',
+                                    comments: [item]
+                                })
+                                lastOne = mergedTimelineData[mergedTimelineData.length - 1]
+                            }else if(lastOne.event === 'similar_comment' && lastOne.comments[0].user.login === item.user.login && lastOne.comments[0].body === item.body){
+                                mergedTimelineData[mergedTimelineData.length - 1].comments.push(item)
+                                lastOne = mergedTimelineData[mergedTimelineData.length - 1]
+                            }else{
+                                mergedTimelineData.push(item)
+                                lastOne = item
+                            }
+                            break
+                        default:
+                            mergedTimelineData.push(item)
+                            lastOne = item
+                    }
+                })
+                return mergedTimelineData
             }
         },
         created() {
             this.network_getData()
         },
         methods: {
-            loadingMore() {
-                if(this.timeline.loading) return
-                this.network_getTimeline({
-                    changePage: true
-                })
-            },
             network_getData() {
                 this.network_getIssueRest()
                 this.network_getTimeline()
@@ -695,7 +785,15 @@
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
 
                     let url_issue = api.API_ISSUE(this.$route.params)
-                    let res_issue = await authRequiredGet(url_issue,{cancelToken})
+                    let res_issue = await authRequiredGet(
+                        url_issue,
+                        {
+                            cancelToken,
+                            headers: {
+                                "Accept": "application/vnd.github.squirrel-girl-preview"
+                            }
+                        }
+                    )
                     
                     //处理一种情况：当前issue已经被transfer到另外一个仓库
                     if(res_issue.data.url.replace("https://api.github.com/repos","") != this.$route.path) {
@@ -706,6 +804,9 @@
                     if(this.accessToken) this.network_getIssueExtraData()
                 }catch(e){
                     this.handleError(e)
+                    if(e.response && e.response.status == 404) {
+                        this.emitNotFoundEvent(this.$el)
+                    }
                 }finally{
                     this.loading = false
                 }
@@ -760,7 +861,7 @@
                     
                     let res_timeline = await authRequiredGet(url_timeline,config)
 
-                    this.timeline.pageInfo = parse(res_timeline.headers.link)
+                    this.timeline.pageInfo = parse(res_timeline.headers.link) || {}
 
                     this.timeline.data = this.timeline.data.concat(res_timeline.data)
 
@@ -799,6 +900,8 @@
                     }catch(e) {
                         this.handleGraphqlError(res_issueCommentBodyAndReactions)
                     }
+
+                    return res_issueCommentBodyAndReactions.data.data.nodes
                 }catch(e) {
                     console.log(e)
                 }finally{   
@@ -1095,10 +1198,88 @@
                 }
             },
             async network_getAvailableTransferTargetRepositories() {
+                this.transferIssueModal.selectedRepository = undefined
+                if(this.transferIssueModal.availableRepositories.data.length > 0) return
+                if(this.transferIssueModal.availableRepositories.loading) return 
+                try{
+                    this.transferIssueModal.availableRepositories.loading = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_available_transfer_target_repositories')
 
+                    let pageInfo
+                    let repositories = []
+                    
+                    while(!pageInfo || pageInfo.hasNextPage) {
+                        let res = await authRequiredGitHubGraphqlApiQuery(
+                            graphql.GRAPHQL_QUERY_VIEWER_REPOSTIORIES,
+                            {
+                                cancelToken,
+                                variables: {
+                                    after: pageInfo && pageInfo.endCursor
+                                }
+                            }
+                        )
+                        try{
+                            repositories = repositories.concat(res.data.data.viewer.repositories.nodes)
+                            pageInfo = res.data.data.viewer.repositories.pageInfo
+                        }catch(e) {
+                            this.handleGraphqlError(res)
+                        }
+                    }
+
+                    this.transferIssueModal.availableRepositories.data = repositories
+                   
+                }catch(e) {
+                    this.handleError(e)
+                }finally{
+                    this.transferIssueModal.availableRepositories.loading = false
+                }
             },
             async network_transferIssue() {
-
+                if(this.transferIssueModal.loading) return 
+                try{
+                    this.transferIssueModal.loading = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' transfer_issue')
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_MUTATION_TRANSFER_ISSUE,
+                        {
+                            cancelToken,
+                            variables: {
+                                issueId: this.data.node_id,
+                                repositoryId: this.transferIssueModal.selectedRepository
+                            }
+                        }
+                    )
+                    this.closeModal()
+                    this.$router.push(res.data.data.transferIssue.issue.resourcePath)
+                    this.topNoticeShow('repository','This issue was transferred here.')
+                }catch(e){
+                    this.handleError(e)
+                }finally{
+                    this.transferIssueModal.loading = false
+                }
+            },
+            async network_deleteIssue() {
+                if(this.deleteIssueModal.loading) return
+                try{
+                    this.deleteIssueModal.loading = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' delete_issue')
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_MUTATION_DELETE_ISSUE,
+                        {
+                            cancelToken,
+                            variables: {
+                                issueId: this.data.node_id
+                            }
+                        }
+                    )
+                    this.handleGraphqlError(res)
+                    this.$router.replace(`/${this.owner()}/${this.repo()}/issues?delete=${this.data.id}`)
+                    this.topNoticeShow('repository','The issue was successfully deleted.')
+                }catch(e) { 
+                    this.handleError(e)
+                }finally{
+                    this.deleteIssueModal.loading = false
+                }
             },
             triggerSubscription() {
                 if(this.extraData.data.viewerSubscription == 'SUBSCRIBED') {
@@ -1112,6 +1293,40 @@
             },
             selectTransferTargetRepository(payload) {
                 this.transferIssueModal.selectedRepository = payload
+            },
+            quoteReply(e) {
+                let commentCreateOrEditPaneTextarea = document.querySelector('textarea')
+                commentCreateOrEditPaneTextarea.focus()
+                commentCreateOrEditPaneTextarea.value = commentCreateOrEditPaneTextarea.value + e
+                commentCreateOrEditPaneTextarea.dispatchEvent(new Event('input'))
+            },
+            createIssuePostHook(payload) {
+                this.createdComments.push(payload)
+                this.network_getTimelineExtraData([{...payload,event:'commented'}])
+            },
+            closeIssuePostHook(payload) {
+                this.data = payload
+                this.network_getIssueExtraData()
+                this.timeline.extraData = []
+                this.network_getTimelineExtraData(this.timeline.data)
+            },
+            minimizeCommentPostHook(payload) {
+                let theComment = this.timeline.extraData.data.filter(i => i.id == payload.comment.node_id)[0]
+                if(theComment) {
+                    Object.assign(theComment,payload.info)
+                }
+            },
+            unminimizeCommentPostHook(payload) {
+                let theComment = this.timeline.extraData.data.filter(i => i.id == payload.comment.node_id)[0]
+                if(theComment) {
+                    Object.assign(theComment,payload.info)
+                }
+            },
+            updateCommentPostHook(payload) {
+                let theComment = this.timeline.data.filter(i => i.id == payload.id)[0]
+                if(theComment) {
+                    Object.assign(theComment,payload)
+                }
             }
         },
         watch: {
@@ -1119,6 +1334,7 @@
                 this.chooseAssigneesModal.assignableUsers.data = []
                 this.applyLabelsModal.labels.data = []
                 this.setMilestoneModal.milestones.data = []
+                this.transferIssueModal.availableRepositories.data = []
             }
         },
         components: {
@@ -1133,12 +1349,13 @@
             Progress,
             IssueIcon,
             ProjectCard,
-            CommentEditor,
+            CommentCreatePane,
             Modal,
             SimpleSearchInput,
             TinyLoadingIcon,
             SelectMenuItem,
             HyperlinkWrapper,
+            LoadMore,
             Container: styled.div``,
             Header: styled.div``,
             HeaderActions: styled.div``,
@@ -1171,6 +1388,7 @@
 @import 'node_modules/@primer/css/avatars/index.scss';
 @import 'node_modules/@primer/css/box/index.scss';
 @import 'node_modules/@primer/css/forms/index.scss';
+@import 'node_modules/@primer/css/truncate/index.scss';
 .title{
     margin-bottom: 0;
     font-weight: 400;
@@ -1289,5 +1507,10 @@
         color: #24292e;
     background-color: #fff;
     border-color: #dfe2e5 #dfe2e5 #fff;
+}
+
+.modal-footer {
+    position: sticky;
+    top: 100%;
 }
 </style>

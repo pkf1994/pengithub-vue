@@ -15,7 +15,8 @@ export default {
                 ...mapState({
                     accessToken: state => state.oauth.accessToken.accessToken,
                     viewer: state => state.oauth.viewerInfo
-                })
+                }),
+                
             },
             created() {
                 if(this.documentTitle) {
@@ -58,10 +59,11 @@ export default {
                     let errors = graphqlRes.data && graphqlRes.data.errors
                     if(errors) {
                         errors.forEach(i => {
+                            console.log(i.message)
                             this.$toast(i.message,'error')
                         })
+                        throw new Error('GraphQL response error')
                     }
-                    throw new Error('GraphQL response error')
                 },
                 emitNotFoundEvent(el) {
                     let event = document.createEvent('HTMLEvents')
@@ -77,12 +79,15 @@ export default {
                         return 
                     }
                     for(let modalRef in this.$refs) {
-                        if(this.$refs[modalRef].show) this.$refs[modalRef].show = false
+                        if(this.$refs[modalRef] && this.$refs[modalRef].show) this.$refs[modalRef].show = false
                     }
                 },
                 scrollToBottom() {
                     let bottomY = document && document.body && document.body.scrollHeight
                     window && window.scrollTo(0,bottomY)
+                },
+                getPageScrollTop() {
+                    return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
                 },
             },
             activated() {

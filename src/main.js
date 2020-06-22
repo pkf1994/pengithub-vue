@@ -7,8 +7,6 @@ import './directives'
 import './filter'
 import './scss'
 import './css'
-import { ReactiveRefs } from 'vue-reactive-refs'
-Vue.use(ReactiveRefs)
 import plugin_toast from './plugin/toast'
 import plugin_themeColor from './plugin/themeColors'
 import plugin_modal from './plugin/modal'
@@ -16,6 +14,8 @@ import plugin_loading from './plugin/loading'
 import plugin_common from './plugin/common'
 import plugin_githubBusiness from './plugin/githubBusiness'
 import plugin_topNotice from './plugin/topNotice'
+import VueClipboard from 'vue-clipboard2'
+Vue.use(VueClipboard)
 Vue.use(plugin_themeColor)
 Vue.use(plugin_modal)
 Vue.use(plugin_toast)

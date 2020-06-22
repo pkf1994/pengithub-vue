@@ -196,3 +196,65 @@ mutation($subscribableId:ID!,$state:SubscriptionState!){
   }
 }
 `
+
+export const GRAPHQL_QUERY_VIEWER_REPOSTIORIES = `
+query($after:String){
+  viewer {
+    repositories(first: 100,after:$after,affiliations: OWNER) {
+      nodes {
+        id
+        name
+        isPrivate
+        description
+        hasIssuesEnabled
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}
+`
+
+export const GRAPHQL_MUTATION_TRANSFER_ISSUE = `
+mutation ($issueId:ID!,$repositoryId:ID!) {
+  transferIssue(input: {issueId: $issueId, repositoryId: $repositoryId}) {
+    issue {
+      resourcePath
+    }
+  }
+}
+`
+
+export const GRAPHQL_MUTATION_DELETE_ISSUE = `
+mutation ($issueId:ID!) {
+  deleteIssue(input: {issueId: $issueId}) {
+    clientMutationId
+  }
+}
+`
+
+export const GRAPHQL_MUTATION_MINIMIZE_COMMENT = `
+mutation ($subjectId:ID!,$classifier:ReportedContentClassifiers!) {
+  minimizeComment(input: {subjectId: $subjectId, classifier: $classifier}) {
+    minimizedComment {
+      minimizedReason
+      isMinimized
+      viewerCanMinimize
+    }
+  }
+}
+`
+
+export const GRAPHQL_MUTATION_UNMINIMIZE_COMMENT = `
+mutation ($subjectId:ID!) {
+  unminimizeComment(input: {subjectId: $subjectId}) {
+    unminimizedComment {
+      minimizedReason
+      isMinimized
+      viewerCanMinimize
+    }
+  }
+}
+`

@@ -1,6 +1,12 @@
 <template>
     <Container>
-        <Comment v-if="data.event === 'commented'" :data="data"></Comment>
+        <Comment v-if="data.event === 'commented'" 
+                :data="data" 
+                @quote="(payload) => $emit('quote',payload)"
+                @update-comment="payload => $emit('update-comment',payload)"
+                @minimize-comment="(payload) => $emit('minimize-comment',payload)"
+                @unminimize-comment="(payload) => $emit('unminimize-comment',payload)"
+         ></Comment>
         <!-- similar_comment -->
         <SimilarComments v-else-if="data.event === 'similar_comment'" :data="data"></SimilarComments>
         <!-- pinned  -->

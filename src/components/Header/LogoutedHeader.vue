@@ -22,14 +22,13 @@
       <slot></slot>  
 
       <PanelRight>
-        <Button
-          :inline="true"
-          class="border"
-          title="Sign in"
-          @click.native="signIn"
+        <button
+          class="d-inline-block f5 text-white no-underline border border-gray-dark rounded-2 px-2 py-1 mr-3 no-wrap"
+          @click="signIn"
           :style="signUpBtnStyle.buttonContainerStyle"
-          :titleStyle="signUpBtnStyle.titleStyle"
-        />
+        >
+        Sign in
+        </button>
 
         <Menu class="d-flex flex-items-center">
           <svg height="24" viewBox="0 0 12 16" version="1.1" width="18" aria-hidden="true" @click="triggerMenu">
