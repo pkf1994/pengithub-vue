@@ -5,22 +5,16 @@
 <script>
     import styled from 'vue-styled-components'
     import Hola from './Hola/Hola.vue'
-    import LoginedHome from './LoginedHome/LoginedHome.vue'
-
-    import {mapState} from "vuex";
-    const LOGINED_HOME = "LoginedHome"
-    const HOLA = "Hola"
+    import Dashboard from './Dashboard/Dashboard.vue'
     export default {
         computed: {
-            ...mapState({
-                currentComponent: function(state) {
-                    return state.oauth.accessToken.authenticated ? LOGINED_HOME : HOLA
-                }
-            })
+            currentComponent() {
+                 return this.accessToken ? "Dashboard" : "Hola"
+            }
         },
         components:{
             Hola,
-            LoginedHome
+            Dashboard
         }
     }
 </script>

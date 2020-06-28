@@ -5,9 +5,8 @@ const LabelsFooter = () => import('../components/Footer/LabelsFooter.vue')
 const ComplexFooter = () => import('../components/Footer/ComplexFooter.vue')
 const Home = () => import('../pages/Home/Home.vue')
 const OauthRedirectPage = () => import('../pages/OauthRedirectPage/OauthRedirectPage.vue')
-const Dashboard = () => import('../pages/Home/LoginedHome/Dashboard/Dashboard.vue')
-const HomePullRequests = () => import('../pages/Home/LoginedHome/PullRequests.vue')
-const HomeIssues = () => import('../pages/Home/LoginedHome/Issues.vue')
+const ViewerPullRequests = () => import('../pages/ViewerIssues/PullRequests.vue')
+const ViewerIssues = () => import('../pages/ViewerIssues/Issues.vue')
 const Explore = () => import('../pages/Explore/Explore.vue')
 const ExploreMain = () => import('../pages/Explore/ExploreMain/ExploreMain.vue')
 const ExploreTrending = () => import('../pages/Explore/Trending/Trending.vue')
@@ -90,7 +89,7 @@ export default [
         },
         name: 'pulls',
         components: {
-            default: HomePullRequests,
+            default: ViewerPullRequests,
             header: LogoHeader,
             footer: SimpleFooter
         },
@@ -102,7 +101,7 @@ export default [
         },
         name: 'issues',
         components: {
-            default: HomeIssues,
+            default: ViewerIssues,
             header: LogoHeader,
             footer: SimpleFooter
         },
@@ -298,7 +297,7 @@ export default [
     {
         path: '/:owner/:repo',
         components: {
-            header: RepoHeader,
+            header: LogoHeader,
             default: Repository,
             footer: SimpleFooter
         },

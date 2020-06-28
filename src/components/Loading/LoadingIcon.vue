@@ -1,7 +1,7 @@
 <template>
      <img alt="loading"
-            height="45"
-            width="45"
+            :height="size"
+            :width="size"
             class="width-fit height-fit"
             src="../../assets/image/octocat-spinner-128.gif"/>
 </template>
@@ -11,6 +11,10 @@
         props: {
             color: {
                 type: String
+            },
+            size: {
+                type: Number,
+                default: 35
             }
         },
         computed: {

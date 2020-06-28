@@ -38,7 +38,10 @@ export const API_USER_EVENTS = (login,pararms) => {
     return `${GITHUB_REST_API_BASE}/users/${login}/events?${query}`
 }
 
-export const API_USER_RECEIVED_EVENTS = user => `${GITHUB_REST_API_BASE}/users/${user}/received_events`
+export const API_USER_RECEIVED_EVENTS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/users/${payload.user}/received_events?${query}`
+}
 
 export const API_USER_ORG_EVENTS = (user,org) => `${GITHUB_REST_API_BASE}/users/${user}/events/orgs/${org}`
 
@@ -61,6 +64,11 @@ export const API_ORG_PUBLIC_MEMBER = (organization,params) => {
 export const API_ORG_REPOS = (organization,params) => {
     let query = util_queryParse.querify(params)
     return `${GITHUB_REST_API_BASE}/orgs/${organization}/repos?${query}`
+}
+
+export const API_VIEWER_REPOS = payload => {
+    let query = util_queryParse.querify(payload)
+    return `${GITHUB_REST_API_BASE}/user/repos?${query}`
 }
 
 export const API_USER_STARRED_REPOS = (login,params) => {
@@ -93,7 +101,10 @@ export const API_REPO_PROJECTS = (fullName,params) => {
     return `${GITHUB_REST_API_BASE}/repos/${fullName}/projects?${query}`
 }
 
-export const API_README = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/readme`
+export const API_README = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/readme?${query}`
+}
 
 export const API_CONTENTS = (payload) => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/contents/${payload.path}${payload.branch?'?ref='+payload.branch:''}`
 
@@ -111,10 +122,12 @@ export const API_REPOSITORY_BRANCHES = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/branches?${query}`
 }
 
-export const API_REPOSITORY_RELEASES = (owner,repo,params) => {
-    let query = util_queryParse.querify(params)
-    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/releases?${query}`
+export const API_REPOSITORY_RELEASES = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/releases?${query}`
 }
+
+export const API_REPOSITORY_GIT_TAG = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/refs/tags/${payload.tag}`
 
 export const API_REPOSITORY_TAGS = (owner,repo,params) => {
     let query = util_queryParse.querify(params)
@@ -238,6 +251,8 @@ export const API_REPOSITORY_ACTIVE_BRANCHES = payload => `${PROXY_API_BASE}/${pa
 
 export const API_BRANCHES_OVERVIEW_INFO = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/branches`
 
+export const API_BRANCH = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/branches/${payload.branch}`
+
 export const API_PROXY_ALL_BRANCHES = payload => {
     let query = util_queryParse.querify(payload.params)
     return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/branches/${payload.meta}?${query}`
@@ -287,5 +302,7 @@ export const API_CREATE_ISSUE_COMMENT = payload => `${GITHUB_REST_API_BASE}/repo
 export const API_HANDLE_ISSUE_COMMENT = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.comment}`
 
 export const API_ISSUE_COMMENT_REACTIONS = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.comment}/reactions`
+
+export const API_PROXY_ISSUE_COMMENT_EDIT_HISTORIES = payload => `${PROXY_API_BASE}/_render_node/${payload}/comments/comment_edit_history_log`
 
 

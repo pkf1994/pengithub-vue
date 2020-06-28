@@ -1,6 +1,86 @@
 <template>
     <Container>
-        <HeaderDetachTopTab :tabs="tabs" :activeTab="activeTab"></HeaderDetachTopTab>
+        <RepoBasicInfo class="bg-gray-light pb-0 pt-3 border-0">
+            <RepoFullName class="mb-3 px-3 f3">
+                <div class="d-flex flex-items-center">
+                     <svg v-if="data.private" class="octicon octicon-lock repo-private-icon flex-shrink-0" aria-label="Repository" viewBox="0 0 16 16" version="1.1" width="16" height="16" role="img"><path fill-rule="evenodd" d="M4 4v2h-.25A1.75 1.75 0 002 7.75v5.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-5.5A1.75 1.75 0 0012.25 6H12V4a4 4 0 10-8 0zm6.5 2V4a2.5 2.5 0 00-5 0v2h5zM12 7.5h.25a.25.25 0 01.25.25v5.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-5.5a.25.25 0 01.25-.25H12z"></path></svg>
+                    <svg v-else-if="data.fork" class="octicon octicon-repo-forked" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg>
+                    <svg v-else class="octicon octicon-repo" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"></path></svg>
+                    <router-link class="flex-self-stretch ml-2" :to="`/${owner}`">{{owner}}</router-link>
+                    <span class="path-divider flex-self-stretch">/</span>
+                    <strong class="flex-self-stretch">
+                        <router-link class="flex-self-stretch" :to="`/${owner}/${repo}`">{{repo}}</router-link>
+                    </strong>
+                    <span v-if="data.private" class="Label Label--outline v-align-middle ">Private</span>
+                </div>
+               
+                <ForkFlag class="fork-flag mt-1" v-if="data.fork && data.parent">
+                    <span>
+                        forked from
+                        <router-link :to="`/${data.parent.full_name}`">{{data.parent.full_name}}</router-link>
+                    </span>
+                </ForkFlag>
+            </RepoFullName>
+
+            <Description v-if="data.description" class="f4 mb-3 px-3">
+                {{data.description}}
+            </Description>
+
+            <RepoMeta class="mb-3 px-3">
+                <!-- homePage -->
+                <div v-if="data.homepage" class="mb-2 d-flex flex-items-center">
+                    <svg height="16" class="flex-shrink-0 mr-2" mr="2" class_names="flex-shrink-0" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg>
+                    <span class="flex-auto min-width-0 css-truncate css-truncate-target width-fit">
+                        <HyperlinkWrapper>
+                            <a :title="data.homepage" class="text-bold" :href="data.homepage">{{data.homepage.replace(/https:\/\/|http:\/\//g,'')}}</a>
+                        </HyperlinkWrapper>
+                    </span>
+                </div>
+
+                <!-- license -->
+                <div v-if="data.license" class="mb-2 d-flex flex-items-center">
+                    <router-link :to="`/${data.full_name}/blob/${data.default_branch}/LICENSE`" class="muted-link">
+                        <svg height="16" class="octicon-law mr-2 v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.75.75a.75.75 0 00-1.5 0V2h-.984c-.305 0-.604.08-.869.23l-1.288.737A.25.25 0 013.984 3H1.75a.75.75 0 000 1.5h.428L.066 9.192a.75.75 0 00.154.838l.53-.53-.53.53v.001l.002.002.002.002.006.006.016.015.045.04a3.514 3.514 0 00.686.45A4.492 4.492 0 003 11c.88 0 1.556-.22 2.023-.454a3.515 3.515 0 00.686-.45l.045-.04.016-.015.006-.006.002-.002.001-.002L5.25 9.5l.53.53a.75.75 0 00.154-.838L3.822 4.5h.162c.305 0 .604-.08.869-.23l1.289-.737a.25.25 0 01.124-.033h.984V13h-2.5a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-2.5V3.5h.984a.25.25 0 01.124.033l1.29.736c.264.152.563.231.868.231h.162l-2.112 4.692a.75.75 0 00.154.838l.53-.53-.53.53v.001l.002.002.002.002.006.006.016.015.045.04a3.517 3.517 0 00.686.45A4.492 4.492 0 0013 11c.88 0 1.556-.22 2.023-.454a3.512 3.512 0 00.686-.45l.045-.04.01-.01.006-.005.006-.006.002-.002.001-.002-.529-.531.53.53a.75.75 0 00.154-.838L13.823 4.5h.427a.75.75 0 000-1.5h-2.234a.25.25 0 01-.124-.033l-1.29-.736A1.75 1.75 0 009.735 2H8.75V.75zM1.695 9.227c.285.135.718.273 1.305.273s1.02-.138 1.305-.273L3 6.327l-1.305 2.9zm10 0c.285.135.718.273 1.305.273s1.02-.138 1.305-.273L13 6.327l-1.305 2.9z"></path></svg>
+                        {{data.license.name}}
+                    </router-link>
+                </div>
+
+                <!-- star and fork -->
+                <div class="mb-3">
+                    <router-link class="link-gray no-underline mr-3" :to="`/${owner}/${repo}/stargazers`">
+                        <svg height="16" class="octicon-star mr-1 v-align-text-bottom" mr="1" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25zm0 2.445L6.615 5.5a.75.75 0 01-.564.41l-3.097.45 2.24 2.184a.75.75 0 01.216.664l-.528 3.084 2.769-1.456a.75.75 0 01.698 0l2.77 1.456-.53-3.084a.75.75 0 01.216-.664l2.24-2.183-3.096-.45a.75.75 0 01-.564-.41L8 2.694v.001z"></path></svg>
+                        <span class="text-bold">{{data.stargazers_count | thousands2K2M}}</span>
+                        {{data.stargazers_count > 1 ? 'stars' : 'star'}}
+                    </router-link>
+                    <router-link v-if="!data.fork" class="link-gray no-underline" :to="`/${owner}/${repo}/forkee`">
+                        <svg height="16" class="octicon-repo-forked mr-1 v-align-text-bottom" mr="1" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg>
+                        <span class="text-bold">{{data.forks_count | thousands2K2M}}</span>
+                        {{data.forks_count > 1 ? 'forks' : 'fork'}}
+                    </router-link>
+                    <router-link v-else class="link-gray no-underline" :to="`/${owner}/${repo}/forkee`">
+                        <svg height="16" class="octicon-repo-forked mr-1 v-align-text-bottom" mr="1" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg>
+                        <span class="text-bold">{{data.network_count | thousands2K2M}}</span>
+                        {{data.forks_count > 1 ? 'forks' : 'fork'}}
+                    </router-link>
+                </div>
+
+            </RepoMeta>
+
+            <StarOrWatch class="d-flex px-3">
+                <button class="btn btn-sm btn-block flex-1 mr-2">        
+                    <svg height="16" class="octicon-star v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25zm0 2.445L6.615 5.5a.75.75 0 01-.564.41l-3.097.45 2.24 2.184a.75.75 0 01.216.664l-.528 3.084 2.769-1.456a.75.75 0 01.698 0l2.77 1.456-.53-3.084a.75.75 0 01.216-.664l2.24-2.183-3.096-.45a.75.75 0 01-.564-.41L8 2.694v.001z"></path></svg>
+                    Star
+                </button>
+                <button class="btn btn-sm btn-block flex-1">        
+                    <svg height="16" class="octicon octicon-eye" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.679 7.932c.412-.621 1.242-1.75 2.366-2.717C5.175 4.242 6.527 3.5 8 3.5c1.473 0 2.824.742 3.955 1.715 1.124.967 1.954 2.096 2.366 2.717a.119.119 0 010 .136c-.412.621-1.242 1.75-2.366 2.717C10.825 11.758 9.473 12.5 8 12.5c-1.473 0-2.824-.742-3.955-1.715C2.92 9.818 2.09 8.69 1.679 8.068a.119.119 0 010-.136zM8 2c-1.981 0-3.67.992-4.933 2.078C1.797 5.169.88 6.423.43 7.1a1.619 1.619 0 000 1.798c.45.678 1.367 1.932 2.637 3.024C4.329 13.008 6.019 14 8 14c1.981 0 3.67-.992 4.933-2.078 1.27-1.091 2.187-2.345 2.637-3.023a1.619 1.619 0 000-1.798c-.45-.678-1.367-1.932-2.637-3.023C11.671 2.992 9.981 2 8 2zm0 8a2 2 0 100-4 2 2 0 000 4z"></path></svg>
+                    Watch
+                    <span class="dropdown-caret d-inline-block"></span>
+                </button>
+            </StarOrWatch>
+        </RepoBasicInfo>
+
+        <ComplexTopTab :tabs="tabs" class="px-3 mt-2 mb-5 UnderlineNav"></ComplexTopTab>
+
         <WithTopNoticeWrapper theKey="repository">
             <keep-alive>
                 <router-view></router-view>
@@ -12,7 +92,7 @@
 <script>
     import styled from 'vue-styled-components'
     import { mapState } from 'vuex'
-    import {HeaderDetachTopTab,WithTopNoticeWrapper} from '@/components'
+    import {HeaderDetachTopTab,WithTopNoticeWrapper,ComplexTopTab,HyperlinkWrapper} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as api from '@/network/api'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet } from '@/network'
@@ -60,7 +140,7 @@
                 return [
                     {
                         label: "Code",
-                        routerLink: path,
+                        to: path,
                         exact: true,
                         active: [
                             `${path}/tree`,
@@ -74,7 +154,7 @@
                     },
                     {
                         label: "Issues",
-                        routerLink: `${path}/issues`,
+                        to: `${path}/issues`,
                         disabled: !this.data.has_issues,
                         meta: this.openIssuesCount,
                         active: [
@@ -86,7 +166,7 @@
                     },
                     {
                         label: "Pull requests",
-                        routerLink: `${path}/pulls`,
+                        to: `${path}/pulls`,
                         active: [
                             `${path}/pull`
                         ].filter(i => {
@@ -96,11 +176,11 @@
                     },
                     {
                         label: "Pulse",
-                        routerLink: `${path}/pulse`
+                        to: `${path}/pulse`
                     },
                     {
                         label: "Community",
-                        routerLink: `${path}/community`
+                        to: `${path}/community`
                     }
                 ]
             }
@@ -208,11 +288,35 @@
         components: {
             HeaderDetachTopTab,
             WithTopNoticeWrapper,
-            Container: styled.div``
+            ComplexTopTab,
+            HyperlinkWrapper,
+            Container: styled.div``,
+            RepoBasicInfo: styled.div``,
+            RepoFullName: styled.div``,
+            ForkFlag: styled.span``,
+            Description: styled.p``,
+            RepoMeta: styled.div``,
+            StarOrWatch: styled.div``,
         }
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/labels/index.scss';
+@import 'node_modules/@primer/css/dropdown/index.scss';
+@import 'node_modules/@primer/css/navigation/index.scss';
+.octicon{
+    color: #959da5;
+}
 
+.path-divider {
+    margin: 0 .25em;
+}
+
+.fork-flag{
+    display: block;
+    font-size: 11px;
+    line-height: 10px;
+    white-space: nowrap;
+}
 </style>

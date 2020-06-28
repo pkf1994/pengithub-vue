@@ -45,9 +45,6 @@
             //this.action_home_requestNotificationsData()
         },
         methods: {
-            ...mapActions({
-                action_home_requestNotificationsData: ACTION_HOME_REQUEST_NOTIFICATIONS_DATA
-            }),
             switchTab(tabItem) {
                 this.activeTab = tabItem
             },
