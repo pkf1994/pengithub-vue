@@ -1,9 +1,9 @@
 <template>
     <nav class="d-flex overflow-auto">
         <router-link class="px-2 py-3 mr-3 router-link flex-row-center flex-shrink-0" 
-                        :class="{active:tabItem.active}"
                         :style="tabStyle"
                         :exact="tabItem.exact"
+                        :class="{'router-link-active':tabItem.active}"
                         v-for="tabItem in tabs"
                         :key="tabItem.label"
                         :to="tabItem.to">

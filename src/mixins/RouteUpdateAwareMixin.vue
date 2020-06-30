@@ -23,7 +23,7 @@
                     console.log('beforeRouteEnter')
                 }
                 if(vm.routerMeta && vm.routerMeta != vm.generateRouterMeta() && vm.componentActive) {
-                    vm.routeResetHook()
+                    vm.routeResetHook(to,from)
                     vm.cancelUntimelyAxios()
                     /* await (function(time) {
                         return new Promise((resolve) => setTimeout(resolve, time));

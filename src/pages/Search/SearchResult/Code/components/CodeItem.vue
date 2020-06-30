@@ -15,6 +15,7 @@
                     <router-link to="/search">{{code.path}}</router-link>
                 </ThePath>
                 <MatchesContent class="matches-content my-1 font-mono"
+                                v-if="code.text_matches.lenght > 0"
                                 :meta="randomMeta">
                     <div v-for="(item,index) in code.text_matches || []" :key="index" class="flex-column">
                         <div v-for="(_item,_index) in item.fragment.split('\n')" :key="_index" class="d-flex">
@@ -35,7 +36,7 @@
                         <span>{{fileTypeAndColor.type}}</span>
                     </span>
                     </Language>
-                    <MatchesNumber>
+                    <MatchesNumber v-if="matchCount > 0">
                         Showing the top {{matchCount}} {{matchCount > 1 ? "matches" : "match"}}
                     </MatchesNumber>
                 </MultiInfo>

@@ -313,16 +313,12 @@ export default [
                     {
                         path: '/',
                         name: 'repositoryCodeMain',
-                        components: {
-                            RepositoryCodeMain: RepositoryCodeMain
-                        }
+                        component: RepositoryCodeMain
                     },
                     {
                         path: 'tree/(\.*)+',
-                        name: 'repositoryCodeFileBrowser',
-                        components: {
-                            RepositoryCodeFileBrowser: RepositoryCodeFileBrowser
-                        }
+                        name: 'repositoryCodeMain',
+                        component: RepositoryCodeMain
                     },
                     {
                         path: 'blob/(\.*)+',

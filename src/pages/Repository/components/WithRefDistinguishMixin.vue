@@ -20,7 +20,7 @@
                 if(!this.$route.params.pathMatch) return
                 if(this.$route.params.pathMatch.indexOf('/') === -1) return ''
                 if(!this.currentRef) return undefined
-                return this.$route.params.pathMatch.replace(this.currentRef,'')
+                return this.$route.params.pathMatch.replace(this.currentRef,'').replace(/^\//,'')
             },
             currentRef() {
                 let pathMatch = this.$route.params.pathMatch

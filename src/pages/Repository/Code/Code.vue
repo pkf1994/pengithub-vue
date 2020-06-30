@@ -1,10 +1,6 @@
 <template>
     <Container>
-        <router-view name="RepositoryCodeMain"></router-view>
-        <keep-alive>
-            <router-view name="RepositoryCodeFileBrowser"></router-view>
-        </keep-alive>
-        <router-view name="RepositoryCodeFileDetail"></router-view>
+        <router-view></router-view>
     </Container>   
 </template>
 

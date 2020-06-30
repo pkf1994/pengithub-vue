@@ -106,7 +106,7 @@ export const API_README = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/readme?${query}`
 }
 
-export const API_CONTENTS = (payload) => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/contents/${payload.path}${payload.branch?'?ref='+payload.branch:''}`
+export const API_CONTENTS = (payload) => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/contents${payload.path ? '/' + payload.path : ''}${payload.ref?'?ref='+payload.ref:''}`
 
 export const API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/stats/contributors`
 
@@ -138,13 +138,16 @@ export const API_REPOSITORY_RELEASE_BY_TAG_NAME = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/releases/tags/${payload.tag}`
 }
 
-export const API_REPOSITORY_CONTRIBUTORS = (owner,repo) => {
-    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/contributors`
+export const API_REPOSITORY_CONTRIBUTORS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/contributors?${query}`
 }
 
 export const API_REPOSITORY_SUBSCRIPTION = (owner,repo) => {
     return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/subscription`
 }
+
+export const API_REPOSITORY_LANGUAGES = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/languages`
 
 export const API_COMMITS_COMPARE = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/compare/${payload.baseHead}`
 
@@ -210,13 +213,14 @@ export const API_REPOSITORY_ISSUES_AVAILABLE_LABELS = payload => {
     return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/issues/show_menu_content?partial=issues%2Ffilters%2Flabels_content&q=${payload.query}`
 }
 
-export const API_REPOSITORY_CODE_FILE_DETAIL_AVAILABLE_BRANCHES = payload => {
-    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/refs/${payload.ref}/${payload.path}?source_action=show&source_controller=blob`
+export const API_REPOSITORY_AVAILABLE_BRANCHES = payload => {
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/refs/${payload.ref}${payload.path ? '/' + payload.path : ''}?source_action=${payload.sourceAction}&source_controller=${payload.sourceController}`
 }
 
-export const API_REPOSITORY_CODE_FILE_DETAIL_AVAILABLE_TAGS = payload => {
-    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/refs-tags/${payload.ref}/${payload.path}?source_action=show&source_controller=blob&tag_name=${payload.ref}`
+export const API_REPOSITORY_AVAILABLE_TAGS = payload => {
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/refs-tags/${payload.ref}${payload.path ? '/' + payload.path : ''}?source_action=${payload.sourceAction}&source_controller=${payload.sourceController}&tag_name=${payload.ref}`
 }
+
 
 
 export const API_REPOSITORY_LABELS = payload => {

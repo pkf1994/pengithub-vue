@@ -57,6 +57,7 @@
                 return [
                     {
                         to: this.cachedRouteQuery['/search'] || `/search?q=${this.query}`,
+                        exact: true,
                         label: 'Repositories',
                         meta: this.data.repositories === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.repositories,0),
                         active: this.$route.path == '/search'
@@ -157,7 +158,7 @@
                         authRequiredGet(
                             api.API_SEARCH(
                                 {
-                                    type: 'topcis',
+                                    type: 'topics',
                                     params: restParam
                                 }
                             ),
