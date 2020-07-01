@@ -323,9 +323,7 @@ export default [
                     {
                         path: 'blob/(\.*)+',
                         name: 'repositoryCodeFileDetail',
-                        components: {
-                            RepositoryCodeFileDetail: RepositoryCodeFileDetail
-                        }
+                        component: RepositoryCodeFileDetail
                     }
                 ]
             },

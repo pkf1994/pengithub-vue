@@ -309,4 +309,6 @@ export const API_ISSUE_COMMENT_REACTIONS = payload => `${GITHUB_REST_API_BASE}/r
 
 export const API_PROXY_ISSUE_COMMENT_EDIT_HISTORIES = payload => `${PROXY_API_BASE}/_render_node/${payload}/comments/comment_edit_history_log`
 
+export const API_PROXY_FILE_CONTRIBUTION_MESSAGE = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/contributors/${payload.ref}/${payload.path}`
 
+export const API_PROXY_COMMIT_STATUS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/commit/${payload.sha}/rollup?direction=e`

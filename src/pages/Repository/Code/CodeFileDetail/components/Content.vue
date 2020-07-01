@@ -28,31 +28,31 @@
                         </button>
                     </EditOrDelete>
                     </Pane>
-                    <LineAndSize  class="text-mono f6 flex-auto pt-2 pr-3 text-normal">
+                   <!--  <LineAndSize  class="text-mono f6 flex-auto pt-2 pr-3 text-normal">
                         <span v-if="fileDetailRows.length != 0">
                             {{fileDetailRows.length}} lines 
                         </span>
                         <span class="file-info-divider"></span>
                         {{byteSize() | fileSize}}
-                    </LineAndSize>
+                    </LineAndSize> -->
                 </Header>
             </AnimatedHeightWrapper>
             
         </template>
 
        
-         <Content class="Box-body p-0 content" v-if="isImage && !isSvg">
+        <!--  <Content class="Box-body p-0 content" v-if="isImage && !isSvg">
             <div class="p-3">
                 <ImgWrapper>
                     <img :src="raw" class='d-block mx-auto width-fit'> 
                 </ImgWrapper>
             </div>
+        </Content> -->
+
+        <Content class="Box-body content markdown-body p-0" v-if="contentType == 'HTML'" v-html="data()">
         </Content>
 
-        <Content class="Box-body py-3 px-4 content markdown-body" v-else-if="isBook" v-html="html()">
-        </Content>
-
-        <Content class="Box-body p-3 content text-center" v-else-if="isSvg" v-html="data()">
+        <!-- <Content class="Box-body p-3 content text-center" v-else-if="isSvg" v-html="data()">
         </Content>
 
          <Content class="Box-body p-0 content" v-else-if="!isBinary()">
@@ -60,7 +60,7 @@
                 <BlobNumber class="blob-num">{{index + 1}}</BlobNumber>
                 <BlobCode class="blob-code">{{item}}</BlobCode>
             </BlobRow>
-        </Content>
+        </Content> -->
 
         <Content class="text-center p-3" v-if="isBinary()">
             <a :href="raw">View raw</a>
@@ -76,6 +76,9 @@
     import {util_analyseFileType} from '@/util'
     export default {
         inject: ['data','html','byteSize','isBinary','currentRef','path','owner','repo'],
+        props: {
+            contentType: String,
+        },
         computed: {
            /*  ...mapState({
                 loading: state => state.repository.code.codeFile.fileDetail.loading,
@@ -85,10 +88,10 @@
            /*  ...mapGetters([
                 'fileDetailRows'
             ]), */
-            fileDetailRows() {
+          /*   fileDetailRows() {
                 let rows = this.data() && this.data().split(/\n/)
                 return rows || []
-            },
+            }, */
             isBook() {
                 let fileName = this.$route.path.replace(/.*?\//gi,'')
                 if(util_analyseFileType.analyseContentTypeByFileName(fileName) === 'book') {
