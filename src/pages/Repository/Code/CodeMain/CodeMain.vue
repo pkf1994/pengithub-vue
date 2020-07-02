@@ -3,93 +3,103 @@
     :loading="ref.loading || !repoBasicInfo().node_id || readme.loading || commitCount.loading || latestCommit.loading" 
     :position="(ref.loading || !repoBasicInfo().node_id) ? 'center' : 'corner'"
     class="px-3">
-        <AnimatedHeightWrapper>
-            <FileNavigation class="pb-3 d-flex flex-items-start flex-justify-between" v-if="latestCommit.data.sha">
-                <button class="btn css-truncate text-gray" :disabled="!currentRef"  @click="() => showModal('switchBranchOrTagModal')">
-                    <svg v-if="refType == 'branch'" height="16" class="octicon-git-branch text-gray v-align-text-bottom" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122V6A2.5 2.5 0 0110 8.5H6a1 1 0 00-1 1v1.128a2.251 2.251 0 11-1.5 0V5.372a2.25 2.25 0 111.5 0v1.836A2.492 2.492 0 016 7h4a1 1 0 001-1v-.628A2.25 2.25 0 019.5 3.25zM4.25 12a.75.75 0 100 1.5.75.75 0 000-1.5zM3.5 3.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0z"></path></svg>
-                    <svg v-else-if="refType == 'tag'" height="16" class="octicon-tag text-gray v-align-text-bottom" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M2.5 7.775V2.75a.25.25 0 01.25-.25h5.025a.25.25 0 01.177.073l6.25 6.25a.25.25 0 010 .354l-5.025 5.025a.25.25 0 01-.354 0l-6.25-6.25a.25.25 0 01-.073-.177zm-1.5 0V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 010 2.474l-5.026 5.026a1.75 1.75 0 01-2.474 0l-6.25-6.25A1.75 1.75 0 011 7.775zM6 5a1 1 0 100 2 1 1 0 000-2z"></path></svg>
-                    <span class="css-truncate-target" data-menu-button="">{{currentRef || '...'}}</span>
-                    <span class="dropdown-caret"></span>
-                </button>
+        <FileNavigation class="pb-3 d-flex flex-items-start flex-justify-between">
+            <button class="btn css-truncate text-gray" :disabled="!currentRef"  @click="() => showModal('switchBranchOrTagModal')">
+                <svg v-if="refType == 'branch'" height="16" class="octicon-git-branch text-gray v-align-text-bottom" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122V6A2.5 2.5 0 0110 8.5H6a1 1 0 00-1 1v1.128a2.251 2.251 0 11-1.5 0V5.372a2.25 2.25 0 111.5 0v1.836A2.492 2.492 0 016 7h4a1 1 0 001-1v-.628A2.25 2.25 0 019.5 3.25zM4.25 12a.75.75 0 100 1.5.75.75 0 000-1.5zM3.5 3.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0z"></path></svg>
+                <svg v-else-if="refType == 'tag'" height="16" class="octicon-tag text-gray v-align-text-bottom" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M2.5 7.775V2.75a.25.25 0 01.25-.25h5.025a.25.25 0 01.177.073l6.25 6.25a.25.25 0 010 .354l-5.025 5.025a.25.25 0 01-.354 0l-6.25-6.25a.25.25 0 01-.073-.177zm-1.5 0V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 010 2.474l-5.026 5.026a1.75 1.75 0 01-2.474 0l-6.25-6.25A1.75 1.75 0 011 7.775zM6 5a1 1 0 100 2 1 1 0 000-2z"></path></svg>
+                <span class="css-truncate-target" data-menu-button="">{{currentRef || '...'}}</span>
+                <span class="dropdown-caret"></span>
+            </button>
 
-                <button class="btn d-inline-block">
-                    <svg height="16" class="octicon-kebab-horizontal v-align-text-bottom" aria-label="More options" viewBox="0 0 16 16" version="1.1" width="16" role="img"><path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
-                </button>
-            </FileNavigation>
-        </AnimatedHeightWrapper>
+            <button class="btn d-inline-block">
+                <svg height="16" class="octicon-kebab-horizontal v-align-text-bottom" aria-label="More options" viewBox="0 0 16 16" version="1.1" width="16" role="img"><path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
+            </button>
+        </FileNavigation>
 
         <AnimatedHeightWrapper>
-            <FilePath v-if="path && latestCommit.data.sha" class="file-path text-normal pb-3 flex-auto text-bold">
+            <FilePath v-if="path" class="file-path text-normal pb-3 flex-auto text-bold">
                 <router-link :to="`/${owner}/${repo}`">{{repo}}</router-link>&nbsp;/&nbsp;<Breadcrumb :spaceArround="true" :routePath="breadcrumbRoutePath" :displayPath="path && path.replace(/^\//,'').replace(/\/$/,'')"/>
             </FilePath>  
         </AnimatedHeightWrapper>
+
+        <AnimatedHeightWrapper>
+            <CompareWithDefaultRef v-if="currentRef && defaultRef && (currentRef != defaultRef) && (compareWithDefaultRef.data.status || compareWithDefaultRef.data.message)" class="Box Box-body bg-gray-light">
+                <div v-if="compareWithDefaultRef.data.status">
+                    This branch is
+                    <span v-if="compareWithDefaultRef.data.ahead_by > 0">{{compareWithDefaultRef.data.ahead_by}} {{compareWithDefaultRef.data.ahead_by > 1 ? 'commits' : 'commit'}} ahead</span><span v-if="compareWithDefaultRef.data.ahead_by && compareWithDefaultRef.data.behind_by">,</span>
+                    <span v-if="compareWithDefaultRef.data.behind_by > 0">{{compareWithDefaultRef.data.behind_by}} {{compareWithDefaultRef.data.behind_by > 1 ? 'commits' : 'commit'}} behind</span> 
+                    dev.
+                </div>
+                <div v-else-if="compareWithDefaultRef.message" class="d-flex flex-auto">
+                    {{compareWithDefaultRef.message}}
+                </div>
+            </CompareWithDefaultRef>
+        </AnimatedHeightWrapper>
       
-        <AnimatedHeightWrapper class="pb-3 mb-3">
-            <FileBrowser class="Box" v-if="latestCommit.data.sha">
-                <div class="Box-header Box-header--blue position-relative d-flex flex-items-center flex-wrap">
-                    <router-link v-if="latestCommit.data.author && latestCommit.data.author.avatar_url" class="avatar avatar-user d-block" :to="`/${latestCommit.data.author.login}`">
-                        <ImgWrapper>
-                            <img width="24" height="24" :src="latestCommit.data.author.avatar_url" :alt="`@${latestCommit.data.author.login}`">
-                        </ImgWrapper>
-                    </router-link>
+        <FileBrowser class="Box my-3">
+            <div class="Box-header Box-header--blue position-relative d-flex flex-items-center flex-wrap">
+                <router-link v-if="latestCommit.data.author && latestCommit.data.author.avatar_url" class="avatar avatar-user d-block" :to="`/${latestCommit.data.author.login}`">
+                    <ImgWrapper>
+                        <img width="24" height="24" :src="latestCommit.data.author.avatar_url" :alt="`@${latestCommit.data.author.login}`">
+                    </ImgWrapper>
+                </router-link>
 
-                    <div class="flex-1 d-flex flex-items-center ml-2 min-width-0">
-                        <div class="css-truncate css-truncate-overflow text-gray">
-                            <router-link v-if="latestCommit.data.author && latestCommit.data.author.login" class="user-mention" :to="`/${latestCommit.data.author.login}`">
-                                {{latestCommit.data.author.login}}
-                            </router-link>
-                            committed
-                            <span v-if="latestCommit.data.commit && latestCommit.data.commit.committer && latestCommit.data.commit.committer.date">
-                                {{latestCommit.data.commit.committer.date | getDateDiff}}
-                            </span>
-                        </div>
-                        <button v-if="latestCommit.data.commit && latestCommit.data.commit.message" class="ellipsis-expander js-details-target ml-2 d-inline-block " @click="triggerShowLatestCommitMessage">
-                            …
-                        </button>
-
-                        <svg v-if="latestCommit.status && latestCommit.status.state == 'SUCCESS'" class="octicon text-green octicon-check v-align-middle flex-shrink-0 ml-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
-                        <svg v-else-if="latestCommit.status && latestCommit.status.state == 'FAILURE'" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true" class="octicon octicon-x v-align-middle text-red flex-shrink-0 ml-2"><path data-v-74bab622="" fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
-                    </div>
-
-                    <router-link v-if="commitCount.data !== undefined" :to="`/${owner}/${repo}/commits/${currentRef}`" class="link-gray-dark no-underline d-block ml-3">
-                        <svg height="16" class="octicon octicon-history text-gray" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path></svg>
-                        <span>
-                            <strong>
-                                {{commitCount.data | thousands}}
-                            </strong>
-                            <!-- {{commitCount.data > 1 ? 'commits' : 'commit'}} -->
-                        </span>
-                    </router-link>
-
-                    <!-- commit message -->
-                    <div class="pl-5 mt-2 width-full" v-if="latestCommit.data.commit.message && latestCommit.showMessage">
-                        <router-link class="link-gray-dark" :to="`/${owner}/${repo}/commits/${latestCommit.data.sha}`">
-                            {{latestCommit.data.commit.message}}
+                <div class="flex-1 d-flex flex-items-center ml-2 min-width-0">
+                    <div class="css-truncate css-truncate-overflow text-gray">
+                        <router-link v-if="latestCommit.data.author && latestCommit.data.author.login" class="user-mention" :to="`/${latestCommit.data.author.login}`">
+                            {{latestCommit.data.author.login}}
                         </router-link>
+                        committed
+                        <span v-if="latestCommit.data.commit && latestCommit.data.commit.committer && latestCommit.data.commit.committer.date">
+                            {{latestCommit.data.commit.committer.date | getDateDiff}}
+                        </span>
                     </div>
+                    <button v-if="latestCommit.data.commit && latestCommit.data.commit.message" class="ellipsis-expander js-details-target ml-2 d-inline-block " @click="triggerShowLatestCommitMessage">
+                        …
+                    </button>
+
+                    <svg v-if="latestCommit.status && latestCommit.status.state == 'SUCCESS'" class="octicon text-green octicon-check v-align-middle flex-shrink-0 ml-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
+                    <svg v-else-if="latestCommit.status && latestCommit.status.state == 'FAILURE'" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true" class="octicon octicon-x v-align-middle text-red flex-shrink-0 ml-2"><path data-v-74bab622="" fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
                 </div>
 
-                <div class="position-relative" :style="{minHeight: contents.show ? '120px':'auto'}" style="background:#fafbfc">
-                    <div v-if="!contents.show" class="Details-content--shown Box-footer d-md-none p-0" @click="showContents">
-                        <button class="d-block btn-link js-details-target width-full px-3 py-2">
-                            View code
-                        </button>
-                    </div>
-                    
-                    <transition-group name="fade-group" appear>
-                        <ContentListItem v-for="item in contents.data" :key="item.sha || item.type" :content="item" :currentRef="currentRef"></ContentListItem>
-                    </transition-group>
+                <router-link v-if="commitCount.data !== undefined" :to="`/${owner}/${repo}/commits/${currentRef}`" class="link-gray-dark no-underline d-block ml-3">
+                    <svg height="16" class="octicon octicon-history text-gray" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path></svg>
+                    <span>
+                        <strong>
+                            {{commitCount.data | thousands}}
+                        </strong>
+                        <!-- {{commitCount.data > 1 ? 'commits' : 'commit'}} -->
+                    </span>
+                </router-link>
 
-                    <div v-if="contents.loading" class="loading-contents">
-                        <div class="loading-contents-inner d-flex flex-justify-center flex-items-center">
-                            <LoadingIconEx class="loading-icon"></LoadingIconEx>
-                        </div>
-                    </div>
-                </div> 
+                <!-- commit message -->
+                <div class="pl-5 mt-2 width-full" v-if="latestCommit.data.commit && latestCommit.data.commit.message && latestCommit.showMessage">
+                    <router-link class="link-gray-dark" :to="`/${owner}/${repo}/commits/${latestCommit.data.sha}`">
+                        {{latestCommit.data.commit.message}}
+                    </router-link>
+                </div>
+            </div>
 
+            <div class="position-relative" :style="{minHeight: contents.show ? '120px':'auto'}" style="background:#fafbfc">
+                <div v-if="!contents.show" class="Details-content--shown Box-footer d-md-none p-0" @click="showContents">
+                    <button class="d-block btn-link js-details-target width-full px-3 py-2">
+                        View code
+                    </button>
+                </div>
                 
-            </FileBrowser>
-        </AnimatedHeightWrapper>
+                <transition-group name="fade-group" appear>
+                    <ContentListItem v-for="item in (contents.show ? contents.data : [])" :key="item.sha || item.type" :content="item" :currentRef="currentRef"></ContentListItem>
+                </transition-group>
+
+                <div v-if="contents.loading && contents.show" class="loading-contents">
+                    <div class="loading-contents-inner d-flex flex-justify-center flex-items-center">
+                        <LoadingIconEx class="loading-icon"></LoadingIconEx>
+                    </div>
+                </div>
+            </div> 
+
+            
+        </FileBrowser>
        
 
         <Readme v-if="readme.data && !this.path" v-show="readme.show" class="read-me Box">
@@ -288,6 +298,11 @@
                     data: [],
                     loading: false,
                     loadingLastUpdateDate: false
+                },
+                compareWithDefaultRef: {
+                    data: {},
+                    message: '',
+                    loading: false
                 }
             }
         },
@@ -379,9 +394,13 @@
                 this.network_getLanguages()
                 if(!this.currentRef) return
                 this.network_getBranch()
+                this.networl_getLatestCommit()
                 this.network_getCommitsCount()
                 this.network_getReadme()
-                if(this.contents.show) this.network_getContents()
+                this.network_getContents()
+                if(this.defaultRef && this.currentRef && (this.currentRef != this.defaultRef)) {
+                    this.network_getCompareWithDefaultRef()
+                }
             },
             async network_getBranch() {
                 try{
@@ -398,8 +417,7 @@
                         }
                     )
                     this.ref.data = res.data  
-                    this.latestCommit.data = res.data.commit   
-                    if(this.accessToken) this.network_getLatestCommitStatus()
+                   
                     this.ref.loading = false
                 }catch(e) {
                     console.log(e)
@@ -408,6 +426,55 @@
                     }else{
                         this.ref.loading = false
                     }
+                }
+            },
+            async networl_getLatestCommit() {
+                try{
+                    this.latestCommit.loading = true
+                    let url = api.API_COMMITS({
+                        repo: this.repo,
+                        owner: this.owner,
+                        params: {
+                            path: this.path,
+                            sha: this.currentRef,
+                            per_page: 1
+                        }
+                    })
+
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_latest_commit')
+                        }
+                    )
+
+                    this.latestCommit.data = res.data[0]
+                    this.network_getLatestCommitStatus()
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.latestCommit.loading = false
+                }
+            },
+            async network_getLatestCommitStatus() {
+                try{
+                    let url = api.API_PROXY_COMMIT_STATUS({
+                        repo: this.repo,
+                        owner: this.owner,
+                        sha: this.latestCommit.data.sha
+                    })
+
+                    let res = await commonGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_latest_commit_status')
+                        }
+                    )
+
+                    if(res.data) this.parseLatestCommitStatus(res.data)
+                   
+                }catch(e) {
+                    console.log(e)
                 }
             },
             async network_getTag() {
@@ -426,19 +493,6 @@
                     if(url_tag) {
                         let res_tag = await authRequiredGet(url_tag,{cancelToken})
                         this.ref.data = res_tag.data
-
-                        let latestCommitSha = res_tag.data.object && res_tag.data.object.sha
-                        if(latestCommitSha) {
-                            this.latestCommit.loading = true
-                            let url_latestCommit = api.API_COMMIT({
-                                repo: this.repo,
-                                owner: this.owner,
-                                sha: latestCommitSha
-                            })
-                            let res_latestCommit = await authRequiredGet(url_latestCommit,{cancelToken})
-                            this.latestCommit.data = res_latestCommit.data
-                            if(this.accessToken) this.network_getLatestCommitStatus()
-                        }
                     }
                 }catch(e) {
                     console.log(e)
@@ -448,6 +502,7 @@
                 }
             },
             async network_getCommitsCount() {
+               
                 try{
                     this.commitCount.loading = true
                     let url = api.API_COMMITS({
@@ -477,29 +532,7 @@
             triggerShowLatestCommitMessage() {
                 this.latestCommit.showMessage = !this.latestCommit.showMessage
             },
-            async network_getLatestCommitStatus() {
-                try{
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.GRAPHQL_COMMIT,
-                        {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_latest_commit_status'),
-                            variables: {
-                                id: this.latestCommit.data.node_id
-                            }
-                        }
-                    )
-
-                    try{
-                        this.latestCommit.status = res.data.data.node.status
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-                }catch(e) {
-                    console.log(e)
-                }
-            },
             async network_getReadme() {
-                console.log('get readme')
                 try{
                     this.readme.loading = true
                     let url = api.API_README({
@@ -685,7 +718,6 @@
                 }
             },
             async network_getContents() {
-                console.log(this.currentRef)
                 try{
                     this.contents.loading = true 
                     let url = api.API_CONTENTS({
@@ -709,6 +741,7 @@
                         type: 'prevLink'
                     })
                     this.contents.data = contents
+                    if(this.path) this.contents.show = true
                     if(this.accessToken) {
                         this.network_getContentsLastUpdateInfo()
                     }
@@ -721,7 +754,7 @@
                     this.contents.loading = false
                 }
             },
-             async network_getContentsLastUpdateInfo() {
+            async network_getContentsLastUpdateInfo() {
                 try{
                     this.contents.loadingLastUpdateDate = true 
 
@@ -756,6 +789,32 @@
                     this.contents.loadingLastUpdateDate = false
                 }
             },
+            async network_getCompareWithDefaultRef() {
+                try{
+                    this.compareWithDefaultRef.loading = true
+                    let url = api.API_COMMITS_COMPARE({
+                        repo: this.repo,
+                        owner: this.owner,
+                        baseHead: `${this.defaultRef}...${this.currentRef}`
+                    })
+
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_compare_with_default_ref')
+                        }
+                    )
+
+                    this.compareWithDefaultRef.data = res.data
+                }catch(e) {
+                    console.log(e)
+                    if(e.response) {
+                        this.compareWithDefaultRef.message = e.response.data.message
+                    }
+                }finally{
+                    this.compareWithDefaultRef.loading = false
+                }
+            },
             parseBranchesFromHTML(HTML) {
                 let pattern = /<span class="(?:flex-1 )?break-word" data-menu-button-text data-filter-item-text>(.*)<\/span>/g
                 let execResult
@@ -782,19 +841,30 @@
                 this.selectRefModal.tab = payload
                 this.network_getModalAvailableRef()
             },
-            generateRouterMeta() {
+           /*  generateRouterMeta() {
                 return `${this.owner}/${this.repo}/${this.currentRef}`
-            },
-            routeUpdateHook() {
+            }, */
+            routeUpdateHook(to,from) {
                 //初始化selectRefModal数据
                 this.selectRefModal.branches.data = []
                 this.selectRefModal.tags.data = []
-                this.network_getContributors() 
-                this.network_getLanguages() 
-                this.network_getReleases()
+
+                if(to.params.repo != from.params.repo || to.params.owner != from.params.owner) {
+                    this.network_getContributors() 
+                    this.network_getLanguages() 
+                    this.network_getReleases()
+
+                    this.allBranchesAndTags.branches = []
+                    this.allBranchesAndTags.tags = []
+                    this.network_getAllBranchesAndTags()
+                }
                 if(!this.currentRef) return
                 this.network_getReadme()
-                if(this.contents.show) this.network_getContents()
+                this.networl_getLatestCommit()
+                this.network_getContents()
+                if(!this.defaultRef) return 
+                if(this.defaultRef == this.currentRef) return 
+                this.network_getCompareWithDefaultRef()
             },
             routeResetHook(to,from){
                 if(to.path.indexOf(from.path) == 0 || from.path.indexOf(to.path) == 0) return
@@ -803,24 +873,31 @@
             showContents() {
                 this.contents.show = true
             },
-            
-        }, 
+            parseLatestCommitStatus(HTML) {
+                let failurePattern = /octicon-x/g
+                let successPattern = /octicon-check/g
+                if(HTML.match(failurePattern) != null) {
+                    this.latestCommit.status = 'FAILURE'
+                }else if(HTML.match(successPattern) != null) {
+                    this.latestCommit.status = 'SUCCESS'
+                }
+            },
+        },  
         
         watch: {
             currentRef(newOne,oldOne) {
                 if(newOne && !oldOne) {
-                    this.network_getData()
+                    this.network_getBranch()
+                    this.networl_getLatestCommit()
+                    this.network_getCommitsCount()
+                    this.network_getReadme()
+                    this.network_getContents()
+                    if(this.defaultRef) this.network_getCompareWithDefaultRef()
                 }
             },
-            path() {
-                this.selectRefModal.branches.data = []
-                this.selectRefModal.tags.data = []
-                if(this.path) this.contents.show = true
-                if(this.contents.show) this.network_getContents()
-            },
-            'contents.show': function(newOne,oldOne) {
-                if(newOne && !oldOne && this.currentRef) {
-                    this.network_getContents()
+            defaultRef(newOne,oldOne) {
+                if(newOne && !oldOne) {
+                    if(this.currentRef) this.network_getCompareWithDefaultRef()
                 }
             }
         },
@@ -842,7 +919,8 @@
             Languages: styled.div``,
             Pagination: styled.div``,
             ModalTab: styled.div``,
-            FilePath: styled.div``
+            FilePath: styled.div``,
+            CompareWithDefaultRef: styled.div``,
         }
     }
 </script>

@@ -41,7 +41,7 @@
                     console.log(this.generateRouterMeta())
                 }
                 this.cancelUntimelyAxios()
-                this.routeUpdateHook()
+                this.routeUpdateHook(to,from)
                 this.routerMeta = this.generateRouterMeta()
             }
         },

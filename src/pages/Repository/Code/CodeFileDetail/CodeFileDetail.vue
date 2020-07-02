@@ -1,62 +1,102 @@
 <template>
-    <CommonLoadingWrapper :loading="allBranchesAndTags.loading || loading" class="px-3">
+    <CommonLoadingWrapper :loading="allBranchesAndTags.loading || loading || contributionMessage.loading || contributionMessage.latestCommit.loading" class="px-3">
+        <FileNavigation class="pb-3 d-flex flex-items-start flex-justify-between">
+            <button class="btn css-truncate text-gray" :disabled="!currentRef"  @click="() => showModal('switchBranchOrTagModal')">
+                <svg v-if="refType == 'branch'" height="16" class="octicon-git-branch text-gray v-align-text-bottom" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122V6A2.5 2.5 0 0110 8.5H6a1 1 0 00-1 1v1.128a2.251 2.251 0 11-1.5 0V5.372a2.25 2.25 0 111.5 0v1.836A2.492 2.492 0 016 7h4a1 1 0 001-1v-.628A2.25 2.25 0 019.5 3.25zM4.25 12a.75.75 0 100 1.5.75.75 0 000-1.5zM3.5 3.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0z"></path></svg>
+                <svg v-else-if="refType == 'tag'" height="16" class="octicon-tag text-gray v-align-text-bottom" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M2.5 7.775V2.75a.25.25 0 01.25-.25h5.025a.25.25 0 01.177.073l6.25 6.25a.25.25 0 010 .354l-5.025 5.025a.25.25 0 01-.354 0l-6.25-6.25a.25.25 0 01-.073-.177zm-1.5 0V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 010 2.474l-5.026 5.026a1.75 1.75 0 01-2.474 0l-6.25-6.25A1.75 1.75 0 011 7.775zM6 5a1 1 0 100 2 1 1 0 000-2z"></path></svg>
+                <span class="css-truncate-target" data-menu-button="">{{currentRef || '...'}}</span>
+                <span class="dropdown-caret"></span>
+            </button>
+
+            <button class="btn d-inline-block">
+                <svg height="16" class="octicon-kebab-horizontal v-align-text-bottom" aria-label="More options" viewBox="0 0 16 16" version="1.1" width="16" role="img"><path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
+            </button>
+        </FileNavigation>
+
         <AnimatedHeightWrapper>
-            <FileNavigation class="pb-3 d-flex flex-items-start flex-justify-between">
-                <button class="btn css-truncate text-gray" :disabled="!currentRef"  @click="() => showModal('switchBranchOrTagModal')">
-                    <svg v-if="refType == 'branch'" height="16" class="octicon-git-branch text-gray v-align-text-bottom" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122V6A2.5 2.5 0 0110 8.5H6a1 1 0 00-1 1v1.128a2.251 2.251 0 11-1.5 0V5.372a2.25 2.25 0 111.5 0v1.836A2.492 2.492 0 016 7h4a1 1 0 001-1v-.628A2.25 2.25 0 019.5 3.25zM4.25 12a.75.75 0 100 1.5.75.75 0 000-1.5zM3.5 3.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0z"></path></svg>
-                    <svg v-else-if="refType == 'tag'" height="16" class="octicon-tag text-gray v-align-text-bottom" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M2.5 7.775V2.75a.25.25 0 01.25-.25h5.025a.25.25 0 01.177.073l6.25 6.25a.25.25 0 010 .354l-5.025 5.025a.25.25 0 01-.354 0l-6.25-6.25a.25.25 0 01-.073-.177zm-1.5 0V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 010 2.474l-5.026 5.026a1.75 1.75 0 01-2.474 0l-6.25-6.25A1.75 1.75 0 011 7.775zM6 5a1 1 0 100 2 1 1 0 000-2z"></path></svg>
-                    <span class="css-truncate-target" data-menu-button="">{{currentRef || '...'}}</span>
-                    <span class="dropdown-caret"></span>
-                </button>
-
-                <button class="btn d-inline-block">
-                    <svg height="16" class="octicon-kebab-horizontal v-align-text-bottom" aria-label="More options" viewBox="0 0 16 16" version="1.1" width="16" role="img"><path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
-                </button>
-            </FileNavigation>
+            <FilePath v-if="currentRef" class="file-path text-normal pt-1 pb-3 flex-auto text-bold">
+                <router-link :to="`/${owner}/${repo}`">{{repo}}</router-link>&nbsp;/&nbsp;<Breadcrumb :spaceArround="true" :routePath="breadcrumbRoutePath" :displayPath="path && path.replace(/^\//,'').replace(/\/$/,'')"/>
+            </FilePath>
         </AnimatedHeightWrapper>
-
-        <FilePath class="file-path text-normal mt-1 mb-3 flex-auto text-bold">
-            <router-link :to="`/${owner}/${repo}`">{{repo}}</router-link>&nbsp;/&nbsp;<Breadcrumb :spaceArround="true" :routePath="breadcrumbRoutePath" :displayPath="path && path.replace(/^\//,'').replace(/\/$/,'')"/>
-        </FilePath>
+       
 
         <ContributionMessage class="Box d-flex flex-column flex-shrink-0 mb-3">
-            <div class="Box-header Box-header--blue d-flex flex-items-center">
-                <span class="flex-shrink-0">
-                    <router-link v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" 
-                                :to="`/${contributionMessage.latestCommit.data.author.login}`">
-                        <ImgWrapper class="avatar avatar-user">
-                            <img    class="avatar avatar-user"
-                                    :src="contributionMessage.latestCommit.data.author.avatar_url" 
-                                    :alt="`@${contributionMessage.latestCommit.data.author.login}`"
-                                    height="24"
-                                    width="24">
-                        </ImgWrapper>
-                    </router-link>
-                </span>
+            <div class="Box-header Box-header--blue">
+                <div class="d-flex flex-items-center">
+                    <span class="flex-shrink-0">
+                        <router-link v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" 
+                                    :to="`/${contributionMessage.latestCommit.data.author.login}`">
+                            <ImgWrapper class="avatar avatar-user">
+                                <img    class="avatar avatar-user"
+                                        :src="contributionMessage.latestCommit.data.author.avatar_url" 
+                                        :alt="`@${contributionMessage.latestCommit.data.author.login}`"
+                                        height="24"
+                                        width="24">
+                            </ImgWrapper>
+                        </router-link>
+                    </span>
 
-                <div class="flex-1 d-flex flex-items-center ml-3 min-width-0">
-                    <div class="css-truncate css-truncate-overflow">
-                        <router-link class="text-bold link-gray-dark" :to="`/${contributionMessage.latestCommit.data.author.login}`">{{contributionMessage.latestCommit.data.author.login}}</router-link>
-                        <span>
-                            <router-link class="link-gray" :to="`/${owner}/${repo}/commit/${contributionMessage.latestCommit.data.sha}`">{{latestCommitMessageHeadline}}</router-link>
-                        </span>
+                    <div class="flex-1 d-flex flex-items-center ml-3 min-width-0">
+                        <div class="css-truncate css-truncate-overflow">
+                            <router-link class="text-bold link-gray-dark" v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" :to="`/${contributionMessage.latestCommit.data.author.login}`">{{contributionMessage.latestCommit.data.author.login}}</router-link>
+                            <span>
+                                <router-link class="link-gray" :to="`/${owner}/${repo}/commit/${contributionMessage.latestCommit.data.sha}`">{{latestCommitMessageHeadline}}</router-link>
+                            </span>
+                        </div>
                     </div>
+
+                    <span v-if="latestCommitMessageBody" @click="triggerShowLatestCommitMessageBody" class="hidden-text-expander ml-1 flex-shrink-0">
+                        <button type="button" class="ellipsis-expander js-details-target" aria-expanded="true">…</button>
+                    </span>  
+
+                    <span v-if="contributionMessage.latestCommitStatus !== undefined" class="ml-2">
+                        <svg v-if="contributionMessage.latestCommitStatus == 'SUCCESS'" class="octicon octicon-check text-green" viewBox="0 0 16 16" version="1.1" width="16" height="16" role="img"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
+                        <svg v-else-if="contributionMessage.latestCommitStatus == 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
+                    </span>     
+
+                    <router-link :to="`/${owner}/${repo}/commits/${currentRef}/${path}`" class="d-block ml-3 d-flex flex-shrink-0 flex-items-center flex-justify-end text-gray no-wrap">
+                        <svg height="16" class="octicon octicon-history text-gray" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path></svg>
+                    </router-link>
                 </div>
+                
+                <div class="pl-5 mt-2 width-full" v-if="latestCommitMessageBody && contributionMessage.latestCommit.showMessageBody">
+                    <router-link class="link-gray-dark" :to="`/${owner}/${repo}/commits/${contributionMessage.latestCommit.data.sha}`">
+                        <pre>{{latestCommitMessageBody}}</pre>
+                    </router-link>
+                </div>  
 
-                <span class="hidden-text-expander ml-1 flex-shrink-0">
-                    <button type="button" class="ellipsis-expander js-details-target" aria-expanded="true">…</button>
-                </span>  
-
-                <span v-if="contributionMessage.latestCommitStatus !== undefined" class="ml-2">
-                    <svg v-if="contributionMessage.latestCommitStatus == 'SUCCESS'" class="octicon octicon-check text-green" viewBox="0 0 16 16" version="1.1" width="16" height="16" role="img"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
-                    <svg v-else-if="contributionMessage.latestCommitStatus == 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
-                </span>       
             </div>
+            
+            <div class="Box-body d-flex flex-items-center flex-auto border-bottom-0 flex-wrap">
+                <div class="lh-default text-gray-dark float-left mr-3">
+                    <svg height="16" class="octicon octicon-people text-gray" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M5.5 3.5a2 2 0 100 4 2 2 0 000-4zM2 5.5a3.5 3.5 0 115.898 2.549 5.507 5.507 0 013.034 4.084.75.75 0 11-1.482.235 4.001 4.001 0 00-7.9 0 .75.75 0 01-1.482-.236A5.507 5.507 0 013.102 8.05 3.49 3.49 0 012 5.5zM11 4a.75.75 0 100 1.5 1.5 1.5 0 01.666 2.844.75.75 0 00-.416.672v.352a.75.75 0 00.574.73c1.2.289 2.162 1.2 2.522 2.372a.75.75 0 101.434-.44 5.01 5.01 0 00-2.56-3.012A3 3 0 0011 4z"></path></svg>
+                    <strong>
+                        {{contributionMessage.contributorCount}}
+                    </strong>
+                    {{contributionMessage.contributorCount > 1 ? 'contributors' : 'contributor'}}
+                    
+                    
+                </div>
+                <span>
+                    <router-link v-for="item in contributionMessage.contributors" :key="item.login" class="avatar-link py-1" :to="`/${item.login}`">
+                        <img :src="item.avatarUrl" :alt="`@${item.login}`" width="24" height="24" class="avatar mr-2 avatar-user" >
+                    </router-link>
+
+                    <button v-if="contributionMessage.contributorCount > contributionMessage.contributors.length" type="button" class="btn-link lh-default mt-1" data-toggle-for="blob_contributors_box">
+                        +{{contributionMessage.contributorCount - contributionMessage.contributors.length}}
+                    </button>
+                </span>    
+            </div>
+           
         </ContributionMessage>
 
-       <!--  <transition name="fade" appear>
-            <Content :contentType="contentType" v-if="data || html || raw"></Content>
-        </transition> -->
+        <transition name="fade" appear>
+            <Content :contentType="contentType" 
+                        :content="data" 
+                        :currentRef="currentRef" 
+                        :path="path" 
+                        :contentInfo="contentInfo.data"></Content>
+        </transition>
 
        <!--  <Modal ref="switchBranchOrTagModal" title="Switch branches/tags" :modalStyle="{height:'80vh'}" @show="network_getAvailableRefs">
             <div class="select-menu-text-filter">
@@ -112,10 +152,11 @@
             return {
                 data: '',
                 loading: false,
-                contentType: 'others',
+                contentType: 'html',
                 contributionMessage: {
                     latestCommit: {
                         data: {},
+                        showMessageBody: false,
                         loading: false
                     },
                     latestCommitStatus: undefined,
@@ -134,6 +175,10 @@
                     }
                 },
                 switchBranchOrTagModalTab: "branch",
+                contentInfo: {
+                    data: {},
+                    loading: false
+                }
             }
         },
       
@@ -148,11 +193,8 @@
                 return this.$route.params.owner
             },
             breadcrumbRoutePath() {
-                let regExp = new RegExp('^(\/[^\/]+\/[^\/]+\/)file')
-                let match = this.$route.path.match(regExp)
-                if(match) {
-                    return this.$route.path.replace(regExp,`${match[1]}dir`)
-                }
+                let regExp = new RegExp(`^\/${this.owner}\/${this.repo}\/blob`)
+                return this.$route.path.replace(regExp,`/${this.owner}/${this.repo}/tree`)
             },
             filterAvailableBranches() {
                 return this.availableBranches.data.filter(i => {
@@ -191,6 +233,7 @@
                 this.network_getLatestCommit()
                 this.network_getContributionMessage()
                 this.network_tryToGetContentHTML()
+                this.network_getContentInfo()
             },
             async network_getLatestCommit() {
                 try{
@@ -266,17 +309,16 @@
 
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_content_HTML')
                     
-                    let url_whetherHTML = api.API_CONTENTS({
+                    let url_contentHTML = api.API_CONTENTS({
                         repo: this.repo,
                         owner: this.owner,
                         path: this.path,
                         ref: this.currentRef
                     })
 
-                    console.log(url_whetherHTML)
 
-                    let res_whetherHTML = await authRequiredGet(
-                        url_whetherHTML,
+                    let res = await authRequiredGet(
+                        url_contentHTML,
                         {
                             headers: {
                                 'Accept': 'application/vnd.github.VERSION.html'
@@ -285,20 +327,23 @@
                         }
                     )
 
-                    this.data = res_whetherHTML.data
-                    this.contentType = 'HTML'
+                    this.detemineContentType(res.data)
 
-                    this.loading = false
-                    
-                   
                 }catch(e){
                     console.log(e)
-                    if(e.response && e.response.status == 404) {
-
-                    }
-
+                    this.contentType = 'binary'
                 }finally{
-                    
+                    this.loading = false
+                }
+            },
+            detemineContentType(HTML) {
+                let plainCodePattern = /^<div id="file"[^>]*?><div class="plain"><pre style="white-space: pre-wrap">((?:.|\r|\n)*)<\/pre><\/div><\/div>$/g
+                let plainCodeExecResult
+                if((plainCodeExecResult = plainCodePattern.exec(HTML)) != null) {
+                    this.data = plainCodeExecResult[1]
+                    this.contentType = 'text'
+                }else{
+                    this.data = HTML
                 }
             },
             parseContributionMessage(HTML) {
@@ -323,9 +368,6 @@
             parseLatestCommitStatus(HTML) {
                 let failurePattern = /octicon-x/g
                 let successPattern = /octicon-check/g
-                console.log(HTML)
-                console.log(HTML.match(failurePattern))
-                console.log(HTML.match(successPattern))
                 if(HTML.match(failurePattern) != null) {
                     this.contributionMessage.latestCommitStatus = 'FAILURE'
                 }else if(HTML.match(successPattern) != null) {
@@ -399,6 +441,29 @@
                     this.availableTags.loading = false
                 }
             },
+            async network_getContentInfo() {
+                try{
+                    this.contentInfo.loading = true
+                    let url = api.API_CONTENTS({
+                        repo: this.repo,
+                        owner: this.owner,
+                        path: this.path,
+                        ref: this.currentRef
+                    })
+
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_content_info')
+                        }
+                    )
+                    this.contentInfo.data = res.data
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.contentInfo.loading = false
+                }
+            },
             parseBranchesFromHTML(HTML) {
                 let refs = []
                 let execPattern = /<span class="(?:flex-1 )?break-word" data-menu-button-text data-filter-item-text>(.*)<\/span>/g
@@ -416,6 +481,9 @@
                     refs.push(execResult[1])
                 }
                 return refs
+            },
+            triggerShowLatestCommitMessageBody() {
+                this.contributionMessage.latestCommit.showMessageBody = !this.contributionMessage.latestCommit.showMessageBody
             }
         },
         watch: {
