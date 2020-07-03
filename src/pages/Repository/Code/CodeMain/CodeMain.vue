@@ -3,7 +3,7 @@
     :loading="ref.loading || !repoBasicInfo().node_id || readme.loading || commitCount.loading || latestCommit.loading" 
     :position="(ref.loading || !repoBasicInfo().node_id) ? 'center' : 'corner'"
     class="px-3">
-        <FileNavigation class="pb-3 d-flex flex-items-start flex-justify-between">
+        <FileNavigation class="d-flex flex-items-start flex-justify-between position-relative">
             <button class="btn css-truncate text-gray" :disabled="!currentRef"  @click="() => showModal('switchBranchOrTagModal')">
                 <svg v-if="refType == 'branch'" height="16" class="octicon-git-branch text-gray v-align-text-bottom" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122V6A2.5 2.5 0 0110 8.5H6a1 1 0 00-1 1v1.128a2.251 2.251 0 11-1.5 0V5.372a2.25 2.25 0 111.5 0v1.836A2.492 2.492 0 016 7h4a1 1 0 001-1v-.628A2.25 2.25 0 019.5 3.25zM4.25 12a.75.75 0 100 1.5.75.75 0 000-1.5zM3.5 3.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0z"></path></svg>
                 <svg v-else-if="refType == 'tag'" height="16" class="octicon-tag text-gray v-align-text-bottom" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M2.5 7.775V2.75a.25.25 0 01.25-.25h5.025a.25.25 0 01.177.073l6.25 6.25a.25.25 0 010 .354l-5.025 5.025a.25.25 0 01-.354 0l-6.25-6.25a.25.25 0 01-.073-.177zm-1.5 0V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 010 2.474l-5.026 5.026a1.75 1.75 0 01-2.474 0l-6.25-6.25A1.75 1.75 0 011 7.775zM6 5a1 1 0 100 2 1 1 0 000-2z"></path></svg>
@@ -11,29 +11,44 @@
                 <span class="dropdown-caret"></span>
             </button>
 
-            <button class="btn d-inline-block">
+            <span class="btn d-inline-block" @click="() => showModal('popover')">
                 <svg height="16" class="octicon-kebab-horizontal v-align-text-bottom" aria-label="More options" viewBox="0 0 16 16" version="1.1" width="16" role="img"><path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
-            </button>
+            </span>
+             <Popover ref="popover" :popoverStyle="{right: 0, top: 'calc(100% + 10px)', width: '160px',paddingTop: '8px', paddingBottom: '8px'}">
+                    <div>
+                        <router-link class="dropdown-item" :to="`/${owner}/${repo}/find/${currentRef}`">
+                            Go to file
+                        </router-link>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                         <router-link class="dropdown-item" :to="`/${owner}/${repo}/find/${currentRef}`">
+                            Create new file
+                        </router-link>
+            </Popover>
         </FileNavigation>
 
         <AnimatedHeightWrapper>
-            <FilePath v-if="path" class="file-path text-normal pb-3 flex-auto text-bold">
-                <router-link :to="`/${owner}/${repo}`">{{repo}}</router-link>&nbsp;/&nbsp;<Breadcrumb :spaceArround="true" :routePath="breadcrumbRoutePath" :displayPath="path && path.replace(/^\//,'').replace(/\/$/,'')"/>
-            </FilePath>  
+            <div v-if="path" class="pt-3">
+                <FilePath class="file-path text-normal flex-auto text-bold">
+                    <router-link :to="`/${owner}/${repo}`">{{repo}}</router-link>&nbsp;/&nbsp;<Breadcrumb :spaceArround="true" :routePath="breadcrumbRoutePath" :displayPath="path && path.replace(/^\//,'').replace(/\/$/,'')"/>
+                </FilePath>
+            </div> 
         </AnimatedHeightWrapper>
 
         <AnimatedHeightWrapper>
-            <CompareWithDefaultRef v-if="currentRef && defaultRef && (currentRef != defaultRef) && (compareWithDefaultRef.data.status || compareWithDefaultRef.data.message)" class="Box Box-body bg-gray-light">
-                <div v-if="compareWithDefaultRef.data.status">
-                    This branch is
-                    <span v-if="compareWithDefaultRef.data.ahead_by > 0">{{compareWithDefaultRef.data.ahead_by}} {{compareWithDefaultRef.data.ahead_by > 1 ? 'commits' : 'commit'}} ahead</span><span v-if="compareWithDefaultRef.data.ahead_by && compareWithDefaultRef.data.behind_by">,</span>
-                    <span v-if="compareWithDefaultRef.data.behind_by > 0">{{compareWithDefaultRef.data.behind_by}} {{compareWithDefaultRef.data.behind_by > 1 ? 'commits' : 'commit'}} behind</span> 
-                    dev.
-                </div>
-                <div v-else-if="compareWithDefaultRef.message" class="d-flex flex-auto">
-                    {{compareWithDefaultRef.message}}
-                </div>
-            </CompareWithDefaultRef>
+            <div v-if="currentRef && defaultRef && (currentRef != defaultRef) && (compareWithDefaultRef.data.status || compareWithDefaultRef.message)" class="pt-3">
+                <CompareWithDefaultRef class="Box Box-body bg-gray-light">
+                    <div v-if="compareWithDefaultRef.data.status">
+                        This branch is
+                        <span v-if="compareWithDefaultRef.data.ahead_by > 0">{{compareWithDefaultRef.data.ahead_by}} {{compareWithDefaultRef.data.ahead_by > 1 ? 'commits' : 'commit'}} ahead</span><span v-if="compareWithDefaultRef.data.ahead_by && compareWithDefaultRef.data.behind_by">,</span>
+                        <span v-if="compareWithDefaultRef.data.behind_by > 0">{{compareWithDefaultRef.data.behind_by}} {{compareWithDefaultRef.data.behind_by > 1 ? 'commits' : 'commit'}} behind</span> 
+                        dev.
+                    </div>
+                    <div v-else-if="compareWithDefaultRef.message" class="d-flex flex-auto">
+                        {{compareWithDefaultRef.message}}
+                    </div>
+                </CompareWithDefaultRef>
+            </div>
         </AnimatedHeightWrapper>
       
         <FileBrowser class="Box my-3">
@@ -45,7 +60,7 @@
                 </router-link>
 
                 <div class="flex-1 d-flex flex-items-center ml-2 min-width-0">
-                    <div class="css-truncate css-truncate-overflow text-gray">
+                    <div class="css-truncate css-truncate-overflow text-gray" v-if="latestCommit.data.node_id">
                         <router-link v-if="latestCommit.data.author && latestCommit.data.author.login" class="user-mention" :to="`/${latestCommit.data.author.login}`">
                             {{latestCommit.data.author.login}}
                         </router-link>
@@ -145,6 +160,8 @@
                         + {{releases.totalCount - 1}} releases
                     </router-link>
                 </div>
+
+                <div v-else-if="!releases.loading" class="text-small">No releases published</div>
             </Releases>
         </AnimatedHeightWrapper>
         
@@ -188,6 +205,8 @@
                         <span class="text-gray-dark text-bold mr-1">{{item.language}}</span>
                         <span>{{(item.distribution * 100).toFixed(1)}}%</span>
                     </router-link>
+                </li>
+                <li>
                     <span class="d-inline-flex flex-items-center flex-nowrap link-gray no-underline text-small mr-3">
                         <svg class="octicon octicon-dot-fill mr-2" style="color:#ededed" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8z"></path></svg>
                         <span class="text-gray-dark text-bold mr-1">others</span>
@@ -226,16 +245,22 @@
                     </SelectMenuItem>
                 </transition-group>
             </div>
+            <footer class="modal-footer SelectMenu-footer">
+                <router-link :to="`/${owner}/${repo}/branches`">
+                    View all branches
+                </router-link>
+            </footer>
         </Modal>
+
     </CommonLoadingWrapper>
 </template>
 <script>
     import styled from 'vue-styled-components'
-    import{CommonLoadingWrapper,ImgWrapper,AnimatedHeightWrapper,Modal,SelectMenuItem,LoadingIconEx,Breadcrumb} from '@/components'
+    import{CommonLoadingWrapper,ImgWrapper,AnimatedHeightWrapper,Modal,SelectMenuItem,LoadingIconEx,Breadcrumb,Popover} from '@/components'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet } from '@/network'
-    import {RouteUpdateAwareMixin} from '@/mixins'
+    import {RouteUpdateAwareMixin,ComponentActiveAwareMixin} from '@/mixins'
     import {util_analyseFileType} from '@/util'
     import {WithRefDistinguishMixin} from '../../components'
     import {ContentListItem} from './components'
@@ -244,7 +269,7 @@
     export default {
         name: 'repository_code_main',
         inject: ['repoBasicInfo'],
-        mixins: [RouteUpdateAwareMixin,WithRefDistinguishMixin],
+        mixins: [RouteUpdateAwareMixin,WithRefDistinguishMixin,ComponentActiveAwareMixin],
         data() {
             return {
                 ref: {
@@ -386,8 +411,6 @@
         },
         methods: {
             network_getData() {
-                //this.network_getBranch()
-
                 this.network_getAllBranchesAndTags()
                 this.network_getReleases()
                 this.network_getContributors()
@@ -845,7 +868,7 @@
                 return `${this.owner}/${this.repo}/${this.currentRef}`
             }, */
             routeUpdateHook(to,from) {
-                //初始化selectRefModal数据
+                
                 this.selectRefModal.branches.data = []
                 this.selectRefModal.tags.data = []
 
@@ -886,7 +909,7 @@
         
         watch: {
             currentRef(newOne,oldOne) {
-                if(newOne && !oldOne) {
+                if(newOne && !oldOne && this.componentActive) {
                     this.network_getBranch()
                     this.networl_getLatestCommit()
                     this.network_getCommitsCount()
@@ -896,7 +919,7 @@
                 }
             },
             defaultRef(newOne,oldOne) {
-                if(newOne && !oldOne) {
+                if(newOne && !oldOne && this.componentActive) {
                     if(this.currentRef) this.network_getCompareWithDefaultRef()
                 }
             }
@@ -910,6 +933,7 @@
             LoadingIconEx,
             Breadcrumb,
             ContentListItem,
+            Popover,
             Container: styled.div``,
             FileNavigation: styled.div``,
             FileBrowser: styled.div``,

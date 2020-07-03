@@ -68,21 +68,21 @@
             </div>
             
             <div class="Box-body d-flex flex-items-center flex-auto border-bottom-0 flex-wrap">
-                <div class="lh-default text-gray-dark float-left mr-3">
+                <div class="lh-default text-gray-dark float-left mr-3" @click="() => showModal('contributorsListModal')">
                     <svg height="16" class="octicon octicon-people text-gray" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M5.5 3.5a2 2 0 100 4 2 2 0 000-4zM2 5.5a3.5 3.5 0 115.898 2.549 5.507 5.507 0 013.034 4.084.75.75 0 11-1.482.235 4.001 4.001 0 00-7.9 0 .75.75 0 01-1.482-.236A5.507 5.507 0 013.102 8.05 3.49 3.49 0 012 5.5zM11 4a.75.75 0 100 1.5 1.5 1.5 0 01.666 2.844.75.75 0 00-.416.672v.352a.75.75 0 00.574.73c1.2.289 2.162 1.2 2.522 2.372a.75.75 0 101.434-.44 5.01 5.01 0 00-2.56-3.012A3 3 0 0011 4z"></path></svg>
                     <strong>
                         {{contributionMessage.contributorCount}}
                     </strong>
                     {{contributionMessage.contributorCount > 1 ? 'contributors' : 'contributor'}}
-                    
-                    
                 </div>
                 <span>
                     <router-link v-for="item in contributionMessage.contributors" :key="item.login" class="avatar-link py-1" :to="`/${item.login}`">
                         <img :src="item.avatarUrl" :alt="`@${item.login}`" width="24" height="24" class="avatar mr-2 avatar-user" >
                     </router-link>
 
-                    <button v-if="contributionMessage.contributorCount > contributionMessage.contributors.length" type="button" class="btn-link lh-default mt-1" data-toggle-for="blob_contributors_box">
+                    <button v-if="contributionMessage.contributorCount > contributionMessage.contributors.length" 
+                            @click="() => showModal('contributorsListModal')"
+                            class="btn-link lh-default mt-1">
                         +{{contributionMessage.contributorCount - contributionMessage.contributors.length}}
                     </button>
                 </span>    
@@ -130,6 +130,56 @@
             </div> 
             
         </Modal> -->
+
+        <Modal ref="switchBranchOrTagModal" title="Switch branches/tags" :modalStyle="{height:'80vh'}" @show="network_getModalAvailableRef">
+            <div class="select-menu-text-filter">
+                <div class="p-3">
+                    <input type="text" v-model="selectRefModal.searchQuery" class="form-control" placeholder="Filter branches/tags" autofocus="" autocomplete="off"/>
+                </div>
+                <ModalTab class="SelectMenu-tabs" style="background-color: #f6f8fa;">
+                    <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('branches')" :class="{'active-modal-tab':selectRefModal.tab == 'branches'}">Branches</button>
+                    <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('tags')" :class="{'active-modal-tab':selectRefModal.tab == 'tags'}">Tags</button>
+                </ModalTab>
+            </div>
+            <div v-if="(selectRefModal.tab == 'branches' && selectRefModal.branches.loading) || (selectRefModal.tab == 'tags' && selectRefModal.tags.loading)" class="flex-row-center height-full">
+                <LoadingIconEx></LoadingIconEx>
+            </div>
+            <div v-else style="overflow:auto">
+                <transition-group v-if="selectRefModal.tab == 'branches'" name="fade-group" appear>
+                    <SelectMenuItem :key="repoBasicInfo().default_branch" v-if="repoBasicInfo().default_branch" @click.native="() => routerWithRef(repoBasicInfo().default_branch)" :selected="currentRef == repoBasicInfo().default_branch">
+                        <span class="flex-1">{{repoBasicInfo().default_branch}}</span>    
+                        <span class="Label Label--gray flex-self-start">default</span>
+                    </SelectMenuItem>
+                    <SelectMenuItem @click.native="() => routerWithRef(item)" v-for="item in modalFilteredAvailableBranches" :key="item" :selected="currentRef == item">
+                        <span>{{item}}</span>    
+                    </SelectMenuItem>
+                </transition-group>
+                <transition-group v-if="selectRefModal.tab == 'tags'" name="fade-group" appear>
+                    <SelectMenuItem @click.native="() => routerWithRef(item)" v-for="item in modalFilteredAvailableTags" :key="item" :selected="currentRef == item">
+                        <span>{{item}}</span>    
+                    </SelectMenuItem>
+                </transition-group>
+            </div>
+            <footer class="modal-footer SelectMenu-footer">
+                <router-link :to="`/${owner}/${repo}/branches`">
+                    View all branches
+                </router-link>
+            </footer>
+        </Modal>
+
+        <Modal ref="contributorsListModal" title="Users who have contributed to this file" :modalStyle="{height:'80vh'}" @show="network_getModalContributors">
+            <div v-if="modalContributors.loading" class="flex-row-center height-full">
+                <LoadingIconEx></LoadingIconEx>
+            </div>
+            <div v-else style="overflow:auto">
+                <transition-group name="fade-group" appear>
+                    <router-link @click="closeModal" v-for="item in modalContributors.data" :key="item.login" :to="`/${item.login}`" class="d-block link-gray-dark no-underline Box-row bg-white">
+                        <img class="avatar mr-1 avatar-user" :alt="`@${item.login}`" :src="item.avatarUrl" width="20" height="20">
+                        {{item.login}}
+                    </router-link>
+                </transition-group>
+            </div>
+        </Modal>
     </CommonLoadingWrapper>
 </template>
 
@@ -139,14 +189,14 @@
     import ClipboardJS from 'clipboard'
     import {Content} from './components'
     import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet,commonGet} from '@/network'
-    import {RouteUpdateAwareMixin} from '@/mixins'
+    import {RouteUpdateAwareMixin,ComponentActiveAwareMixin} from '@/mixins'
     import {WithRefDistinguishMixin} from '../../components'
     import * as graphql from '../graphql'
     import * as api from '@/network/api'
     let parse = require('parse-link-header')
     export default {
         name: 'repository_code_file_detail_page',
-        mixins: [RouteUpdateAwareMixin,WithRefDistinguishMixin],
+        mixins: [RouteUpdateAwareMixin,WithRefDistinguishMixin,ComponentActiveAwareMixin],
         inject: ['repoBasicInfo'],
         data() {
             return {
@@ -164,7 +214,13 @@
                     contributorCount: 0,
                     loading: false
                 },
+                modalContributors: {
+                    data: [],
+                    loading: false
+                },
                 selectRefModal: {
+                    tab: "branches",
+                    searchQuery: '',
                     branches: {
                         data: [],
                         loading: false
@@ -196,14 +252,14 @@
                 let regExp = new RegExp(`^\/${this.owner}\/${this.repo}\/blob`)
                 return this.$route.path.replace(regExp,`/${this.owner}/${this.repo}/tree`)
             },
-            filterAvailableBranches() {
-                return this.availableBranches.data.filter(i => {
-                    return i.toLowerCase().indexOf(this.switchBranchOrTagModalSearchQuery.toLowerCase()) != -1 && i != this.repoBasicInfo().default_branch
+            modalFilteredAvailableBranches() {
+                return this.selectRefModal.branches.data.filter(i => {
+                    return (i.toLowerCase().indexOf(this.selectRefModal.searchQuery.toLowerCase()) != -1) && (i != this.repoBasicInfo().default_branch)
                 })
             },
-            filterAvailableTags() {
-                return this.availableTags.data.filter(i => {
-                    return i.toLowerCase().indexOf(this.switchBranchOrTagModalSearchQuery.toLowerCase()) != -1
+            modalFilteredAvailableTags() {
+                return this.selectRefModal.tags.data.filter(i => {
+                    return i.toLowerCase().indexOf(this.selectRefModal.searchQuery.toLowerCase()) != -1
                 })
             },
             findFileRouterLink() {
@@ -223,12 +279,14 @@
                 }
             }
         },
-        async created() {
-            await this.network_getAllBranchesAndTags()
+        created() {
             this.network_getData() 
         },
         methods: {
-            network_getData() {
+            async network_getData() {
+                if(this.allBranchesAndTags.branches.length == 0) {
+                    await this.network_getAllBranchesAndTags()
+                }
                 if(!this.currentRef) return
                 this.network_getLatestCommit()
                 this.network_getContributionMessage()
@@ -336,6 +394,81 @@
                     this.loading = false
                 }
             },
+             network_getModalAvailableRef() {
+                if(this.selectRefModal.tab == 'branches') {
+                    this.network_getModalAvailableBranches()
+                }else{
+                    this.network_getModalAvailableTags()
+                }
+            },
+            async network_getModalAvailableBranches() {
+                if(this.selectRefModal.branches.loading) return
+                if(this.selectRefModal.branches.data.length > 0) return
+                try{
+                    this.selectRefModal.branches.loading = true
+                    let url = api.API_REPOSITORY_AVAILABLE_BRANCHES({
+                        owner: this.owner,
+                        repo: this.repo,
+                        ref: this.currentRef,
+                        sourceController: 'files',
+                        path: this.path,
+                        sourceAction: 'disambiguate',
+                    })
+                    let res = await commonGet(url)
+                    this.selectRefModal.branches.data = this.parseBranchesFromHTML(res.data)
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.selectRefModal.branches.loading = false
+                }
+            },
+            async network_getModalAvailableTags() {
+                if(this.selectRefModal.tags.loading) return
+                if(this.selectRefModal.tags.data.length > 0) return
+                try{
+                    this.selectRefModal.tags.loading = true
+                    let url = api.API_REPOSITORY_AVAILABLE_TAGS({
+                        owner: this.owner,
+                        repo: this.repo,
+                        ref: this.currentRef,
+                        sourceController: 'files',
+                        sourceAction: 'disambiguate',
+                        path: this.path,
+                    })
+                    let res = await commonGet(url)
+                    this.selectRefModal.tags.data = this.parseTagsFromHTML(res.data)
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.selectRefModal.tags.loading = false
+                }
+            },
+            async network_getModalContributors() {
+                if(this.modalContributors.loading) return
+                if(this.modalContributors.data.length > 0) return
+                try{
+                    this.modalContributors.loading = true
+                    let url = api.API_PROXY_CONTRIBUTORS_LIST({
+                        repo: this.repo,
+                        owner: this.owner,
+                        path: this.path,
+                        ref: this.currentRef
+                    })
+
+                    let res = await commonGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_modal_contributors')
+                        }
+                    )
+
+                    this.parseContributors(res.data)
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.modalContributors.loading = false
+                }
+            },
             detemineContentType(HTML) {
                 let plainCodePattern = /^<div id="file"[^>]*?><div class="plain"><pre style="white-space: pre-wrap">((?:.|\r|\n)*)<\/pre><\/div><\/div>$/g
                 let plainCodeExecResult
@@ -364,6 +497,18 @@
                     })
                 }
                 this.contributionMessage.contributors = contributors
+            },
+            parseContributors(HTML) {
+                let pattern = /<a.*?href="\/(.*?)">(?:\r|\n)\s*<img.*?src="(.*?)"[^>]*?>/g
+                let execResult
+                let contributors = []
+                while((execResult = pattern.exec(HTML)) != null) {
+                    contributors.push({
+                        login: execResult[1],
+                        avatarUrl: execResult[2]
+                    })
+                }
+                this.modalContributors.data = contributors
             },
             parseLatestCommitStatus(HTML) {
                 let failurePattern = /octicon-x/g
@@ -484,14 +629,18 @@
             },
             triggerShowLatestCommitMessageBody() {
                 this.contributionMessage.latestCommit.showMessageBody = !this.contributionMessage.latestCommit.showMessageBody
-            }
+            },
+            switchModalTab(payload) {
+                this.selectRefModal.tab = payload
+                this.network_getModalAvailableRef()
+            },
         },
         watch: {
             currentRef(newOne, oldOne) {
-                if(newOne,oldOne) this.network_getData()
+                if(newOne && !oldOne && this.componentAware) this.network_getData()
             },
             repoFullName() {
-                this.network_getAllBranchesAndTags()
+                if(this.componentAware) this.network_getAllBranchesAndTags()
             }
         },
         components: {

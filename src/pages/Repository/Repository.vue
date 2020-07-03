@@ -154,6 +154,7 @@
                             `${path}/branches`,
                             `${path}/branches/all`,
                             `${path}/branches/stale`,
+                            `${path}/find`,
                         ].some(i => {
                             return this.$route.path.indexOf(i) != -1
                         })

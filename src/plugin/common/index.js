@@ -79,7 +79,7 @@ export default {
                         return 
                     }
                     for(let modalRef in this.$refs) {
-                        if(this.$refs[modalRef] && this.$refs[modalRef].show) this.$refs[modalRef].show = false
+                        if(this.$refs[modalRef]) this.$refs[modalRef].show = false
                     }
                 },
                 scrollToBottom() {
@@ -95,6 +95,9 @@ export default {
                     document.title = this.documentTitle
                 }
             },
+            deactivated() {
+                this.closeModal()
+            }
         })
     }
 }

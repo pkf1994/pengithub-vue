@@ -25,7 +25,7 @@
                             </button>
                         </EditOrDelete>
                     </Pane>
-                    <div  class="text-mono f6 flex-auto pt-2 pr-3 text-normal">
+                    <div v-if="fileSize" class="text-mono f6 flex-auto pt-2 pr-3 text-normal">
                         {{fileSize.number}} {{fileSize.unit}}
                     </div>
                 </Header>

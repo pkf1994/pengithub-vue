@@ -1,5 +1,5 @@
 <template>
-    <Container>
+    <Container style="margin-top: -32px">
         <SearchInput class="search-input">
             <input v-model="searchQuery" type="text" name="q" autofocus="" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" id="tree-finder-field" class="form-control input-block js-tree-finder-field" placeholder="Search by name to jump to a file" >
         </SearchInput>

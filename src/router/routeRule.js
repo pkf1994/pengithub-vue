@@ -35,7 +35,6 @@ const OrganizationPackages = () => import('../pages/Organization/Packages/Packag
 const Repository = () => import('../pages/Repository/Repository.vue')
 const RepositoryCode = () => import('../pages/Repository/Code/Code.vue')
 const RepositoryCodeMain = () => import('../pages/Repository/Code/CodeMain/CodeMain.vue')
-const RepositoryCodeFileBrowser = () => import('../pages/Repository/Code/CodeFileBrowser/CodeFileBrowser.vue')
 const RepositoryCodeFileDetail = () => import('../pages/Repository/Code/CodeFileDetail/CodeFileDetail.vue')
 const RepositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
 const RepositoryIssuesBrowser = () => import('../pages/Repository/Issues/IssuesBrowser.vue')

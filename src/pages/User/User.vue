@@ -7,8 +7,8 @@
                     <AvatarAndName>
                         <Avatar class="float-left col-3 pr-3 mb-3">
                             <a href="" class="d-block position-relative">
-                                <ImgWrapper>
-                                    <img :src="data.avatar_url" :alt="`@${data.login}`" width="260" height="260" class="avatar width-full height-full">
+                                <ImgWrapper class="avatar-user avatar">
+                                    <img :src="data.avatar_url" :alt="`@${data.login}`" width="260" height="260" class="avatar-user avatar width-full height-full">
                                 </ImgWrapper>
                             </a>
                         </Avatar>
@@ -54,7 +54,7 @@
                     </button>
                     </UserBasicInfo>
 
-                    <SponsorInfo class="mt-3">
+                  <!--   <SponsorInfo class="mt-3">
                         <Sponsors class="border-top py-3" v-if="extraData.data.sponsorshipsAsMaintainer && extraData.data.sponsorshipsAsMaintainer.totalCount > 0">
                             <h2 class="h4 d-flex flex-items-start mb-1">Sponsors</h2>
                             <router-link class="avatar-group-item mb-0 v-align-top mr-1 mb-1" v-for="item in extraData.data.sponsorshipsAsMaintainer.nodes" :key="item.sponsor.login" :to="`/${item.sponsor.login}`">
@@ -77,7 +77,7 @@
                             </span>
                         </Sponsoring>
                     </SponsorInfo>
-
+ -->
                     <UserProfile>
                         <Bio class="mb-2 user-profile-bio">
                             {{data.bio}}
@@ -137,7 +137,9 @@
 
                     <ComplexTopTab :tabs="tabs" class="ml-n3 mr-n3 border-bottom user-tab bg-white" :tabStyle="{marginRight: `0px!important`}"></ComplexTopTab>
 
-                    <router-view></router-view>
+                    <keep-alive>
+                        <router-view style="min-height: 100vh"></router-view>
+                    </keep-alive>
                 </Main>
         </transition>
 
@@ -350,6 +352,9 @@
                     },
                 ]
             },
+            documentTitle() {
+                return this.$route.params.login
+            }
           
         },
         created() {
