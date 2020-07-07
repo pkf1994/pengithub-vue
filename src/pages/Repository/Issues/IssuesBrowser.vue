@@ -1,19 +1,19 @@
 <template>
     <Container class="flex-grow-1 bg-white flex-column">
 
-        <SubNav class="px-3 pt-3 pb-1 d-flex flex-justify-between">
+        <SubNav class="px-3 pb-1 d-flex flex-justify-between">
             <nav class="flex">
-                <router-link class="subnav-item" :to="`/${owner()}/${repo()}/labels`">
+                <router-link class="subnav-item" :to="`/${owner}/${repo}/labels`">
                     <svg class="octicon octicon-tag" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
                     Labels
                 </router-link>
-                <router-link class="subnav-item" :to="`/${owner()}/${repo()}/milestones`">
+                <router-link class="subnav-item" :to="`/${owner}/${repo}/milestones`">
                     <svg class="octicon octicon-milestone" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2H6V0h2v2zm4 5H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h10l2 2-2 2zM8 4H6v2h2V4zM6 16h2V8H6v8z"></path></svg>
                     Milestones
                 </router-link>
             </nav> 
 
-            <router-link :to="`/${owner()}/${repo()}/${this.routerPathFragment}/new`" class="btn btn-primary">
+            <router-link :to="`/${owner}/${repo}/${this.routerPathFragment}/new`" class="btn btn-primary">
                 New
             </router-link>  
         </SubNav>
@@ -22,11 +22,12 @@
         <IssuesPageTemplate :data="data" 
                         :extraData="extraData"
                         :type="type"
+                        :perPage="perPage"
                         v-model="searchQuery"
                         :loading="loading" 
                         :countByState="processedCountByState"
-                        :baseQuery="`repo:${owner()}/${repo()} is:open is:${type}`"
-                        :resetRouterLink="`/${owner()}/${repo()}/${routerPathFragment}`"
+                        :baseQuery="`repo:${owner}/${repo} is:open is:${type}`"
+                        :resetRouterLink="`/${owner}/${repo}/${routerPathFragment}`"
                         :query="query">
             <template v-slot:searchInput>
                 <ButtonLeftSearchInput v-model="searchQuery" 
@@ -64,11 +65,11 @@
                                 v-model="authorModalSearchQuery"/>
           
             <transition-group name="slide-up" appear>
-                <SelectMenuItem v-for="item in filteredAvailableAuthors" :key="item.login" :selected="query.indexOf(`author:${item.login}`) > -1"  @click.native="() => selectTheAuthorOrNot(item.login)">
+                <SelectMenuItem v-for="item in filteredAvailableAuthors" :key="item.viewer.login" :selected="query.indexOf(`author:${item.viewer.login}`) > -1"  @click.native="() => selectTheAuthorOrNot(item.viewer.login)">
                     <ImgWrapper class="mr-2">
                         <img class="avatar" width="20" height="20" :src="item.avatarUrl">
                     </ImgWrapper>
-                    <strong class='mr-1'>{{item.login}}</strong>
+                    <strong class='mr-1'>{{item.viewer.login}}</strong>
                     <span>{{item.name}}</span>    
                 </SelectMenuItem>
             </transition-group>
@@ -125,11 +126,11 @@
                 </SelectMenuItem>    
             </router-link> 
             <transition-group name="slide-up" appear>
-                <SelectMenuItem :selected="query.indexOf(`assignee:${item.login}`) > -1"  @click.native="() => selectTheAssigneeOrNot(item.login)" v-for="item in filteredAvailableAssignees" :key="item.login">
+                <SelectMenuItem :selected="query.indexOf(`assignee:${item.viewer.login}`) > -1"  @click.native="() => selectTheAssigneeOrNot(item.viewer.login)" v-for="item in filteredAvailableAssignees" :key="item.viewer.login">
                     <ImgWrapper class="mr-2">
                         <img class="avatar" width="20" height="20" :src="item.avatarUrl">
                     </ImgWrapper>
-                    <strong class='mr-1'>{{item.login}}</strong>
+                    <strong class='mr-1'>{{item.viewer.login}}</strong>
                     <span>{{item.name}}</span>    
                 </SelectMenuItem>
             </transition-group>
@@ -199,12 +200,11 @@
     import * as api from '@/network/api'
     import * as graphql from './graphql'
     import {RouteUpdateAwareMixin} from '@/mixins'
+    import Vue from 'vue'
     var parse = require('parse-link-header');
-    import {mapState} from 'vuex'
     export default {
         name: 'repository_issues_browser',
         mixins: [RouteUpdateAwareMixin],
-        inject: ['repo','owner'],
         props: {
             type: {
                 type: String,
@@ -232,7 +232,7 @@
                     data: undefined,
                     loading: false
                 },
-                perPage: 25,
+                perPage: 10,
                 currentPage: 0,
               
                 pageInfo: {
@@ -271,30 +271,36 @@
             }
         },
         computed: {
-            ...mapState({
-                login: state => state.oauth.viewerInfo.login,
-            }),
+            page() {
+                return this.$route.query.page
+            },
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
             filterModalRouterLink() {
                 return [
                     {
                         label: 'Open issues and pull requests',
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=repo:${this.owner()}/${this.repo()} is:open`
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=repo:${this.owner}/${this.repo} is:open`
                     },
                     {
                         label: 'Your issues',
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=repo:${this.owner()}/${this.repo()} is:open is:issue author:${this.login}`
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=repo:${this.owner}/${this.repo} is:open is:issue author:${this.viewer.login}`
                     },
                     {
                         label: 'Your pull requests',
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=repo:${this.owner()}/${this.repo()} is:open is:pr author:${this.login}`
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=repo:${this.owner}/${this.repo} is:open is:pr author:${this.viewer.login}`
                     },
                     {
                         label: 'Everything assigned to you',
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=repo:${this.owner()}/${this.repo()} is:open assignee:${this.login}`
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=repo:${this.owner}/${this.repo} is:open assignee:${this.viewer.login}`
                     },
                     {
                         label: 'Everything mentioned to you',
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=repo:${this.owner()}/${this.repo()} is:open mentions:${this.login}`
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=repo:${this.owner}/${this.repo} is:open mentions:${this.viewer.login}`
                     }
                 ]
             },
@@ -309,44 +315,44 @@
                 return {
                     ...this.countByState.data,
                     currentIssueState,
-                    toOpen: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=${toOpenQuery}`,
-                    toClosed: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=${toClosedQuery}`,
+                    toOpen: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=${toOpenQuery}`,
+                    toClosed: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=${toClosedQuery}`,
                 }
             },
             query() {
-                let query = this.$route.query.q || `repo:${this.owner()}/${this.repo()} is:open is:${this.type}`
+                let query = this.$route.query.q || `repo:${this.owner}/${this.repo} is:open is:${this.type}`
                 this.searchQuery = query.replace(/is:(issue|pr)/g,`is:${this.type}`).replace(/repo:\S*\/\S*/g,'').replace(/\s+/g,' ').trim()
                 return query
             },
             sortModalRouterLink() {
                 return [
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:created-desc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:created-desc',
                         label: 'Newest',
                         queryFragment: 'sort:created-desc'
                     },
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:created-asc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:created-asc',
                         label: 'Oldest',
                         queryFragment: 'sort:created-asc'
                     },
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:comments-desc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:comments-desc',
                         label: 'Most commented',
                         queryFragment: 'sort:comments-desc'
                     },
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:comments-asc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:comments-asc',
                         label: 'Least commented',
                         queryFragment: 'sort:comments-asc'
                     },
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:updated-desc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:updated-desc',
                         label: 'Recently updated',
                         queryFragment: 'sort:updated-desc'
                     },
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:updated-asc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:updated-asc',
                         label: 'Least recently updated',
                         queryFragment: 'sort:updated-asc'
                     },
@@ -355,62 +361,62 @@
             sortModalReactionRouterLink() {
                 return [
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-%2B1-desc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-%2B1-desc',
                         label: '👍',
                         queryFragment: 'sort:reactions-+1-desc'
                     },
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions--1-desc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions--1-desc',
                         label: '👎',
                         queryFragment: 'sort:reactions--1-desc'
                     },
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-smile-desc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-smile-desc',
                         label: '😄',
                         queryFragment: 'sort:reactions-smile-desc'
                     },
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-tada-desc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-tada-desc',
                         label: '🎉',
                         queryFragment: 'sort:reactions-tada-desc'
                     },
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-thinking_face-desc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-thinking_face-desc',
                         label: '😕',
                         queryFragment: 'sort:reactions-thinking_face-desc'
                     },
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-heart-desc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-heart-desc',
                         label: '❤️',
                         queryFragment: 'sort:reactions-heart-desc'
                     },
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-rocket-desc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-rocket-desc',
                         label: '🚀',
                         queryFragment: 'sort:reactions-rocket-desc'
                     },
                     {
-                        routerLink: `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-eyes-desc',
+                        routerLink: `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/sort:\S*/g,'').trim() + ' sort:reactions-eyes-desc',
                         label: '👀',
                         queryFragment: 'sort:reactions-eyes-desc'
                     },
                 ]
             },
             authorModalSearchRouterLink() {
-                return `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/author:\S*/g,'').trim() + ` author:${this.authorModalSearchQuery}`
+                return `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/author:\S*/g,'').trim() + ` author:${this.authorModalSearchQuery}`
             },
             assigneeModalSearchRouterLink() {
-                return `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/assignee:\S*/g,'').trim() + ` assignee:${this.assigneeModalSearchQuery}`
+                return `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/assignee:\S*/g,'').trim() + ` assignee:${this.assigneeModalSearchQuery}`
             },
             assigneeToNobodyRouterLink() {
-                return `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/assignee:\S*/g,'').replace(/no:\S*/g,'').trim() + ` no:assignee`
+                return `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/assignee:\S*/g,'').replace(/no:\S*/g,'').trim() + ` no:assignee`
             },
             unlabeledRouterLink() {
-                return `/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=` + this.query.replace(/assignee:\S*/g,'').replace(/label:\S*/g,'').replace(/no:\S*/g,'').trim() + ` no:label`
+                return `/${this.owner}/${this.repo}/${this.routerPathFragment}?q=` + this.query.replace(/assignee:\S*/g,'').replace(/label:\S*/g,'').replace(/no:\S*/g,'').trim() + ` no:label`
             },
             filteredAvailableAuthors() {
                 return this.availableAuthors.data.filter(i => {
-                    return i.login.toLowerCase().indexOf(this.authorModalSearchQuery.toLowerCase()) != -1 || i.name.toLowerCase().indexOf(this.authorModalSearchQuery.toLowerCase()) != -1
+                    return i.viewer.login.toLowerCase().indexOf(this.authorModalSearchQuery.toLowerCase()) != -1 || i.name.toLowerCase().indexOf(this.authorModalSearchQuery.toLowerCase()) != -1
                 })
             },
             filteredAvailableLabels() {
@@ -420,11 +426,11 @@
             },
             filteredAvailableAssignees() {
                 return this.availableAssignees.data.filter(i => {
-                      return i.login.toLowerCase().indexOf(this.assigneeModalSearchQuery.toLowerCase()) != -1 || i.name.toLowerCase().indexOf(this.assigneeModalSearchQuery.toLowerCase()) != -1
+                      return i.viewer.login.toLowerCase().indexOf(this.assigneeModalSearchQuery.toLowerCase()) != -1 || i.name.toLowerCase().indexOf(this.assigneeModalSearchQuery.toLowerCase()) != -1
                 })
             },
             documentTitle() {
-                return `Issues · ${this.owner()}/${this.repo()}`
+                return `Issues · ${this.owner}/${this.repo}`
             }
         },
         created() {
@@ -445,12 +451,14 @@
                                 type: 'issues',
                                 params: {
                                     q: this.query,
-                                    per_page: this.perPage
+                                    per_page: this.perPage,
+                                    page: this.page
                                 }
                             }
                         )
                     }
                     let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
+                    window.scrollTo(0,0)
                     this.data = res.data.items
                     this.totalCount = res.data.total_count
                     this.pageInfo = parse(res.headers.link)
@@ -467,22 +475,36 @@
             async network_getExtraData(issues) {
                 try{
                     this.extraData.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(`${this.name} ${this.routerPathFragment} get_extra_data`)
-                    this.cancelSources.push(sourceAndCancelToken.source)
-                    let graphql_issueExtraData =  graphql.GRAPHQL_GET_ISSUES(issues)
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_issueExtraData,{cancelToken:sourceAndCancelToken.cancelToken})
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_ISSUES,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data'),
+                            variables: {
+                                ids: issues.map(i => i.node_id)
+                            }
+                        }
+                    )
 
-                    let dataHolder
-                    try{
-                        dataHolder = res.data.data
+                    console.log(res.data)
+
+                     try{
+                         issues.forEach((i,index) => {
+                            Vue.set(
+                                i,
+                                'closed_by',
+                                {
+                                    login: res.data.data.nodes[index].timelineItems.nodes[0].actor.login
+                                }
+                            ),
+                            Vue.set(
+                                i,
+                                'lastCommitState',
+                                res.data.data.nodes[index].commits.nodes[0].commit.status.state
+                            )
+                        })
                     }catch(e) {
                         this.handleGraphqlError(res)
                     }
-                    let issueArr = []
-                    for(let key in dataHolder){
-                        issueArr.push(dataHolder[key])
-                    }
-                    this.extraData.data = this.extraData.data.concat(issueArr)
 
                 }catch(e) {
                     console.log(e)
@@ -532,8 +554,8 @@
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_available_authors')
                     this.availableAuthors.loading = true
                     let url = api.API_REPOSITORY_ISSUES_AVAILABLE_AUTHORS({
-                        repo: this.repo(),
-                        owner: this.owner(),
+                        repo: this.repo,
+                        owner: this.owner,
                         query: this.query
                     })
                     let res = await commonGet(url,{cancelToken})
@@ -550,8 +572,8 @@
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_available_labels')
                     this.availableLabels.loading = true
                     let url = api.API_REPOSITORY_ISSUES_AVAILABLE_LABELS({
-                        repo: this.repo(),
-                        owner: this.owner(),
+                        repo: this.repo,
+                        owner: this.owner,
                         query: this.query
                     })
                     let res = await commonGet(url,{cancelToken})
@@ -568,8 +590,8 @@
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_available_Assgnees')
                     this.availableAssignees.loading = true
                     let url = api.API_REPOSITORY_ISSUES_AVAILABLE_ASSIGNEES({
-                        repo: this.repo(),
-                        owner: this.owner(),
+                        repo: this.repo,
+                        owner: this.owner,
                         query: this.query
                     })
                     let res = await commonGet(url,{cancelToken})
@@ -582,7 +604,7 @@
             },
             search() {
                 this.searchQuery = this.searchQuery.replace(/is:(issue|pr)/g,'is:issue').replace(/repo:\S*\/\S*/g,'').replace(/\s+/g,' ').trim()
-                this.$router.replace(`/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=repo:${this.owner()}/${this.repo()} ${this.searchQuery}`)
+                this.$router.replace(`/${this.owner}/${this.repo}/${this.routerPathFragment}?q=repo:${this.owner}/${this.repo} ${this.searchQuery}`)
             },
             triggerModel(modalRef) {
                 this.$refs[modalRef].show = true
@@ -610,10 +632,10 @@
                 let authorQueryFragment = `author:${authorLogin}`
                 if(this.query.indexOf(authorQueryFragment) > -1) {
                     let q = this.query.replace(authorQueryFragment,'').trim()
-                    this.$router.push(`/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=${q}`)
+                    this.$router.push(`/${this.owner}/${this.repo}/${this.routerPathFragment}?q=${q}`)
                 }else {
                     let q = this.query.replace(/author:\s?\S*/g,'') + ` ${authorQueryFragment}`
-                    this.$router.push(`/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=${q}`)
+                    this.$router.push(`/${this.owner}/${this.repo}/${this.routerPathFragment}?q=${q}`)
                 }
                 this.closeModal()
             },
@@ -621,10 +643,10 @@
                 let assigneeQueryFragment = `assignee:${assigneeLogin}`
                 if(this.query.indexOf(assigneeQueryFragment) > -1) {
                     let q = this.query.replace('no:assignee','').replace(assigneeQueryFragment,'').trim()
-                    this.$router.push(`/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=${q}`)
+                    this.$router.push(`/${this.owner}/${this.repo}/${this.routerPathFragment}?q=${q}`)
                 }else {
                     let q = this.query.replace('no:assignee','') + ` ${assigneeQueryFragment}`
-                    this.$router.push(`/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=${q}`)
+                    this.$router.push(`/${this.owner}/${this.repo}/${this.routerPathFragment}?q=${q}`)
                 }
                 this.closeModal()
             },
@@ -632,10 +654,10 @@
                 let labelQueryFragment = `label:${labelName}`
                 if(this.query.indexOf(labelQueryFragment) > -1) {
                     let q = this.query.replace(labelQueryFragment,'').trim()
-                    this.$router.push(`/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=${q}`)
+                    this.$router.push(`/${this.owner}/${this.repo}/${this.routerPathFragment}?q=${q}`)
                 }else {
                     let q = this.query.replace('no:label','') + ` ${labelQueryFragment}`
-                    this.$router.push(`/${this.owner()}/${this.repo()}/${this.routerPathFragment}?q=${q}`)
+                    this.$router.push(`/${this.owner}/${this.repo}/${this.routerPathFragment}?q=${q}`)
                 }
                 this.closeModal()
             },

@@ -1,5 +1,5 @@
 <template>
-    <CommonLoadingWrapper :loading="loading || totalCount.loading || extraData.loading" class="p-3" :position="loading ? 'center' : 'corner'">
+    <CommonLoadingWrapper :loading="loading || totalCount.loading || extraData.loading" class="px-3" :position="loading ? 'center' : 'corner'">
         
         <nav class="d-flex flex-justify-between">
             <div>
@@ -30,7 +30,7 @@
         
 
         <transition name="fade" appear>
-            <ComplexBubble class="mt-3" v-if="firstLoadedFlag">
+            <ComplexBubble class="mt-3">
                 <template v-slot:title>
                     <Header class="Box-header d-flex flex-justify-between flex-shrink-0">
                          <h3 class="Box-title f5">
@@ -42,9 +42,14 @@
                     </Header>
                 </template>
 
-                <transition-group name="fade-group" appear>
-                    <LabelItem v-for="item in data" :key="item.name" :label="item" @label-deleted="labelDeletedHandler" @label-updated="labelUpdatedHandler"/>
-                </transition-group>
+                <LabelSkeleton v-if="loading && data.length == 0"></LabelSkeleton>
+
+                <div v-else>
+                    <transition-group name="fade-group" appear>
+                        <LabelItem v-for="item in data" :key="item.name" :label="item" @label-deleted="labelDeletedHandler" @label-updated="labelUpdatedHandler"/>
+                    </transition-group>
+                </div>
+               
 
             </ComplexBubble>
         </transition>
@@ -71,7 +76,7 @@
     import {util_color} from '@/util'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
-    import {LabelItem,LabelEditor} from './components'
+    import {LabelItem,LabelEditor,LabelSkeleton} from './components'
     let parse = require("parse-link-header")
     export default {
         name: 'repository_labels_page',
@@ -251,6 +256,7 @@
             Popover,
             LabelItem,
             LabelEditor,
+            LabelSkeleton,
             Header: styled.div``,
             EmptyNotice: styled.div``,
             CreateLabelPane: styled.div``,

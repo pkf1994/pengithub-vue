@@ -52,47 +52,66 @@
         </AnimatedHeightWrapper>
       
         <FileBrowser class="Box my-3">
-            <div class="Box-header Box-header--blue position-relative d-flex flex-items-center flex-wrap">
-                <router-link v-if="latestCommit.data.author && latestCommit.data.author.avatar_url" class="avatar avatar-user d-block" :to="`/${latestCommit.data.author.login}`">
-                    <ImgWrapper>
-                        <img width="24" height="24" :src="latestCommit.data.author.avatar_url" :alt="`@${latestCommit.data.author.login}`">
-                    </ImgWrapper>
-                </router-link>
+            <div class="Box-header Box-header--blue position-relative">
+                <Skeleton v-if="!latestCommit.data.node_id || latestCommit.loading" class="d-flex flex-items-center">
+                    <SkeletonCircle :diameter="24" color="#EEEEEE"></SkeletonCircle>
+                    <SkeletonRectangle :height="14" color="#EEEEEE" class="flex-grow-1 ml-2 mr-6"></SkeletonRectangle>
+                </Skeleton> 
 
-                <div class="flex-1 d-flex flex-items-center ml-2 min-width-0">
-                    <div class="css-truncate css-truncate-overflow text-gray" v-if="latestCommit.data.node_id">
-                        <router-link v-if="latestCommit.data.author && latestCommit.data.author.login" class="user-mention" :to="`/${latestCommit.data.author.login}`">
-                            {{latestCommit.data.author.login}}
-                        </router-link>
-                        committed
-                        <span v-if="latestCommit.data.commit && latestCommit.data.commit.committer && latestCommit.data.commit.committer.date">
-                            {{latestCommit.data.commit.committer.date | getDateDiff}}
-                        </span>
+                <div v-else class="d-flex flex-items-center flex-wrap">
+                    <div style="height: 24px" class="AvatarStack flex-self-start AvatarStack--two" v-if="latestCommit.data.author && latestCommit.data.author.login != latestCommit.data.committer.login">
+                        <div class="AvatarStack-body">
+                            <router-link style="height: 24px;width: 24px" v-if="latestCommit.data.author && latestCommit.data.author.avatar_url" class="avatar avatar-user" :to="`/${latestCommit.data.author.login}`">
+                                <img width="24" height="24" :src="latestCommit.data.author.avatar_url" :alt="`@${latestCommit.data.author.login}`">
+                            </router-link>
+                            <router-link style="height: 24px;width: 24px" v-if="latestCommit.data.committer && latestCommit.data.committer.avatar_url" class="avatar avatar-user" :to="`/${latestCommit.data.author.login}`">
+                                <img width="24" height="24" :src="latestCommit.data.committer.avatar_url" :alt="`@${latestCommit.data.committer.login}`">
+                            </router-link>
+                        </div>
                     </div>
-                    <button v-if="latestCommit.data.commit && latestCommit.data.commit.message" class="ellipsis-expander js-details-target ml-2 d-inline-block " @click="triggerShowLatestCommitMessage">
-                        …
-                    </button>
-
-                    <svg v-if="latestCommit.status && latestCommit.status.state == 'SUCCESS'" class="octicon text-green octicon-check v-align-middle flex-shrink-0 ml-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
-                    <svg v-else-if="latestCommit.status && latestCommit.status.state == 'FAILURE'" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true" class="octicon octicon-x v-align-middle text-red flex-shrink-0 ml-2"><path data-v-74bab622="" fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
-                </div>
-
-                <router-link v-if="commitCount.data !== undefined" :to="`/${owner}/${repo}/commits/${currentRef}`" class="link-gray-dark no-underline d-block ml-3">
-                    <svg height="16" class="octicon octicon-history text-gray" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path></svg>
-                    <span>
-                        <strong>
-                            {{commitCount.data | thousands}}
-                        </strong>
-                        <!-- {{commitCount.data > 1 ? 'commits' : 'commit'}} -->
-                    </span>
-                </router-link>
-
-                <!-- commit message -->
-                <div class="pl-5 mt-2 width-full" v-if="latestCommit.data.commit && latestCommit.data.commit.message && latestCommit.showMessage">
-                    <router-link class="link-gray-dark" :to="`/${owner}/${repo}/commits/${latestCommit.data.sha}`">
-                        {{latestCommit.data.commit.message}}
+                    
+                    <router-link v-else-if="latestCommit.data.author && latestCommit.data.author.avatar_url" class="avatar avatar-user" :to="`/${latestCommit.data.author.login}`">
+                        <ImgWrapper>
+                            <img width="24" height="24" :src="latestCommit.data.author.avatar_url" :alt="`@${latestCommit.data.author.login}`">
+                        </ImgWrapper>
                     </router-link>
+
+                    <div class="flex-1 d-flex flex-items-center ml-2 min-width-0">
+                        <div class="css-truncate css-truncate-overflow text-gray" v-if="latestCommit.data.node_id">
+                            <router-link v-if="latestCommit.data.author && latestCommit.data.author.login" class="user-mention" :to="`/${latestCommit.data.author.login}`">
+                                {{latestCommit.data.author.login}}
+                            </router-link>
+                            committed
+                            <span v-if="latestCommit.data.commit && latestCommit.data.commit.committer && latestCommit.data.commit.committer.date">
+                                {{latestCommit.data.commit.committer.date | getDateDiff}}
+                            </span>
+                        </div>
+                        <button v-if="latestCommit.data.commit && latestCommit.data.commit.message" class="ellipsis-expander js-details-target ml-2 d-inline-block " @click="triggerShowLatestCommitMessage">
+                            …
+                        </button>
+
+                        <svg v-if="latestCommit.status && latestCommit.status.state == 'SUCCESS'" class="octicon text-green octicon-check v-align-middle flex-shrink-0 ml-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
+                        <svg v-else-if="latestCommit.status && latestCommit.status.state == 'FAILURE'" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true" class="octicon octicon-x v-align-middle text-red flex-shrink-0 ml-2"><path data-v-74bab622="" fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
+                    </div>
+
+                    <router-link v-if="commitCount.data !== undefined" :to="`/${owner}/${repo}/commits/${currentRef}`" class="link-gray-dark no-underline d-block ml-3">
+                        <svg height="16" class="octicon octicon-history text-gray" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path></svg>
+                        <span>
+                            <strong>
+                                {{commitCount.data | thousands}}
+                            </strong>
+                            <!-- {{commitCount.data > 1 ? 'commits' : 'commit'}} -->
+                        </span>
+                    </router-link>
+
+                    <!-- commit message -->
+                    <div class="pl-5 mt-2 width-full" v-if="latestCommit.data.commit && latestCommit.data.commit.message && latestCommit.showMessage">
+                        <router-link class="link-gray-dark" :to="`/${owner}/${repo}/commits/${latestCommit.data.sha}`">
+                            {{latestCommit.data.commit.message}}
+                        </router-link>
+                    </div>
                 </div>
+                
             </div>
 
             <div class="position-relative" :style="{minHeight: contents.show ? '120px':'auto'}" style="background:#fafbfc">
@@ -117,7 +136,7 @@
         </FileBrowser>
        
 
-        <Readme v-if="readme.data && !this.path" v-show="readme.show" class="read-me Box">
+        <Readme v-if="!(!readme.data && !readme.loading)" class="read-me Box">
             <div class="Box-header d-flex flex-items-center flex-justify-between bg-white border-bottom-0">
                 <h2 class="Box-title pr-3">
                     README.md
@@ -125,7 +144,14 @@
             </div>
 
             <div class="Box-body px-5 pb-5">
-                <article class="markdown-body entry-content container-lg" v-html="readme.data">
+                <Skeleton v-if="!readme.data && readme.loading">
+                    <SkeletonRectangle :height="28" style="width: 30%"></SkeletonRectangle>
+                    <SkeletonRectangle :height="18" style="width: 100%" class="mt-3"></SkeletonRectangle>
+                    <SkeletonRectangle :height="18" style="width: 100%" class="mt-3"></SkeletonRectangle>
+                    <SkeletonRectangle :height="18" style="width: 100%" class="mt-3"></SkeletonRectangle>
+                    <SkeletonRectangle :height="18" style="width: 80%" class="mt-3"></SkeletonRectangle>
+                </Skeleton>
+                <article class="markdown-body entry-content container-lg" v-else v-html="readme.data">
 
                 </article>
             </div>
@@ -175,7 +201,9 @@
             <ul class="list-style-none d-flex flex-wrap mb-n2">
                 <li class="mb-2 mr-2" v-for="item in contributors.data" :key="item.node_id">
                     <router-link :to="`/${item.login}`">
-                        <img class="d-block avatar-user" :src="item.avatar_url" width="32" height="32" :alt="`@${item.login}`">
+                        <ImgWrapper class="d-block avatar-user">
+                            <img class="d-block avatar-user" :src="item.avatar_url" width="32" height="32" :alt="`@${item.login}`">
+                        </ImgWrapper>
                     </router-link>
                 </li>
             </ul>   
@@ -256,7 +284,7 @@
 </template>
 <script>
     import styled from 'vue-styled-components'
-    import{CommonLoadingWrapper,ImgWrapper,AnimatedHeightWrapper,Modal,SelectMenuItem,LoadingIconEx,Breadcrumb,Popover} from '@/components'
+    import{CommonLoadingWrapper,ImgWrapper,AnimatedHeightWrapper,Modal,SelectMenuItem,LoadingIconEx,Breadcrumb,Popover,SkeletonCircle,SkeletonRectangle} from '@/components'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet } from '@/network'
@@ -934,6 +962,8 @@
             Breadcrumb,
             ContentListItem,
             Popover,
+            SkeletonCircle,
+            SkeletonRectangle,
             Container: styled.div``,
             FileNavigation: styled.div``,
             FileBrowser: styled.div``,
@@ -945,6 +975,7 @@
             ModalTab: styled.div``,
             FilePath: styled.div``,
             CompareWithDefaultRef: styled.div``,
+            Skeleton: styled.div``,
         }
     }
 </script>

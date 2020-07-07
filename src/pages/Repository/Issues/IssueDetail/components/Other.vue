@@ -74,6 +74,10 @@
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/avatars/index.scss';
+img{
+    border-radius: 2em!important;
+}
 .badge {
     position: relative;
     z-index: 1;

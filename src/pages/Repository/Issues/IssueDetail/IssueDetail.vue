@@ -1,5 +1,5 @@
 <template>
-    <CommonLoadingWrapper :loading="loading || timeline.loading || timeline.extraData.loading" :position="loading ? 'center' : 'corner'" class="px-3 pt-3 bg-white flex-grow-1">
+    <CommonLoadingWrapper :loading="loading || timeline.loading || timeline.extraData.loading" :position="loading ? 'center' : 'corner'" class="px-3 bg-white flex-grow-1">
         <AnimatedHeightWrapper>
             <Header v-if="data.id">
                 <HeaderActions class="d-flex flex-justify-between flex-items-center mb-3">
@@ -16,7 +16,7 @@
                 </HeaderTitle>
 
                 <HeaderMeta class="d-flex mt-2 mb-3 flex-items-center header-meta">
-                    <State class="State State--green mr-2 d-inline-flex flex-items-center flex-self-start" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize;">
+                    <State class="State State--green mr-2 d-inline-flex flex-items-center flex-self-start" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize;border-radius: 2em">
                         <IssueIcon color="#fff" :issue="data"></IssueIcon>
                         &nbsp;{{data.state}}
                     </State>   
@@ -24,7 +24,8 @@
                     <MetaContent class="meta-content">
                         <router-link to="/" class="text-bold link-gray">{{data.user && data.user.login}}</router-link>
                         {{data.state}} this issue
-                        <span class="no-wrap">on {{createdAt}}</span>&nbsp;· {{data.comments}} {{data.comments > 1 ? 'comments' : 'comment'}} 
+                        <span class="no-wrap">on {{data.created_at | dateFormat('dd zzz yyyy')}}</span>
+                        · {{data.comments}} {{data.comments > 1 ? 'comments' : 'comment'}} 
                     </MetaContent>
                 </HeaderMeta>
             </Header>
@@ -149,8 +150,8 @@
                 <InfoBottomItemTitle class="info-bottom-item-title">
                     Labels
                 </InfoBottomItemTitle>
-                <router-link class="d-block mt-1" to="/" v-for="item in data.labels.slice(0,21)" :key="item.id">
-                    <Label class="width-full" :name="item.name" :color="`#${item.color}`"></Label>      
+                <router-link class="mt-1 mr-1" to="/" v-for="item in data.labels.slice(0,21)" :key="item.id">
+                    <Label :name="item.name" :color="`#${item.color}`"></Label>      
                 </router-link> 
                 <span v-if="!(data.labels && data.labels.length > 0)">None yet</span>    
                 <span v-if="data.labels.length > 21">and others</span> 
@@ -198,8 +199,8 @@
                 </InfoBottomItemTitle>
                 <div style="margin-bottom:10px" class="d-flex flex-wrap">
                     <router-link to="/" v-for="item in extraData.data.participants ? extraData.data.participants.nodes : []" :key="item.id" class="mt-1 ml-1">
-                        <ImgWrapper>
-                            <img class="avatar" :src="item.avatarUrl" width="26" height="26" :alt="`@${item.login}`"> 
+                        <ImgWrapper class="avatar" style="border-radius: 2em" >
+                            <img class="avatar" style="border-radius: 2em" :src="item.avatarUrl" width="26" height="26" :alt="`@${item.login}`"> 
                         </ImgWrapper>
                     </router-link> 
                 </div>
@@ -243,7 +244,7 @@
                         </h1>
                         <div class="meta text-gray-light css-truncate css-truncate-target d-block width-fit f6">
                             <router-link to="/" class="text-bold link-gray">{{data.user && data.user.login}}</router-link>  opened this issue
-                            <span class="no-wrap">{{createdAt}}</span>
+                            <span class="no-wrap">{{data.created_at | dateFormat('dd zzz yyyy')}}</span>
                             · {{data.comments}} {{data.comments > 1 ? 'comments' : 'comment'}}
                         </div>
                     </div> 
@@ -1355,6 +1356,7 @@
             TinyLoadingIcon,
             SelectMenuItem,
             HyperlinkWrapper,
+            Label,
             LoadMore,
             Container: styled.div``,
             Header: styled.div``,
@@ -1364,7 +1366,6 @@
             State: styled.div``,
             MetaContent: styled.div``,
             Info: styled.div``,
-            Labels: styled.div``,
             LoadingTimeline: styled.div``,
             InfoBottom: styled.div``,
             InfoBottomItem: styled.div``,

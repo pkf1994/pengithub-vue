@@ -1,5 +1,5 @@
 <template>
-    <Container class="flex-column flex-items-stretch py-4 px-3">
+    <CommonLoadingWrapper class="flex-column flex-items-stretch pb-4 px-3" :loading="loading">
         <Head class="head">
             <h2>Community profile</h2>  
         </Head>
@@ -17,10 +17,10 @@
             <span class="f4 text-bold">Checklist</span>
         </Title>
 
-        <ComplexBubble :loading="loading" :disabledAnimatedWrapper="false">
+        <div class="Box">
             <ScoreBar class="position-relative border-bottom">
-                <Background class="progress-bar round-1"></Background>
-                <WhiteCover class="white-cover" :style="{width: parseInt(100 -data.health_percentage) + '%'}"></WhiteCover>
+                <Background  class="progress-bar round-1"></Background>
+                <WhiteCover  class="white-cover" :style="{width: data.health_percentage ? parseInt(100 - data.health_percentage) + '%' : '100%'}"></WhiteCover>
             </ScoreBar>
             <CheckItem :checked="data.description && data.description.trim() !== ''">
                     Description
@@ -75,15 +75,15 @@
                     Pull request template
                 </span>
             </CheckItem>
-        </ComplexBubble>
+        </div>
 
         <p class="mt-1 mr-3 text-small text-right">What is <a href="https://help.github.com/articles/viewing-your-community-profile">the community profile</a>?</p>
-    </Container>
+    </CommonLoadingWrapper>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexBubble,HyperlinkWrapper} from '@/components'
+    import {ComplexBubble,HyperlinkWrapper,CommonLoadingWrapper} from '@/components'
     import CheckItem from './CheckItem'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as api from '@/network/api'
@@ -135,6 +135,7 @@
             ComplexBubble,
             CheckItem,
             HyperlinkWrapper,
+            CommonLoadingWrapper,
             Container: styled.div``,
             Head: styled.div``,
             SubHead: styled.div``,
@@ -147,6 +148,7 @@
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/box/index.scss';
 .head {
     display: flex;
     padding-bottom: 8px;
@@ -162,8 +164,11 @@
     background: linear-gradient(90deg,#ffd33d,#c5e300,#28a745);
     background-color: initial;
     height: 10px;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
 }
 .white-cover{
+    transition: all .4s ease;
     background: #f6f8fa;
     position: absolute;
     right: 0;

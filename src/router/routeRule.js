@@ -384,7 +384,7 @@ export default [
                 component: RepositoryProjects,
             },
             {
-                path: 'pulse',
+                path: 'pulse/:period?',
                 name: 'repositoryPulse',
                 component: RepositoryPulse,
             },

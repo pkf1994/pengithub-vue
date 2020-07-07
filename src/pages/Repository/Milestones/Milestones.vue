@@ -1,5 +1,5 @@
 <template>
-    <CommonLoadingWrapper :loading="loading || extraData.loading" class="p-3" :position="loading ? 'center' : 'corner'">
+    <CommonLoadingWrapper :loading="loading || extraData.loading" class="px-3" :position="loading ? 'center' : 'corner'">
         
         <nav class="d-flex">
             <router-link class="subnav-item" :to="`/${owner()}/${repo()}/labels`">
@@ -13,7 +13,7 @@
         </nav> 
 
         <transition name="fade" appear>
-            <ComplexBubble class="mt-3" v-if="firstLoadedFlag">
+            <ComplexBubble class="mt-3">
                 <template v-slot:title>
                     <Header class="Box-header d-flex flex-justify-between flex-shrink-0">
                         <StateStatistic>
@@ -35,9 +35,21 @@
                     </Header>
                 </template>
 
-                <transition-group name="fade-group" appear>
+                <MilestonesSkeleton v-if="data.length == 0 && loading"></MilestonesSkeleton>
+
+                <transition-group v-else name="fade-group" appear>
                     <MilestoneListItem v-for="item in data" :key="item.id" :milestone="item" class="Box-row"></MilestoneListItem>
                 </transition-group>
+
+                <EmptyNotice v-if="emptyFlag" class="empty-notice d-flex flex-items-center">
+                    <div class="blankslate"> 
+                        <svg height="40" class="octicon octicon-milestone blankslate-icon" viewBox="0 0 14 16" version="1.1" width="35" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M8 2H6V0h2v2zm4 5H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h10l2 2-2 2zM8 4H6v2h2V4zM6 16h2V8H6v8z"></path>
+                        </svg>
+                        <h3>We couldn’t find anything!</h3>
+                        <p>There aren’t any milestones that match. Give it another shot above.</p>
+                    </div>
+                </EmptyNotice>
 
             </ComplexBubble>
         </transition>
@@ -52,15 +64,7 @@
             </router-link> 
         </Modal>
 
-        <EmptyNotice v-if="emptyFlag" class="empty-notice d-flex flex-items-center">
-            <div class="blankslate"> 
-                <svg height="40" class="octicon octicon-milestone blankslate-icon" viewBox="0 0 14 16" version="1.1" width="35" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M8 2H6V0h2v2zm4 5H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h10l2 2-2 2zM8 4H6v2h2V4zM6 16h2V8H6v8z"></path>
-                </svg>
-                <h3>We couldn’t find anything!</h3>
-                <p>There aren’t any milestones that match. Give it another shot above.</p>
-            </div>
-        </EmptyNotice>
+       
     </CommonLoadingWrapper>
 </template>
 
@@ -71,7 +75,7 @@
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet} from '@/network'
     import * as api from '@/network/api'
     import {util_queryParse} from '@/util'
-    import MilestoneListItem from './MilestoneListItem'
+    import {MilestoneListItem,MilestonesSkeleton} from './components'
     let parse = require("parse-link-header")
     export default {
         name: 'repository_milestones_page',
@@ -283,6 +287,7 @@
             SelectMenuItem,
             SimplePaginationRest,
             MilestoneListItem,
+            MilestonesSkeleton,
             Header: styled.div``,
             LabelItem: styled.div``,
             Description: styled.div``,
@@ -314,14 +319,6 @@
     color: #fff;
     background-color: #0366d6;
     border-color: #0366d6;
-}
-.empty-notice{
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    pointer-events: none;
 }
 .btn-link {
     position: relative;

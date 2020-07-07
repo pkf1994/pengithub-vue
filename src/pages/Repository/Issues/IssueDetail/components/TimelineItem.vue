@@ -185,18 +185,24 @@
                 added a commit to {{repoFullNameOfCommit}} that referenced this issue
             </template>
             <template v-slot:additional>
-                <SourceCommit class="mt-3 d-flex">
-                    <ImgWrapper>
-                        <img class="mr-2" :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" height="20" width="20">
-                    </ImgWrapper>
+                <SourceCommit class="mt-3">
+                    <div class="d-flex">
+                        <ImgWrapper>
+                            <img class="mr-2" :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" height="20" width="20">
+                        </ImgWrapper>
 
-                    <code class="d-inline-block mr-1 flex-grow-1 mr-3">
-                        <router-link to="/" class="link-gray" v-html="referenceHighlightMessageOfCommit"></router-link>
-                    </code>
+                        <code class="d-inline-block mr-1 flex-grow-1 mr-3">
+                            <router-link to="/" class="link-gray">{{commitMessageTitle}}</router-link>
+                            <button @click="triggerShowCommitMessageBody" v-if="commitMessageBody" type="button" class="ellipsis-expander js-details-target" aria-expanded="true">…</button>
+                        </code>
 
-                    <code class="flex-shrink-0">
-                        <router-link to="/" class="link-gray">{{commit.sha && commit.sha.substring(0,7)}}</router-link>
-                    </code>
+                        <code class="flex-shrink-0">
+                            <router-link to="/" class="link-gray">{{commit.sha && commit.sha.substring(0,7)}}</router-link>
+                        </code>
+                    </div>
+                    <div class="mt-2" v-if="showCommitMessageBody && commitMessageBody">
+                        <pre class="text-gray" style="white-space: pre-wrap;">{{commitMessageBody}}</pre>
+                    </div>
                 </SourceCommit>
             </template>
         </Other>
@@ -376,7 +382,8 @@
                 commit: {}, // referenced closed
                 transferredFrom: '', //transferred
                 blockedUser: {}, //user blocked
-                pullRequest: {} //cross-referenced
+                pullRequest: {}, //cross-referenced
+                showCommitMessageBody: false
             }
         },
         computed: {
@@ -400,6 +407,14 @@
                 }
                 message = message.replace(`#${this.issueNumber}`,`<strong>#${this.issueNumber}</strong>`)
                 return message
+            },
+            commitMessageTitle() {
+                if(!this.commit.commit) return ''
+                return this.commit.commit.message.split('\n\n')[0]
+            },
+            commitMessageBody() {
+                if(!this.commit.commit) return ''
+                return this.commit.commit.message.split('\n\n')[1]
             },
             pullRequestTaskProgress() {
                 if(!this.pullRequest.bodyHTML) return undefined
@@ -571,6 +586,9 @@
                     this.handleGraphqlError(res)
                 }
                 this.loading = false
+            },
+            triggerShowCommitMessageBody() {
+                this.showCommitMessageBody = !this.showCommitMessageBody
             }
         },
         components: {
@@ -593,6 +611,9 @@
 
 <style scoped lang='scss'>
 @import 'node_modules/@primer/css/labels/index.scss';
+img{
+    border-radius: 2em;
+}
 .issue-state{
     text-transform: Capitalize
 }

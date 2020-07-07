@@ -1,6 +1,6 @@
 <template>
     <Container>
-        <PageTopTab :tabs="tabs"></PageTopTab>
+        <PageTopTab :tabs="tabs" style="margin-top: -32px;"></PageTopTab>
         <keep-alive>
             <router-view></router-view>
         </keep-alive>

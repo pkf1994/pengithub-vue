@@ -1,6 +1,6 @@
 <template>
     <CommonLoadingWrapper :loading="allBranchesAndTags.loading || loading || contributionMessage.loading || contributionMessage.latestCommit.loading" class="px-3">
-        <FileNavigation class="pb-3 d-flex flex-items-start flex-justify-between">
+        <FileNavigation class="pb-3 d-flex flex-items-start flex-justify-between position-relative">
             <button class="btn css-truncate text-gray" :disabled="!currentRef"  @click="() => showModal('switchBranchOrTagModal')">
                 <svg v-if="refType == 'branch'" height="16" class="octicon-git-branch text-gray v-align-text-bottom" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122V6A2.5 2.5 0 0110 8.5H6a1 1 0 00-1 1v1.128a2.251 2.251 0 11-1.5 0V5.372a2.25 2.25 0 111.5 0v1.836A2.492 2.492 0 016 7h4a1 1 0 001-1v-.628A2.25 2.25 0 019.5 3.25zM4.25 12a.75.75 0 100 1.5.75.75 0 000-1.5zM3.5 3.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0z"></path></svg>
                 <svg v-else-if="refType == 'tag'" height="16" class="octicon-tag text-gray v-align-text-bottom" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M2.5 7.775V2.75a.25.25 0 01.25-.25h5.025a.25.25 0 01.177.073l6.25 6.25a.25.25 0 010 .354l-5.025 5.025a.25.25 0 01-.354 0l-6.25-6.25a.25.25 0 01-.073-.177zm-1.5 0V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 010 2.474l-5.026 5.026a1.75 1.75 0 01-2.474 0l-6.25-6.25A1.75 1.75 0 011 7.775zM6 5a1 1 0 100 2 1 1 0 000-2z"></path></svg>
@@ -8,9 +8,20 @@
                 <span class="dropdown-caret"></span>
             </button>
 
-            <button class="btn d-inline-block">
+            <button class="btn d-inline-block" @click="() => showModal('popover')">
                 <svg height="16" class="octicon-kebab-horizontal v-align-text-bottom" aria-label="More options" viewBox="0 0 16 16" version="1.1" width="16" role="img"><path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
             </button>
+            <Popover ref="popover" :popoverStyle="{right: 0, top: '100%', width: '160px',paddingTop: '8px', paddingBottom: '8px'}">
+                    <div>
+                        <router-link class="dropdown-item" :to="`/${owner}/${repo}/find/${currentRef}`">
+                            Go to file
+                        </router-link>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                         <router-link class="dropdown-item" :to="`/${owner}/${repo}/find/${currentRef}`">
+                            Create new file
+                        </router-link>
+            </Popover>
         </FileNavigation>
 
         <AnimatedHeightWrapper>
@@ -22,48 +33,61 @@
 
         <ContributionMessage class="Box d-flex flex-column flex-shrink-0 mb-3">
             <div class="Box-header Box-header--blue">
-                <div class="d-flex flex-items-center">
-                    <span class="flex-shrink-0">
-                        <router-link v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" 
-                                    :to="`/${contributionMessage.latestCommit.data.author.login}`">
-                            <ImgWrapper class="avatar avatar-user">
-                                <img    class="avatar avatar-user"
-                                        :src="contributionMessage.latestCommit.data.author.avatar_url" 
-                                        :alt="`@${contributionMessage.latestCommit.data.author.login}`"
-                                        height="24"
-                                        width="24">
+
+                <Skeleton v-if="!contributionMessage.latestCommit.data.node_id || contributionMessage.latestCommit.loading"  class="d-flex flex-items-center">
+                    <SkeletonCircle :diameter="24" color="#EEEEEE"></SkeletonCircle>
+                    <SkeletonRectangle :height="14" color="#EEEEEE" class="flex-grow-1 ml-2 mr-6"></SkeletonRectangle>
+                </Skeleton>
+
+                <div v-else>
+                    <div class="d-flex flex-items-center">
+
+                        <div style="height: 24px" class="AvatarStack flex-self-start AvatarStack--two" v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.login != contributionMessage.latestCommit.data.committer.login">
+                            <div class="AvatarStack-body">
+                                <router-link style="height: 24px;width: 24px" v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" class="avatar avatar-user" :to="`/${contributionMessage.latestCommit.data.author.login}`">
+                                    <img width="24" height="24" :src="contributionMessage.latestCommit.data.author.avatar_url" :alt="`@${contributionMessage.latestCommit.data.author.login}`">
+                                </router-link>
+                                <router-link style="height: 24px;width: 24px" v-if="contributionMessage.latestCommit.data.committer && contributionMessage.latestCommit.data.committer.avatar_url" class="avatar avatar-user" :to="`/${contributionMessage.latestCommit.data.author.login}`">
+                                    <img width="24" height="24" :src="contributionMessage.latestCommit.data.committer.avatar_url" :alt="`@${contributionMessage.latestCommit.data.committer.login}`">
+                                </router-link>
+                            </div>
+                        </div>
+                        
+                        <router-link v-else-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" class="avatar avatar-user" :to="`/${contributionMessage.latestCommit.data.author.login}`">
+                            <ImgWrapper>
+                                <img width="24" height="24" :src="contributionMessage.latestCommit.data.author.avatar_url" :alt="`@${contributionMessage.latestCommit.data.author.login}`">
                             </ImgWrapper>
                         </router-link>
-                    </span>
 
-                    <div class="flex-1 d-flex flex-items-center ml-3 min-width-0">
-                        <div class="css-truncate css-truncate-overflow">
-                            <router-link class="text-bold link-gray-dark" v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" :to="`/${contributionMessage.latestCommit.data.author.login}`">{{contributionMessage.latestCommit.data.author.login}}</router-link>
-                            <span>
-                                <router-link class="link-gray" :to="`/${owner}/${repo}/commit/${contributionMessage.latestCommit.data.sha}`">{{latestCommitMessageHeadline}}</router-link>
-                            </span>
+                        <div class="flex-1 d-flex flex-items-center ml-3 min-width-0">
+                            <div class="css-truncate css-truncate-overflow">
+                                <router-link class="text-bold link-gray-dark" v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" :to="`/${contributionMessage.latestCommit.data.author.login}`">{{contributionMessage.latestCommit.data.author.login}}</router-link>
+                                <span>
+                                    <router-link class="link-gray" :to="`/${owner}/${repo}/commit/${contributionMessage.latestCommit.data.sha}`">{{latestCommitMessageHeadline}}</router-link>
+                                </span>
+                            </div>
                         </div>
+
+                        <span v-if="latestCommitMessageBody" @click="triggerShowLatestCommitMessageBody" class="hidden-text-expander ml-1 flex-shrink-0">
+                            <button type="button" class="ellipsis-expander js-details-target" aria-expanded="true">…</button>
+                        </span>  
+
+                        <span v-if="contributionMessage.latestCommitStatus !== undefined" class="ml-2">
+                            <svg v-if="contributionMessage.latestCommitStatus == 'SUCCESS'" class="octicon octicon-check text-green" viewBox="0 0 16 16" version="1.1" width="16" height="16" role="img"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
+                            <svg v-else-if="contributionMessage.latestCommitStatus == 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
+                        </span>     
+
+                        <router-link :to="`/${owner}/${repo}/commits/${currentRef}/${path}`" class="d-block ml-3 d-flex flex-shrink-0 flex-items-center flex-justify-end text-gray no-wrap">
+                            <svg height="16" class="octicon octicon-history text-gray" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path></svg>
+                        </router-link>
                     </div>
-
-                    <span v-if="latestCommitMessageBody" @click="triggerShowLatestCommitMessageBody" class="hidden-text-expander ml-1 flex-shrink-0">
-                        <button type="button" class="ellipsis-expander js-details-target" aria-expanded="true">…</button>
-                    </span>  
-
-                    <span v-if="contributionMessage.latestCommitStatus !== undefined" class="ml-2">
-                        <svg v-if="contributionMessage.latestCommitStatus == 'SUCCESS'" class="octicon octicon-check text-green" viewBox="0 0 16 16" version="1.1" width="16" height="16" role="img"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
-                        <svg v-else-if="contributionMessage.latestCommitStatus == 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
-                    </span>     
-
-                    <router-link :to="`/${owner}/${repo}/commits/${currentRef}/${path}`" class="d-block ml-3 d-flex flex-shrink-0 flex-items-center flex-justify-end text-gray no-wrap">
-                        <svg height="16" class="octicon octicon-history text-gray" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path></svg>
-                    </router-link>
-                </div>
-                
-                <div class="pl-5 mt-2 width-full" v-if="latestCommitMessageBody && contributionMessage.latestCommit.showMessageBody">
-                    <router-link class="link-gray-dark" :to="`/${owner}/${repo}/commits/${contributionMessage.latestCommit.data.sha}`">
-                        <pre>{{latestCommitMessageBody}}</pre>
-                    </router-link>
-                </div>  
+                    
+                    <div class="pl-5 mt-2 width-full" v-if="latestCommitMessageBody && contributionMessage.latestCommit.showMessageBody">
+                        <router-link class="link-gray-dark" :to="`/${owner}/${repo}/commits/${contributionMessage.latestCommit.data.sha}`">
+                            <pre>{{latestCommitMessageBody}}</pre>
+                        </router-link>
+                    </div>  
+                </div> 
 
             </div>
             
@@ -185,7 +209,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {Breadcrumb,Modal,SelectMenuItem,LoadingIconEx,CommonLoadingWrapper,AnimatedHeightWrapper,ImgWrapper} from '@/components'
+    import {Breadcrumb,Modal,SelectMenuItem,LoadingIconEx,CommonLoadingWrapper,AnimatedHeightWrapper,ImgWrapper,Popover,SkeletonCircle,SkeletonRectangle} from '@/components'
     import ClipboardJS from 'clipboard'
     import {Content} from './components'
     import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet,commonGet} from '@/network'
@@ -374,7 +398,6 @@
                         ref: this.currentRef
                     })
 
-
                     let res = await authRequiredGet(
                         url_contentHTML,
                         {
@@ -390,6 +413,9 @@
                 }catch(e){
                     console.log(e)
                     this.contentType = 'binary'
+                    if(e.response && e.response.status == 404) {
+                        this.emitNotFoundEvent(this.$el)
+                    }
                 }finally{
                     this.loading = false
                 }
@@ -652,11 +678,15 @@
             CommonLoadingWrapper,
             AnimatedHeightWrapper,
             ImgWrapper,
+            Popover,
+            SkeletonCircle,
+            SkeletonRectangle,
             Container: styled.div``,
             FileNavigation: styled.div``,
             ContributionMessage: styled.div``,
             FilePath: styled.h2``,
             ModalTab: styled.h2``,
+            Skeleton: styled.h2``,
         }
     }
 </script>

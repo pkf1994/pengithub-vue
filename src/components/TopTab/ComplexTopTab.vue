@@ -9,7 +9,7 @@
                         :to="tabItem.to">
             <span>{{tabItem.label}}</span>
             <AnimatedWidthWrapper>
-                <span class="ml-1 mt-1 meta no-wrap" v-if="tabItem.meta">
+                <span class="ml-1 mt-1 no-wrap Counter" v-if="tabItem.meta">
                     {{tabItem.meta}}
                 </span>
             </AnimatedWidthWrapper>
@@ -36,7 +36,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/labels/index.scss';
     .router-link {
         padding: 16px 8px;
         margin-right: 16px;

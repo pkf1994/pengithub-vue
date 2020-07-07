@@ -29,6 +29,7 @@ import SimpleLoadingMore from './SimpleLoadingMore'
 import WithNotFoundNoticeWrapper from './WithNotFoundNoticeWrapper'
 import WithNotificationPaneWrapper from './WithNotificationPaneWrapper'
 import WithTopNoticeWrapper from './WithTopNoticeWrapper'
+import {SkeletonRectangle,SkeletonCircle} from './ComponentSkeleton'
 export {
     Button,
     BaseHeader,
@@ -81,4 +82,6 @@ export {
     SimpleLoadingMore,
     WithNotificationPaneWrapper,
     WithTopNoticeWrapper,
+    SkeletonRectangle,
+    SkeletonCircle
 }

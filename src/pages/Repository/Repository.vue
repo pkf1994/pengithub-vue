@@ -182,7 +182,7 @@
                         meta: this.openPullRequestsCount
                     },
                     {
-                        label: "Pulse",
+                        label: "Insights",
                         to: `${path}/pulse`
                     },
                     {
