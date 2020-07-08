@@ -4,13 +4,23 @@
             This pull request is big! We’re only showing the most recent 250 commits.
         </CutOffNotice>
         <transition-group name="fade-group" appear >
+            <CommittedDate key="0" class="committed-date" v-if="committedDateMarkedData.length == 0 && loading">
+                <span>&nbsp;</span>
+            </CommittedDate>
+            <Skeleton v-for="item in committedDateMarkedData.length == 0 && loading ? [1,2,3,4,5,6,7] : []" :key="item" class="border-bottom d-flex flex-items-start" style="padding:14px">
+                <SkeletonCircle :diameter="20" class="mr-2"></SkeletonCircle>
+                <div class="flex-grow-1">
+                    <SkeletonRectangle :height="14" style="width:100%"></SkeletonRectangle>
+                    <SkeletonRectangle :height="12" style="width:60%;margin-top:12px"></SkeletonRectangle>
+                </div>
+            </Skeleton>
             <Commit v-for="item in committedDateMarkedData" :key="item.commit.abbreviatedOid">
                 <CommittedDate class="committed-date" v-if="!item.someCommittedDateWithPrevOne">
                     <span>{{formatDate(item.commit.committer.date)}}</span>
                 </CommittedDate>
                 <CommitInfo class="commit-info-item bg-white">
                     <ImgWrapper class="img">
-                        <img :src="item.commit.committer.user ? item.commit.committer.avatarUrl : item.commit.author.avatarUrl" width="20" height="20" :alt="item.commit.committer.user ? item.commit.committer.user.login : item.commit.author.user.login" class="avatar">
+                        <img :src="item.commit.committer.user ? item.commit.committer.avatarUrl : item.commit.author.avatarUrl" width="20" height="20" :alt="item.commit.committer.user ? item.commit.committer.user.login : item.commit.author.user.login" class="avatar avatar-user">
                     </ImgWrapper>
                     <Title class="title">
                         <router-link :to="item.commit.commitResourcePath" v-html="item.commit.messageHeadlineHTML">
@@ -28,7 +38,7 @@
         </HiddenItemLoading>
         
         <transition name="fade" appear>
-            <CommonLoading v-if="loading"
+            <CommonLoading v-if="loading && committedDateMarkedData.length != 0"
                             :preventClickEvent="false"
                             :position="loading ? 'center' : 'corner'"/>
         </transition> 
@@ -38,13 +48,14 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading,ImgWrapper} from '@/components'
+    import {CommonLoading,ImgWrapper,SkeletonCircle,SkeletonRectangle} from '@/components'
     import {HiddenItemLoading} from './components'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery } from '@/network'
     import {util_dateFormat,util_emoji} from '@/util'
     import * as graphql from './graphql'
     export default {
         name: 'repository_pull_request_detail_commits_page',
+        mixins: [RouteUpdateAwareMixin],
         inject: ['owner','repo','number'],
         data() {
             return {
@@ -110,6 +121,8 @@
             CommonLoading,
             HiddenItemLoading,
             ImgWrapper,
+            SkeletonCircle,
+            SkeletonRectangle,
             Container: styled.div``,
             CutOffNotice: styled.div``,
             Commit: styled.div``,
@@ -117,6 +130,7 @@
             CommitInfo: styled.div``,
             Title: styled.div``,
             Meta: styled.div``,
+            Skeleton: styled.div``,
         }
     }
 </script>
@@ -145,7 +159,7 @@
 }
 
 .commit-info-item{
-    border-top: 1px solid #eaecef;
+    border-bottom: 1px solid #eaecef;
     position: relative;
     width: 100%;
     padding: 14px 15px 14px 45px;

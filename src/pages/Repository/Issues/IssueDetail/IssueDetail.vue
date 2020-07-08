@@ -1,35 +1,49 @@
 <template>
     <CommonLoadingWrapper :loading="loading || timeline.loading || timeline.extraData.loading" :position="loading ? 'center' : 'corner'" class="px-3 bg-white flex-grow-1">
-        <AnimatedHeightWrapper>
-            <Header v-if="data.id">
-                <HeaderActions class="d-flex flex-justify-between flex-items-center mb-3">
-                    <router-link to="/" class="btn btn-primary d-inline-block btn-sm">
-                        New issue
-                    </router-link>
+        
+        <Header>
+            <HeaderActions class="d-flex flex-justify-between flex-items-center mb-3">
+                <router-link to="/" class="btn btn-primary d-inline-block btn-sm">
+                    New issue
+                </router-link>
 
-                    <button class="btn-link" @click="scrollToBottom">Jump to bottom</button>
-                </HeaderActions>
+                <button class="btn-link" @click="scrollToBottom">Jump to bottom</button>
+            </HeaderActions>
 
-                <HeaderTitle class="title f1">
-                    {{data.title}}
-                    <span class="number">#{{data.number}}</span>
-                </HeaderTitle>
+            <HeaderTitle class="title f1">
+                <transition-group name="fade-group">
+                    <Skeleton key="1" v-if="!data.id && loading">
+                        <SkeletonRectangle :height="20" style="width:100%"></SkeletonRectangle>
+                        <SkeletonRectangle :height="20" style="width:80%" class="mt-3"></SkeletonRectangle>
+                    </Skeleton>
+                    <div key="2" v-else> 
+                        {{data.title}}
+                        <span class="number">#{{data.number}}</span>
+                    </div> 
+                </transition-group>
+                
+            </HeaderTitle>
 
-                <HeaderMeta class="d-flex mt-2 mb-3 flex-items-center header-meta">
-                    <State class="State State--green mr-2 d-inline-flex flex-items-center flex-self-start" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize;border-radius: 2em">
-                        <IssueIcon color="#fff" :issue="data"></IssueIcon>
-                        &nbsp;{{data.state}}
-                    </State>   
+            <HeaderMeta class="d-flex mt-2 mb-3 flex-items-center header-meta">
+                <State  class="State State--green mr-2 d-inline-flex flex-items-center flex-self-start"
+                        :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" 
+                        style="text-transform:capitalize;border-radius: 2em;min-width:55px">
+                    <IssueIcon color="#fff" :issue="data"></IssueIcon>
+                    &nbsp;{{data.state}}
+                </State>   
 
-                    <MetaContent class="meta-content">
-                        <router-link to="/" class="text-bold link-gray">{{data.user && data.user.login}}</router-link>
-                        {{data.state}} this issue
-                        <span class="no-wrap">on {{data.created_at | dateFormat('dd zzz yyyy')}}</span>
-                        · {{data.comments}} {{data.comments > 1 ? 'comments' : 'comment'}} 
-                    </MetaContent>
-                </HeaderMeta>
-            </Header>
-        </AnimatedHeightWrapper>
+                <Skeleton v-if="!data.id && loading" class="flex-grow-1">
+                    <SkeletonRectangle :height="16" style="width:100%"></SkeletonRectangle>   
+                </Skeleton>   
+
+                <MetaContent v-else class="meta-content">
+                    <router-link to="/" class="text-bold link-gray">{{data.user && data.user.login}}</router-link>
+                    {{data.state}} this issue
+                    <span class="no-wrap">on {{data.created_at | dateFormat('dd zzz yyyy')}}</span>
+                    · {{data.comments}} {{data.comments > 1 ? 'comments' : 'comment'}} 
+                </MetaContent>
+            </HeaderMeta>
+        </Header>
         
 
         <Info  class="border-bottom border-top pt-3 mt-3" 
@@ -74,7 +88,6 @@
         </Info>
       
         <Comment    :data="data"
-                    v-if="data.user" 
                     style="padding-top:0px!important;margin-top:16px;"
                     :headerStyle="{
                         backgroundColor:'#f1f8ff',
@@ -496,6 +509,8 @@
             SimpleSearchInput,
             SelectMenuItem,
             HyperlinkWrapper,
+            SkeletonCircle,
+            SkeletonRectangle,
             HiddenItemLoading} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
     import {TimelineItem,Comment,ProjectCard,CommentCreatePane,LoadMore} from './components'
@@ -1358,6 +1373,8 @@
             HyperlinkWrapper,
             Label,
             LoadMore,
+            SkeletonCircle,
+            SkeletonRectangle,
             Container: styled.div``,
             Header: styled.div``,
             HeaderActions: styled.div``,
@@ -1378,7 +1395,8 @@
             LabelDescription: styled.div``,
             LabelsPageLink: styled.div``,
             EmptyNotice: styled.div``,
-            IssueHandle: styled.div``
+            IssueHandle: styled.div``,
+            Skeleton: styled.div``
         }
     }
 </script>

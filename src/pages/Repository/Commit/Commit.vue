@@ -1,24 +1,25 @@
 <template>
-    <CommonLoadingWrapper class="px-3 pt-3 bg-white" :loading="loading || extraData.loading || comments.loading" :position="(loading  || extraData.loading) ? 'center' : 'corner'">
+    <CommonLoadingWrapper class="px-3 bg-white" :loading="loading || extraData.loading || comments.loading" :position="(loading  || extraData.loading) ? 'center' : 'corner'">
         <AnimatedHeightWrapper>
-            <BasicInfo v-if="data.node_id" class="basic-info mt-0 px-2 pt-2">
-                <router-link  :to="browseFilesRouterLink" class="float-right btn-outline btn" >
+            <BasicInfo class="basic-info mt-0 px-2 pt-2">
+                <router-link v-if="browseFilesRouterLink" :to="browseFilesRouterLink" class="float-right btn-outline btn" >
                     Browse files
                 </router-link>
-                <Status v-if="extraData.data.status" class="mr-1 mt-1 float-left">
-                    <svg v-if="extraData.data.status && extraData.data.status.state === 'SUCCESS'" class="octicon octicon-check v-align-middle text-green" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
-                    <svg v-else-if="extraData.data.status && extraData.data.status.state === 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
+                <div>
+                    
+                </div> 
+                <Status v-if="status.data !== undefined" class="mr-1 mt-1 float-left">
+                    <svg v-if="status.data === 'SUCCESS'" class="octicon octicon-check v-align-middle text-green" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
+                    <svg v-else-if="status.data === 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
                 </Status>
-                <p class="title" v-if="extraData.data.messageHeadlineHTML" v-html="extraData.data.messageHeadlineHTML">
+
+                <p class="title">
+                    {{messageHeadline}}
                 </p> 
 
-                <p class="title" v-else>
-                    {{data.commit.message}}
-                </p>   
-
-                <p class="desc" style="margin-top:10px;" v-if="extraData.data.messageBodyHTML" v-html="extraData.data.messageBodyHTML">
+                <p class="desc" style="margin-top:10px;" v-if="messageBody">
+                    {{messageBody}}
                 </p>
-
 
                 <Branches class="branches">
                     <!-- associated pulls -->
@@ -33,17 +34,17 @@
                     <!-- tag info -->
                     <svg class="octicon octicon-tag" v-if="tags.length > 0" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
                     <span class="tag-info" v-if="tags.length > 0" >
-                        <router-link v-for="(item,index) in tags" :key="item" :to="`${owner()}/${repo()}/releases/tag/${item}`" :class="{'text-bold':index === 0}" class="text-gray mr-2">{{item}}</router-link>
+                        <router-link v-for="(item,index) in tags" :key="item" :to="`${owner}/${repo}/releases/tag/${item}`" :class="{'text-bold':index === 0}" class="text-gray mr-2">{{item}}</router-link>
                     </span>
                 </Branches>
 
                 <Meta class="meta p-2 d-flex flex-wrap">
-                    <ImgWrapper>
-                        <img class="avatar flex-self-start mr-1" height="20" width="20" :alt="`@${data.author && data.author.login}`" :src="data.author && data.author.avatar_url">
-                    </ImgWrapper>  
-                    <WhoDidWhat class="flex-self-start no-wrap mr-md-4 mr-0">
-                        <router-link  class="user-mention" :to="`/${data.author && data.author.login}`">{{data.author && data.author.login}}</router-link>
-                        <span>committed on {{committedAt}}</span>
+                    <WhoDidWhat class="flex-self-start mr-md-4 mr-0">
+                        <ImgWrapper>
+                            <img class="avatar flex-self-start mr-1 avatar-user" height="20" width="20" :alt="`@${data.author && data.author.login}`" :src="data.author && data.author.avatar_url">
+                        </ImgWrapper>  
+                        <router-link class="user-mention no-wrap " :to="`/${data.author && data.author.login}`">{{data.author && data.author.login}}</router-link>
+                        <span class="no-wrap ">committed on {{committedAt}}</span>
                     </WhoDidWhat>
                     <ParentInfo class="flex-auto no-wrap text-left overflow-x-auto">
                         <span class="sha-block ml-0" >
@@ -125,6 +126,7 @@
 
         <Editor v-if="accessToken && firstLoadFlag" 
                 ref="editor"
+                uniqueId="commit_comment_creator"
                 class="pt-3 mb-5" 
                 :withGidelines="false"
                 :locked="viewerCannotComment" 
@@ -152,14 +154,13 @@
     import {CommonLoading,AnimatedHeightWrapper,LoadingIconEx,HiddenItemLoading,Editor,Subscription,ImgWrapper,CommonLoadingWrapper} from '@/components'
     import Comment from './Comment'
     import {Diff} from '../components'
-    import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery } from '@/network'
+    import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet } from '@/network'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
     import {util_dateFormat} from '@/util'
     export default {
         name: 'commit_page',
         mixins: [RouteUpdateAwareMixin],
-        inject: ['owner','repo'],
         provide() {
             return {
                 commit: () => Object.assign({},this.data,this.extraData.data),
@@ -171,6 +172,19 @@
                 data: {},
                 loading: false,
                 associatedPulls: [],
+                associatedRefs: {
+                    branch: {},
+                    tags: [],
+                    loading: false
+                },
+                associatedPulls: {
+                    data: [],
+                    loading: false
+                },
+                status: {
+                    data: undefined,
+                    loading: false
+                },
                 extraData: {
                     data: {},
                     loading: false
@@ -194,10 +208,16 @@
             sha() {
                 return this.$route.params.sha
             },
-            message() {
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
+            messageHeadline() {
                 return this.data.commit && this.data.commit.message.split('\n\n')[0]
             },
-            description() {
+            messageBody() {
                 return this.data.commit && this.data.commit.message.split('\n\n')[1]
             },
             tags() {
@@ -243,7 +263,7 @@
                 return this.data.locked && !this.data.viewerCanUpdate
             },
             browseFilesRouterLink() {
-                return `/${this.owner()}/${this.repo()}/tree/${this.data.sha}`
+                return this.data.sha && `/${this.owner}/${this.repo}/tree/${this.data.sha}`
             },
             committedByAuthor() {
                 if(!this.data.author.login) return 
@@ -255,14 +275,19 @@
             this.network_getData()
         },
         methods: {
-            async network_getData() {
+            network_getData() {
+                this.network_getBasicData()
+                this.network_getCommitStatus()
+                this.network_getAssociatedBranchAndTags()
+            },
+            async network_getBasicData() {
                 try{
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name)
 
                     let url = api.API_COMMIT({
-                        owner: this.owner(),
-                        repo: this.repo(),
+                        owner: this.owner,
+                        repo: this.repo,
                         sha: this.sha,
                     })
 
@@ -281,6 +306,52 @@
                     this.handleError(e)
                 }finally{
                     this.loading = false
+                }
+            },
+            async network_getCommitStatus() {
+                try {
+                    this.status.loading = true
+                    let url = api.API_PROXY_COMMIT_STATUS({
+                        repo: this.repo,
+                        owner: this.owner,
+                        sha: this.sha
+                    })
+
+                    let res = await commonGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_commit_status')
+                        }
+                    )
+
+                    this.parseCommitStatus(res.data)
+                } catch (e) {
+                    console.log(e)
+                }finally{
+                    this.status.loading = false
+                }
+            },
+            async network_getAssociatedBranchAndTags() {
+                try {
+                    this.associatedRefs.loading = true
+                    let url = api.API_PROXY_COMMIT_ASSOCIATED_REFS({
+                        repo: this.repo,
+                        owner: this.owner,
+                        sha: this.sha
+                    })
+
+                    let res = await commonGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_associated_refs')
+                        }
+                    )
+
+                    this.parseAssociatedRefs(res.data)
+                } catch (e) {
+                    console.log(e)
+                }finally{
+                    this.associatedRefs.loading = false
                 }
             },
             async network_getExtraData() {
@@ -363,6 +434,41 @@
                 }finally{
                     this.comments.loading = false
                 }
+            },
+            parseCommitStatus(HTML) {
+                let failurePattern = /octicon-x/g
+                let successPattern = /octicon-check/g
+                if(HTML.match(failurePattern) != null) {
+                    this.status.data = 'FAILURE'
+                }else if(HTML.match(successPattern) != null) {
+                    this.status.data = 'SUCCESS'
+                }
+            },
+            parseAssociatedRefs(HTML) {
+                let branchPattern = /<li class="branch"><a href="(.*?)">(.*?)<\/a><\/li>/g
+                let branchExecResult
+                if((branchExecResult = branchPattern.exec(HTML)) != null) {
+                    this.associatedRefs.branch.routerLink = branchExecResult[1]
+                    this.associatedRefs.branch.name = branchExecResult[2]
+                }
+
+                let tagsParagraphPattern = /<ul class="branches-tag-list js-details-container">((?:.|\r|\n)*?)<\/ul>/g
+                let tagsParagraphPatternExecResult = tagsParagraphPattern.exec(HTML)
+                let tagsParagraph = tagsParagraphPatternExecResult && tagsParagraphPatternExecResult[1]
+
+                if(tagsParagraph) {
+                    let tagPattern = /<li[^>]*><a href="(.*?)">(.*?)<\/a><\/li>/g
+                    let tagExecResult
+                    let tags = []
+                    while((tagExecResult = tagPattern.exec(tagsParagraph)) != null) {
+                        tags.push({
+                            routerLink: tagExecResult[1],
+                            name: tagExecResult[2]
+                        })
+                    }
+                    this.associatedRefs.tags = tags
+                }
+
             }
         },
         components: {

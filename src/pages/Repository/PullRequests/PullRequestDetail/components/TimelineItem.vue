@@ -733,7 +733,6 @@
 }
 
 .commit-meta{
-    padding: 4px 0;
     width: 36px;
     text-align: right;
 }

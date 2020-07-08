@@ -39,44 +39,52 @@
                     {{authorAssociation}}
                 </AuthorAssociation>
 
-                <HeaderInner class="py-2 flex-grow-1 position-relative" >
-                    <router-link class="d-inline-block" to="/">
-                        <ImgWrapper>
-                            <img   class="avatar" 
-                                    :src="data.user && data.user.avatar_url"
-                                    height="20" 
-                                    width="20" 
-                                    :alt="`@${data.user && data.user.login}`">
-                        </ImgWrapper>
-                    </router-link>
-                    <router-link to="/">
-                        <strong class="no-wrap link-gray-dark">
-                            {{data.user && data.user.login}}
-                        </strong>
-                    </router-link>
-                    
-                    commented
-                    <span class="no-wrap">{{data.created_at | getDateDiff}}</span>
+                <transition-group tag="div" class="flex-grow-1" name="fade-group">
+                    <Skeleton key="0" v-if="!data.id" class="d-flex flex-items-center flex-grow-1">
+                        <SkeletonCircle color="#EEEEEE" :diameter="20" class="mr-2"></SkeletonCircle>
+                        <SkeletonRectangle color="#EEEEEE" :height="14" class="flex-grow-1"></SkeletonRectangle>
+                    </Skeleton>
 
-                    <span class="d-inline-block text-gray-light" v-if="withEditHistory || data.updated_at != data.created_at">•</span>    
-                    <span class="d-inline-block text-gray btn-link" v-if="withEditHistory || data.updated_at != data.created_at" @click="() => showModal('editedPopover')">
-                        edited
-                        <svg height="11" class="octicon octicon-triangle-down v-align-middle" viewBox="0 0 12 16" version="1.1" width="8" aria-hidden="true"><path fill-rule="evenodd" d="M0 5l6 6 6-6H0z"></path></svg>
-                        <Popover ref="editedPopover" :popoverStyle="{left: '16px',right: '16px',top:'calc(100% + 8px)'}" @show="network_getEditHistories">
-                            <div class="dropdown-header px-3 py-2 border-bottom">
-                                Edited {{editHistories.data.length}} {{editHistories.data.length > 1 ? 'times' : 'time'}}
-                            </div> 
-                            <div class="edit-history-popover">
-                                <button class="btn-link dropdown-item p-2" v-for="(item,index) in editHistories.data" :key="item.editedAt">
-                                    <img :src="item.avatarUrl" width="20" height="20" class="avatar avatar-user avatar-small v-align-middle mr-1" :alt="`@${item.login}`">
-                                    <span class="css-truncate-target v-align-middle text-bold">pkf1994</span>
-                                    <span class="v-align-middle">edited <span class="no-wrap">{{item.editedAt | getDateDiff}}o</span> <span v-if="index == 0">(most recent)</span></span>
-                                </button>
-                            </div>
-                        </Popover>
-                    </span>
+                    <HeaderInner key="1" v-else class="py-2 flex-grow-1 position-relative" >
+                        <router-link class="d-inline-block" to="/">
+                            <ImgWrapper>
+                                <img   class="avatar avatar-user" 
+                                        :src="data.user && data.user.avatar_url"
+                                        height="20" 
+                                        width="20" 
+                                        :alt="`@${data.user && data.user.login}`">
+                            </ImgWrapper>
+                        </router-link>
+                        <router-link to="/">
+                            <strong class="no-wrap link-gray-dark">
+                                {{data.user && data.user.login}}
+                            </strong>
+                        </router-link>
+                        
+                        commented
+                        <span class="no-wrap">{{data.created_at | getDateDiff}}</span>
 
-                </HeaderInner>
+                        <span class="d-inline-block text-gray-light" v-if="withEditHistory || data.updated_at != data.created_at">•</span>    
+                        <span class="d-inline-block text-gray btn-link" v-if="withEditHistory || data.updated_at != data.created_at" @click="() => showModal('editedPopover')">
+                            edited
+                            <svg height="11" class="octicon octicon-triangle-down v-align-middle" viewBox="0 0 12 16" version="1.1" width="8" aria-hidden="true"><path fill-rule="evenodd" d="M0 5l6 6 6-6H0z"></path></svg>
+                            <Popover ref="editedPopover" :popoverStyle="{left: '16px',right: '16px',top:'calc(100% + 8px)'}" @show="network_getEditHistories">
+                                <div class="dropdown-header px-3 py-2 border-bottom">
+                                    Edited {{editHistories.data.length}} {{editHistories.data.length > 1 ? 'times' : 'time'}}
+                                </div> 
+                                <div class="edit-history-popover">
+                                    <button class="btn-link dropdown-item p-2" v-for="(item,index) in editHistories.data" :key="item.editedAt">
+                                        <img :src="item.avatarUrl" width="20" height="20" class="avatar avatar-user avatar-small v-align-middle mr-1" :alt="`@${item.login}`">
+                                        <span class="css-truncate-target v-align-middle text-bold">pkf1994</span>
+                                        <span class="v-align-middle">edited <span class="no-wrap">{{item.editedAt | getDateDiff}}o</span> <span v-if="index == 0">(most recent)</span></span>
+                                    </button>
+                                </div>
+                            </Popover>
+                        </span>
+
+                    </HeaderInner>
+                </transition-group>
+              
             </Header>   
 
             <AnimatedHeightWrapper>
@@ -124,14 +132,24 @@
             </CommentEditPane>
 
             <div v-else>
-                <Body v-if="bodyHTML" v-html="bodyHTML" style="padding:15px" class="markdown-body comment-body">
-                </Body>
+                <transition-group name="fade-group">
+                     <Body key="0" v-if="bodyHTML" v-html="bodyHTML" style="padding:15px" class="markdown-body comment-body">
+                    </Body>
 
-                <Body v-else>
-                    <p class="text-gray p-3 mb-0">
-                        <em>No description provided.</em>
-                    </p>
-                </Body>
+                    <Body key="1" v-else-if="data.id">
+                        <p class="text-gray p-3 mb-0">
+                            <em>No description provided.</em>
+                        </p>
+                    </Body>
+
+                    <Skeleton key="2" v-else class="p-3">
+                        <SkeletonRectangle :height="18" class="ml-6"></SkeletonRectangle>
+                        <SkeletonRectangle :height="18" class="mt-3"></SkeletonRectangle>
+                        <SkeletonRectangle :height="18" class="mt-3"></SkeletonRectangle>
+                        <SkeletonRectangle :height="18" class="mt-3 mr-6"></SkeletonRectangle>
+                    </Skeleton>
+                </transition-group>
+               
 
                 <!-- <LoadingWrapper v-else class="loading-wrapper d-flex flex-justify-center flex-items-center">
                     <LoadingIconEx/>
@@ -262,7 +280,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {util_dateFormat} from '@/util'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover,ImgWrapper,HyperlinkWrapper} from '@/components'
+    import {LoadingIconEx,AnimatedHeightWrapper,Popover,ImgWrapper,HyperlinkWrapper,SkeletonRectangle,SkeletonCircle} from '@/components'
     import {util_markdownParse} from '@/util'
     import {mapState} from 'vuex'
     import ClipboardJS from 'clipboard';
@@ -304,7 +322,7 @@
         props: {
             data: {
                 type: Object,
-                required: true
+                default: () => ({})
             },
             extraData: {
                 type: Object,
@@ -404,6 +422,7 @@
                 return location
             },
             bodyHTML() {
+                if(!this.data.body) return ''
                 return util_markdownParse.markdownToHTML(this.data.body)
             },
         },
@@ -622,6 +641,8 @@
             Popover,
             CommentEditPane,
             HyperlinkWrapper,
+            SkeletonRectangle,
+            SkeletonCircle,
             Container: styled.div``,
             Inner: styled.div``,
             Header: styled.div``,
@@ -635,6 +656,7 @@
             StretchCommentBtn: styled.div``,
             MinimizePane: styled.div``,
             EditHistoryItem: styled.div``,
+            Skeleton: styled.div``,
         }
     }
 </script>

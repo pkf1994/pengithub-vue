@@ -315,9 +315,12 @@ export const API_PROXY_CONTRIBUTORS_LIST = payload => `${PROXY_API_BASE}/${paylo
 
 export const API_PROXY_COMMIT_STATUS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/commit/${payload.sha}/rollup?direction=e`
 
+export const API_PROXY_COMMIT_ASSOCIATED_REFS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/branch_commits/${payload.sha}`
+
 export const API_PROXY_PULSE_COMMITTER_DATA = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/pulse_committer_data/${payload.period}`
 
 export const API_PROXY_PULSE_DIFF_STATUS_SUMMARY = payload => {
     let query = util_queryParse.querify(payload.params)
     return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/pulse_diffstat_summary?${query}`
 }
+
