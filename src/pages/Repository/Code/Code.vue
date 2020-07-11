@@ -12,11 +12,6 @@
     export default {
         mixins: [RouteUpdateAwareMixin],
         inject: ['owner','repo'],
-        provide() {
-            return {
-                codeBasicInfo: () => this.data
-            }
-        },
         data() {
             return {
                 data: {},
@@ -34,7 +29,7 @@
             }
         },
         created() {
-            if(this.accessToken) this.network_getData()
+            //if(this.accessToken) this.network_getData()
         },
         methods: {
             //获取仓库文件基本信息

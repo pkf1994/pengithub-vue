@@ -1,9 +1,10 @@
 <template>
     <CommonLoadingWrapper :loading="loadingOrganizationBasicInfo() || loading || extraData.loading" :position="loadingOrganizationBasicInfo() || loading ? 'center' : 'corner'" class="p-3">
 
-        <IconSearchInput class="mb-3" v-if="firstLoadedFlag" v-model="searchQuery" :search="routeWithSearchQuery"></IconSearchInput>
+        <IconSearchInput class="mb-3" v-model="searchQuery" :search="routeWithSearchQuery"></IconSearchInput>
 
         <transition-group tag="div" appear name="fade-group">
+            <MemberListSkeleton key="0" v-if="data.length == 0 && loading"></MemberListSkeleton>
             <MemberListItem class="member-item" v-for="item in data" :key="item.login" :member="item"></MemberListItem>
         </transition-group>
 
@@ -19,7 +20,7 @@
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet} from '@/network'
     import {util_queryParse} from '@/util'
-    import MemberListItem from './MemberListItem'
+    import {MemberListItem,MemberListSkeleton} from './components'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
     let parse = require('parse-link-header');
@@ -51,9 +52,6 @@
             }
         },
         computed: {
-            publicMemberUrl() {
-                return this.organizationBasicInfo().public_members_url
-            },
             query() {
                 this.searchQuery = this.$route.query.query
                 return this.$route.query.query
@@ -74,16 +72,16 @@
                 }
             },
             async netwokr_getDataFromApi() {
-                if(!this.publicMemberUrl) return
-                if(this.loadingOrganizationBasicInfo()) return
                 try{
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let url = `${this.publicMemberUrl.replace('{/member}','')}?${util_queryParse.querify({
-                        per_page: this.perPage,
-                        q:'a',
-                        ...this.$route.query,
-                    })}`
+                    let url = api.API_ORG_PUBLIC_MEMBER({
+                        organization: this.organization,
+                        params: {
+                            per_page: this.perPage,
+                            ...this.$route.query
+                        }
+                    })
                     let res = await authRequiredGet(url,{cancelToken})
 
                     this.data = res.data
@@ -171,17 +169,13 @@
 
             }
         },
-        watch: {
-            publicMemberUrl(newOne,oldOne) {
-                if(newOne && !oldOne) this.network_getData()
-            }
-        },
         components: {
             CommonLoadingWrapper,
             MemberListItem,
             IconSearchInput,
             SimplePaginationRest,
             SimplePagination,
+            MemberListSkeleton,
             Container: styled.div``
         }
         

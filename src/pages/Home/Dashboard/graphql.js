@@ -21,6 +21,7 @@ query($userLogin:[String!]){
 export const GRAPHQL_REPOSITORY = `
 query($name:String!,$owner:String!){
     repository(name: $name, owner: $owner) {
+      id
       viewerHasStarred
       updatedAt
       description

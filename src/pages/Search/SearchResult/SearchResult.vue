@@ -25,7 +25,7 @@
     import {ComplexTopTab} from '@/components'
     import {WithSearchInputMixin,RouteUpdateAwareMixin} from '@/mixins'
     import {util_numberFormat} from '@/util'
-    import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery } from '@/network'
+    import {commonGet, authRequiredGet} from '@/network'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
     import Vue from 'vue'
@@ -34,18 +34,16 @@
         name: 'search_result_page',
         data() {
             return {
-                data: {
-                    repositories: 0,
-                    code: 0,
-                    commits: 0,
-                    issues: 0,
-                    users: 0,
-                    topics: 0,
+                searchResultCount: {
+                    repositories: '',
+                    users: '',
+                    issues: '',
+                    code: '',
+                    commits: '',
+                    topics: '',
                 },
                 loading: false,
-                cachedRouteQuery: {
-                    
-                }  
+                cachedRouteQuery: {}
             }
         },
         computed: {
@@ -59,37 +57,37 @@
                         to: this.cachedRouteQuery['/search'] || `/search?q=${this.query}`,
                         exact: true,
                         label: 'Repositories',
-                        meta: this.data.repositories === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.repositories,0),
+                        meta: this.searchResultCount.repositories,
                         active: this.$route.path == '/search'
                     },
                     {
                         to: this.cachedRouteQuery['/search/code'] || `/search/code?q=${this.query}`,
                         label: 'Code',
-                        meta: this.data.code === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.code,0),
+                        meta: this.searchResultCount.code,
                         active: this.$route.path == '/search/code'
                     },
                     {
                         to: this.cachedRouteQuery['/search/commits'] || `/search/commits?q=${this.query}`,
                         label: 'Commits',
-                        meta: this.data.commits === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.commits,0),
+                        meta: this.searchResultCount.commits,
                         active: this.$route.path == '/search/commits'
                     },
                     {
                         to: this.cachedRouteQuery['/search/issues'] || `/search/issues?q=${this.query}`,
                         label: 'Issues',
-                        meta: this.data.issues === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.issues,0),
+                        meta: this.searchResultCount.issues,
                         active: this.$route.path == '/search/issues'
                     },
                     {
                         to: this.cachedRouteQuery['/search/users'] || `/search/users?q=${this.query}`,
                         label: 'Users',
-                        meta: this.data.users === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.users,0),
+                        meta: this.searchResultCount.users,
                         active: this.$route.path == '/search/users'
                     },
                     {
                         to: this.cachedRouteQuery['/search/topics'] || `/search/topics?q=${this.query}`,
                         label: 'Topics',
-                        meta: this.data.topics === 0 ? undefined : util_numberFormat.thousands2K2M(this.data.topics,0),
+                        meta: this.searchResultCount.topics,
                         active: this.$route.path == '/search/topics'
                     }
                 ]
@@ -101,85 +99,39 @@
             },
         },
         created() {
-            console.log(this.$route)
             this.network_getData()
         },
         methods: {
             async network_getData() {
-                try{
-                    this.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    this.cancelSources.push(sourceAndCancelToken.source)
-                    let graphql_itemCountBySearchResult = graphql.GRAPHQL_COUNT_GROUP_BY_SEARCH_TYPE(this.query)
-
-                    const res_graphql = await authRequiredGitHubGraphqlApiQuery(graphql_itemCountBySearchResult,{cancelToken:sourceAndCancelToken.cancelToken})
-                    
-                    try{
-                         this.data = {
-                            ...this.data,
-                            repositories: res_graphql.data.data.REPOSITORY.repositoryCount,
-                            users: res_graphql.data.data.USER.userCount,
-                            issues: res_graphql.data.data.ISSUE.issueCount,
+                let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_search_result_count')
+                for(let tabItem in this.searchResultCount) {
+                    if(tabItem == 'code' && !this.accessToken) continue
+                    let url = api.API_SEARCH({
+                        type: tabItem,
+                        params: {
+                            per_page: 1,
+                            q: this.query
                         }
-                    }catch(e) {
-                        this.handleGraphqlError(res_graphql)
-                    }
-                   
-                    let restParam = {
-                        q: this.query,
-                        page: 1,
-                        per_page: 1
-                    }
-                    const res_rest_arr = await Promise.all([
-                        authRequiredGet(
-                            api.API_SEARCH(
-                                {
-                                    type: 'code',
-                                    params: restParam
-                                }
-                            ),
-                            {
-                                headers: {"Accept": "application/vnd.github.mercy-preview+json"},
-                                cancelToken:sourceAndCancelToken.cancelToken
+                    })
+                    authRequiredGet(
+                        url,
+                        {
+                            cancelToken,
+                            headers: {
+                                "Accept": "application/vnd.github.mercy-preview+json,application/vnd.github.cloak-preview,*"
                             }
-                        ),
-                        authRequiredGet(
-                            api.API_SEARCH(
-                                {
-                                    type: 'commits',
-                                    params: restParam
-                                }
-                            ),
-                            {
-                                headers: {"Accept": "application/vnd.github.cloak-preview"},
-                                cancelToken:sourceAndCancelToken.cancelToken
-                            }
-                        ),
-                        authRequiredGet(
-                            api.API_SEARCH(
-                                {
-                                    type: 'topics',
-                                    params: restParam
-                                }
-                            ),
-                            {
-                                headers: {"Accept": "application/vnd.github.mercy-preview+json"},
-                                cancelToken:sourceAndCancelToken.cancelToken
-                            }
-                        )
-                    ])
-
-                    this.data = {
-                       ...this.data,
-                        code: res_rest_arr[0].data.total_count,
-                        commits: res_rest_arr[1].data.total_count,
-                        topics: res_rest_arr[2].data.total_count,
-                    }
-                }catch(e) {
-                    console.log(e)
-                }finally{
-                    this.loading = false
-                }   
+                        }
+                        ).then(res => {
+                        this.searchResultCount[tabItem] = util_numberFormat.thousands2K2M(res.data.total_count,0)
+                    })
+                }
+            },
+            parseSearchResultCount(HTML) {
+                let searchResultCountPattern = /<span[^>]*data-search-type="(.*)">(.*)<\/span>/g
+                let searchResultCountExecResult
+                if((searchResultCountExecResult = searchResultCountPattern.exec(HTML)) != null) {
+                    this.searchResultCount[searchResultCountExecResult[1]] = searchResultCountExecResult[2]
+                }
             },
             search() {
                 let path = `${this.$route.path}?q=${this.localSearchQuery}`

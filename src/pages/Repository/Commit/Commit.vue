@@ -1,13 +1,16 @@
 <template>
     <CommonLoadingWrapper class="px-3 bg-white" :loading="loading || extraData.loading || comments.loading" :position="(loading  || extraData.loading) ? 'center' : 'corner'">
-        <AnimatedHeightWrapper>
-            <BasicInfo class="basic-info mt-0 px-2 pt-2">
+        <BasicInfo class="basic-info mt-0 px-2 pt-2">
+            
+            <Skeleton v-if="!data.node_id">
+                <SkeletonRectangle :height="16"></SkeletonRectangle>
+                <SkeletonRectangle :height="16" class="mt-3" style="width:55%"></SkeletonRectangle>
+                <SkeletonRectangle :height="14" class="mt-3 mb-2" style="width:40%"></SkeletonRectangle>
+            </Skeleton>
+            <div v-else>
                 <router-link v-if="browseFilesRouterLink" :to="browseFilesRouterLink" class="float-right btn-outline btn" >
                     Browse files
                 </router-link>
-                <div>
-                    
-                </div> 
                 <Status v-if="status.data !== undefined" class="mr-1 mt-1 float-left">
                     <svg v-if="status.data === 'SUCCESS'" class="octicon octicon-check v-align-middle text-green" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
                     <svg v-else-if="status.data === 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
@@ -23,25 +26,40 @@
 
                 <Branches class="branches">
                     <!-- associated pulls -->
-                    <svg v-if="associatedPulls.length > 0" class="octicon octicon-git-branch" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 5c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v.3c-.02.52-.23.98-.63 1.38-.4.4-.86.61-1.38.63-.83.02-1.48.16-2 .45V4.72a1.993 1.993 0 00-1-3.72C.88 1 0 1.89 0 3a2 2 0 001 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-.53-.2-1-.53-1.36.09-.06.48-.41.59-.47.25-.11.56-.17.94-.17 1.05-.05 1.95-.45 2.75-1.25S8.95 7.77 9 6.73h-.02C9.59 6.37 10 5.73 10 5zM2 1.8c.66 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2C1.35 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2zm0 12.41c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm6-8c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
-                    <span v-if="associatedPulls.length > 0" class="associated-pulls">
-                        <span class="text-bold">{{associatedPulls[0] && associatedPulls[0].baseRef.name}}</span>
-                        (<span v-for="(item,index) in associatedPulls" :key="item.id">
-                            <router-link :to="item.resourcePath" class="text-gray">#{{item.number}}</router-link><span v-if="index < associatedPulls.length -1">,&nbsp;</span>
-                        </span>)
+                    <svg v-if="associatedRefs.branch.name" class="octicon octicon-git-branch" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 5c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v.3c-.02.52-.23.98-.63 1.38-.4.4-.86.61-1.38.63-.83.02-1.48.16-2 .45V4.72a1.993 1.993 0 00-1-3.72C.88 1 0 1.89 0 3a2 2 0 001 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-.53-.2-1-.53-1.36.09-.06.48-.41.59-.47.25-.11.56-.17.94-.17 1.05-.05 1.95-.45 2.75-1.25S8.95 7.77 9 6.73h-.02C9.59 6.37 10 5.73 10 5zM2 1.8c.66 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2C1.35 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2zm0 12.41c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm6-8c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
+                    <span v-if="associatedRefs.branch.name" class="associated-pulls">
+                        <span class="text-bold">{{associatedRefs.branch.name}}</span>
+                        <span v-if="associatedRefs.pullRequest.number">
+                            (<router-link :to="`/${owner}/${repo}/pulls/${associatedRefs.pullRequest.number}`" class="text-gray">#{{associatedRefs.pullRequest.number}}</router-link>)
+                        </span>
                     </span>
 
                     <!-- tag info -->
-                    <svg class="octicon octicon-tag" v-if="tags.length > 0" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
+                    <svg class="octicon octicon-tag" v-if="associatedRefs.tags.length > 0" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
                     <span class="tag-info" v-if="tags.length > 0" >
-                        <router-link v-for="(item,index) in tags" :key="item" :to="`${owner}/${repo}/releases/tag/${item}`" :class="{'text-bold':index === 0}" class="text-gray mr-2">{{item}}</router-link>
+                        <router-link v-for="(item,index) in associatedRefs.tags" :key="item.name" :to="item.routerLink" :class="{'text-bold':index === 0}" class="text-gray mr-2">{{item.name}}</router-link>
                     </span>
                 </Branches>
 
-                <Meta class="meta p-2 d-flex flex-wrap">
+            </div>
+
+            
+
+            <Meta class="meta p-2">
+
+                <Skeleton class="width-full" v-if="!data.node_id">
+                    <div class="d-flex flex-items-center">
+                        <SkeletonCircle :diameter="20" class="mr-2"> 
+                        </SkeletonCircle>
+                        <SkeletonRectangle :height="14" class="flex-grow-1"></SkeletonRectangle>
+                    </div>
+                    <SkeletonRectangle :height="12" class="mb-2" style="margin-top:5px"></SkeletonRectangle>
+                </Skeleton>
+
+                <div v-else class="d-flex flex-wrap">
                     <WhoDidWhat class="flex-self-start mr-md-4 mr-0">
                         <ImgWrapper>
-                            <img class="avatar flex-self-start mr-1 avatar-user" height="20" width="20" :alt="`@${data.author && data.author.login}`" :src="data.author && data.author.avatar_url">
+                            <img class="avatar mr-1 avatar-user v-align-bottom" height="20" width="20" :alt="`@${data.author && data.author.login}`" :src="data.author && data.author.avatar_url">
                         </ImgWrapper>  
                         <router-link class="user-mention no-wrap " :to="`/${data.author && data.author.login}`">{{data.author && data.author.login}}</router-link>
                         <span class="no-wrap ">committed on {{committedAt}}</span>
@@ -59,10 +77,12 @@
                             </span>   
                         </span>
                     </ParentInfo>
-                </Meta>
-            </BasicInfo>
-        </AnimatedHeightWrapper>
+                </div>
+                
+            </Meta>
         
+        </BasicInfo>
+    
         <AnimatedHeightWrapper class="my-3">
             <DiffStatus v-if="data.node_id">
                 <DiffStyleBtn class="float-right ml-2 BtnGroup">
@@ -151,7 +171,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading,AnimatedHeightWrapper,LoadingIconEx,HiddenItemLoading,Editor,Subscription,ImgWrapper,CommonLoadingWrapper} from '@/components'
+    import {CommonLoading,AnimatedHeightWrapper,LoadingIconEx,HiddenItemLoading,Editor,Subscription,ImgWrapper,CommonLoadingWrapper,SkeletonCircle,SkeletonRectangle} from '@/components'
     import Comment from './Comment'
     import {Diff} from '../components'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet } from '@/network'
@@ -175,6 +195,7 @@
                 associatedRefs: {
                     branch: {},
                     tags: [],
+                    pullRequest: {},
                     loading: false
                 },
                 associatedPulls: {
@@ -452,6 +473,12 @@
                     this.associatedRefs.branch.name = branchExecResult[2]
                 }
 
+                let pullRequestPattern = /\(<a[^>]*>#(.*)<\/a>\)/g
+                let pullRequestExecResult
+                if((pullRequestExecResult = pullRequestPattern.exec(HTML)) != null) {
+                    this.associatedRefs.pullRequest.number = pullRequestExecResult[1]
+                }
+
                 let tagsParagraphPattern = /<ul class="branches-tag-list js-details-container">((?:.|\r|\n)*?)<\/ul>/g
                 let tagsParagraphPatternExecResult = tagsParagraphPattern.exec(HTML)
                 let tagsParagraph = tagsParagraphPatternExecResult && tagsParagraphPatternExecResult[1]
@@ -482,6 +509,8 @@
             HiddenItemLoading,
             Editor,
             Subscription,
+            SkeletonCircle,
+            SkeletonRectangle,
             Container: styled.div``,
             BasicInfo: styled.div``,
             Status: styled.span``,
@@ -495,6 +524,7 @@
             DiffStyleBtn: styled.div``,
             CommentWrapper: styled.div``,
             SignInToComment: styled.div``,
+            Skeleton: styled.div``,
         }
     }
 </script>

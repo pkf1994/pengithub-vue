@@ -30,7 +30,7 @@
                           v-if="pageInfo.next || pageInfo.prev"
                           :pageInfo="pageInfo"/>
         
-        <EmptyNotice v-if="data.length == 0 && !loading"></EmptyNotice>
+        <!-- <EmptyNotice v-if="data.length == 0 && !loading"></EmptyNotice> -->
         
         <transition name="fade" appear>
             <CommonLoading  v-if="loading"
@@ -41,7 +41,7 @@
 
 <script>
     import {CodeItem} from './components'
-    import {SearchResultMixin} from "../components";
+    import {SearchResultMixin,EmptyNotice} from "../components";
     import {util_numberFormat,util_queryParse} from '@/util'
     import * as api from '@/network/api'
     import { authRequiredGet,cancelAndUpdateAxiosCancelTokenSource } from '@/network';
@@ -111,6 +111,11 @@
         },
         methods: {
             async network_getData() {
+
+                if(!this.accessToken) {
+                    this.$toast('You must authenticate to search for code across all public repositories.')
+                    return 
+                }
                 try{
                     this.loading = true
                     
@@ -159,6 +164,7 @@
         },
         components: {
             CodeItem,
+            EmptyNotice
         }
     }
 </script>

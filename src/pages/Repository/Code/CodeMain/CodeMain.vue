@@ -59,7 +59,7 @@
                 </Skeleton> 
 
                 <div v-else class="d-flex flex-items-center flex-wrap">
-                    <div style="height: 24px" class="AvatarStack flex-self-start AvatarStack--two" v-if="latestCommit.data.author && latestCommit.data.author.login != latestCommit.data.committer.login">
+                    <div style="height: 24px" class="AvatarStack flex-self-start AvatarStack--two" v-if="latestCommit.data.author && latestCommit.data.committer && latestCommit.data.author.login != latestCommit.data.committer.login">
                         <div class="AvatarStack-body">
                             <router-link style="height: 24px;width: 24px" v-if="latestCommit.data.author && latestCommit.data.author.avatar_url" class="avatar avatar-user" :to="`/${latestCommit.data.author.login}`">
                                 <img width="24" height="24" :src="latestCommit.data.author.avatar_url" :alt="`@${latestCommit.data.author.login}`">
@@ -72,7 +72,7 @@
                     
                     <router-link v-else-if="latestCommit.data.author && latestCommit.data.author.avatar_url" class="avatar avatar-user" :to="`/${latestCommit.data.author.login}`">
                         <ImgWrapper>
-                            <img width="24" height="24" :src="latestCommit.data.author.avatar_url" :alt="`@${latestCommit.data.author.login}`">
+                            <img width="24" height="24" :src="latestCommit.data.author.avatar_url" :alt="`@${latestCommit.data.author.login || latestCommit.data.author.name || 'Unknow'}`">
                         </ImgWrapper>
                     </router-link>
 

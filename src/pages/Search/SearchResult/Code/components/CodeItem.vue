@@ -1,7 +1,7 @@
 <template>
         <Container class="py-4 px-3 d-flex">
-            <ImgWrapper>
-                <img class="rounded-1 v-align-middle mr-1 flex-shrink-0"
+            <ImgWrapper class="avatar avatar-user mr-1 flex-shrink-0">
+                <img class="avatar avatar-user  v-align-middle flex-shrink-0"
                     :src="code.repository.owner.avatar_url"
                     width="20"
                     height="20">
@@ -15,7 +15,7 @@
                     <router-link to="/search">{{code.path}}</router-link>
                 </ThePath>
                 <MatchesContent class="matches-content my-1 font-mono"
-                                v-if="code.text_matches.lenght > 0"
+                                v-if="code.text_matches.length > 0"
                                 :meta="randomMeta">
                     <div v-for="(item,index) in code.text_matches || []" :key="index" class="flex-column">
                         <div v-for="(_item,_index) in item.fragment.split('\n')" :key="_index" class="d-flex">
@@ -142,7 +142,7 @@
     line-height: 20px;
 }
 .blob-num{
-    min-width: 50px;
+    min-width: 24px;
     font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
     font-size: 12px;
     line-height: 20px;

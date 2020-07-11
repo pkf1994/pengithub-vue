@@ -303,7 +303,7 @@
                 }
             },
             async network_getViewerHasStarredInfo() {
-                if(this.data.length == 0) return 
+                if(this.repositories.data.length == 0) return 
                 try{
                     this.repositories.viewerHasStarred.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_viewer_has_starred')
@@ -319,11 +319,7 @@
                         this.handleGraphqlError(res)
                     }
 
-                    let data = []
-                    for(let key in dataHolder) {
-                        data.push(dataHolder[key])
-                    }
-                    this.repositories.viewerHasStarred.data = data
+                    this.repositories.viewerHasStarred.data = Object.values(dataHolder)
                 }catch(e) {
                     this.handleError(e)
                 }finally{
@@ -331,7 +327,7 @@
                 }
             },
             async network_getViewerIsFollowingInfo() {
-                if(this.data.length == 0) return 
+                if(this.developers.data.length == 0) return 
                 try{
                     this.developers.viewerIsFollowing.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_viewer_is_following')

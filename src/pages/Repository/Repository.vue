@@ -2,14 +2,14 @@
     <Container>
         <RepoBasicInfo class="bg-gray-light pb-0 pt-3 border-0">
             <RepoFullName class="mb-3 px-3 f3">
-                <div class="d-flex flex-items-center">
+                <div>
                      <svg v-if="data.private" class="octicon octicon-lock repo-private-icon flex-shrink-0" aria-label="Repository" viewBox="0 0 16 16" version="1.1" width="16" height="16" role="img"><path fill-rule="evenodd" d="M4 4v2h-.25A1.75 1.75 0 002 7.75v5.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-5.5A1.75 1.75 0 0012.25 6H12V4a4 4 0 10-8 0zm6.5 2V4a2.5 2.5 0 00-5 0v2h5zM12 7.5h.25a.25.25 0 01.25.25v5.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-5.5a.25.25 0 01.25-.25H12z"></path></svg>
                     <svg v-else-if="data.fork" class="octicon octicon-repo-forked" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg>
                     <svg v-else class="octicon octicon-repo" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"></path></svg>
-                    <router-link class="flex-self-stretch ml-2" :to="`/${owner}`">{{owner}}</router-link>
-                    <span class="path-divider flex-self-stretch">/</span>
-                    <strong class="flex-self-stretch">
-                        <router-link class="flex-self-stretch" :to="`/${owner}/${repo}`">{{repo}}</router-link>
+                    <router-link class="ml-2" :to="`/${owner}`">{{owner}}</router-link>
+                    <span class="path-divider">/</span>
+                    <strong>
+                        <router-link :to="`/${owner}/${repo}`">{{repo}}</router-link>
                     </strong>
                     <span v-if="data.private" class="Label Label--outline v-align-middle ">Private</span>
                 </div>
@@ -69,10 +69,7 @@
                     </RepoMeta>
 
                     <StarOrWatch class="d-flex px-3" v-if="data.id">
-                        <button class="btn btn-sm btn-block flex-1 mr-2">        
-                            <svg height="16" class="octicon-star v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25zm0 2.445L6.615 5.5a.75.75 0 01-.564.41l-3.097.45 2.24 2.184a.75.75 0 01.216.664l-.528 3.084 2.769-1.456a.75.75 0 01.698 0l2.77 1.456-.53-3.084a.75.75 0 01.216-.664l2.24-2.183-3.096-.45a.75.75 0 01-.564-.41L8 2.694v.001z"></path></svg>
-                            Star
-                        </button>
+                        <StarBtn  class="btn btn-sm btn-block flex-1 mr-2" :repo="repo" :owner="owner" :viewerHasStarred="viewerHasStarred.data"></StarBtn>
                         <button class="btn btn-sm btn-block flex-1">        
                             <svg height="16" class="octicon octicon-eye" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.679 7.932c.412-.621 1.242-1.75 2.366-2.717C5.175 4.242 6.527 3.5 8 3.5c1.473 0 2.824.742 3.955 1.715 1.124.967 1.954 2.096 2.366 2.717a.119.119 0 010 .136c-.412.621-1.242 1.75-2.366 2.717C10.825 11.758 9.473 12.5 8 12.5c-1.473 0-2.824-.742-3.955-1.715C2.92 9.818 2.09 8.69 1.679 8.068a.119.119 0 010-.136zM8 2c-1.981 0-3.67.992-4.933 2.078C1.797 5.169.88 6.423.43 7.1a1.619 1.619 0 000 1.798c.45.678 1.367 1.932 2.637 3.024C4.329 13.008 6.019 14 8 14c1.981 0 3.67-.992 4.933-2.078 1.27-1.091 2.187-2.345 2.637-3.023a1.619 1.619 0 000-1.798c-.45-.678-1.367-1.932-2.637-3.023C11.671 2.992 9.981 2 8 2zm0 8a2 2 0 100-4 2 2 0 000 4z"></path></svg>
                             Watch
@@ -98,11 +95,12 @@
 <script>
     import styled from 'vue-styled-components'
     import { mapState } from 'vuex'
-    import {HeaderDetachTopTab,WithTopNoticeWrapper,ComplexTopTab,HyperlinkWrapper,AnimatedHeightWrapper} from '@/components'
+    import {HeaderDetachTopTab,WithTopNoticeWrapper,ComplexTopTab,HyperlinkWrapper,AnimatedHeightWrapper,StarBtn} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as api from '@/network/api'
-    import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet } from '@/network'
+    import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery } from '@/network'
     let parse = require('parse-link-header')
+    import * as graphql from './graphql'
     export default {
         name: 'repository_page',
         mixins: [RouteUpdateAwareMixin],
@@ -118,7 +116,10 @@
                     data: false,
                     loading: true
                 },
-                viewerHasStarred: false,
+                viewerHasStarred: {
+                    data: undefined,
+                    loading: false
+                },
             }
         },
         provide() {
@@ -197,15 +198,23 @@
                     return true
                 }
                 return false
+            },
+            documentTitle() {
+                return `${this.owner}/${this.repo}`
             }
         },
         created() {
             this.network_getData()
-            this.network_ifViewerACollaborator()
+            
         },
         methods: {
-            //获取仓库基本信息
             network_getData() {
+                this.network_getRepoBasicInfo()
+                this.network_ifViewerACollaborator()
+                if(this.accessToken) this.network_getViewerHasStarred()
+            },
+            //获取仓库基本信息
+            network_getRepoBasicInfo() {
                 this.loading = true
                 let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
                 let url_repo = api.API_REPO(`${this.owner}/${this.repo}`)
@@ -253,7 +262,7 @@
                 })
 
                  //获取project count
-                let url_projectsCount = api.API_REPO_PROJECTS(`${this.owner}/${this.repo}`,{
+                /* let url_projectsCount = api.API_REPO_PROJECTS(`${this.owner}/${this.repo}`,{
                     per_page: 1
                 })
                 authRequiredGet(
@@ -268,7 +277,7 @@
                     this.openProjectsCount = openProjectsCountHolder.last ? openProjectsCountHolder.last.page : res.data.length
                 }).catch(e => {
                     console.log(e)
-                })
+                }) */
 
             },
             async network_ifViewerACollaborator() {
@@ -296,7 +305,44 @@
             generateRouterMeta() {
                 return `${this.$route.params.owner}/${this.$route.params.repo}`
             },
-          
+            async network_getViewerHasStarred() {
+                try {
+                    this.viewerHasStarred.loading = true
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.VIEWER_HAS_STARRED,
+                        {
+                            variables: {
+                                name: this.repo,
+                                owner: this.owner
+                            },
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_viewer_has_starred')
+                        }
+                    )
+                    try{
+                        this.viewerHasStarred.data = res.data.data.repository.viewerHasStarred
+                    }catch(e) {
+                        console.log(e)
+                        this.handleGraphqlError(res)
+                    }
+                } catch (e) {
+                    console.log(e)
+                }finally{
+                    this.viewerHasStarred.loading = false
+                }
+            },
+            async network_changeStarStatus() {
+                if(this.viewerHasStarred.data === undefined) return
+                try{
+                    this.viewerHasStarred.loading = true
+                    await this.github_changeStarStatus(this.owner, this.repo, this.viewerHasStarred.data)
+                    this.viewerHasStarred.data = !this.viewerHasStarred.data
+                }catch(e) {
+                    console.log(e)
+                    this.handleError(e)
+                }finally{
+                    this.viewerHasStarred.loading = false
+                }
+            }
         }, 
        
         components: {
@@ -305,6 +351,7 @@
             ComplexTopTab,
             HyperlinkWrapper,
             AnimatedHeightWrapper,
+            StarBtn,
             Container: styled.div``,
             RepoBasicInfo: styled.div``,
             RepoFullName: styled.div``,

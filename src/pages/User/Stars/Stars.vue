@@ -23,7 +23,7 @@
         </Pagination>
 
         <LoadingWrapper  class="loading-wrapper">
-            <div v-if="loading && !loadingUserBasicInfoProvided()" class="inner d-flex flex-items-center flex-justify-center">
+            <div v-if="loading && !userBasicInfoProvided().loading" class="inner d-flex flex-items-center flex-justify-center">
                 <LoadingIcon></LoadingIcon>
             </div>
         </LoadingWrapper>
@@ -52,7 +52,7 @@
     export default {
         name: 'user_stars_page',
         mixins: [RouteUpdateAwareMixin],
-        inject: ['loadingUserBasicInfoProvided'],
+        inject: ['userBasicInfoProvided'],
         provide() {
             return {
                 extraDataProvided: () => this.extraData.data
@@ -131,6 +131,9 @@
                     },
                 ]
             },
+            documentTitle() {
+                return `${this.userBasicInfoProvided().data.login}(${this.userBasicInfoProvided().data.name}) / Stars`
+            }
         },
         async created() {
             this.network_getData()
@@ -140,14 +143,20 @@
                 try{
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let url = api.API_USER_STARRED_REPOS(this.login, {
-                       ...this.$route.query,
-                       per_page: this.perPage
+                    let url = api.API_USER_STARRED_REPOS({
+                        login: this.login,
+                        params: {
+                            ...this.$route.query,
+                            per_page: this.perPage
+                        }
                     })
 
-                    let url_count = api.API_USER_STARRED_REPOS(this.login, {
-                       ...this.$route.query,
-                       per_page: 1
+                    let url_count = api.API_USER_STARRED_REPOS({
+                        login: this.login,
+                        params: {
+                            ...this.$route.query,
+                            per_page: 1
+                        }
                     })
 
 

@@ -2,8 +2,8 @@
     <Container class="d-flex py-3 flex-items-center border-bottom">
         <Avatar class="flex-shrink-0">
             <router-link :to="`/${member.login}`">
-                <ImgWrapper>
-                    <img class="avatar" :src="member.avatar_url" :alt="`@${member.login}`" width="48" height="48">
+                <ImgWrapper class="avatar avatar-user">
+                    <img class="avatar avatar-user" :src="member.avatar_url" :alt="`@${member.login}`" width="48" height="48">
                 </ImgWrapper>
             </router-link>
         </Avatar>

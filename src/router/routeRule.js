@@ -181,7 +181,7 @@ export default [
         components: {
             default: Search,
             header: LogoHeader,
-            footer: LabelsFooter
+            footer: SimpleFooter
         },
         children: [
             {

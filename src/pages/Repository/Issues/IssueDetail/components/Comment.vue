@@ -47,7 +47,7 @@
 
                     <HeaderInner key="1" v-else class="py-2 flex-grow-1 position-relative" >
                         <router-link class="d-inline-block" to="/">
-                            <ImgWrapper>
+                            <ImgWrapper class="avatar avatar-user">
                                 <img   class="avatar avatar-user" 
                                         :src="data.user && data.user.avatar_url"
                                         height="20" 

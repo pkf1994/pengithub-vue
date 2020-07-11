@@ -53,7 +53,7 @@
         </Pagination>
 
         <LoadingWrapper  class="loading-wrapper">
-            <div v-if="loading && !loadingUserBasicInfoProvided()" class="inner d-flex flex-items-center flex-justify-center">
+            <div v-if="loading && !userBasicInfoProvided().loading" class="inner d-flex flex-items-center flex-justify-center">
                 <LoadingIcon></LoadingIcon>
             </div>
         </LoadingWrapper>
@@ -107,7 +107,7 @@
     export default {
         name: 'user_repositories_page',
         mixins: [RouteUpdateAwareMixin],
-        inject: ['loadingUserBasicInfoProvided'],
+        inject: ['userBasicInfoProvided'],
         provide() {
             return {
                 extraDataProvided: () => this.extraData.data
@@ -211,6 +211,9 @@
             },
             filterAvailableLanguage() {
                 return this.availableLanguage.data.filter(i => (i.name.toLowerCase().indexOf(this.availableLanguage.searchQuery.toLowerCase()) != -1 || i.urlParam.toLowerCase().indexOf(this.availableLanguage.searchQuery.toLowerCase()) != -1))
+            },
+            documentTitle() {
+                return `${this.userBasicInfoProvided().data.login}(${this.userBasicInfoProvided().data.name}) / Repositories`
             }
         },
         created() {

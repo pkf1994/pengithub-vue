@@ -25,7 +25,7 @@
         </transition>
 
         <LoadingWrapper  class="loading-wrapper">
-            <div v-if="loading && !loadingUserBasicInfoProvided()" class="inner d-flex flex-items-center flex-justify-center">
+            <div v-if="loading && !userBasicInfoProvided().loading" class="inner d-flex flex-items-center flex-justify-center">
                 <LoadingIcon></LoadingIcon>
             </div>
         </LoadingWrapper>
@@ -42,7 +42,7 @@
     export default {
         name: 'user_overview_page',
         mixins: [RouteUpdateAwareMixin],
-        inject: ['loadingUserBasicInfoProvided'],
+        inject: ['userBasicInfoProvided'],
         data() {
             return {
                 firstLoadedFlag: false,
@@ -54,6 +54,9 @@
             login() {
                 return this.$route.params.login
             },
+            documentTitle() {
+                return `${this.userBasicInfoProvided().data.login}(${this.userBasicInfoProvided().data.name})`
+            }
         },
         created() {
             this.network_getData()

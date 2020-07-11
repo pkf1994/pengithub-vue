@@ -1,5 +1,5 @@
 <template>
-    <CommonLoadingWrapper class="p-3" :loading="loading || graphqlData.loading || allBranchesAndTags.loading" :position="loading || allBranchesAndTags.loading ? 'center' : 'corner'">
+    <CommonLoadingWrapper class="px-3" :loading="loading || graphqlData.loading || allBranchesAndTags.loading" :position="loading || allBranchesAndTags.loading ? 'center' : 'corner'">
         <transition-group name="fade-group" appear>
             <button key="refSwitchBtn" v-if="firstLoadedFlag && !path" class="btn css-truncate btn-sm" @click="() => openModal('switchBranchOrTagModal')">
                 <i>{{refType | capitalize}}:</i>

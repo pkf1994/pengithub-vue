@@ -12,6 +12,7 @@
 <script>
     import styled from 'vue-styled-components'
     export default {
+        name: 'empty_notice',
         components: {
             Container: styled.div``,
             Message: styled.h3``

@@ -51,30 +51,43 @@ export const authRequiredGet = (url, config = {}) => {
     })
 }
 
-export const authRequiredPost = (url, config = {}) => {
-    return authRequiredAxios.post(url,config).then(res => {
+export const authRequiredDelete = (url, config = {}) => {
+    return authRequiredAxios.delete(url,config).then(res => {
         return res
     })
 }
 
-export const authRequiredPatch = (url, config = {}) => {
-    return authRequiredAxios.patch(url,config).then(res => {
+export const authRequiredPost = (url, data, config) => {
+    return authRequiredAxios.post(url, data, config).then(res => {
         return res
     })
 }
 
-export const authRequiredAjax = (url, config = {}, method = 'get',) => {
+export const authRequiredPut = (url, data, config) => {
+    return authRequiredAxios.put(url, data, config).then(res => {
+        return res
+    })
+}
+
+export const authRequiredPatch = (url, data, config) => {
+    return authRequiredAxios.patch(url,data,config).then(res => {
+        return res
+    })
+}
+
+export const authRequiredAjax = (url, config = {}, method = 'get') => {
     return authRequiredAxios[method](url,config).then(res => {
         return res
     })
 }
 
-export const authRequiredGitHubGraphqlApiQuery = (query,config = {}) => {
+export const authRequiredGitHubGraphqlApiQuery = (query,data,config) => {
     return authRequiredPost(API_GRAPHQL_ENDPOINT,
         {
             query,
-            ...config
-        }
+            ...data
+        },
+        config
     )
 }
 

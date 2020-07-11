@@ -30,6 +30,7 @@ import WithNotFoundNoticeWrapper from './WithNotFoundNoticeWrapper'
 import WithNotificationPaneWrapper from './WithNotificationPaneWrapper'
 import WithTopNoticeWrapper from './WithTopNoticeWrapper'
 import {SkeletonRectangle,SkeletonCircle} from './ComponentSkeleton'
+import StarBtn from './StarBtn.vue'
 export {
     Button,
     BaseHeader,
@@ -83,5 +84,6 @@ export {
     WithNotificationPaneWrapper,
     WithTopNoticeWrapper,
     SkeletonRectangle,
-    SkeletonCircle
+    SkeletonCircle,
+    StarBtn
 }

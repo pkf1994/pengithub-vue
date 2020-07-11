@@ -56,9 +56,9 @@ export const API_USER = login => `${GITHUB_REST_API_BASE}/users/${login}`
 
 export const API_ORG = organization => `${GITHUB_REST_API_BASE}/orgs/${organization}`
 
-export const API_ORG_PUBLIC_MEMBER = (organization,params) => {
-    let query = util_queryParse.querify(params)
-    return `${GITHUB_REST_API_BASE}/orgs/${organization}/public_members?${query}`
+export const API_ORG_PUBLIC_MEMBER = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/orgs/${payload.organization}/public_members?${query}`
 }
 
 export const API_ORG_REPOS = (organization,params) => {
@@ -66,14 +66,15 @@ export const API_ORG_REPOS = (organization,params) => {
     return `${GITHUB_REST_API_BASE}/orgs/${organization}/repos?${query}`
 }
 
+
 export const API_VIEWER_REPOS = payload => {
     let query = util_queryParse.querify(payload)
     return `${GITHUB_REST_API_BASE}/user/repos?${query}`
 }
 
-export const API_USER_STARRED_REPOS = (login,params) => {
-    let query = util_queryParse.querify(params)
-    return `${GITHUB_REST_API_BASE}/users/${login}/starred?${query}`
+export const API_USER_STARRED_REPOS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/users/${payload.login}/starred?${query}`
 }
 
 export const API_USER_FOLLOWERS = (login,params) => {
@@ -324,3 +325,11 @@ export const API_PROXY_PULSE_DIFF_STATUS_SUMMARY = payload => {
     return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/pulse_diffstat_summary?${query}`
 }
 
+
+export const API_STAR_OR_NOT_REPOSITORY = payload => `${GITHUB_REST_API_BASE}/user/starred/${payload.owner}/${payload.repo}`
+
+export const API_BLOCK_USER_OR_NOT = payload => `${GITHUB_REST_API_BASE}/user/blocks/${payload}`
+
+export const API_FOLLOW_USER_OR_NOT = payload => `${GITHUB_REST_API_BASE}/user/following/${payload}`
+
+export const API_PROXY_SEARCH_RESULT_COUNT = payload => `${PROXY_API_BASE}/search/count?q=${payload.q}&type=${payload.type}`

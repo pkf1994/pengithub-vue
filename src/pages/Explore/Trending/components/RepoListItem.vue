@@ -1,11 +1,6 @@
 <template>
     <Container class="Box-row">
-        <StarBtn class="float-right">
-            <button class="btn btn-sm" :disabled="viewerHasStarred === undefined">
-                <svg height="16" class="octicon octicon-star v-align-text-bottom" vertical_align="text_bottom" viewBox="0 0 14 16" version="1.1" width="14" aria-hidden="true"><path fill-rule="evenodd" d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74L14 6z"></path></svg>
-               {{viewerHasStarred ? 'Unstar' : 'Star'}}
-            </button>
-        </StarBtn>
+        <StarBtn class="btn btn-sm float-right" :repo="repository.name" :owner="repository.author" :viewerHasStarred="viewerHasStarred"></StarBtn>
 
         <h1 class="h3 text-gray text-normal lh-condensed">
             <span>
@@ -53,7 +48,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {util_numberFormat} from '@/util'
-    import {ImgWrapper} from '@/components'
+    import {ImgWrapper,StarBtn} from '@/components'
     export default {
         inject: ['viewerHasStarredProvided'],
         props: {
@@ -90,8 +85,8 @@
         },
         components: {
             ImgWrapper,
+            StarBtn,
             Container: styled.div``,
-            StarBtn: styled.span``,
             FullName: styled.div``,
             Meta: styled.div``
         }

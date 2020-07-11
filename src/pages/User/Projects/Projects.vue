@@ -51,7 +51,7 @@
         </ProjectsBox>
 
          <LoadingWrapper  class="loading-wrapper">
-            <div v-if="loading && !loadingUserBasicInfoProvided()" class="inner d-flex flex-items-center flex-justify-center">
+            <div v-if="loading && !userBasicInfoProvided().loading" class="inner d-flex flex-items-center flex-justify-center">
                 <LoadingIcon></LoadingIcon>
             </div>
         </LoadingWrapper>
@@ -78,7 +78,7 @@
     export default {
         name: 'user_projects_page',
         mixins: [RouteUpdateAwareMixin],
-        inject: ['loadingUserBasicInfoProvided'],
+        inject: ['userBasicInfoProvided'],
         data() {
             return {
                 searchQuery: '',
@@ -188,6 +188,9 @@
                     })
                 }`
             },
+            documentTitle() {
+                return `${this.userBasicInfoProvided().data.login}(${this.userBasicInfoProvided().data.name}) / Projects`
+            }
         },
         created() {
             this.network_getData()

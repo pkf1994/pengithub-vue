@@ -1,6 +1,6 @@
 <template>
     <transition-group name="fade-group">
-        <Container v-if="authenticated" class="header p-3" style="align-self: stretch" key="1">
+        <Container v-if="accessToken" class="header p-3" style="align-self: stretch" key="1">
             <MainRow class="d-flex flex-items-center text-white flex-justify-between">
 
                 <Menu class="btn-link text-white mr-3 d-flex flex-items-center" @click="triggerShowPullDown">
@@ -20,7 +20,9 @@
             <AnimatedHeightWrapper :stretch="stretch">
                 <MenuPullDown class="pt-3" ref="menuPullDown">
                     <SearchWrapper class="search-wrapper mb-3">
-                        <input class="search-input input-sm input-contrast form-control width-full"
+                        <input @keydown.enter="search" 
+                            v-model="searchQuery"
+                            class="search-input input-sm input-contrast form-control width-full"
                             placeholder="Search GitHub"
                             autocomplete="off"
                             autocorrect="off"
@@ -33,9 +35,9 @@
                         </router-link>
                         <router-link @click.native="closeNav" class="nav-item d-block d-lg-none py-2 py-lg-0 border-top border-lg-top-0 border-white-fade-15"  to="/">
                             <ImgWrapper>
-                                <img height="20" width="20" class="avatar" :src="avatarUrl"/>
+                                <img height="20" width="20" class="avatar" :src="viewer.avatarUrl"/>
                             </ImgWrapper>
-                            {{login ? login : 'user'}}
+                            {{viewer.login || 'user'}}
                         </router-link>
                         <button @click="routeToLogoutPage" class="nav-item d-lg-none py-2 py-lg-0 border-top border-lg-top-0 border-white-fade-15" style="text-align:left">
                             <svg class="d-inline-block v-align-middle" fill="currentColor" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 9V7H8V5h4V3l4 3-4 3zm-2 3H6V3L2 1h8v3h1V1c0-.55-.45-1-1-1H1C.45 0 0 .45 0 1v11.38c0 .39.22.73.55.91L6 16.01V13h4c.55 0 1-.45 1-1V8h-1v4z"></path></svg>
@@ -62,6 +64,7 @@
         data() {
             return {
                 stretch: false,
+                searchQuery: '',
                 computedHeight: 0,
                 staticNavList: [
                     {
@@ -96,12 +99,8 @@
         },
         computed: {
             ...mapState({
-                avatarUrl: state => state.oauth.viewerInfo.avatarUrl,
-                login: state => state.oauth.viewerInfo.login,
-                authenticated: state => state.oauth.accessToken.authenticated,
                 unreadNotificationsCount: state => state.notifications.unread.count,
                 loadingUnreadNotificationsCount: state => state.notifications.unread.loading,
-                accessToken: state => state.oauth.accessToken.accessToken
             })
         },
         mounted() {
@@ -132,6 +131,10 @@
             },
             routeToLogoutPage() {
                 this.$router.push(`/sign_out?return_to=${this.$route.fullPath}`)
+            },
+            search() {
+                this.closeNav()
+                this.$router.push(`/search?q=${this.searchQuery}`)
             }
         },
         components: {

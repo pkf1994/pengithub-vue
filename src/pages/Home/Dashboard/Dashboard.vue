@@ -122,7 +122,8 @@ export default {
                 data: [],
                 loading: false,
                 pageInfo: {}
-            }
+            },
+            documentTitle: 'Pengihub'
         }
     },
     computed: {

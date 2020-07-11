@@ -7,7 +7,7 @@
                     :style="popoverStyle">
             <Cover class="cover" v-show="show"  @click.stop="close"></Cover>
 
-            <Main class="main bg-white" style="z-index:999">
+            <Main class="main bg-white">
                 <slot></slot>
             </Main>
         </Container>
@@ -24,7 +24,7 @@
                 type: Object,
                 required: false
             },
-            smooth: Boolean
+            smooth: Boolean,
         },
         data() {
             return {
@@ -58,7 +58,7 @@
 <style scoped lang="scss">
     .container{
         position: absolute;
-        z-index: 100;
+        z-index: 99;
         list-style: none;
         background-color: #fff;
         background-clip: padding-box;
