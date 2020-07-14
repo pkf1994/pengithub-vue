@@ -44,11 +44,11 @@
 
                         <div style="height: 24px" class="AvatarStack flex-self-start AvatarStack--two" v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.login != contributionMessage.latestCommit.data.committer.login">
                             <div class="AvatarStack-body">
-                                <router-link style="height: 24px;width: 24px" v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" class="avatar avatar-user" :to="`/${contributionMessage.latestCommit.data.author.login}`">
-                                    <img width="24" height="24" :src="contributionMessage.latestCommit.data.author.avatar_url" :alt="`@${contributionMessage.latestCommit.data.author.login}`">
+                                <router-link style="height: 24px;width: 24px;border-radius:2em;" v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" class="avatar avatar-user"  :to="`/${contributionMessage.latestCommit.data.author.login}`">
+                                    <img width="24" height="24" :src="contributionMessage.latestCommit.data.author.avatar_url" :alt="`@${contributionMessage.latestCommit.data.author.login}`" class="avatar-user" style="border-radius:2em">
                                 </router-link>
-                                <router-link style="height: 24px;width: 24px" v-if="contributionMessage.latestCommit.data.committer && contributionMessage.latestCommit.data.committer.avatar_url" class="avatar avatar-user" :to="`/${contributionMessage.latestCommit.data.author.login}`">
-                                    <img width="24" height="24" :src="contributionMessage.latestCommit.data.committer.avatar_url" :alt="`@${contributionMessage.latestCommit.data.committer.login}`">
+                                <router-link style="height: 24px;width: 24px;border-radius:2em;" v-if="contributionMessage.latestCommit.data.committer && contributionMessage.latestCommit.data.committer.avatar_url" class="avatar avatar-user" :to="`/${contributionMessage.latestCommit.data.author.login}`">
+                                    <img width="24" height="24" :src="contributionMessage.latestCommit.data.committer.avatar_url" :alt="`@${contributionMessage.latestCommit.data.committer.login}`" class="avatar-user" style="border-radius:2em">
                                 </router-link>
                             </div>
                         </div>

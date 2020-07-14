@@ -109,7 +109,7 @@ export const API_README = payload => {
 
 export const API_CONTENTS = (payload) => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/contents${payload.path ? '/' + payload.path : ''}${payload.ref?'?ref='+payload.ref:''}`
 
-export const API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/stats/contributors`
+export const API_REPOSITORY_STATISTIC_CONTRIBUTOR_LIST = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/stats/contributors`
 
 export const API_REPOSITORY_COMMUNITY = (owner,repo) => `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/community/profile`
 

@@ -1,5 +1,5 @@
 <template>
-    <CommonLoadingWrapper :loading="loading || existPullRequest.loading || mergeabilityHTML.loading" :position="loading ? 'center' : 'corner'" class="p-3">
+    <CommonLoadingWrapper :loading="loading || existPullRequest.loading || mergeabilityHTML.loading" :position="loading ? 'center' : 'corner'" class="px-3">
         <Title class="title">
             Compare changes
         </Title>

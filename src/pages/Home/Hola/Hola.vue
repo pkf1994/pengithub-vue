@@ -17,10 +17,6 @@
                     million&nbsp;developers.
                 </HolaJumbotronParagraph>
 
-                <HolaJumbotronParagraph class="font-inter lead-mktg mb-4 text-hsla-pale text-center">
-                    Get started for free — join the millions of developers already using GitHub to share their code, work together, and build amazing things.
-                </HolaJumbotronParagraph>
-
                  <Button inline
                         style="padding-bottom: 20px;padding-top: 20px"
                         @click.native="signIn"
@@ -491,11 +487,6 @@
                         subTitle: "Jess Frazelle works on Kubernetes full-time. Previously she maintained Docker, a software containerization platform used by thousands of teams."
                     },
                 ]
-            }
-        },
-        methods: {
-            signIn() {
-                this.$router.push('/oauth_redirect')
             }
         },
         components: {

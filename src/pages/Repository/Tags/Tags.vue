@@ -1,7 +1,7 @@
 <template>
     <CommonLoadingWrapper :loading="loading || extraData.loading" :position="loading ? 'center' : 'corner'" class="px-3">
         <transition name="fade" appear>
-            <PaddingPageTopTab v-if="firstLoadedFlag" class="subnav" style="margin-right:-16px;margin-left:-16px;" :tabs="tabs"></PaddingPageTopTab>
+            <PaddingPageTopTab class="subnav" style="margin-right:-16px;margin-left:-16px;" :tabs="tabs"></PaddingPageTopTab>
         </transition>  
        
         <div class="Box" v-if="firstLoadedFlag && data.length > 0">
@@ -19,7 +19,7 @@
         <SimplePaginationRest v-if="firstLoadedFlag && (pageInfo.prev || pageInfo.next)" :loading="loading" :pageInfo="pageInfo"></SimplePaginationRest>
 
          <transition name="fade" appear>
-            <Blankslate v-if="data.length == 0 && loading == false && !pageInfo.prev" class="blankslate border-top">
+            <Blankslate v-if="isEmpty" class="blankslate border-top">
                 <svg height="32" class="octicon octicon-tag blankslate-icon" viewBox="0 0 15 16" version="1.1" width="30" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
                 <h3>There aren’t any tags here</h3>
                 <p>Tags are powered by 
@@ -36,11 +36,11 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {PaddingPageTopTab,SimplePaginationRest} from '@/components'
+    import {PaddingPageTopTab,SimplePaginationRest,CommonLoadingWrapper} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as api from '@/network/api'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
-    import TagListItem from './TagListItem'
+    import {TagListItem} from './components'
     import * as graphql from './graphql'
     let parse = require('parse-link-header')
     export default {
@@ -56,13 +56,15 @@
             return {
                 data: [],
                 perPage: 10,
+                isEmpty: false,
                 loading: false,
                 pageInfo: {},
                 firstLoadedFlag:false,
                 extraData: {
                     data: [],
                     loading: false
-                }
+                },
+                
             }
         },
         computed: {
@@ -101,6 +103,8 @@
                     )
                     if(window) window.scrollTo(0,0)
                     this.data = res.data
+                    this.isEmpty = false
+                    if(res.data.length == 0) this.isEmpty = true
                     this.pageInfo = parse(res.headers.link) || {}
                     this.firstLoadedFlag = true
                     if(this.accessToken) this.network_getExtraData()
@@ -142,6 +146,7 @@
             TagListItem,
             PaddingPageTopTab,
             SimplePaginationRest,
+            CommonLoadingWrapper,
             Container: styled.div``,
             Blankslate: styled.div``,
         }

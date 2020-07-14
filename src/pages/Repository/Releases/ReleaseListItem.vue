@@ -2,10 +2,10 @@
     <Container class="pt-2 pb-2">
         <ReleaseHeader>
             <Name class="f1">
-                <span v-if="release.prerelease" class="flex-shrink-0 ml-2 mt-2 Label Label--outline Label--prerelease float-right">
+                <span v-if="release.prerelease" class="flex-shrink-0 ml-2 mt-2 Label Label--outline Label--prerelease float-right px-2" style="border-radius:2em">
                     Pre-release
                 </span>
-                <span v-if="isLatestRelease" class="flex-shrink-0 ml-2 mt-2 Label Label--outline Label--outline-green float-right">
+                <span v-if="isLatestRelease" class="flex-shrink-0 ml-2 mt-2 Label Label--outline Label--outline-green float-right px-2" style="border-radius:2em">
                     Latest release
                 </span>
                 <router-link :to="to">
@@ -13,29 +13,37 @@
                 </router-link>
             </Name>
             <AnimatedHeightWrapper>
-                <TheMeta>
-                    <router-link class="muted-link mr-1" :to="resourcePath">
-                        <svg class="octicon octicon-tag" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
-                        {{release.tag_name}}
-                    </router-link> 
-                    <transition appear name="fade"> 
-                        <router-link class="muted-link d-inline-block" v-if="commitSha" :to="extraDataHolder.tag.target.commitResourcePath">
-                            <svg class="octicon octicon-git-commit" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z"></path></svg>
-                            {{commitSha.substring(0,7)}}
+                <TheMeta class="d-flex flex-items-center flex-justify-between">
+                    <div>
+                        <router-link class="muted-link mr-1" :to="resourcePath">
+                            <svg class="octicon octicon-tag" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
+                            {{release.tag_name}}
                         </router-link> 
-                    </transition>
-                    <transition appear name="fade"> 
-                        <button class="verify-state-badge float-right position-relative" v-if="commitIsVerified" @click="() => showModal('verifiedNoticeModal')">
-                            Verified
+                        <transition appear name="fade"> 
+                            <router-link class="muted-link d-inline-block" v-if="commitSha" :to="extraDataHolder.tag.target.commitResourcePath">
+                                <svg class="octicon octicon-git-commit" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z"></path></svg>
+                                {{commitSha.substring(0,7)}}
+                            </router-link> 
+                        </transition>
+                    </div>
+                    <div class="d-flex flex-items-center">
+                        <button class="btn btn-sm select-menu-button text-md-left" @click="() => showModal('chooseTagToCompareModal')">
+                            Compare
                         </button>
-                    </transition>
+                        <transition appear name="fade"> 
+                            <button class="verify-state-badge position-relative ml-2 px-2" v-if="commitIsVerified" @click="() => showModal('verifiedNoticeModal')">
+                                Verified
+                            </button>
+                        </transition>
+                    </div>
+                    
                 </TheMeta>
             </AnimatedHeightWrapper>
            
            <AnimatedHeightWrapper class="my-2">
                 <WhoDidWhatAtWhen class="f5 text-gray">
                     <router-link class="d-inline-block" :to="`/${release.author.login}`">
-                        <img class="avatar" :src="release.author.avatar_url" width="20" height="20" :alt="`@${release.author.login}`">
+                        <img class="avatar avatar-user" :src="release.author.avatar_url" width="20" height="20" :alt="`@${release.author.login}`">
                     </router-link> 
                     <router-link class="text-bold text-gray" :to="`/${release.author.login}`">
                         {{release.author.login}}
@@ -73,14 +81,14 @@
                     <AssetItem class="d-flex flex-justify-between flex-items-center py-2 Box-body px-2">
                         <a :href="release.zipball_url">
                             <svg class="octicon octicon-file-zip flex-shrink-0 text-gray" width="16" height="16" viewBox="0 0 12 16" version="1.1" aria-hidden="true"><path fill-rule="evenodd" d="M8.5 1H1a1 1 0 00-1 1v12a1 1 0 001 1h10a1 1 0 001-1V4.5L8.5 1zM11 14H1V2h3v1h1V2h3l3 3v9zM5 4V3h1v1H5zM4 4h1v1H4V4zm1 2V5h1v1H5zM4 6h1v1H4V6zm1 2V7h1v1H5zM4 9.28A2 2 0 003 11v1h4v-1a2 2 0 00-2-2V8H4v1.28zM6 10v1H4v-1h2z"></path></svg>
-                            <span class="pl-2 flex-auto min-width-0 text-bold">Source code</span>(zip)
+                            <span class="pl-2 flex-auto min-width-0 text-bold">Source code</span>&nbsp;(zip)
                         </a> 
                     </AssetItem>
 
                     <AssetItem class="d-flex flex-justify-between flex-items-center py-2 Box-body px-2">
                         <a :href="release.tarball_url">
                             <svg class="octicon octicon-file-zip flex-shrink-0 text-gray" width="16" height="16" viewBox="0 0 12 16" version="1.1" aria-hidden="true"><path fill-rule="evenodd" d="M8.5 1H1a1 1 0 00-1 1v12a1 1 0 001 1h10a1 1 0 001-1V4.5L8.5 1zM11 14H1V2h3v1h1V2h3l3 3v9zM5 4V3h1v1H5zM4 4h1v1H4V4zm1 2V5h1v1H5zM4 6h1v1H4V6zm1 2V7h1v1H5zM4 9.28A2 2 0 003 11v1h4v-1a2 2 0 00-2-2V8H4v1.28zM6 10v1H4v-1h2z"></path></svg>
-                            <span class="pl-2 flex-auto min-width-0 text-bold">Source code</span>(tar.gz)
+                            <span class="pl-2 flex-auto min-width-0 text-bold">Source code</span>&nbsp;(tar.gz)
                         </a> 
                     </AssetItem>
                 </div>
@@ -106,18 +114,42 @@
                 </HyperlinkWrapper>
             </div>
         </Modal>
+
+        <Modal ref="chooseTagToCompareModal" :title="`Choose a tag to compare with ${name}`" :modalStyle="{height: '80vh',position:'relative',display:'flex'}" @show="network_getAvailableTagsToCompare">
+            <div style="padding:10px" class="bg-white border-bottom">
+                <input v-model="tagsToCompare.searchQuery" type="text" class="form-control width-full" placeholder="Find a tag" autofocus="" autocomplete="off" spellcheck="false">
+            </div>
+            <div v-if="tagsToCompare.loading" class="position-absolute d-flex flex-items-center flex-justify-center" style="top:0;bottom:0;right:0;left:0">
+                <LoadingIconEx></LoadingIconEx>
+            </div> 
+            <div style="overflowY:auto" class="flex-grow-1">
+                <transition-group name="fade-group" appear>
+                    <router-link class="d-block" v-for="item in filteredTags" :key="item" :to="`/${owner}/${repo}/compare/${item}...${name}`">
+                        <SelectMenuItem :selected="item == name">
+                            {{item}}
+                        </SelectMenuItem>
+                    </router-link>
+                    <div key="Emtpy notice" v-if="filteredTags.length == 0 && !tagsToCompare.loading" class="p-3 d-flex flex-items-center flex-justify-center">
+                        Nothing to show
+                    </div>
+                </transition-group>
+            </div>
+            <footer class="SelectMenu-footer bg-white">
+                <router-link :to="`/${owner}/${repo}/tags`">View all tags</router-link>
+            </footer>
+        </Modal>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {AnimatedHeightWrapper,Modal,HyperlinkWrapper} from '@/components'
+    import {AnimatedHeightWrapper,Modal,HyperlinkWrapper,SelectMenuItem,LoadingIconEx} from '@/components'
     import * as api from "@/network/api"
-    import {authRequiredGet} from '@/network'
+    import {authRequiredGet,commonGet} from '@/network'
     import {util_markdownParse} from "@/util"
     let parse = require('parse-link-header')
     export default {
-        inject: ['owner','repo','extraDataProvided'],
+        inject: ['extraDataProvided'],
         props: {
             release: {
                 type: Object,
@@ -126,18 +158,29 @@
             isLatestRelease: {
                 type: Boolean,
                 default: false
-            }
+            },
         },
         data() {
             return {
                 commitsCountSinceThisRelease: 0,
                 loading: false,
-                assetsStretched: false
+                assetsStretched: false,
+                tagsToCompare: {
+                    searchQuery: '',
+                    data: [],
+                    loading: false
+                }
             }
         },
         computed: {
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
             to() {
-                return `/${this.owner()}/${this.repo()}/releases/tag/${this.name}`
+                return `/${this.owner}/${this.repo}/releases/tag/${this.release.tag_name}`
             },
             name() {
                 let name = this.release.name
@@ -154,10 +197,15 @@
                 return this.extraDataHolder && this.extraDataHolder.tag.target.oid
             },
             resourcePath() {
-                return `/${this.owner()}/${this.repo()}/tree/${this.release.tag_name}`
+                return `/${this.owner}/${this.repo}/tree/${this.release.tag_name}`
             },
             commitIsVerified() {
                 return this.extraDataHolder && this.extraDataHolder.tag.target.signature && this.extraDataHolder.tag.target.signature.isValid
+            },
+            filteredTags() {
+                return this.tagsToCompare.data.filter( i => {
+                    return i.toLowerCase().indexOf(this.tagsToCompare.searchQuery.toLowerCase()) > -1
+                })
             }
         },
         created() {
@@ -168,8 +216,8 @@
                 try{    
                     this.loading = true
                     let url = api.API_COMMITS_COMPARE({
-                        owner: this.owner(),
-                        repo: this.repo(),
+                        owner: this.owner,
+                        repo: this.repo,
                         baseHead: `${this.release.tag_name}...${this.release.target_commitish}`
                     })
                     let res = await authRequiredGet(url)
@@ -181,7 +229,37 @@
                     this.loading = false
                 }
             },
-             triggerAssetsStretch() {
+            async network_getAvailableTagsToCompare() {
+                if(this.tagsToCompare.data.length > 0) return
+                if(this.tagsToCompare.loading) return
+                try {
+                    this.tagsToCompare.loading = true
+                    let url = api.API_REPOSITORY_COMPARE_AVAILABLE_TAGS({
+                        owner: this.owner,
+                        repo: this.repo,
+                        baseHead: this.name,
+                        tag: this.name,
+                        type: 'base'
+                    })
+
+                    let res = await commonGet(url)
+                    this.parseAvailableTagsToCompare(res.data)
+                } catch (e) {
+                    this.handleError(e)
+                } finally {
+                    this.tagsToCompare.loading = false
+                }
+            },
+            parseAvailableTagsToCompare(HTML) {
+                let tagPattern = /<span class="css-truncate css-truncate-overflow" title="(.*)" >/g
+                let tagExecResult
+                let tags = []
+                while((tagExecResult = tagPattern.exec(HTML)) != null) {
+                    tags.push(tagExecResult[1])
+                }
+                this.tagsToCompare.data = tags
+            },
+            triggerAssetsStretch() {
                 this.assetsStretched = !this.assetsStretched
             },
             showModal(modalRef) {
@@ -191,7 +269,9 @@
         components: {
             AnimatedHeightWrapper,
             Modal,
+            SelectMenuItem,
             HyperlinkWrapper,
+            LoadingIconEx,
             Container: styled.div``,
             ReleaseHeader: styled.div``,
             Name: styled.div``,
@@ -212,18 +292,21 @@
 @import 'node_modules/@primer/css/avatars/index.scss';
 @import 'node_modules/@primer/css/labels/index.scss';
 @import 'node_modules/@primer/css/box/index.scss';
+@import 'node_modules/@primer/css/forms/index.scss';
+@import 'node_modules/@primer/css/select-menu/index.scss';
 .verify-state-badge{
     color: #22863a;
     margin-top: -2px;
     margin-right: 3px;
     display: inline-block;
     padding: 1px 4px;
-    font-size: 10px;
+    font-size: 12px;
     vertical-align: middle;
     user-select: none;
     background: none;
     border: 1px solid #e1e4e8;
-    border-radius: 3px;
+    font-weight: 500;
+    border-radius: 2em;
 }
 
 .Label--prerelease {
@@ -239,5 +322,15 @@
 .signed-commit-verified-label {
     color: #1e7e34;
     white-space: nowrap;
+}
+
+.select-menu-button:after {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    vertical-align: -2px;
+    content: "";
+    border: 4px solid transparent;
+    border-top-color: currentcolor;
 }
 </style>

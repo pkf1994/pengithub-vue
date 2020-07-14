@@ -93,10 +93,10 @@
                                     <router-link @click.native="triggerMenu" v-else :to="item_.href" class="h5 lh-condensed-ultra py-2 d-block link-gray-dark no-underline">{{item_.title}}</router-link>  
                                     <ul v-if="item_.data" class="list-style-none pb-3">
                                         <li v-for="item__ in item_.data" :key="item__.title">
-                                            <HyperlinkWrapper v-if="!item_.notOuterLink" @click="triggerMenu">
+                                            <HyperlinkWrapper v-if="!item__.notOuterLink" @click="triggerMenu">
                                                 <a :href="item__.href" class="lh-condensed-ultra py-2 d-block link-gray-dark no-underline">{{item__.title}}</a>
                                             </HyperlinkWrapper>
-                                            <router-link @click.native="triggerMenu" v-if="item_.notOuterLink" :to="item__.href" class="lh-condensed-ultra py-2 d-block link-gray-dark no-underline">{{item__.title}}</router-link>
+                                            <router-link @click.native="triggerMenu" v-if="item__.notOuterLink" :to="item__.href" class="lh-condensed-ultra py-2 d-block link-gray-dark no-underline">{{item__.title}}</router-link>
                                         </li>
                                     </ul>
                                 </div> 

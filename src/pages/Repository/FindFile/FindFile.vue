@@ -6,21 +6,22 @@
 
         <Main>
             <transition-group name="fade-group" appear>
+                <FileListSkeleton :key="-1" v-if="data.length == 0 && loading"></FileListSkeleton>
                 <FileListItem v-for="item in filteredFiles.slice(0,50)" :key="`${item.sha}-${item.path}`" :file="item" :highlightStr="searchQuery">
                 </FileListItem>
             </transition-group>
         </Main>
 
-        <transition name="fade" appear>
+        <!-- <transition name="fade" appear>
             <CommonLoading v-if="loading"></CommonLoading>
-        </transition>
+        </transition> -->
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
     import {CommonLoading} from '@/components'
-    import FileListItem from './FileListItem.vue'
+    import {FileListItem,FileListSkeleton} from './components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as api from '@/network/api'
     import {authRequiredGet} from '@/network'
@@ -75,6 +76,7 @@
         components: {
             CommonLoading,
             FileListItem,
+            FileListSkeleton,
             Container: styled.div``,
             SearchInput: styled.div``,
             Main: styled.div``,

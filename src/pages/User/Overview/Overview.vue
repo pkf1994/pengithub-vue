@@ -2,15 +2,20 @@
     <Container class="position-relative">
         
         <transition name="fade" appear>
-             <Main v-if="firstLoadedFlag || !accessToken">
-                <Pinned class="mt-4" v-if="pinnedRepositories.length > 0 || !accessToken">
+             <Main>
+                <Pinned class="mt-4">
                     <Title class="f4 mb-2 text-normal">
                         Pinned
                     </Title>
                     
                     <RepoListItem class="mb-3" v-for="item in pinnedRepositories" :key="item.id" :repository="item">
-
                     </RepoListItem>
+
+                    <div v-if="dosenotHaveAnyPublicRepo" class="blankslate mb-4">
+                        <h5>
+                            {{login}} doesn’t have any public repositories yet.
+                        </h5>
+                    </div>
 
                     <LoginNecessaryNotice v-if="!accessToken" class="px-3 py-4 text-gray-light text-center">
                         <a href="javascript:void(0)" class="btn-link" @click="signIn">Sign up with Oauth&nbsp;</a> 
@@ -47,6 +52,7 @@
             return {
                 firstLoadedFlag: false,
                 pinnedRepositories: [],
+                dosenotHaveAnyPublicRepo: false,
                 loading: false
             }
         },
@@ -60,7 +66,6 @@
         },
         created() {
             this.network_getData()
-            
         },
         methods: {
             async network_getData() {
@@ -72,6 +77,8 @@
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_pinnedRepositories,{cancelToken})
                     try{
                         this.pinnedRepositories = res.data.data.user.pinnedItems.nodes
+                        this.dosenotHaveAnyPublicRepo = false
+                        if(this.pinnedRepositories.length == 0) this.dosenotHaveAnyPublicRepo = true
                         this.firstLoadedFlag = true
                     }catch(e) {
                         this.handleGraphqlError(res)
@@ -101,6 +108,7 @@
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/blankslate/index.scss';
 .loading-wrapper{
     pointer-events: none;
     position:absolute;

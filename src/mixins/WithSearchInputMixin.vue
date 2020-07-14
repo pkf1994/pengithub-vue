@@ -17,7 +17,7 @@
             search() {
                 if(!this.localSearchQuery || this.localSearchQuery.trim() === "") return
                 this.$router.push({
-                    path: `/search/repositories?q=${this.localSearchQuery}`
+                    path: `/search?q=${this.localSearchQuery}`
                 })
             },
             initEnterHandler() {

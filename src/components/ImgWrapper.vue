@@ -1,5 +1,5 @@
 <template>
-    <Container @load.native="loadHandler">
+    <Container @load.native="loadHandler"  style="overflow: hidden">
         <transition-group name="fade-group">
             <span key="1" v-if="showImgFlag">
                 <slot></slot>

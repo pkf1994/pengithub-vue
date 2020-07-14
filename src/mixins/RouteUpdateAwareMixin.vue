@@ -35,7 +35,7 @@
                 }
                 setTimeout(() => {
                     vm.$el.style.display = 'block'
-                },0)
+                },500)
             })
         },
         beforeRouteUpdate (to, from, next) {

@@ -1,7 +1,7 @@
 <template>
     <CommonLoadingWrapper :loading="loading || extraData.loading" :position="loading ? 'center' : 'corner'" class="px-3">
         <transition name="fade" appear>
-            <PaddingPageTopTab v-if="firstLoadedFlag" class="subnav" style="margin-right:-16px;margin-left:-16px;" :tabs="tabs"></PaddingPageTopTab>
+            <PaddingPageTopTab class="subnav" style="margin-right:-16px;margin-left:-16px;" :tabs="tabs"></PaddingPageTopTab>
         </transition>  
         <transition-group name="fade-group" appear>
             <ReleaseListItem v-for="(item,index) in data" :key="item.node_id" :release="item" :isLatestRelease="(!pageInfo.prev) && index == 0" class="border-top"></ReleaseListItem>
@@ -9,7 +9,7 @@
         <SimplePaginationRest v-if="firstLoadedFlag && (pageInfo.prev || pageInfo.next)" :loading="loading" :pageInfo="pageInfo"></SimplePaginationRest>
 
         <transition name="fade" appear>
-            <Blankslate v-if="data.length == 0 && loading == false && !pageInfo.prev" class="blankslate border-top">
+            <Blankslate v-if="isEmpty" class="blankslate">
                 <svg height="32" class="octicon octicon-tag blankslate-icon" viewBox="0 0 15 16" version="1.1" width="30" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
                 <h3>There aren’t any releases here</h3>
                 <p>Releases are powered by 
@@ -27,7 +27,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {PaddingPageTopTab,SimplePaginationRest,HyperlinkWrapper} from '@/components'
+    import {PaddingPageTopTab,SimplePaginationRest,HyperlinkWrapper,CommonLoadingWrapper} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as api from '@/network/api'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
@@ -36,7 +36,6 @@
     let parse = require('parse-link-header')
     export default {
         name: 'repository_releases_page',
-        inject: ['repo','owner'],
         mixins: [RouteUpdateAwareMixin],
         provide() {
             return {
@@ -46,6 +45,7 @@
         data() {
             return {
                 data: [],
+                isEmpty: false,
                 perPage: 10,
                 loading: false,
                 pageInfo: {},
@@ -57,16 +57,22 @@
             }
         },
         computed: {
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
             tabs() {
                 return [
                     {
                         label: 'Releases',
-                        to: `/${this.owner()}/${this.repo()}/releases`,
+                        to: `/${this.owner}/${this.repo}/releases`,
                         activeFlag: true
                     },
                     {
                         label: 'Tags',
-                        to: `/${this.owner()}/${this.repo()}/tags`
+                        to: `/${this.owner}/${this.repo}/tags`
                     },
                 ]
             },
@@ -74,7 +80,7 @@
                 return this.$route.params.tabOrRelease
             },
             documentTitle() {
-                return `Releases · ${this.owner()}/${this.repo()}`
+                return `Releases · ${this.owner}/${this.repo}`
             }
         },
         created() {
@@ -85,9 +91,14 @@
                 try{
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let url = api.API_REPOSITORY_RELEASES(this.owner(),this.repo(),{
-                        per_page: this.perPage,
-                        ...this.$route.query
+                
+                    let url = api.API_REPOSITORY_RELEASES({
+                        repo: this.repo,
+                        owner: this.owner,
+                        params: {
+                            per_page: this.perPage,
+                            ...this.$route.query
+                        }
                     })
                     let res = await authRequiredGet(
                         url,
@@ -100,6 +111,8 @@
                     )
                     if(window) window.scrollTo(0,0)
                     this.data = res.data
+                    this.isEmpty = false
+                    if(res.data.length == 0) this.isEmpty = true
                     this.pageInfo = parse(res.headers.link) || {}
                     this.firstLoadedFlag = true
                     if(this.accessToken) this.network_getExtraData()
@@ -142,6 +155,7 @@
             PaddingPageTopTab,
             SimplePaginationRest,
             HyperlinkWrapper,
+            CommonLoadingWrapper,
             Container: styled.div``,
             Blankslate: styled.div``
         }

@@ -152,6 +152,8 @@
                         active: [
                             `${path}/tree`,
                             `${path}/blob`,
+                            `${path}/releases`,
+                            `${path}/tags`,
                             `${path}/branches`,
                             `${path}/branches/all`,
                             `${path}/branches/stale`,
@@ -184,7 +186,12 @@
                     },
                     {
                         label: "Insights",
-                        to: `${path}/pulse`
+                        to: `${path}/pulse`,
+                        active: [
+                            `${path}/contributors`
+                        ].some(i => {
+                            return this.$route.path.indexOf(i) != -1
+                        })
                     },
                     {
                         label: "Community",

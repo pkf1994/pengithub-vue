@@ -1,8 +1,5 @@
 const LogoHeader = () => import('../components/Header/LogoHeader.vue')
-const RepoHeader = () => import('../components/Header/RepoHeader.vue')
 const SimpleFooter = () => import('../components/Footer/SimpleFooter.vue')
-const LabelsFooter = () => import('../components/Footer/LabelsFooter.vue')
-const ComplexFooter = () => import('../components/Footer/ComplexFooter.vue')
 const Home = () => import('../pages/Home/Home.vue')
 const OauthRedirectPage = () => import('../pages/OauthRedirectPage/OauthRedirectPage.vue')
 const ViewerPullRequests = () => import('../pages/ViewerIssues/PullRequests.vue')
@@ -66,6 +63,7 @@ const RepositoryLabels = () => import('../pages/Repository/Labels/Labels.vue')
 const RepositoryMilestones = () => import('../pages/Repository/Milestones/Milestones.vue')
 const RepositoryMilestoneDetail = () => import('../pages/Repository/MilestoneDetail/MilestoneDetail.vue')
 const RepositoryCompare = () => import('../pages/Repository/Compare/Compare.vue')
+const RepositoryContributors = () => import('../pages/Repository/Contributors/Contributors.vue')
 const SignOut = () => import('../pages/SignOut/SignOut.vue')
 const Notifications = () => import('../pages/Notifications/Notifications.vue')
 const NotFoundPage = () => import('../pages/NotFoundPage/NotFoundPage.vue')
@@ -482,6 +480,12 @@ export default [
                     authRequired: true
                 }
             },
+            {
+                path: 'contributors',
+                name: 'repositoryContributors',
+                component: RepositoryContributors,
+            },
+
         ]
     },
     {

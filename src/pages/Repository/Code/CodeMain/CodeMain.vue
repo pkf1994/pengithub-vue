@@ -61,10 +61,10 @@
                 <div v-else class="d-flex flex-items-center flex-wrap">
                     <div style="height: 24px" class="AvatarStack flex-self-start AvatarStack--two" v-if="latestCommit.data.author && latestCommit.data.committer && latestCommit.data.author.login != latestCommit.data.committer.login">
                         <div class="AvatarStack-body">
-                            <router-link style="height: 24px;width: 24px" v-if="latestCommit.data.author && latestCommit.data.author.avatar_url" class="avatar avatar-user" :to="`/${latestCommit.data.author.login}`">
+                            <router-link style="height: 24px;width: 24px;border-radius:2em;overflow:hidden" v-if="latestCommit.data.author && latestCommit.data.author.avatar_url" class="avatar avatar-user" :to="`/${latestCommit.data.author.login}`">
                                 <img width="24" height="24" :src="latestCommit.data.author.avatar_url" :alt="`@${latestCommit.data.author.login}`">
                             </router-link>
-                            <router-link style="height: 24px;width: 24px" v-if="latestCommit.data.committer && latestCommit.data.committer.avatar_url" class="avatar avatar-user" :to="`/${latestCommit.data.author.login}`">
+                            <router-link style="height: 24px;width: 24px;border-radius:2em;overflow:hidden" v-if="latestCommit.data.committer && latestCommit.data.committer.avatar_url" class="avatar avatar-user" :to="`/${latestCommit.data.author.login}`">
                                 <img width="24" height="24" :src="latestCommit.data.committer.avatar_url" :alt="`@${latestCommit.data.committer.login}`">
                             </router-link>
                         </div>
@@ -90,8 +90,8 @@
                             …
                         </button>
 
-                        <svg v-if="latestCommit.status && latestCommit.status.state == 'SUCCESS'" class="octicon text-green octicon-check v-align-middle flex-shrink-0 ml-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
-                        <svg v-else-if="latestCommit.status && latestCommit.status.state == 'FAILURE'" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true" class="octicon octicon-x v-align-middle text-red flex-shrink-0 ml-2"><path data-v-74bab622="" fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
+                        <svg v-if="latestCommit.status == 'SUCCESS'" class="octicon text-green octicon-check v-align-middle flex-shrink-0 ml-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
+                        <svg v-else-if="latestCommit.status == 'FAILURE'" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true" class="octicon octicon-x v-align-middle text-red flex-shrink-0 ml-2"><path data-v-74bab622="" fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
                     </div>
 
                     <router-link v-if="commitCount.data !== undefined" :to="`/${owner}/${repo}/commits/${currentRef}`" class="link-gray-dark no-underline d-block ml-3">
@@ -188,6 +188,10 @@
                 </div>
 
                 <div v-else-if="!releases.loading" class="text-small">No releases published</div>
+
+                <div class=" text-small" v-if="viewer.login == owner">
+                    <router-link :to="`/${owner}/${repo}/releases/new`">Create a new release</router-link>
+                </div>
             </Releases>
         </AnimatedHeightWrapper>
         
@@ -215,7 +219,7 @@
                 </div>
         </Contributors>
 
-        <Languages class="py-4 border-top" v-if="languages.data && !this.path">
+        <Languages class="py-4 border-top" v-if="languagesDistribution && languagesDistribution.length > 0 && !this.path">
             <h2 class="h4 mb-3">
                 Languages
             </h2>
@@ -434,8 +438,8 @@
             },
         },
         created() {
+            console.log('create')
             this.network_getData()
-            
         },
         methods: {
             network_getData() {
@@ -995,9 +999,6 @@
 @import 'node_modules/@primer/css/forms/index.scss';
 @import 'node_modules/@primer/css/select-menu/index.scss';
 
-.avatar-user{
-    border-radius: 50%;
-}
 .user-mention{
     font-weight: 600;
     color: #24292e;

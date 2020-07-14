@@ -11,13 +11,9 @@
         
         <CommitMeta class="commit-meta d-flex flex-commits-center" style="color: #24292e;">
             
-            <AvatarStack v-if="commit.author || commit.committer" class="AvatarStack flex-self-start AvatarStack-body" :class="{'AvatarStack--two':committedNotByAuthor}">
-                <ImgWrapper>
-                    <img class="avatar" v-if="commit.author" height="20" width="20" :src="commit.author.avatar_url" :alt="`@${commit.author && commit.author.name}`">
-                </ImgWrapper>
-                <ImgWrapper>
-                    <img v-if="commit.author && committedNotByAuthor" class="avatar" height="20" width="20" :src="commit.committer.avatar_url" :alt="`@${commit.author.name}`">
-                </ImgWrapper>
+            <AvatarStack v-if="commit.author && commit.committer && commit.author.avatar_url != commit.committer.avatar_url" class="AvatarStack flex-self-start AvatarStack-body" :class="{'AvatarStack--two':committedNotByAuthor}">
+                <img class="avatar" height="20" width="20" :src="commit.author.avatar_url" :alt="`@${commit.author.login}`">
+                <img class="avatar" height="20" width="20" :src="commit.committer.avatar_url" :alt="`@${commit.committer.login}`">
             </AvatarStack>
 
             <div class="f6 text-gray min-width-0 mr-1" v-if="commit.author || commit.committer">

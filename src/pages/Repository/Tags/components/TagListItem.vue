@@ -2,7 +2,7 @@
     <Container class="Box-row">
         <TagName>
             <h4 class="flex-auto min-width-0 pr-2 pb-1 commit-title">
-                <router-link :to="`/vuejs/vue/releases/tag/${tag.name}`">
+                <router-link :to="`/${owner}/${repo}/releases/tag/${tag.name}`">
                     {{tag.name}}
                 </router-link>
                 <transition appear name="fade">   
@@ -68,6 +68,12 @@
             }
         },
         computed: {
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
             tagDate() {
                 if(!this.extraDataHolder) return
                 if(!this.extraDataHolder.target) return

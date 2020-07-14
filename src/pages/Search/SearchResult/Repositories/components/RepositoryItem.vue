@@ -15,7 +15,7 @@
 
         <Main class="mt-n1">
             <FullName class="f4 text-normal">
-                <router-link to="/search" :meta="randomMeta">{{repository.full_name}}</router-link>
+                <router-link :to="`/${repository.full_name}`" :meta="randomMeta">{{repository.full_name}}</router-link>
             </FullName>
             <Description class="mb-1" :meta="randomMeta">
                 {{repository.description}}
