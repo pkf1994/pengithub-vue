@@ -247,7 +247,6 @@
 
         methods: {
             network_getData() {
-                console.log('getData')
                 this.network_getContributionIllustration()
                 if(this.accessToken) this.network_getContributionActivities()
             },

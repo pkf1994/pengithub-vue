@@ -9,6 +9,7 @@
                 componentActive: true
             }
         },
+    
         activated() {
             this.componentActive = true
         },

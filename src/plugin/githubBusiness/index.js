@@ -85,6 +85,31 @@ export default {
                         await authRequiredPut(url)
                     }
                 },
+                async github_updateSubscrption(subscribableId,state) {
+                    if(!this.accessToken) {
+                        this.signIn()
+                        return 
+                    }
+
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.UPDATE_SUBSCRIPTION,
+                        {
+                            variables: {
+                                subscribableId,
+                                state
+                            }
+                        }
+                    )
+
+                    let subscriptionResult
+                    try{
+                        subscriptionResult = res.data.data.updateSubscription.subscribable.viewerSubscription
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
+                    return subscriptionResult
+                },
                 signIn() {
                     let state = util_ramdonString.randomString()
                     let signInFromPath = this.$route.fullPath

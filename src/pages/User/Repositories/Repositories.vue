@@ -2,11 +2,11 @@
     <Container class="position-relative">
         
         <transition name="fade" appear>
-            <input v-if="firstLoadedFlag" v-model="searchQuery" class="form-control width-full my-3" placeholder="Find a repository…" autocomplete="off">
+            <input v-model="searchQuery" class="form-control width-full my-3" placeholder="Find a repository…" autocomplete="off">
         </transition>
 
         <transition name="fade" appear>
-            <FilterRow v-if="firstLoadedFlag" class="border-bottom pb-3">
+            <FilterRow class="border-bottom pb-3">
                 <button class="btn mr-1" @click="() => openModal('selectTypeModal')">
                     <i>Type:</i>
                     <span>{{type || 'All' | capitalize}}</span>
@@ -42,6 +42,7 @@
         </AnimatedHeightWrapper>
 
         <transition-group name="fade-group" appear>
+            <RepoListSkeleton v-if="loading && data.length == 0" key="RepoListSkeleton"></RepoListSkeleton>
             <RepoListItem v-for="item in data" :key="item.id" :repository="item"></RepoListItem>
         </transition-group>
 
@@ -54,7 +55,7 @@
 
         <LoadingWrapper  class="loading-wrapper">
             <div v-if="loading && !userBasicInfoProvided().loading" class="inner d-flex flex-items-center flex-justify-center">
-                <LoadingIcon></LoadingIcon>
+                <LoadingIcon :size="45"></LoadingIcon>
             </div>
         </LoadingWrapper>
 
@@ -98,7 +99,7 @@
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {LoadingIcon,Modal,SelectMenuItem,AnimatedHeightWrapper,LoadingIconEx} from '@/components'
-    import RepoListItem from './RepoListItem'
+    import {RepoListItem,RepoListSkeleton} from './components'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet,commonGet} from '@/network' 
@@ -242,6 +243,7 @@
                         }
                     })
 
+                    window && window.scrollTo && window.scrollTo(0,0)
                     this.data = res_rest.data.items
                     this.totalCount = res_rest.data.total_count
                     this.pageInfo = parse(res_rest.headers.link) || {}
@@ -321,6 +323,7 @@
         },
         components: {
             RepoListItem,
+            RepoListSkeleton,
             LoadingIcon,
             Modal,
             SelectMenuItem,

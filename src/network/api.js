@@ -1,7 +1,7 @@
 import {util_queryParse} from "../util";
 
 const CLIENT_ID = "125cb651f63615c6d362"
-const SCOPE = "user repo repo_deployment repo:invite admin:repo_hook home admin:org admin:public_key admin:org_hook gist notifications delete_repo write:discussion read:discussion write:packages read:packages delete:packages admin:gpg_key workflow"
+const SCOPE = "user public_repo repo repo_deployment repo:status read:repo_hook read:org read:public_key read:gpg_key repo:invite admin:repo_hook home admin:org admin:public_key admin:org_hook gist notifications delete_repo write:discussion read:discussion write:packages read:packages delete:packages admin:gpg_key workflow"
 const GITHUB_REST_API_BASE = "https://api.github.com"
 const BACK_END_API_BASE = "http://127.0.0.1:8088"
 const PROXY_API_BASE = "http://127.0.0.1:8888"
@@ -144,8 +144,13 @@ export const API_REPOSITORY_CONTRIBUTORS = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/contributors?${query}`
 }
 
-export const API_REPOSITORY_SUBSCRIPTION = (owner,repo) => {
-    return `${GITHUB_REST_API_BASE}/repos/${owner}/${repo}/subscription`
+export const API_REPOSITORY_SUBSCRIPTION = payload => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/subscription`
+}
+
+export const API_REPOSITORY_STARGAZERS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/stargazers?${query}`
 }
 
 export const API_REPOSITORY_LANGUAGES = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/languages`
@@ -333,3 +338,5 @@ export const API_BLOCK_USER_OR_NOT = payload => `${GITHUB_REST_API_BASE}/user/bl
 export const API_FOLLOW_USER_OR_NOT = payload => `${GITHUB_REST_API_BASE}/user/following/${payload}`
 
 export const API_PROXY_SEARCH_RESULT_COUNT = payload => `${PROXY_API_BASE}/search/count?q=${payload.q}&type=${payload.type}`
+
+export const API_THREAD_SUBSCRIPTION = payload => `${GITHUB_REST_API_BASE}/notifications/threads/${payload}/subscription`

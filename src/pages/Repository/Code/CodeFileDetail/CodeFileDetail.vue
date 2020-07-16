@@ -119,7 +119,7 @@
                         :content="data" 
                         :currentRef="currentRef" 
                         :path="path" 
-                        :contentInfo="contentInfo.data"></Content>
+                        :byteSize="byteSize.data"></Content>
         </transition>
 
        <!--  <Modal ref="switchBranchOrTagModal" title="Switch branches/tags" :modalStyle="{height:'80vh'}" @show="network_getAvailableRefs">
@@ -255,10 +255,10 @@
                     }
                 },
                 switchBranchOrTagModalTab: "branch",
-                contentInfo: {
-                    data: {},
+                byteSize: {
+                    data: 0,
                     loading: false
-                }
+                },
             }
         },
       
@@ -315,7 +315,7 @@
                 this.network_getLatestCommit()
                 this.network_getContributionMessage()
                 this.network_tryToGetContentHTML()
-                this.network_getContentInfo()
+                if(this.accessToken)this.network_getByteSize()
             },
             async network_getLatestCommit() {
                 try{
@@ -420,7 +420,7 @@
                     this.loading = false
                 }
             },
-             network_getModalAvailableRef() {
+            network_getModalAvailableRef() {
                 if(this.selectRefModal.tab == 'branches') {
                     this.network_getModalAvailableBranches()
                 }else{
@@ -612,27 +612,31 @@
                     this.availableTags.loading = false
                 }
             },
-            async network_getContentInfo() {
+            async network_getByteSize() {
                 try{
-                    this.contentInfo.loading = true
-                    let url = api.API_CONTENTS({
-                        repo: this.repo,
-                        owner: this.owner,
-                        path: this.path,
-                        ref: this.currentRef
-                    })
+                    this.byteSize.loading = true
 
-                    let res = await authRequiredGet(
-                        url,
-                        {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_content_info')
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.BLOB_BYTE_SIZE,
+                        {  
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_byte_size'),
+                            variables: {
+                                name: this.repo,
+                                owner: this.owner,
+                                expression: `${this.currentRef}:${this.path}`
+                            }
                         }
                     )
-                    this.contentInfo.data = res.data
+                    try{
+                        this.byteSize.data = res.data.data.repository.object.byteSize
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    } 
+                    
                 }catch(e) {
                     console.log(e)
                 }finally{
-                    this.contentInfo.loading = false
+                    this.byteSize.loading = false
                 }
             },
             parseBranchesFromHTML(HTML) {

@@ -221,3 +221,17 @@ export const GRAPHQL_REPOSITORY_CONTENT_AND_LAST_COMMIT_AND_COMMIT_HISTORY = pay
   }
 }
 `}
+
+export const BLOB_BYTE_SIZE = `
+query($name:String!,$owner:String!,$expression:String!){
+  repository(name: $name, owner: $owner) {
+    object(expression: $expression) {
+      ... on Blob {
+        id
+        byteSize
+      }
+    }
+  }
+}
+
+`

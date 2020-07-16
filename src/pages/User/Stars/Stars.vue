@@ -2,7 +2,7 @@
     <Container class="position-relative">
 
         <transition name="fade" appear>
-            <FilterRow v-if="firstLoadedFlag" class="border-bottom py-3">
+            <FilterRow class="border-bottom py-3">
                 <button class="btn mr-1" @click="() => openModal('sortModal')">
                     <i>Sort:</i>
                     <span>{{currentSortLabel || 'Recently starred'}}</span>
@@ -12,6 +12,7 @@
         </transition>
 
         <transition-group name="fade-group" appear>
+            <RepoListSkeleton v-if="data.length == 0 && loading" key="RepoListSkeleton"></RepoListSkeleton>
             <RepoListItem v-for="item in data" :key="item.id" :repository="item"></RepoListItem>
         </transition-group>
 
@@ -24,7 +25,7 @@
 
         <LoadingWrapper  class="loading-wrapper">
             <div v-if="loading && !userBasicInfoProvided().loading" class="inner d-flex flex-items-center flex-justify-center">
-                <LoadingIcon></LoadingIcon>
+                <LoadingIcon :size="45"></LoadingIcon>
             </div>
         </LoadingWrapper>
 
@@ -43,7 +44,7 @@
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {LoadingIcon,Modal,SelectMenuItem,AnimatedHeightWrapper} from '@/components'
-    import RepoListItem from './RepoListItem'
+    import {RepoListItem,RepoListSkeleton} from './components'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet,commonGet} from '@/network' 
@@ -240,6 +241,7 @@
             Modal,
             SelectMenuItem,
             AnimatedHeightWrapper,
+            RepoListSkeleton,
             Container: styled.div``,
             LoadingWrapper: styled.div``,
             FilterRow: styled.div``,

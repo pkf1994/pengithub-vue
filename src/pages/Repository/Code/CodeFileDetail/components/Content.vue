@@ -61,7 +61,7 @@
             content: String,
             currentRef: String,
             path: String,
-            contentInfo: Object,
+            byteSize: Number,
         },
         computed: {
             fileDetailRows() {
@@ -88,7 +88,7 @@
                 return `/${this.owner}/${this.repo}/blame/${this.currentRef}/${this.path}`
             },
             fileSize() {
-                if(this.contentInfo.size) return util_fileSize.getFileSizeWithNumberAndUnit(this.contentInfo.size)
+                if(this.byteSize) return util_fileSize.getFileSizeWithNumberAndUnit(this.byteSize)
             }
         },
         components: {

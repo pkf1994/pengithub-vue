@@ -25,11 +25,20 @@
             </HeaderTitle>
 
             <HeaderMeta class="d-flex mt-2 mb-3 flex-items-center header-meta">
-                <State  class="State State--green mr-2 d-inline-flex flex-items-center flex-self-start"
+                <State v-if="!data.state"  class="State State--green mr-2 d-inline-flex flex-items-center flex-self-start"
                         :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" 
-                        style="text-transform:capitalize;border-radius: 2em;min-width:55px">
-                    <IssueIcon color="#fff" :issue="data"></IssueIcon>
-                    &nbsp;{{data.state}}
+                        style="text-transform:capitalize;border-radius: 2em">
+                    <IssueIcon class="flex-shrink-0 mr-1" color="#fff" :issue="data"></IssueIcon>
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                </State>   
+                <State v-else  class="State State--green mr-2 d-inline-flex flex-items-center flex-self-start"
+                        :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" 
+                        style="text-transform:capitalize;border-radius: 2em">
+                    <IssueIcon class="flex-shrink-0 mr-1" color="#fff" :issue="data"></IssueIcon>
+                    {{data.state}}
                 </State>   
 
                 <Skeleton v-if="!data.id && loading" class="flex-grow-1">
@@ -189,20 +198,33 @@
             <InfoBottomItem class="info-bottom-item" v-if="accessToken">
                 <InfoBottomItemTitle class="info-bottom-item-title d-flex flex-justify-between">
                     Notifications
-                    <span class="text-normal" @click="() => showModal('notificationSettingsModal')">Customize</span>
+                    <button v-if="repoOwnerType &&  repoOwnerType != 'Organization'" class="text-normal" @click="() => showModal('notificationSettingsModal')">Customize</button>
                 </InfoBottomItemTitle>
-               <button style="height: 40px" @click="triggerSubscription" :disabled="notificationSettingsModal.loading" class="btn btn-block d-block width-full d-flex flex-items-center flex-justify-center">
-                    <span v-if="!notificationSettingsModal.loading">
-                        <span class="mr-2">
-                            <svg class="octicon octicon-mute v-align-middle" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2.81v10.38c0 .67-.81 1-1.28.53L3 10H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h2l3.72-3.72C7.19 1.81 8 2.14 8 2.81zm7.53 3.22l-1.06-1.06-1.97 1.97-1.97-1.97-1.06 1.06L11.44 8 9.47 9.97l1.06 1.06 1.97-1.97 1.97 1.97 1.06-1.06L13.56 8l1.97-1.97z"></path></svg> 
-                        </span> 
-                        {{extraData.data.viewerSubscription == 'SUBSCRIBED' ? 'Unsubscribe' : 'Subscribe'}}
+               <button style="height: 40px" @click="triggerSubscription" :disabled="notificationSettingsModal.loading || repoOwnerType == 'Organization'" class="btn btn-block d-block width-full d-flex flex-items-center flex-justify-center">
+                    <span class="d-flex flex-items-center" v-if="!notificationSettingsModal.loading">
+                        <svg class="octicon octicon-mute mr-1" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2.81v10.38c0 .67-.81 1-1.28.53L3 10H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h2l3.72-3.72C7.19 1.81 8 2.14 8 2.81zm7.53 3.22l-1.06-1.06-1.97 1.97-1.97-1.97-1.06 1.06L11.44 8 9.47 9.97l1.06 1.06 1.97-1.97 1.97 1.97 1.06-1.06L13.56 8l1.97-1.97z"></path></svg> 
+                        <span class="v-align-top">
+                            {{extraData.data.viewerSubscription == 'SUBSCRIBED' ? 'Unsubscribe' : 'Subscribe'}}
+                        </span>    
                     </span>
                     <span v-else>
                         Updating...
                     </span>    
                 </button>
-                <span class="mt-1 d-inline-block" v-if="extraData.data.viewerSubscription">You're {{extraData.data.viewerSubscription.toLowerCase()}} to this thread.</span>
+                <span class="mt-1 d-inline-block" v-if="extraData.data.viewerSubscription">
+                    You're {{extraData.data.viewerSubscription.toLowerCase()}} to this thread.
+                    <span v-if="repoSubscription().subscribed && extraData.data.viewerSubscription == 'UNSUBSCRIBED'">
+                        But you can still receive notification because you’re watching this repository.     
+                    </span>    
+                    <span v-if="repoOwnerType == 'Organization'">
+                        And you can't update subscription it at Pengithub. 
+                        <HyperlinkWrapper>
+                            <a href="https://docs.github.com/en/github/setting-up-and-managing-organizations-and-teams/restricting-access-to-your-organizations-data">
+                                Why?
+                            </a>
+                        </HyperlinkWrapper>
+                    </span>    
+                </span>
             </InfoBottomItem>
 
             <!-- participants -->
@@ -243,10 +265,12 @@
         <transition name="fade" appear>
             <StickyTop v-if="scrollTop > 300 && data.id" class="sticky-top px-3 py-2">
                 <StickyTopContent class="d-flex flex-items-center flex-justify-between">
-                    <State class="State mr-2 d-inline-flex flex-items-center flex-shrink-0" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize;">
-                        <IssueIcon color="#fff" :issue="data"></IssueIcon>
-                        &nbsp;{{data.state}}
-                    </State>   
+                    <State class="State State--green mr-2 d-inline-flex flex-items-center"
+                            :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" 
+                            style="text-transform:capitalize;border-radius: 2em">
+                        <IssueIcon class="flex-shrink-0 mr-1" color="#fff" :issue="data"></IssueIcon>
+                        {{data.state}}
+                    </State>     
 
                     <div class="min-width-0">
                         <h1 class="d-flex text-bold f5">
@@ -318,7 +342,7 @@
             </transition-group>
 
                 
-            <router-link v-if="!applyLabelsModal.labels.loading" :to="`/${owner()}/${repo()}/labels`" class="py-3 d-block text-gray border-top labels-page-link bg-white">
+            <router-link v-if="!applyLabelsModal.labels.loading" :to="`/${owner}/${repo}/labels`" class="py-3 d-block text-gray border-top labels-page-link bg-white">
                 <span>
                     <svg class="octicon octicon-pencil mr-1 label-options-icon" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"></path></svg>
                 </span>  
@@ -357,13 +381,13 @@
 
         <Modal title="Notification settings" ref="notificationSettingsModal" :modalStyle="{maxHeight:'80vh'}"> 
             <transition-group name="fade-group" appear>
-                <SelectMenuItem v-for="item in notificationSettingsModal.availableSubscriptionSettings" :key="item.title" :iconStyle="{alignSelf:'flex-start'}" :selected="extraData.data.viewerSubscription ==  item.subscriptionState" @click.native="() => network_setSubscription(item.subscriptionState)">
+                <SelectMenuItem v-for="item in notificationSettingsModal.availableSubscriptionSettings" :key="item.title" :iconStyle="{alignSelf:'flex-start'}" :selected="extraData.data.viewerSubscription == item.value" @click.native="() => network_setSubscription(data.node_id,item.value)">
                     <div>
                         <span class="milestone-title">{{item.title}}</span>
                         <span class="milestone-description">{{item.description}}</span>
                     </div> 
 
-                    <template v-slot:icon v-if="notificationSettingsModal.loading && notificationSettingsModal.settingSubscription == item.subscriptionState">
+                    <template v-slot:icon v-if="notificationSettingsModal.loading && notificationSettingsModal.settingSubscription == item.value">
                         <TinyLoadingIcon class="mr-2"></TinyLoadingIcon>
                     </template>    
                 </SelectMenuItem>
@@ -490,7 +514,6 @@
                 </button>
             </div>
         </Modal>
-
         
     </CommonLoadingWrapper>
 </template>
@@ -526,7 +549,7 @@
     var parse = require('parse-link-header');
     export default {
         name: 'issueDetail',
-        inject: ['owner','repo','viewerIsCollaborator'],
+        inject: ['repoBasicInfo','viewerIsCollaborator','repoSubscription'],
         mixins: [ScrollTopListenerMixin,RouteUpdateAwareMixin],
         provide() {
             return {
@@ -675,19 +698,19 @@
                     loading: false,
                     availableSubscriptionSettings: [
                         {
-                            subscriptionState: 'UNSUBSCRIBED',
                             title: 'Not subscribed',
                             description: 'Only receive notifications from this issue when you have participated or have been @mentioned.',
+                            value: 'UNSUBSCRIBED'
                         },
                         {
-                            subscriptionState: 'SUBSCRIBED',
                             title: 'Subscribed',
                             description: 'Receive all notifications from this issue.',
+                            value: 'SUBSCRIBED'
                         },
                         {
-                            subscriptionState: 'IGNORED',
                             title: 'Ignored',
                             description: 'Never receive notifications from this issue.',
+                            value: 'IGNORED'
                         },
                     ]
                 },
@@ -716,6 +739,12 @@
         },
        
         computed: {
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
             number() {
                 return this.$route.params.number
             },
@@ -785,6 +814,9 @@
                     }
                 })
                 return mergedTimelineData
+            },
+            repoOwnerType() {
+                return this.repoBasicInfo().owner.type
             }
         },
         created() {
@@ -1138,28 +1170,20 @@
                     this.setMilestoneModal.loading = false
                 }
             },
-            async network_setSubscription(subscriptionState) {
+            async network_setSubscription(subscribableId,state) {
                 if(this.notificationSettingsModal.loading) return
                 if(!this.accessToken) return
                 try{
                     this.notificationSettingsModal.loading = true
-                    this.notificationSettingsModal.settingSubscription = subscriptionState
+                    this.notificationSettingsModal.settingSubscription = state
 
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' update_subscription')
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.GRAPHQL_MUTATION_UPDATE_SUBSCRIPTION,
-                        {
-                            cancelToken,
-                            variables: {
-                                subscribableId: this.data.node_id,
-                                state: subscriptionState
-                            }
-                        }
-                    )   
-                    Object.assign(this.extraData.data, res.data.data.updateSubscription.subscribable)
-                    console.log(res)
+                    let result = await this.github_updateSubscrption(this.data.node_id,state)   
+
+                    this.extraData.data.viewerSubscription = result
+                    console.log(result)
                 }catch(e) {
                     this.handleError(e)
+                  
                 }finally{
                     this.notificationSettingsModal.loading = false
                 }
@@ -1289,7 +1313,7 @@
                         }
                     )
                     this.handleGraphqlError(res)
-                    this.$router.replace(`/${this.owner()}/${this.repo()}/issues?delete=${this.data.id}`)
+                    this.$router.replace(`/${this.owner}/${this.repo}/issues?delete=${this.data.id}`)
                     this.topNoticeShow('repository','The issue was successfully deleted.')
                 }catch(e) { 
                     this.handleError(e)

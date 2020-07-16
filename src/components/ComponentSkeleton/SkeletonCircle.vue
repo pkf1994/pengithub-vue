@@ -6,7 +6,10 @@
 import styled from 'vue-styled-components'
 export default {
     props: {
-        diameter: Number,
+        diameter: {
+            type: Number,
+            required: false
+        },
         color: String
     },
     components: {

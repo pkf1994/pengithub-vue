@@ -14,7 +14,7 @@
 
         <LoadingWrapper  class="loading-wrapper">
             <div v-if="loading && !userBasicInfoProvided().loading" class="inner d-flex flex-items-center flex-justify-center">
-                <LoadingIcon></LoadingIcon>
+                <LoadingIcon :size="45"></LoadingIcon>
             </div>
         </LoadingWrapper>
 
@@ -25,7 +25,7 @@
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {LoadingIcon,AnimatedHeightWrapper,CommonLoadingWrapper} from '@/components'
-    import FollowerListItem from './FollowerListItem'
+    import {FollowerListItem} from './components'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet,commonGet} from '@/network' 

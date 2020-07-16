@@ -8,14 +8,17 @@
                         Pinned
                     </Title>
                     
-                    <RepoListItem class="mb-3" v-for="item in pinnedRepositories" :key="item.id" :repository="item">
+                    <RepoListItem class="mb-3" v-for="item in pinnedRepositories.data" :key="item.id" :repository="item">
                     </RepoListItem>
 
-                    <div v-if="dosenotHaveAnyPublicRepo" class="blankslate mb-4">
-                        <h5>
-                            {{login}} doesn’t have any public repositories yet.
-                        </h5>
-                    </div>
+                    <AnimatedHeightWrapper>
+                        <div v-if="pinnedRepositories.isEmpty" class="blankslate">
+                            <h5 class="pb-5">
+                                {{login}} doesn’t have any public repositories yet.
+                            </h5>
+                        </div>
+                    </AnimatedHeightWrapper>
+                    
 
                     <LoginNecessaryNotice v-if="!accessToken" class="px-3 py-4 text-gray-light text-center">
                         <a href="javascript:void(0)" class="btn-link" @click="signIn">Sign up with Oauth&nbsp;</a> 
@@ -31,7 +34,7 @@
 
         <LoadingWrapper  class="loading-wrapper">
             <div v-if="loading && !userBasicInfoProvided().loading" class="inner d-flex flex-items-center flex-justify-center">
-                <LoadingIcon></LoadingIcon>
+                <LoadingIcon :size="45"></LoadingIcon>
             </div>
         </LoadingWrapper>
     </Container>
@@ -40,7 +43,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {LoadingIcon} from '@/components'
+    import {LoadingIcon,AnimatedHeightWrapper} from '@/components'
     import {RepoListItem,ContributionStatistic} from './components'
     import * as graphql from './graphql'
     import {authRequiredGitHubGraphqlApiQuery} from '@/network' 
@@ -51,9 +54,13 @@
         data() {
             return {
                 firstLoadedFlag: false,
-                pinnedRepositories: [],
-                dosenotHaveAnyPublicRepo: false,
-                loading: false
+                pinnedRepositories: {
+                    data: [],
+                    loading: false,
+                    isEmpty: false
+                },
+                loading: false,
+                debug: true
             }
         },
         computed: {
@@ -70,15 +77,17 @@
         methods: {
             async network_getData() {
                 if(!this.accessToken) return 
+                console.log('get pinned repos')
                 try{
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_pinned_repositories')
                     let graphql_pinnedRepositories = graphql.GRAPHQL_USER_PINNED_REPOSITORIES(this.login)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_pinnedRepositories,{cancelToken})
                     try{
-                        this.pinnedRepositories = res.data.data.user.pinnedItems.nodes
+                        this.pinnedRepositories.data = res.data.data.user.pinnedItems.nodes
                         this.dosenotHaveAnyPublicRepo = false
-                        if(this.pinnedRepositories.length == 0) this.dosenotHaveAnyPublicRepo = true
+                        this.pinnedRepositories.isEmpty = false
+                        if(this.pinnedRepositories.data.length == 0) this.pinnedRepositories.isEmpty = true
                         this.firstLoadedFlag = true
                     }catch(e) {
                         this.handleGraphqlError(res)
@@ -95,6 +104,7 @@
             LoadingIcon,
             RepoListItem,
             ContributionStatistic,
+            AnimatedHeightWrapper,
             Container: styled.div``,
             Main: styled.div``,
             Pinned: styled.div``,

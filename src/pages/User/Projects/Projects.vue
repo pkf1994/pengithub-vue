@@ -52,7 +52,7 @@
 
          <LoadingWrapper  class="loading-wrapper">
             <div v-if="loading && !userBasicInfoProvided().loading" class="inner d-flex flex-items-center flex-justify-center">
-                <LoadingIcon></LoadingIcon>
+                <LoadingIcon :size="45"></LoadingIcon>
             </div>
         </LoadingWrapper>
 

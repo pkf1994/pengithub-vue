@@ -1,5 +1,5 @@
 <template>
-    <Container :style="{height: stretch ? `${height}px` : 0, ...containerStyle}">
+    <Container :style="{height: stretch ? `${height}px` : 0, transition: transition,overflow:'hidden'}">
         <Inner ref="content" v-on:compute-height="subComputeHeightEventHandler" >
             <slot></slot>
         </Inner>
@@ -16,23 +16,20 @@
                 type: Boolean,
                 default: true
             },
-            inactivatedFlagSignal: {
+            appear: {
                 type: Boolean,
-                required: false
+                default: true
             }
         },
         data() {
             return {
                 height: 0,
-                inactivatedFlag: false
+                transition: 'height .4s'
             }
         },
-        computed: {
-            containerStyle() {
-                return {
-                    overflowY: this.inactivatedFlag ? 'visible' : 'hidden',
-                    transition: this.inactivatedFlag ? 'none' : 'height .4s'
-                }
+        created() {
+            if(!this.appear) {
+                this.transition = 'none'
             }
         },
         mounted() {
@@ -57,6 +54,10 @@
                 if(!this.$refs.content) return 
                 if(this.height === this.$refs.content.$el.offsetHeight) return
                 this.height = this.$refs.content.$el.offsetHeight
+
+                setTimeout(() => {
+                    this.transition = 'height .4s'
+                },0)
 
                 setTimeout(() => {
                     this.emitComputeHeightEvent()

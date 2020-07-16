@@ -3,7 +3,7 @@
 
         <AvatarColumn class="col-2 mr-2">
             <router-link :to="`/${comprehensiveFollowing.login}`">
-                <ImgWrapper>
+                <ImgWrapper class="avatar avatar-user">
                     <img class="avatar avatar-user" height="50" width="50" :src="comprehensiveFollowing.avatar_url" :alt="`@${comprehensiveFollowing.login}`">
                 </ImgWrapper>
             </router-link>

@@ -50,9 +50,9 @@ export default {
         }
     },
     watch: {
-        viewerHasStarred(newOne) {
+        viewerHasStarred(newOne,oldOne) {
             this.localViewerHasStarred = newOne
-        }
+        },
     },
     components: {
         Container: styled.div``
