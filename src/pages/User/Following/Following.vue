@@ -2,6 +2,7 @@
     <CommonLoadingWrapper class="position-relative" :loading="extraData.loading" position="corner">
 
         <transition-group name="fade-group" appear>
+            <FollowerListSkeleton key="FollowerListSkeleton" v-if="loading && data.length == 0"></FollowerListSkeleton>
             <FollowingListItem v-for="item in data" :key="item.id" :following="item"></FollowingListItem>
         </transition-group>
 
@@ -26,13 +27,14 @@
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {LoadingIcon,AnimatedHeightWrapper,CommonLoadingWrapper} from '@/components'
     import FollowingListItem from './FollowingListItem'
+    import {FollowerListSkeleton} from '../Followers/components'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet,commonGet} from '@/network' 
     import {util_queryParse} from '@/util'
     var parse = require('parse-link-header');
     export default {
-        name: 'user_followers_page',
+        name: 'user_following_page',
         mixins: [RouteUpdateAwareMixin],
         inject: ['userBasicInfoProvided'],
         provide() {
@@ -80,7 +82,7 @@
 
                     let res =  await  authRequiredGet(url,{cancelToken,})
 
-                    window.scrollTo(0,0)
+                    if(this.data.length != 0)window.scrollTo(0,0)
                     this.data = res.data
                     this.pageInfo = parse(res.headers.link) || {}
                     this.firstLoadedFlag = true
@@ -130,6 +132,7 @@
             FollowingListItem,
             LoadingIcon,
             CommonLoadingWrapper,
+            FollowerListSkeleton,
             Container: styled.div``,
             LoadingWrapper: styled.div``,
             Pagination: styled.div``,

@@ -6,17 +6,24 @@
             </button>
             <SkeletonRectangle :height="24" style="width:40%"></SkeletonRectangle>
             <SkeletonRectangle :height="14" style="width:60%" class="mt-3"></SkeletonRectangle>
-            <SkeletonRectangle :height="14" style="margin-top:12px" class="width-full"></SkeletonRectangle>
+            <div class="d-flex flex-items-center flex-wrap mt-2">
+                <SkeletonCircle :diameter="12" class="mr-2"></SkeletonCircle>
+                <SkeletonRectangle :height="12" style="width:50px" class="mr-4"></SkeletonRectangle>
+                <SkeletonCircle :diameter="12" class="mr-2"></SkeletonCircle>
+                <SkeletonRectangle :height="12" style="width:40px" class="mr-4"></SkeletonRectangle>
+                <SkeletonRectangle :height="12" style="width:120px"></SkeletonRectangle>
+            </div>
         </Skeleton>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {SkeletonRectangle} from '@/components'
+    import {SkeletonRectangle,SkeletonCircle} from '@/components'
     export default {
         components: {
             SkeletonRectangle,
+            SkeletonCircle,
             Container: styled.div``,
             Skeleton: styled.div``,
         }

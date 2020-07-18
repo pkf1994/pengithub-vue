@@ -23,6 +23,7 @@ import Editor from './Editor'
 import Subscription from './Subscription'
 import SimpleDiffView from './SimpleDiffView'
 import ImgWrapper from './ImgWrapper'
+import Img from './Img'
 import HyperlinkWrapper from './HyperlinkWrapper'
 import WithSignInNoticeWrapper from './WithSignInNoticeWrapper'
 import SimpleLoadingMore from './SimpleLoadingMore'
@@ -31,6 +32,7 @@ import WithNotificationPaneWrapper from './WithNotificationPaneWrapper'
 import WithTopNoticeWrapper from './WithTopNoticeWrapper'
 import {SkeletonRectangle,SkeletonCircle} from './ComponentSkeleton'
 import StarBtn from './StarBtn.vue'
+import FollowBtn from './FollowBtn.vue'
 export {
     Button,
     BaseHeader,
@@ -77,6 +79,7 @@ export {
     Subscription,
     SimpleDiffView,
     ImgWrapper,
+    Img,
     HyperlinkWrapper,
     WithSignInNoticeWrapper,
     WithNotFoundNoticeWrapper,
@@ -85,5 +88,6 @@ export {
     WithTopNoticeWrapper,
     SkeletonRectangle,
     SkeletonCircle,
-    StarBtn
+    StarBtn,
+    FollowBtn,
 }

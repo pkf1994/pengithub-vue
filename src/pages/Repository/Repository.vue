@@ -136,7 +136,8 @@ import fileSize from '../../util/fileSize'
                 subscription: {
                     data: {},
                     loading: false
-                }
+                },
+                resetBeforeUpdate: true
             }
         },
         provide() {

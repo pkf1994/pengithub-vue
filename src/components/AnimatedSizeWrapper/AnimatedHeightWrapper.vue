@@ -1,6 +1,6 @@
 <template>
     <Container :style="{height: stretch ? `${height}px` : 0, transition: transition,overflow:'hidden'}">
-        <Inner ref="content" v-on:compute-height="subComputeHeightEventHandler" >
+        <Inner ref="content" v-on:compute-height="subComputeHeightEventHandler">
             <slot></slot>
         </Inner>
     </Container>
@@ -19,7 +19,7 @@
             appear: {
                 type: Boolean,
                 default: true
-            }
+            },
         },
         data() {
             return {

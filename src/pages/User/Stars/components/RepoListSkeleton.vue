@@ -6,7 +6,12 @@
             </button>
             <SkeletonRectangle :height="24" style="width:40%"></SkeletonRectangle>
             <SkeletonRectangle :height="14" style="width:60%" class="mt-3"></SkeletonRectangle>
-            <div class="d-flex flex-items-center flex-wrap"  style="margin-top:12px;">
+            <div class="d-flex flex-wrap f6" style="margin-top:12px">
+                <span class="topic-tag" style="width:80px">&nbsp;</span>
+                <span class="topic-tag" style="width:80px">&nbsp;</span>
+                <span class="topic-tag" style="width:80px">&nbsp;</span>
+            </div>
+            <div class="d-flex flex-items-center flex-wrap mt-2">
                 <SkeletonCircle :diameter="12" class="mr-2"></SkeletonCircle>
                 <SkeletonRectangle :height="12" style="width:50px" class="mr-4"></SkeletonRectangle>
                 <SkeletonCircle :diameter="12" class="mr-2"></SkeletonCircle>
@@ -31,4 +36,12 @@
 </script>
 
 <style scoped>
+.topic-tag {
+    display: inline-block;
+    padding: .3em .9em;
+    margin: 0 .5em .5em 0;
+    white-space: nowrap;
+    background-color: #f1f8ff;
+    border-radius: 3px;
+}
 </style>

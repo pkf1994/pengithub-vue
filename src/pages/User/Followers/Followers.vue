@@ -2,6 +2,7 @@
     <CommonLoadingWrapper class="position-relative" :loading="extraData.loading" position="corner">
 
         <transition-group name="fade-group" appear>
+            <FollowerListSkeleton v-if="loading && data.length == 0" key="FollowerListSkeleton"></FollowerListSkeleton>
             <FollowerListItem v-for="item in data" :key="item.id" :follower="item"></FollowerListItem>
         </transition-group>
 
@@ -25,7 +26,7 @@
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {LoadingIcon,AnimatedHeightWrapper,CommonLoadingWrapper} from '@/components'
-    import {FollowerListItem} from './components'
+    import {FollowerListItem,FollowerListSkeleton} from './components'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet,commonGet} from '@/network' 
@@ -80,7 +81,7 @@
 
                     let res =  await  authRequiredGet(url,{cancelToken,})
 
-                    window.scrollTo(0,0)
+                    if(this.data.length != 0) window.scrollTo(0,0)
                     this.data = res.data
                     this.pageInfo = parse(res.headers.link) || {}
                     this.firstLoadedFlag = true
@@ -127,6 +128,7 @@
         },
         components: {
             FollowerListItem,
+            FollowerListSkeleton,
             CommonLoadingWrapper,
             LoadingIcon,
             Container: styled.div``,

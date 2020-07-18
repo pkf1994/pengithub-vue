@@ -1,14 +1,16 @@
 <template>
     <Container>
         <Skeleton class="py-4 border-bottom" v-for="item in [1,2,3,4,5,6,7,8]" :key="item">
-            <button class="btn btn-sm float-right" style="width:65px">
-                &nbsp;
-            </button>
+          
             <div class="d-flex">
-                <SkeletonCircle :diameter="50" class="col-2"></SkeletonCircle>    
+                <SkeletonCircle :diameter="50" class="col-2 mr-2"></SkeletonCircle>    
 
                 <div class="col-10">
-                    <SkeletonRectangle :height="20" class="width-full"></SkeletonRectangle>
+                      <button class="btn btn-sm float-right" style="width:55px">
+                        &nbsp;
+                    </button>
+                    <SkeletonRectangle :maxWidth="150" :minWidth="90" :height="16" :width="120"></SkeletonRectangle>
+                    <SkeletonRectangle :maxWidth="150" :minWidth="90" :height="12" :width="100" style="margin-top:12px"></SkeletonRectangle>
                 </div>    
             </div>
         </Skeleton>
@@ -28,5 +30,6 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/layout/index.scss';
 </style>

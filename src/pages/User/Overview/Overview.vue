@@ -8,8 +8,19 @@
                         Pinned
                     </Title>
                     
-                    <RepoListItem class="mb-3" v-for="item in pinnedRepositories.data" :key="item.id" :repository="item">
-                    </RepoListItem>
+                    <transition-group name="fade-group" appear>
+                        <!-- <div key="loading" v-if="loading && pinnedRepositories.data.length == 0" class="text-center p-3 mb-3">
+                            Loading pinned repositories...
+                        </div> -->
+
+                        <RepoListSkeleton v-if="loading && pinnedRepositories.data.length == 0" key="RepoListSkeleton"></RepoListSkeleton>
+
+                        <RepoListItem class="mb-3" v-for="item in pinnedRepositories.data" :key="item.id" :repository="item">
+                        </RepoListItem>
+                    </transition-group>
+                     
+                    
+                    
 
                     <AnimatedHeightWrapper>
                         <div v-if="pinnedRepositories.isEmpty" class="blankslate">
@@ -27,7 +38,9 @@
                 </Pinned>
 
                 <Contribution :class="{'mt-4':pinnedRepositories.length == 0,'mt-6':pinnedRepositories.length > 0}">
-                    <ContributionStatistic></ContributionStatistic>
+                    <keep-alive>
+                        <router-view></router-view>
+                    </keep-alive>
                 </Contribution>
             </Main>
         </transition>
@@ -44,7 +57,7 @@
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {LoadingIcon,AnimatedHeightWrapper} from '@/components'
-    import {RepoListItem,ContributionStatistic} from './components'
+    import {RepoListItem,ContributionStatistic,RepoListSkeleton} from './components'
     import * as graphql from './graphql'
     import {authRequiredGitHubGraphqlApiQuery} from '@/network' 
     export default {
@@ -60,7 +73,6 @@
                     isEmpty: false
                 },
                 loading: false,
-                debug: true
             }
         },
         computed: {
@@ -105,6 +117,7 @@
             RepoListItem,
             ContributionStatistic,
             AnimatedHeightWrapper,
+            RepoListSkeleton,
             Container: styled.div``,
             Main: styled.div``,
             Pinned: styled.div``,

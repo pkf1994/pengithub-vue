@@ -106,8 +106,11 @@
         <Title class="f4 mt-5 mb-2 text-normal">
             Contribution activity <span v-if="currentOrganization">in {{currentOrganization}}</span>
         </Title>
-
+        
         <transition-group appear name="fade-group">
+            <div key="loading" class="text-center p-3" v-if="contributionsCollectionWithPeriod.data.length == 0 && contributionsCollectionWithPeriod.loading">
+                Loading contribution activity...
+            </div> 
             <ContributionCollection v-for="item in contributionsCollectionWithPeriod.data"  :contributionsCollection="item" :key="item.endedAt"></ContributionCollection>
         </transition-group>
 
@@ -146,14 +149,14 @@
     import {Modal,LoadingIconEx,SimpleSearchInput,SelectMenuItem,AnimatedHeightWrapper} from '@/components'
     import * as graphql from '../graphql'
     import * as api from '@/network/api'
-    import {ComponentActiveAwareMixin} from '@/mixins'
+    import {RouteUpdateAwareMixin} from '@/mixins'
     import {util_numberFormat,util_dateFormat,util_queryParse} from '@/util'
     import ContributionClassificationSvg from './ContributionClassificationSvg'
     import ContributionCollection from './ContributionCollection'
     import {authRequiredGitHubGraphqlApiQuery,cancelAndUpdateAxiosCancelTokenSource,commonGet} from '@/network' 
     import Vue from 'vue'
     export default {
-        mixins: [ComponentActiveAwareMixin],
+        mixins: [RouteUpdateAwareMixin],
         name: 'user_overview_contribution_statistic',
         provide() {
             return {
@@ -262,10 +265,10 @@
                     })
                     let res = await commonGet(url,{cancelToken})
                     this.parseContributionIllustration(res.data)
+                    this.contributionIllustration.loading = false
                 }catch(e) {
                     console.log(e)
-                }finally{
-                    this.contributionIllustration.loading = false
+                    if(e.response && e.response.status == 502) this.network_getContributionIllustration() 
                 }
             },
             async network_getContributionActivities() {
@@ -497,14 +500,9 @@
                     from: util_dateFormat.dateFormat("yyyy-MM-ddThh:mm:ss",fromDate),
                 })
                 this.$router.push(`${this.$route.path}?${query}`)
-            }
-        },
-        watch: {
-            updateFlag() {
-                if(this.componentActive) this.network_getData()
             },
-            contributionActivitiesUpdateFlag() {
-                if(this.componentActive) this.network_getContributionActivities()
+            generateRouterMeta() {
+                return this.login
             }
         },
         components: {

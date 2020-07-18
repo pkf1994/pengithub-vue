@@ -6,10 +6,6 @@ export const GRAPHQL_USER_FOLLOWER_EXTRA = payload => {
       ${grapqhl}
       follower${index}:user(login: "${item.login}") {
         id
-        name
-        company
-        location
-        bioHTML
         viewerIsFollowing
         viewerCanFollow
       }

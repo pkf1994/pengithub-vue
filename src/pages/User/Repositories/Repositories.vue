@@ -214,7 +214,7 @@
                 return this.availableLanguage.data.filter(i => (i.name.toLowerCase().indexOf(this.availableLanguage.searchQuery.toLowerCase()) != -1 || i.urlParam.toLowerCase().indexOf(this.availableLanguage.searchQuery.toLowerCase()) != -1))
             },
             documentTitle() {
-                return `${this.userBasicInfoProvided().data.login}(${this.userBasicInfoProvided().data.name}) / Repositories`
+                return `${this.login}${this.userBasicInfoProvided().data.name ? '(' + this.userBasicInfoProvided().data.name + ')' : ''} / Repositories`
             }
         },
         created() {
@@ -243,7 +243,7 @@
                         }
                     })
 
-                    window && window.scrollTo && window.scrollTo(0,0)
+                    if(this.data.length > 0) window && window.scrollTo && window.scrollTo(0,0)
                     this.data = res_rest.data.items
                     this.totalCount = res_rest.data.total_count
                     this.pageInfo = parse(res_rest.headers.link) || {}

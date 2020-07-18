@@ -1,10 +1,10 @@
 <template>
-    <Container style="overflow: hidden">
-        <transition-group name="fade-group">
+    <Container style="overflow: hidden" class="width-full height-full">
+        <transition-group tag="div" class="width-full height-full" name="fade-group">
             <span key="1" v-if="showImgFlag">
-                <slot></slot>
+                <img ref="img" :src="src" :height="height" :width="width" :style="imgStyle"/>
             </span>
-            <UnloadCover key="2" v-else class="unload-cover avatar d-inline-block" :style="{height:height + 'px',width:width + 'px'}">
+            <UnloadCover key="2" v-else class="unload-cover avatar d-inline-block" :style="{height:height + 'px',width:width + 'px',...imgStyle}">
             </UnloadCover>
         </transition-group>
     </Container>
@@ -14,12 +14,13 @@
     import styled from 'vue-styled-components'
     export default {
         props: {
-
+            src: String,
+            height: Number,
+            width: Number,
+            imgStyle: Object,
         },
         data() {
             return {
-                height: 0,
-                width: 0,
                 showImgFlag: true,
             }
         },
@@ -29,18 +30,19 @@
         },
         methods: {
             initCoverStyle() {
-                if(!this.$slots.default) return 
-                this.width = this.$slots.default[0].elm.width
-                this.height = this.$slots.default[0].elm.height
-                if(this.$slots.default[0].elm.complete) return
+                if(this.$refs.img.complete) return
                 this.showImgFlag = false
             },
             initLoadHandler() {
-                if(!this.$slots.default) return 
-                this.$slots.default[0].elm.addEventListener('load',(e) => {
+                this.$refs.img.addEventListener('load',(e) => {
                     this.showImgFlag = true
                 })
             },
+        },
+        watch: {
+            src(newOne,oldOne) {
+                this.showImgFlag = false
+            }
         },
         components: {
             Container: styled.span``,

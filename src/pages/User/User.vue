@@ -2,43 +2,41 @@
     <WithTopNoticeWrapper theKey="user">
         <CommonLoadingWrapper :loading="loading || changeUserStatusModalData.loading" :position="loading ? 'center' : 'corner'" class="clearfix p-3">
         <transition name="fade" appear>
-            <Main :class="{loading:loading}">
-                <AnimatedHeightWrapper :appear="false">
+            <Main >
+                <AnimatedHeightWrapper :appear="false" :style="{overflow: `${showBlockOrReportUserPopover ? 'visible' : 'hidden'}!important`}">
                     <Skeleton v-if="loading && !data.node_id">
                         <div class="d-flex flex-items-center mb-4">
                             <div class="col-2 mr-3">
-                                <SkeletonCircle class="width-full" style="padding-bottom:100%" color="#D5D5D5"></SkeletonCircle>
+                                <SkeletonCircle class="width-full" style="padding-bottom:100%"></SkeletonCircle>
                             </div>
                             <div class="col-9 pt-1 pb-1">
-                                <SkeletonRectangle :height="24" style="width:60%" color="#D5D5D5"></SkeletonRectangle>
-                                <SkeletonRectangle :height="20" style="width:40%" class="mt-2" color="#D5D5D5"></SkeletonRectangle>
+                                <SkeletonRectangle :height="24" style="width:60%"></SkeletonRectangle>
+                                <SkeletonRectangle :height="20" style="width:40%" class="mt-2"></SkeletonRectangle>
                             </div>
                         </div>
 
                         <div>
                             <div class="d-flex flex-items-center">
-                                <SkeletonCircle :diameter="16" class="mr-2" color="#D5D5D5"></SkeletonCircle>
-                                <SkeletonRectangle :height="14" style="width: 40%" color="#D5D5D5"></SkeletonRectangle>
+                                <SkeletonCircle :diameter="16" class="mr-2"></SkeletonCircle>
+                                <SkeletonRectangle :height="14" style="width: 40%"></SkeletonRectangle>
                             </div>
                             <div class="d-flex flex-items-center mt-3">
-                                <SkeletonCircle :diameter="16" class="mr-2" color="#D5D5D5"></SkeletonCircle>
-                                <SkeletonRectangle :height="14" style="width: 45%" color="#D5D5D5"></SkeletonRectangle>
+                                <SkeletonCircle :diameter="16" class="mr-2"></SkeletonCircle>
+                                <SkeletonRectangle :height="14" style="width: 45%"></SkeletonRectangle>
                             </div>
                             <div class="d-flex flex-items-center mt-3">
-                                <SkeletonCircle :diameter="16" class="mr-2" color="#D5D5D5"></SkeletonCircle>
-                                <SkeletonRectangle :height="14" style="width: 60%" color="#D5D5D5"></SkeletonRectangle>
+                                <SkeletonCircle :diameter="16" class="mr-2"></SkeletonCircle>
+                                <SkeletonRectangle :height="14" style="width: 60%"></SkeletonRectangle>
                             </div>
                         </div> 
                     </Skeleton>
-                    <div v-else>
+                    <div v-else :class="{loading:loading}">
                         <UserBasicInfo>
                             <AvatarAndName class="d-flex flex-items-center mb-4">
-                                <Avatar class="col-2 mr-3">
-                                    <a href="" class="d-block position-relative">
-                                        <ImgWrapper class="avatar-user avatar">
-                                            <img :src="data.avatar_url" :alt="`@${data.login}`" width="260" height="260" class="avatar-user avatar border width-full height-full">
-                                        </ImgWrapper>
-                                    </a>
+                                <Avatar class="col-2 mr-3 flex-self-stretch">
+                                    <router-link :to="`/${data.login}`" class="d-block position-relative height-full">
+                                        <img v-if="showAvatar" :src="data.avatar_url" :alt="`@${data.login}`" class="avatar-user avatar border width-full" style="height: auto"/>
+                                    </router-link>
                                 </Avatar>
 
                                 <Names class="col-9 pt-1 pb-1">
@@ -136,7 +134,7 @@
                                         <strong>{{data.followers | thousands2K2M}}</strong>
                                         {{data.followers > 1 ? 'followers' : 'follower'}}
                                     </router-link>
-                                    <span v-if="data.followers && data.followings">·</span>
+                                    <span v-if="data.followers && data.following">·</span>
                                     <router-link class="link-gray" :to="`/${login}/following`" v-if="data.following !== undefined">
                                         <strong>{{data.following | thousands2K2M}}</strong>
                                         following
@@ -150,38 +148,39 @@
                             </div>
                         </UserProfile>
 
-                        <AnimatedHeightWrapper>
-                            <Actions v-if="blockThisUserOrNot.data !== undefined && viewerIsFollowing.data !== undefined && !loading" class="d-flex position-relative">
-                                <transition-group name="fade-group" appear tag="div" class="flex-grow-1">
-                                    <button key="0" 
-                                            v-if="blockThisUserOrNot.data === false && extraData.data.viewerCanFollow" 
-                                            :disabled="viewerIsFollowing.loading" 
-                                            @click="network_changeUserFollowShip"
-                                            class="btn btn-block">
-                                        {{viewerIsFollowing.loading ? 'Updating...' : (viewerIsFollowing.data ? 'Unfollow' : 'Follow')}}
-                                    </button>
-                                    <div key="1" v-if="blockThisUserOrNot.data" class="border rounded-1 text-red px-3 py-2 text-center">
-                                        <svg class="octicon octicon-circle-slash" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 0110.535-5.096l-9.131 9.131A6.472 6.472 0 011.5 8zm2.465 5.096a6.5 6.5 0 009.131-9.131l-9.131 9.131zM8 0a8 8 0 100 16A8 8 0 008 0z"></path></svg>
-                                        You have blocked this user
-                                    </div>
-                                </transition-group>
-                            
-                                <BlockOrReport class="ml-2 d-flex flex-items-center">
-                                    <span class="px-2 link-gray" @click.stop="() => showModal('blockOrReportUserPopover')">
-                                        <svg height="16" class="octicon octicon-kebab-horizontal" aria-label="More options" viewBox="0 0 16 16" version="1.1" width="16" role="img"><path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
-                                    </span>
-                                </BlockOrReport>
+                        <Actions v-if="blockThisUserOrNot.data !== undefined && viewerIsFollowing.data !== undefined && !loading" class="d-flex position-relative">
+                            <transition-group name="fade-group" appear tag="div" class="flex-grow-1">
+                                <button key="0" 
+                                        v-if="blockThisUserOrNot.data === false && extraData.data.viewerCanFollow" 
+                                        :disabled="viewerIsFollowing.loading" 
+                                        @click="network_changeUserFollowShip"
+                                        class="btn btn-block">
+                                    {{viewerIsFollowing.loading ? 'Updating...' : (viewerIsFollowing.data ? 'Unfollow' : 'Follow')}}
+                                </button>
+                                <div key="1" v-if="blockThisUserOrNot.data" class="border rounded-1 text-red px-3 py-2 text-center">
+                                    <svg class="octicon octicon-circle-slash" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 0110.535-5.096l-9.131 9.131A6.472 6.472 0 011.5 8zm2.465 5.096a6.5 6.5 0 009.131-9.131l-9.131 9.131zM8 0a8 8 0 100 16A8 8 0 008 0z"></path></svg>
+                                    You have blocked this user
+                                </div>
+                            </transition-group>
+                        
+                            <BlockOrReport class="ml-2 d-flex flex-items-center">
+                                <span class="px-2 link-gray" @click.stop="() => showModal('blockOrReportUserPopover')">
+                                    <svg height="16" class="octicon octicon-kebab-horizontal" aria-label="More options" viewBox="0 0 16 16" version="1.1" width="16" role="img"><path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
+                                </span>
+                            </BlockOrReport>
 
-                                <Popover ref="blockOrReportUserPopover" :popoverStyle="{right: '0',top: '100%',zIndex:'10'}">
-                                    <div class="dropdown-item text-small p-3 border-bottom" @click="() => showModal('blockUserModal')">
-                                        {{blockThisUserOrNot.data ? 'Unblock' : 'Block'}} this user
-                                    </div>
-                                    <!-- <div class="dropdown-item text-small p-3" @click="() => showModal('reportUserModal')">
-                                        Report this user
-                                    </div> -->
-                                </Popover>
-                            </Actions>
-                        </AnimatedHeightWrapper>
+                            <Popover ref="blockOrReportUserPopover" 
+                                    :popoverStyle="{right: '0',top: '100%',zIndex:'10'}"
+                                    @show="() => {showBlockOrReportUserPopover = true}"  
+                                    @close="() => {showBlockOrReportUserPopover = false}">
+                                <div class="dropdown-item text-small p-3 border-bottom" @click="() => showModal('blockUserModal')">
+                                    {{blockThisUserOrNot.data ? 'Unblock' : 'Block'}} this user
+                                </div>
+                                <!-- <div class="dropdown-item text-small p-3" @click="() => showModal('reportUserModal')">
+                                    Report this user
+                                </div> -->
+                            </Popover>
+                        </Actions>
                     </div>
                 </AnimatedHeightWrapper>
                 
@@ -350,7 +349,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoadingWrapper,ComplexTopTab,ImgWrapper,HyperlinkWrapper,Modal,AnimatedHeightWrapper,Popover,WithTopNoticeWrapper,SkeletonCircle,SkeletonRectangle} from '@/components'
+    import {CommonLoadingWrapper,ComplexTopTab,ImgWrapper,HyperlinkWrapper,Modal,AnimatedHeightWrapper,Popover,WithTopNoticeWrapper,Img,SkeletonCircle,SkeletonRectangle} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet,authRequiredAjax,commonGet} from '@/network'
     import * as graphql from './graphql'
@@ -419,6 +418,16 @@
                         transform: 'none'
                     }
                 },
+                showAvatar: true,
+                showBlockOrReportUserPopover: false,
+                tabCount: {
+                    loading: false,
+                    repositories: undefined,
+                    followers: undefined,
+                    following: undefined,
+                    stars: undefined
+                },
+                resetBeforeUpdate: true
             }   
         },
         computed: {
@@ -455,13 +464,14 @@
             }
           
         },
-        created() {
+        async created() {
             this.network_getData()
         },
         methods: {
             network_getData() {
                 this.network_getBasicData()
-                this.netwokr_getStarredReposCount()
+                this.network_getStarredReposCount()
+                this.network_getTabCount()
                 if(this.accessToken) this.network_getExtraData()
                 if(this.accessToken) this.network_getUserIsBlockedByViewer()
             },
@@ -485,7 +495,7 @@
                     this.loading = false
                 }
             },  
-            async netwokr_getStarredReposCount() {
+            async network_getStarredReposCount() {
                 try{
                     this.starredReposCount.loading = true
                     let url = api.API_USER_STARRED_REPOS({
@@ -510,6 +520,9 @@
                 }finally{
                     this.starredReposCount.loading = false
                 }
+            },
+            async network_getTabCount() {
+                
             },
             async network_getExtraData() {
                 try{
@@ -706,6 +719,14 @@
                         this.changeUserStatusModalData.message = this.extraData.data.status.message
                     } 
                 }
+            },
+            'data.avatar_url': function(newOne,oldOne) {
+                if(newOne && oldOne) {
+                    this.showAvatar = false
+                    this.$nextTick(() => {
+                        this.showAvatar = true
+                    })
+                }
             }
         },
         components: {
@@ -718,6 +739,7 @@
             Popover,
             WithTopNoticeWrapper,
             SkeletonCircle,
+            Img,
             SkeletonRectangle,
             Container: styled.div``,
             Main: styled.div``,

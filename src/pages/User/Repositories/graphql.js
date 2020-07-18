@@ -7,6 +7,7 @@ export const GRAPHQL_USER_REPOSITORY_EXTRA = payload => {
         id
         descriptionHTML
         parent {
+          forkCount
           nameWithOwner
         }
         primaryLanguage {

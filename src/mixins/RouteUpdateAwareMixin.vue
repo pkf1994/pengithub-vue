@@ -9,7 +9,8 @@
         data() {
             return {
                 cacheRouterMeta: undefined,
-                cancelSources: []
+                cancelSources: [],
+                resetBeforeUpdate: false
             }
         },
         computed: {
@@ -32,8 +33,9 @@
                     console.log('==============================beforeRouteEnter===============================')
                 }
                 if(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta && vm.componentActive) {
+                    window && window.scrollTo && window.scrollTo(0,0)
                     vm.$el.style.display = 'none'
-                    vm.routeResetHook(to,from)
+                    if(!vm.resetBeforeUpdate) vm.routeResetHook(to,from)
                     vm.cancelUntimelyAxios()
                     vm.routeUpdateHook(to,from)
                     setTimeout(() => {
@@ -56,10 +58,12 @@
         }, */
         methods: {
             generateRouterMeta() {
+                if(!this.componentActive) return undefined
                 return JSON.stringify(this.$route.params) + JSON.stringify(this.$route.query) 
             },
             routeUpdateHook(){
                 if(this.debug) console.log('routeUpdateHook')
+                if(this.resetBeforeUpdate) this.routeResetHook()
                 this.network_getData()
             },
             routeResetHook(){

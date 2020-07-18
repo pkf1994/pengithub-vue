@@ -20,6 +20,7 @@ const SearchResultTopics = () => import('../pages/Search/SearchResult/Topics/Top
 const SearchResultUsers = () => import('../pages/Search/SearchResult/Users/Users.vue')
 const User = () => import('../pages/User/User.vue')
 const UserOverview = () => import('../pages/User/Overview/Overview.vue')
+const UserOverviewContributionStatistic = () => import('../pages/User/Overview/components/ContributionStatistic.vue')
 const UserRepositories = () => import('../pages/User/Repositories/Repositories.vue')
 const UserProjects = () => import('../pages/User/Projects/Projects.vue')
 const UserStars = () => import('../pages/User/Stars/Stars.vue')
@@ -230,7 +231,13 @@ export default [
             {
                 path: '/',
                 name: 'userOverview',
-                component: UserOverview
+                component: UserOverview,
+                children: [
+                    {
+                        path: '',
+                        component: UserOverviewContributionStatistic
+                    }
+                ]
             },
             {
                 path: 'repositories',
