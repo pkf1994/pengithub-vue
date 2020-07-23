@@ -32,6 +32,9 @@
                     console.log(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta && vm.componentActive)
                     console.log('==============================beforeRouteEnter===============================')
                 }
+                if(!vm.cacheRouterMeta) {
+                    window && window.scrollTo && window.scrollTo(0,0)
+                }
                 if(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta && vm.componentActive) {
                     window && window.scrollTo && window.scrollTo(0,0)
                     vm.$el.style.display = 'none'

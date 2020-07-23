@@ -111,9 +111,6 @@
 
 <style lang="scss">
 @import 'node_modules/@primer/css/markdown/index.scss';
-pre{
-    margin: -16px;
-}
 </style>
 
 <style scoped lang='scss'>

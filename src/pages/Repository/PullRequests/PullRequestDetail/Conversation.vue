@@ -2,11 +2,11 @@
     <Container class="flex-grow-1">
             <Header  class="px-3 pt-3">
                 <HeaderActions class="d-flex flex-justify-between flex-items-center">
-                   <State class="State State--green mr-2 d-inline-flex flex-items-center" 
-                        :class="{'State--green':pullRequestProvided().state === 'open','State--red':pullRequestProvided().state === 'closed'}" 
+                   <State class="State mr-2 d-inline-flex flex-items-center" 
+                        :class="{'State--green':pullRequestProvided().state === 'open' && !pullRequestProvided().draft,'State--red':pullRequestProvided().state === 'closed'}" 
                         style="text-transform:capitalize;border-radius:2em;padding: 5px 12px;min-width: 70px">
                         <IssueIcon color="#fff" :issue="pullRequestProvided()"></IssueIcon>
-                        &nbsp;{{pullRequestProvided().state}}
+                        &nbsp;{{pullRequestProvided().draft ? 'Draft' : pullRequestProvided().state}}
                     </State>   
 
                     <a href="javascript:return false">Jump to bottom</a>
@@ -149,22 +149,24 @@
         <transition name="fade" appear>
             <StickyTop v-if="scrollTop > 300" class="sticky-top px-3 py-2">
                 <StickyTopContent class="d-flex flex-items-center flex-justify-between">
-                    <State class="State mr-2 d-inline-flex flex-items-center flex-shrink-0" :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize;">
-                        <IssueIcon color="#fff" :issue="data"></IssueIcon>
-                        &nbsp;{{data.state}}
+                    <State class="State mr-2 d-inline-flex flex-items-center flex-shrink-0" :class="{'State--green':pullRequestProvided().state === 'open','State--red':data.state === 'closed'}" style="text-transform:capitalize; border-radius:2em">
+                        <IssueIcon color="#fff" :issue="pullRequestProvided()" class="mr-1"></IssueIcon>
+                        <span style="line-height:auto">
+                            {{pullRequestProvided().state}}
+                        </span>    
                     </State>   
 
                     <div class="min-width-0">
                         <h1 class="d-flex text-bold f5">
                             <router-link to="/" class="css-truncate css-truncate-target link-gray-dark width-fit">
-                                {{data.title}}
+                                {{pullRequestProvided().title}}
                             </router-link>
-                            <span class="text-gray-light pl-1 no-wrap text-normal">#{{data.number}}</span>
+                            <span class="text-gray-light pl-1 no-wrap text-normal">#{{pullRequestProvided().number}}</span>
                         </h1>
                         <div class="meta text-gray-light css-truncate css-truncate-target d-block width-fit f6">
-                            <router-link to="/" class="text-bold link-gray">{{data.user && data.user.login}}</router-link>  opened this issue
+                            <router-link to="/" class="text-bold link-gray">{{pullRequestProvided().user && pullRequestProvided().user.login}}</router-link>  opened this pull request
                             <span class="no-wrap">{{createdAt}}</span>
-                            · {{data.comments}} {{data.comments > 1 ? 'comments' : 'comment'}}
+                            · {{pullRequestProvided().comments}} {{pullRequestProvided().comments > 1 ? 'comments' : 'comment'}}
                         </div>
                     </div> 
 
@@ -725,6 +727,7 @@
 <style scoped lang="scss">
 @import 'node_modules/@primer/css/labels/index.scss';
 @import 'node_modules/@primer/css/avatars/index.scss';
+@import 'node_modules/@primer/css/truncate/index.scss';
 .title{
     margin-bottom: 0;
     font-size: 16px;

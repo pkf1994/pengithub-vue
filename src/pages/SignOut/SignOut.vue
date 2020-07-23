@@ -59,8 +59,12 @@
         },
         methods: {
             async _signOut() {
-                await this.signOut()
-                this.$router.replace(this.returnTo)
+                try{
+                    await this.signOut()
+                    this.$router.replace(this.returnTo)
+                }catch(e) {
+                    this.handleError(e)
+                }
             }
         },
         components: {

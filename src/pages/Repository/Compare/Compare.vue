@@ -25,7 +25,7 @@
             compare with:
         </div>
         <RangeEditor class="range-editor text-gray js-range-editor is-cross-repo p-1 d-flex flex-wrap mb-3 flex-items-center">
-            <BranchPair v-if="isComparingAcrossForks" class="p-1">
+            <BranchPair v-if="isComparingAcrossForks" class="p-1 width-fit">
                 <button class="btn branch d-flex width-full flex-items-center select-menu-button" @click="() => showModal('chooseHeadRepoModal')">
                     <i>compare repository:</i>
                     <span class="truncate d-block flex-shrink-1">{{headRefOwner}}/{{repo}}&nbsp;</span>
@@ -42,42 +42,46 @@
         <MergeableNotice v-if="mergeabilityHTML.data && !entirelyDifferentCommitHistories && data.total_commits > 0" class="range-editor text-gray js-range-editor is-cross-repo py-1 px-3 mb-3" v-html="mergeabilityHTML.data">
         </MergeableNotice>
 
-        <TriggerPullRequestPaneBtn class="create-pull-pane" v-if="accessToken && !showCreatePullRequestPane && !entirelyDifferentCommitHistories && !couldNotFigureOutHowToCompare && data.total_commits > 0 && !existPullRequest.loading && !existPullRequest.data.number">
-            <button class="btn btn-primary d-block width-full" @click="triggerShowCreatePullRequestPane">
-                <svg class="octicon octicon-git-pull-request" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.17674 3.07322L9.57318 0.676753C9.73068 0.51926 9.99996 0.630802 9.99996 0.853529V5.64642C9.99996 5.86915 9.73068 5.98069 9.57319 5.8232L7.17674 3.42677C7.07911 3.32914 7.07911 3.17085 7.17674 3.07322ZM3.75 2.5C3.33579 2.5 3 2.83579 3 3.25C3 3.66421 3.33579 4 3.75 4C4.16421 4 4.5 3.66421 4.5 3.25C4.5 2.83579 4.16421 2.5 3.75 2.5ZM1.5 3.25C1.5 2.00736 2.50736 1 3.75 1C4.99264 1 6 2.00736 6 3.25C6 4.22966 5.37389 5.06309 4.5 5.37197V10.628C5.37389 10.9369 6 11.7703 6 12.75C6 13.9926 4.99264 15 3.75 15C2.50736 15 1.5 13.9926 1.5 12.75C1.5 11.7703 2.12611 10.9369 3 10.628V5.37197C2.12611 5.06309 1.5 4.22966 1.5 3.25ZM11 2.5H10V4H11C11.5523 4 12 4.44772 12 5V10.628C11.1261 10.9369 10.5 11.7703 10.5 12.75C10.5 13.9926 11.5074 15 12.75 15C13.9926 15 15 13.9926 15 12.75C15 11.7703 14.3739 10.9369 13.5 10.628V5C13.5 3.61929 12.3807 2.5 11 2.5ZM12 12.75C12 12.3358 12.3358 12 12.75 12C13.1642 12 13.5 12.3358 13.5 12.75C13.5 13.1642 13.1642 13.5 12.75 13.5C12.3358 13.5 12 13.1642 12 12.75ZM3.75 12C3.33579 12 3 12.3358 3 12.75C3 13.1642 3.33579 13.5 3.75 13.5C4.16421 13.5 4.5 13.1642 4.5 12.75C4.5 12.3358 4.16421 12 3.75 12Z"></path></svg>
-                Create pull request
-            </button>
-            <p class="d-flex flex-items-center mt-2">
-                Discuss and review the changes in this comparison with others.
-                <HyperlinkWrapper class="ml-2"> 
-                    <a class="help-link" href="https://help.github.com/articles/using-pull-requests" target="_blank" aria-label="Guide: Using pull requests">
-                        <svg class="octicon octicon-question" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.5C4.41015 1.5 1.5 4.41015 1.5 8C1.5 11.5899 4.41015 14.5 8 14.5C11.5899 14.5 14.5 11.5899 14.5 8C14.5 4.41015 11.5899 1.5 8 1.5ZM0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8ZM9 11C9 11.5523 8.55229 12 8 12C7.44772 12 7 11.5523 7 11C7 10.4477 7.44772 10 8 10C8.55229 10 9 10.4477 9 11ZM6.92082 6.08541C7.00133 5.92438 7.11032 5.78617 7.25977 5.68654C7.40453 5.59004 7.63124 5.5 8 5.5C8.27975 5.5 8.55291 5.58656 8.7375 5.725C8.90206 5.84842 9 6.01009 9 6.25C9 6.42662 8.95919 6.51381 8.92283 6.56835C8.87748 6.63639 8.79924 6.71162 8.64646 6.81349C8.57007 6.86441 8.48788 6.9139 8.38754 6.97411L8.38141 6.97779L8.38139 6.9778C8.28769 7.03402 8.17704 7.10041 8.06831 7.1729C7.84608 7.32107 7.58057 7.52712 7.37593 7.83412C7.14619 8.17878 7.23935 8.64442 7.58401 8.87417C7.92867 9.10391 8.39432 9.01075 8.62406 8.66609C8.66942 8.59803 8.74766 8.52279 8.90043 8.42093C8.97681 8.37001 9.059 8.32052 9.15933 8.26032L9.16554 8.25659L9.1656 8.25656C9.25926 8.20036 9.36986 8.134 9.47854 8.06154C9.70075 7.91339 9.96627 7.70737 10.1709 7.4004C10.3846 7.07994 10.5 6.69838 10.5 6.25C10.5 5.48991 10.1396 4.90158 9.6375 4.525C9.15542 4.16344 8.55358 4 8 4C7.36876 4 6.84547 4.15996 6.42772 4.43846C6.01467 4.71383 5.74866 5.07562 5.57918 5.41459C5.39393 5.78507 5.5441 6.23558 5.91459 6.42082C6.28507 6.60606 6.73558 6.45589 6.92082 6.08541Z"></path></svg>
-                    </a>
-                </HyperlinkWrapper>
-            </p>
-            
-        </TriggerPullRequestPaneBtn>
+        <AnimatedHeightWrapper>
+            <div class="pb-3"  v-if="accessToken && !showCreatePullRequestPane && !entirelyDifferentCommitHistories && !couldNotFigureOutHowToCompare && data.total_commits > 0 && !existPullRequest.loading && !withOpenPullRequestExist">
+                <TriggerPullRequestPaneBtn class="create-pull-pane">
+                    <button class="btn btn-primary d-block width-full" @click="triggerShowCreatePullRequestPane">
+                        <svg class="octicon octicon-git-pull-request" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.17674 3.07322L9.57318 0.676753C9.73068 0.51926 9.99996 0.630802 9.99996 0.853529V5.64642C9.99996 5.86915 9.73068 5.98069 9.57319 5.8232L7.17674 3.42677C7.07911 3.32914 7.07911 3.17085 7.17674 3.07322ZM3.75 2.5C3.33579 2.5 3 2.83579 3 3.25C3 3.66421 3.33579 4 3.75 4C4.16421 4 4.5 3.66421 4.5 3.25C4.5 2.83579 4.16421 2.5 3.75 2.5ZM1.5 3.25C1.5 2.00736 2.50736 1 3.75 1C4.99264 1 6 2.00736 6 3.25C6 4.22966 5.37389 5.06309 4.5 5.37197V10.628C5.37389 10.9369 6 11.7703 6 12.75C6 13.9926 4.99264 15 3.75 15C2.50736 15 1.5 13.9926 1.5 12.75C1.5 11.7703 2.12611 10.9369 3 10.628V5.37197C2.12611 5.06309 1.5 4.22966 1.5 3.25ZM11 2.5H10V4H11C11.5523 4 12 4.44772 12 5V10.628C11.1261 10.9369 10.5 11.7703 10.5 12.75C10.5 13.9926 11.5074 15 12.75 15C13.9926 15 15 13.9926 15 12.75C15 11.7703 14.3739 10.9369 13.5 10.628V5C13.5 3.61929 12.3807 2.5 11 2.5ZM12 12.75C12 12.3358 12.3358 12 12.75 12C13.1642 12 13.5 12.3358 13.5 12.75C13.5 13.1642 13.1642 13.5 12.75 13.5C12.3358 13.5 12 13.1642 12 12.75ZM3.75 12C3.33579 12 3 12.3358 3 12.75C3 13.1642 3.33579 13.5 3.75 13.5C4.16421 13.5 4.5 13.1642 4.5 12.75C4.5 12.3358 4.16421 12 3.75 12Z"></path></svg>
+                        Create pull request
+                    </button>
+                    <p class="d-flex flex-items-center mt-2">
+                        Discuss and review the changes in this comparison with others.
+                        <HyperlinkWrapper class="ml-2"> 
+                            <a class="help-link" href="https://help.github.com/articles/using-pull-requests" target="_blank" aria-label="Guide: Using pull requests">
+                                <svg class="octicon octicon-question" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 1.5C4.41015 1.5 1.5 4.41015 1.5 8C1.5 11.5899 4.41015 14.5 8 14.5C11.5899 14.5 14.5 11.5899 14.5 8C14.5 4.41015 11.5899 1.5 8 1.5ZM0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8ZM9 11C9 11.5523 8.55229 12 8 12C7.44772 12 7 11.5523 7 11C7 10.4477 7.44772 10 8 10C8.55229 10 9 10.4477 9 11ZM6.92082 6.08541C7.00133 5.92438 7.11032 5.78617 7.25977 5.68654C7.40453 5.59004 7.63124 5.5 8 5.5C8.27975 5.5 8.55291 5.58656 8.7375 5.725C8.90206 5.84842 9 6.01009 9 6.25C9 6.42662 8.95919 6.51381 8.92283 6.56835C8.87748 6.63639 8.79924 6.71162 8.64646 6.81349C8.57007 6.86441 8.48788 6.9139 8.38754 6.97411L8.38141 6.97779L8.38139 6.9778C8.28769 7.03402 8.17704 7.10041 8.06831 7.1729C7.84608 7.32107 7.58057 7.52712 7.37593 7.83412C7.14619 8.17878 7.23935 8.64442 7.58401 8.87417C7.92867 9.10391 8.39432 9.01075 8.62406 8.66609C8.66942 8.59803 8.74766 8.52279 8.90043 8.42093C8.97681 8.37001 9.059 8.32052 9.15933 8.26032L9.16554 8.25659L9.1656 8.25656C9.25926 8.20036 9.36986 8.134 9.47854 8.06154C9.70075 7.91339 9.96627 7.70737 10.1709 7.4004C10.3846 7.07994 10.5 6.69838 10.5 6.25C10.5 5.48991 10.1396 4.90158 9.6375 4.525C9.15542 4.16344 8.55358 4 8 4C7.36876 4 6.84547 4.15996 6.42772 4.43846C6.01467 4.71383 5.74866 5.07562 5.57918 5.41459C5.39393 5.78507 5.5441 6.23558 5.91459 6.42082C6.28507 6.60606 6.73558 6.45589 6.92082 6.08541Z"></path></svg>
+                            </a>
+                        </HyperlinkWrapper>
+                    </p>
+                </TriggerPullRequestPaneBtn>
+            </div> 
 
-        <ExistPullRequest v-else-if="existPullRequest.data.number" class="exist-pull mb-3 px-3 py-2">
-            <div>
-                <span class="float-left d-flex flex-items-start mr-2" v-html="existPullRequest.data.iconSvg"></span>    
-                <h4 class="title">
-                    <router-link :to="existPullRequest.data.routerLink"><strong>{{existPullRequest.data.title}}</strong></router-link>
-                    <span class="number">#{{existPullRequest.data.number}}</span>
-                </h4>
-                <p class="message mb-0 mt-1">
-                    <router-link :to="existPullRequest.data.routerLink" style="color: #586069;">
-                        {{existPullRequest.data.message}}
-                    </router-link>
-                </p>
-                <router-link class="btn btn-primary existing-pull-button d-block text-center mt-2" :to="existPullRequest.data.routerLink">
-                    <svg class="octicon octicon-git-pull-request" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.17674 3.07322L9.57318 0.676753C9.73068 0.51926 9.99996 0.630802 9.99996 0.853529V5.64642C9.99996 5.86915 9.73068 5.98069 9.57319 5.8232L7.17674 3.42677C7.07911 3.32914 7.07911 3.17085 7.17674 3.07322ZM3.75 2.5C3.33579 2.5 3 2.83579 3 3.25C3 3.66421 3.33579 4 3.75 4C4.16421 4 4.5 3.66421 4.5 3.25C4.5 2.83579 4.16421 2.5 3.75 2.5ZM1.5 3.25C1.5 2.00736 2.50736 1 3.75 1C4.99264 1 6 2.00736 6 3.25C6 4.22966 5.37389 5.06309 4.5 5.37197V10.628C5.37389 10.9369 6 11.7703 6 12.75C6 13.9926 4.99264 15 3.75 15C2.50736 15 1.5 13.9926 1.5 12.75C1.5 11.7703 2.12611 10.9369 3 10.628V5.37197C2.12611 5.06309 1.5 4.22966 1.5 3.25ZM11 2.5H10V4H11C11.5523 4 12 4.44772 12 5V10.628C11.1261 10.9369 10.5 11.7703 10.5 12.75C10.5 13.9926 11.5074 15 12.75 15C13.9926 15 15 13.9926 15 12.75C15 11.7703 14.3739 10.9369 13.5 10.628V5C13.5 3.61929 12.3807 2.5 11 2.5ZM12 12.75C12 12.3358 12.3358 12 12.75 12C13.1642 12 13.5 12.3358 13.5 12.75C13.5 13.1642 13.1642 13.5 12.75 13.5C12.3358 13.5 12 13.1642 12 12.75ZM3.75 12C3.33579 12 3 12.3358 3 12.75C3 13.1642 3.33579 13.5 3.75 13.5C4.16421 13.5 4.5 13.1642 4.5 12.75C4.5 12.3358 4.16421 12 3.75 12Z"></path></svg>
-                    View pull request
-                </router-link>
-            </div>
+            <div class="pb-3" v-if="existPullRequest.data.length > 0">
+                <ExistPullRequest v-for="item in existPullRequest.data" :key="item.node_id" class="exist-pull px-3 py-2 mt-2">
+                    <span class="float-left d-flex flex-items-start mr-2">
+                        <IssueIcon issueType="pullRequest" :issue="item"></IssueIcon>
+                    </span>    
+                    <h4 class="title">
+                        <router-link :to="`/${owner}/${repo}/pull/${item.number}`"><strong>{{item.title}}</strong></router-link>
+                        <span class="number">#{{item.number}}</span>
+                    </h4>
+                    <p class="message mb-0 mt-1">
+                        <router-link :to="`/${owner}/${repo}/pull/${item.number}`" style="color: #586069;" v-html="markdownToHTML(item.body)">
 
-        </ExistPullRequest>
-
+                        </router-link>
+                    </p>
+                   <!--  <router-link class="btn btn-primary existing-pull-button d-block text-center mt-2" :to="`/${owner}/${repo}/pull/${item.number}`">
+                        <svg class="octicon octicon-git-pull-request" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.17674 3.07322L9.57318 0.676753C9.73068 0.51926 9.99996 0.630802 9.99996 0.853529V5.64642C9.99996 5.86915 9.73068 5.98069 9.57319 5.8232L7.17674 3.42677C7.07911 3.32914 7.07911 3.17085 7.17674 3.07322ZM3.75 2.5C3.33579 2.5 3 2.83579 3 3.25C3 3.66421 3.33579 4 3.75 4C4.16421 4 4.5 3.66421 4.5 3.25C4.5 2.83579 4.16421 2.5 3.75 2.5ZM1.5 3.25C1.5 2.00736 2.50736 1 3.75 1C4.99264 1 6 2.00736 6 3.25C6 4.22966 5.37389 5.06309 4.5 5.37197V10.628C5.37389 10.9369 6 11.7703 6 12.75C6 13.9926 4.99264 15 3.75 15C2.50736 15 1.5 13.9926 1.5 12.75C1.5 11.7703 2.12611 10.9369 3 10.628V5.37197C2.12611 5.06309 1.5 4.22966 1.5 3.25ZM11 2.5H10V4H11C11.5523 4 12 4.44772 12 5V10.628C11.1261 10.9369 10.5 11.7703 10.5 12.75C10.5 13.9926 11.5074 15 12.75 15C13.9926 15 15 13.9926 15 12.75C15 11.7703 14.3739 10.9369 13.5 10.628V5C13.5 3.61929 12.3807 2.5 11 2.5ZM12 12.75C12 12.3358 12.3358 12 12.75 12C13.1642 12 13.5 12.3358 13.5 12.75C13.5 13.1642 13.1642 13.5 12.75 13.5C12.3358 13.5 12 13.1642 12 12.75ZM3.75 12C3.33579 12 3 12.3358 3 12.75C3 13.1642 3.33579 13.5 3.75 13.5C4.16421 13.5 4.5 13.1642 4.5 12.75C4.5 12.3358 4.16421 12 3.75 12Z"></path></svg>
+                        View pull request
+                    </router-link> -->
+                </ExistPullRequest>
+            </div> 
+        </AnimatedHeightWrapper>
+        
         <CreatePullRequestPane v-if="showCreatePullRequestPane" 
                                 :defaultTitle="pullRequestDefaultTitle"
                                 :headRefOwner="headRefOwner" 
@@ -259,11 +263,12 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoadingWrapper,HyperlinkWrapper,Modal,SelectMenuItem,LoadingIconEx} from '@/components'
+    import {CommonLoadingWrapper,HyperlinkWrapper,Modal,SelectMenuItem,LoadingIconEx,IssueIcon,AnimatedHeightWrapper} from '@/components'
     import {authRequiredGet,commonGet} from '@/network'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import * as api from '@/network/api'
     import {Commits,Files,CreatePullRequestPane} from './components'
+    import { util_markdownParse } from '@/util'
     let parse = require("parse-link-header")
     export default {
         name: "repository_compare_page",
@@ -313,12 +318,13 @@
                     loading: false
                 },
                 existPullRequest: {
-                    data: {},
+                    data: [],
                     loading: false
                 },
                 showFilesFlag: false,
                 firstLoadedFlag: false,
-                showCreatePullRequestPane: false
+                showCreatePullRequestPane: false,
+                resetBeforeUpdate: true
             }
         },
         computed: {
@@ -396,11 +402,26 @@
             pullRequestDefaultTitle() {
                 if(this.data.files && this.data.files.length == 1) return `Update ${this.data.files[0].filename}.`
                 return `${this.headRefOwner ? this.headRefOwner + ':' : ''}${this.headRef}`
+            },
+            documentTitle() {
+                return `Compare ${this.$route.params.pathMatch} · ${this.owner}/${this.repo}`
+            },
+            withOpenPullRequestExist() {
+                return this.existPullRequest.data.filter( i => i.state == 'open').length > 0
             }
-
         },
-        created() {
+        async created() {
             this.network_getData()
+        /*     let u = "http://127.0.0.1:8888/pkf1994/Test/pull/new/review-requests/master...vvv"
+            let r = await commonGet(
+                u,
+                {
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            )
+            console.log(r) */
         },
         methods: {
             network_getData() {
@@ -477,8 +498,10 @@
                     let url = api.API_REPOSITORY_COMPARE_AVAILABLE_BRANCHES({
                         owner: this.owner,
                         repo: this.repo,
-                        baseHead: this.refInfoHolder,
-                        type: meta
+                        params: {
+                            type: meta,
+                            range: this.refInfoHolder,
+                        }
                     })
                     let res = await commonGet(url)
                     this.modalRefsData[meta].branches.data = this.parseBranchesFromHTML(res.data)
@@ -496,10 +519,12 @@
                     let url = api.API_REPOSITORY_COMPARE_AVAILABLE_TAGS({
                         owner: this.owner,
                         repo: this.repo,
-                        baseHead: this.refInfoHolder,
-                        tag: this.baseRef,
-                        type: meta
-                    })
+                        params: {
+                            type: meta,
+                            range: this.refInfoHolder,
+                            tag_name: this.baseRef,
+                        }
+                    })      
                     let res = await commonGet(
                         url,
                         {
@@ -536,25 +561,51 @@
                 }
             },
             async network_getExistPullRequest() {
-                if(!this.headRef) return
+                if(!this.headRef || !this.baseRef) return
                 try{
                     this.existPullRequest.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_exist_pull_request')
-                    let url = api.API_REPOSITORY_COMPARE_EXIST_PULL_REQUEST(
+                    let url = api.API_SEARCH(
                         {
-                            owner: this.owner,
-                            repo: this.repo,
-                            baseHead: this.$route.params.pathMatch
+                            type: 'issues',
+                            params: {
+                                q: `is:pr head:${this.headRef} base:${this.baseRef} author:${this.viewer.login}`,
+                            }
                         }
                     )
-                    let res = await commonGet(url)
 
-                    this.existPullRequest.data = this.parseExistPullRequestFromHTML(res.data) || {}
-                    
+                    let res = await authRequiredGet(url,{cancelToken})
+
+                    if(!res.data.total_count || res.data.total_count == 0) {
+                        this.existPullRequest.loading = false
+                        return 
+                    }
+                    let candidatePulls = res.data.items.filter(i => {
+                        return i.repository_url.replace('https://api.github.com/repos/','') == `${this.owner}/${this.repo}`
+                    })
+
+                    let ajaxRequestRecordIdx = 0
+
+                    candidatePulls.forEach(i => {
+                        if(i.pull_request && i.pull_request.url){
+                            authRequiredGet(i.pull_request.url,{cancelToken}).then(res => {
+                                if(res.data.head.label == `${this.headRefOwner}:${this.headRef}`) {
+                                    this.existPullRequest.data.push(res.data)
+                                }
+                                ajaxRequestRecordIdx++ 
+                                if(ajaxRequestRecordIdx >= candidatePulls.length) this.existPullRequest.loading = false
+                            }).catch(e => {
+                                ajaxRequestRecordIdx++ 
+                                if(ajaxRequestRecordIdx >= candidatePulls.length) this.existPullRequest.loading = false
+                                console.log(e)
+                            }) 
+                        }
+                    })
+
+
                 }catch(e) {
+                    console.log(e)
                     this.handleError(e)
-                }finally{
-                    this.existPullRequest.loading = false
                 }
             },
             parseBranchesFromHTML(HTML) {
@@ -588,10 +639,8 @@
                 return result
             },
             parseExistPullRequestFromHTML(HTML) {
-                let pattern = /<div class="existing-pull-contents">\n\s*<h4 class="list-group-item-name">\n\s*(.*)\n\s*<a class="list-group-item-link" href="(.*)">(.*)<\/a>\n\s*<span class="existing-pull-number">#(.*)<\/span>\n\s*<\/h4>\n\s*<div class="list-group-item-summary css-truncate css-truncate-target"><a href="(?:.*)"><p>(.*)<\/p><\/a><\/div>/g
+                let pattern = /<div class="existing-pull-contents">(?:\n|\r)\s*<h4 class="list-group-item-name">(?:\n|\r)\s*(.*)(?:\n|\r)\s*<a class="list-group-item-link" href="(.*)">(.*)<\/a>(?:\n|\r)\s*<span class="existing-pull-number">#(.*)<\/span>(?:\n|\r)\s*<\/h4>(?:\n|\r)\s*<div class="list-group-item-summary css-truncate css-truncate-target"><a href="(?:.*)"><p>([\S\s]*)<\/p><\/a><\/div>/g
                 let execResult = pattern.exec(HTML)
-                console.log(HTML)
-                console.log(execResult)
                 if(execResult) {
                     return {
                         iconSvg: execResult[1],
@@ -631,6 +680,9 @@
             triggerShowCreatePullRequestPane() {
                 if(this.data.files && this.data.files.length > 5) this.showFilesFlag = false
                 this.showCreatePullRequestPane = true
+            },
+            markdownToHTML(markdown) {
+                return util_markdownParse.markdownToHTML(markdown)
             }
         },
         watch: {
@@ -651,6 +703,8 @@
             Modal,
             LoadingIconEx,
             Files,
+            IssueIcon,
+            AnimatedHeightWrapper,
             CreatePullRequestPane,
             Title: styled.h1``,
             TitleMeta: styled.div``,
@@ -741,7 +795,6 @@
 .create-pull-pane{
     padding: 15px;
     padding-bottom: 6px;
-    margin: 15px 0;
     font-size: 14px;
     color: #4c4a42;
     background-color: #fff9ea;
@@ -768,5 +821,9 @@
             color: #aaa;
         }
     }
+}
+
+.exist-pull:first-child{
+    margin-top: 0px!important;
 }
 </style>

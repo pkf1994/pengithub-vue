@@ -11,7 +11,7 @@
                 <span class="dropdown-caret"></span>
             </button>
 
-            <span class="btn d-inline-block" @click="() => showModal('popover')">
+            <span v-if="accessToken" class="btn d-inline-block" @click="() => showModal('popover')">
                 <svg height="16" class="octicon-kebab-horizontal v-align-text-bottom" aria-label="More options" viewBox="0 0 16 16" version="1.1" width="16" role="img"><path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
             </span>
              <Popover ref="popover" :popoverStyle="{right: 0, top: 'calc(100% + 10px)', width: '160px',paddingTop: '8px', paddingBottom: '8px'}">
@@ -21,7 +21,7 @@
                         </router-link>
                     </div>
                     <div class="dropdown-divider"></div>
-                         <router-link class="dropdown-item" :to="`/${owner}/${repo}/find/${currentRef}`">
+                         <router-link class="dropdown-item" :to="`/${owner}/${repo}/new/${currentRef}`">
                             Create new file
                         </router-link>
             </Popover>

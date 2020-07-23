@@ -65,6 +65,7 @@ const RepositoryMilestones = () => import('../pages/Repository/Milestones/Milest
 const RepositoryMilestoneDetail = () => import('../pages/Repository/MilestoneDetail/MilestoneDetail.vue')
 const RepositoryCompare = () => import('../pages/Repository/Compare/Compare.vue')
 const RepositoryContributors = () => import('../pages/Repository/Contributors/Contributors.vue')
+const RepositoryNew = () => import('../pages/Repository/New/New.vue')
 const SignOut = () => import('../pages/SignOut/SignOut.vue')
 const Notifications = () => import('../pages/Notifications/Notifications.vue')
 const NotFoundPage = () => import('../pages/NotFoundPage/NotFoundPage.vue')
@@ -492,7 +493,14 @@ export default [
                 name: 'repositoryContributors',
                 component: RepositoryContributors,
             },
-
+            {
+                path: 'new/(\.*)?',
+                name: 'repositoryNew',
+                component: RepositoryNew,
+                meta: {
+                    authRequired: true
+                }
+            }
         ]
     },
     {

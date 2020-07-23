@@ -13,12 +13,12 @@
         
             <DiffView class="diff-view" v-if="!reviewComment.outdated || showOutdated">
                 <div :class="{'d-inline-block':!isProseFileType}" style="min-width: 100%;">
-                    <LinesNotShown class="text-shadow-light flex width-full" v-if="diffHunkEntries.hidden.length > 0 && !showHiddenDiffHunk" @click="triggerShowHiddenDiffHunk">
+                    <LinesNotShown class="text-shadow-light d-flex width-full" v-if="diffHunkEntries.hidden.length > 0 && !showHiddenDiffHunk" @click="triggerShowHiddenDiffHunk">
                         <BlobNum class="blob-num position-sticky bg-white"  style="left:0px" data-line-number="..."></BlobNum>
                         <BlobNum class="blob-num position-sticky bg-white" style="left:26px" data-line-number="..."></BlobNum>
                         <BlobCode class="blob-code" :class="{'prose': isProseFileType}">{{diffHunkEntries.hidden.length}} lines not shown</BlobCode>
                     </LinesNotShown>
-                    <CodeLine v-for="(item,index) in showHiddenDiffHunk ? diffHunkEntries.hidden : []" :key="index + 'hidden'" class="flex width-full">
+                    <CodeLine v-for="(item,index) in showHiddenDiffHunk ? diffHunkEntries.hidden : []" :key="index + 'hidden'" class="d-flex width-full">
                         <BlobNum    class="blob-num position-sticky"  
                                     style="left:0px" 
                                     :data-line-number="item.deletionLineIndex == 0 ? '...' : item.deletionLineIndex" 
@@ -44,7 +44,7 @@
                                         'blob-code-context':item.type === 'context',
                                         'blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}">{{item.code}}</BlobCode>
                     </CodeLine>
-                    <CodeLine v-for="(item,index) in diffHunkEntries.showDefault" :key="index + 'showDefault'" class="flex width-full">
+                    <CodeLine v-for="(item,index) in diffHunkEntries.showDefault" :key="index + 'showDefault'" class="d-flex width-full">
                         <BlobNum    class="blob-num position-sticky" 
                                     style="left:0px" 
                                     :data-line-number="item.deletionLineIndex == 0 ? '...' : item.deletionLineIndex" 

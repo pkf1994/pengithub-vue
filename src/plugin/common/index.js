@@ -16,17 +16,6 @@ export default {
                     accessToken: state => state.oauth.accessToken.accessToken,
                     viewer: state => state.oauth.viewerInfo
                 }),
-                
-            },
-            created() {
-                if(this.documentTitle) {
-                    document.title = this.documentTitle
-                }
-            },
-            watch: {
-                documentTitle(newOne){
-                    document.title = newOne
-                } 
             },
             methods: {
                 handleError(e,config = {handle404: false, handle401: false}) {
@@ -82,6 +71,9 @@ export default {
                         if(this.$refs[modalRef]) this.$refs[modalRef].show = false
                     }
                 },
+                scrollToTop() {
+                    window && window.scrollTo(0,0)
+                },
                 scrollToBottom() {
                     let bottomY = document && document.body && document.body.scrollHeight
                     window && window.scrollTo(0,bottomY)
@@ -90,13 +82,20 @@ export default {
                     return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
                 },
             },
-            activated() {
-                if(this.documentTitle) {
-                    document.title = this.documentTitle
-                }
+            beforeRouteEnter(to,from,next) {
+                next(vm => {
+                    if(vm.documentTitle) {
+                        document.title = vm.documentTitle
+                    }
+                })
             },
             deactivated() {
                 this.closeModal()
+            },
+            watch: {
+                documentTitle() {
+                    if(this.componentActive && this.isDynamicDocumentTitle) document.title = this.documentTitle
+                }
             }
         })
     }

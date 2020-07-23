@@ -19,7 +19,6 @@
     export default {
         name: 'pr_detail',
         mixins: [RouteUpdateAwareMixin],
-        inject: ['owner','repo'],
         provide() {
             return {
                 number:() => this.number,
@@ -29,15 +28,22 @@
         data() {
             return {
                 data: {},
-                loading: false
+                loading: false,
+                isDynamicDocumentTitle: true
             }
         },
         computed: {
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
             number() {
                 return this.$route.params.number
             },
             tabs() {
-                let basePath = `/${this.owner()}/${this.repo()}/pull/${this.number}`
+                let basePath = `/${this.owner}/${this.repo}/pull/${this.number}`
               return [
                     { 
                         label: 'Conversation',
@@ -53,9 +59,10 @@
                     },
                 ]
             },
+
             documentTitle() {
                 if(!this.data.title) return location.href
-                return this.data.title
+                return `${this.data.title} by ${this.data.user.login} · Pull Request #${this.data.number} · ${this.owner}/${this.repo}`
             }
         },
         created() {
@@ -68,8 +75,8 @@
                     //获取基本数据
                     this.loading = true
                     let url_pullRequest = api.API_PULLREQUEST({
-                        repo: this.repo(),
-                        owner: this.owner(),
+                        repo: this.repo,
+                        owner: this.owner,
                         number: this.number
                     })
                     let res_pullRequest = await authRequiredGet(url_pullRequest,{cancelToken:sourceAndCancelToken.cancelToken})

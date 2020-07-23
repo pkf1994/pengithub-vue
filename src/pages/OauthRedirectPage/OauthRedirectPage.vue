@@ -64,7 +64,10 @@
             ...mapState({
                 exceptionOccurred: state => state.oauth.accessToken.exceptionOccurred,
                 authenticated: state => state.oauth.accessToken.authenticated
-            })
+            }),
+            code() {
+                return this.$route.query.code
+            }
         },
         watch: {
 

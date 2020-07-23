@@ -1,5 +1,5 @@
 <template>
-    <Container class="commit Box-row Box-row--focus-gray mt-0 p-2 ">
+    <Container class="commit Box-row--focus-gray mt-0 p-2 ">
         <CommitTitle class="h5 text-gray-dark">
             <router-link style="color: #444d56" :to="commit.html_url.replace('https://github.com','')">
                 {{messageTitle}}

@@ -734,7 +734,8 @@
                     loading: false
                 },
                 createdComments: [],
-                deletedComments: []
+                deletedComments: [],
+                isDynamicDocumentTitle: true
             }
         },
        
@@ -1375,7 +1376,8 @@
                 this.applyLabelsModal.labels.data = []
                 this.setMilestoneModal.milestones.data = []
                 this.transferIssueModal.availableRepositories.data = []
-            }
+            },
+            
         },
         components: {
             CommonLoadingWrapper,

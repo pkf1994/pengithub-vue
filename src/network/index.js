@@ -39,6 +39,12 @@ export const commonGet = (url, config = {}) => {
     })
 }
 
+export const commonPost = (url, data, config) => {
+    return axios.post(url,data,config).then(res => {
+        return res
+    })
+}
+
 export const commonDelete = (url, config = {}) => {
     return axios.delete(url,config).then(res => {
         return res

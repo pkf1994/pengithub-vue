@@ -247,11 +247,19 @@ export const API_MERGEABLE = payload => `${PROXY_API_BASE}/${payload.owner}/${pa
 
 export const API_REPOSITORY_COMMITS_AVAILABLE_BRANCHES = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/refs/${payload.branch}?source_action=show&source_controller=commits`
 
-export const API_REPOSITORY_COMMITS_AVAILABLE_TAGS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/refs-tags/${payload.branch}?source_action=show&source_controller=commits&tag_name=${payload.branch}`
+export const API_REPOSITORY_COMMITS_AVAILABLE_TAGS = payload => {
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/refs-tags/${payload.branch}?source_action=show&source_controller=commits&tag_name=${payload.branch}`
+}
 
-export const API_REPOSITORY_COMPARE_AVAILABLE_BRANCHES = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/compare/branch-list?range=${payload.baseHead}&type=${payload.type}`
+export const API_REPOSITORY_COMPARE_AVAILABLE_BRANCHES = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return  `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/compare/branch-list?${query}`
+}
 
-export const API_REPOSITORY_COMPARE_AVAILABLE_TAGS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/compare/tag-list?range=${payload.baseHead}&tag_name=${payload.tag}&type=${payload.type}`
+export const API_REPOSITORY_COMPARE_AVAILABLE_TAGS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/compare/tag-list?${query}`
+}
 
 export const API_REPOSITORY_COMPARE_AVALIABLE_REPOSITORY = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/compare`
 
@@ -340,3 +348,9 @@ export const API_FOLLOW_USER_OR_NOT = payload => `${GITHUB_REST_API_BASE}/user/f
 export const API_PROXY_SEARCH_RESULT_COUNT = payload => `${PROXY_API_BASE}/search/count?q=${payload.q}&type=${payload.type}`
 
 export const API_THREAD_SUBSCRIPTION = payload => `${GITHUB_REST_API_BASE}/notifications/threads/${payload}/subscription`
+
+export const API_CREATE_COMMIT = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/commits`
+
+export const API_CREATE_OR_REPLACE_FILE = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/contents/${payload.path}`
+
+export const API_CREATE_REF = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/refs`

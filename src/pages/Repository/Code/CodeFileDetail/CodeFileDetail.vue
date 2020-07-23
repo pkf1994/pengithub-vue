@@ -18,7 +18,7 @@
                         </router-link>
                     </div>
                     <div class="dropdown-divider"></div>
-                         <router-link class="dropdown-item" :to="`/${owner}/${repo}/find/${currentRef}`">
+                         <router-link class="dropdown-item" :to="`/${owner}/${repo}/new/${currentRef}`">
                             Create new file
                         </router-link>
             </Popover>
@@ -301,6 +301,9 @@
                 if(this.contributionMessage.latestCommit.data.commit && this.contributionMessage.latestCommit.data.commit.message) {
                     return this.contributionMessage.latestCommit.data.commit.message.split('\n\n')[1]
                 }
+            },
+            documentTitle() {
+                return `${this.repo}/${this.path || '...'} at ${this.currentRef || '...'} · ${this.owner}/${this.repo}`
             }
         },
         created() {

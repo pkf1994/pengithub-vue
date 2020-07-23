@@ -5,7 +5,7 @@
         </TitleInput>
         
         <EditorWrapper class="mt-3">
-            <Editor :textareaStyle="{height: '280px'}" v-model="markdownRaw" :disabled="loading">
+            <Editor :textareaStyle="{height: '280px'}" v-model="markdownRaw" :disabled="loading" uniqueId="pullRequestEditor">
                 <ButtonGroup class="mt-3">
                     <button class="btn btn-primary d-block width-full" :disabled="!title || loading" @click="() => network_submitData(false)">
                         Create pull request

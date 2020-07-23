@@ -28,7 +28,7 @@ export default {
             localViewerHasStarred: undefined,
         }
     },
-    creatd() {
+    created() {
         this.localViewerHasStarred = this.viewerHasStarred
     },
     methods: {

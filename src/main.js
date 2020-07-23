@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import store from './store'
 import router from './router'
+import Router from 'vue-router'
 import './assets/iconfont/iconfont.css'
 import './directives'
 import './filter'
@@ -15,6 +16,7 @@ import plugin_common from './plugin/common'
 import plugin_githubBusiness from './plugin/githubBusiness'
 import plugin_topNotice from './plugin/topNotice'
 import VueClipboard from 'vue-clipboard2'
+Vue.use(Router)
 Vue.use(VueClipboard)
 Vue.use(plugin_themeColor)
 Vue.use(plugin_modal)

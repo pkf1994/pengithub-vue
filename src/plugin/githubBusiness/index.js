@@ -110,11 +110,11 @@ export default {
                     
                     return subscriptionResult
                 },
-                signIn() {
+                signIn(signInFromPath) {
                     let state = util_ramdonString.randomString()
-                    let signInFromPath = this.$route.fullPath
+                    let _signInFromPath = signInFromPath || this.$route.fullPath
                     sessionStorage.setItem('state',state)
-                    sessionStorage.setItem('signInFromPath',signInFromPath)
+                    sessionStorage.setItem('signInFromPath',_signInFromPath)
                     let oauthHref = api.API_OAUTH2({
                         state
                     })

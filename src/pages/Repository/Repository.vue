@@ -1,8 +1,8 @@
 <template>
-    <Container>
+    <WithTopNoticeWrapper theKey="repository">
         <RepoBasicInfo class="bg-gray-light pb-0 pt-3 border-0">
             <RepoFullName class="mb-3 px-3 f3">
-                <div>
+                <h1 class="d-flex flex-wrap flex-items-center break-word f3 text-normal">
                     <svg v-if="data.private" class="octicon octicon-lock repo-private-icon flex-shrink-0" aria-label="Repository" viewBox="0 0 16 16" version="1.1" width="16" height="16" role="img"><path fill-rule="evenodd" d="M4 4v2h-.25A1.75 1.75 0 002 7.75v5.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-5.5A1.75 1.75 0 0012.25 6H12V4a4 4 0 10-8 0zm6.5 2V4a2.5 2.5 0 00-5 0v2h5zM12 7.5h.25a.25.25 0 01.25.25v5.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-5.5a.25.25 0 01.25-.25H12z"></path></svg>
                     <svg v-else-if="data.fork" class="octicon octicon-repo-forked" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg>
                     <svg v-else class="octicon octicon-repo" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"></path></svg>
@@ -12,7 +12,7 @@
                         <router-link :to="`/${owner}/${repo}`">{{repo}}</router-link>
                     </strong>
                     <span v-if="data.private" class="Label Label--outline v-align-middle ">Private</span>
-                </div>
+                </h1>
                
                 <ForkFlag class="fork-flag mt-1" v-if="data.fork && data.parent">
                     <span>
@@ -28,7 +28,7 @@
                         {{data.description}}
                     </Description>
 
-                    <RepoMeta class="px-3 py-3" v-if="data.id">
+                    <RepoMeta class="px-3 pb-3" v-if="data.id">
                         <!-- homePage -->
                         <div v-if="data.homepage" class="mb-2 d-flex flex-items-center">
                             <svg height="16" class="flex-shrink-0 mr-2" mr="2" class_names="flex-shrink-0" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg>
@@ -76,7 +76,7 @@
                                 <svg v-else height="16" class="octicon octicon-eye mr-1" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.679 7.932c.412-.621 1.242-1.75 2.366-2.717C5.175 4.242 6.527 3.5 8 3.5c1.473 0 2.824.742 3.955 1.715 1.124.967 1.954 2.096 2.366 2.717a.119.119 0 010 .136c-.412.621-1.242 1.75-2.366 2.717C10.825 11.758 9.473 12.5 8 12.5c-1.473 0-2.824-.742-3.955-1.715C2.92 9.818 2.09 8.69 1.679 8.068a.119.119 0 010-.136zM8 2c-1.981 0-3.67.992-4.933 2.078C1.797 5.169.88 6.423.43 7.1a1.619 1.619 0 000 1.798c.45.678 1.367 1.932 2.637 3.024C4.329 13.008 6.019 14 8 14c1.981 0 3.67-.992 4.933-2.078 1.27-1.091 2.187-2.345 2.637-3.023a1.619 1.619 0 000-1.798c-.45-.678-1.367-1.932-2.637-3.023C11.671 2.992 9.981 2 8 2zm0 8a2 2 0 100-4 2 2 0 000 4z"></path></svg>
                             </span>
                             {{subscription.loading ? 'Updating...' : subscribeBtnTitle}}
-                            <span class="dropdown-caret d-inline-block"></span>
+                            <span v-if="!subscription.loading" class="dropdown-caret d-inline-block"></span>
                         </button>
                     </StarOrWatch>
                 </div>
@@ -87,11 +87,9 @@
 
         <ComplexTopTab :tabs="tabs" class="px-3 pt-2 mb-5 UnderlineNav" style="background:#fafbfc"></ComplexTopTab>
 
-        <WithTopNoticeWrapper theKey="repository">
-            <keep-alive>
-                <router-view></router-view>
-            </keep-alive>
-        </WithTopNoticeWrapper>
+        <keep-alive>
+            <router-view></router-view>
+        </keep-alive>
 
         <Modal ref="notificationsModal" title="Notifications">
             <SelectMenuItem v-for="item in availableSettings" :key="item.title" :iconStyle="{top:'16px'}" :selected="item.selected" @click.native="() => network_setSubscription(item.subscribed,item.ignored)">
@@ -101,7 +99,7 @@
                 </div>
             </SelectMenuItem>
         </Modal>
-    </Container>
+    </WithTopNoticeWrapper>
 </template>
 
 <script>
@@ -127,7 +125,11 @@ import fileSize from '../../util/fileSize'
                 openProjectsCount: 0,
                 viewerIsCollaborator: {
                     data: false,
-                    loading: true
+                    loading: false
+                },
+                viewerPermission: {
+                    data: 'READ',
+                    loading: false
                 },
                 viewerHasStarred: {
                     data: undefined,
@@ -146,9 +148,10 @@ import fileSize from '../../util/fileSize'
                 repo: () => this.repo,
                 repoBasicInfo: () => this.data,
                 viewerIsCollaborator: () => this.viewerIsCollaborator,
+                viewerPermission: () => this.viewerPermission,
                 viewerIsCollaboratorGetter: () => this.network_ifViewerACollaborator,
                 topNoticeShow: () => this.topNoticeShow,
-                repoSubscription: () => this.subscription.data
+                repoSubscription: () => this.subscription.data,
             }
         },
         computed: {
@@ -261,13 +264,16 @@ import fileSize from '../../util/fileSize'
         },
         created() {
             this.network_getData()
-            
+        },
+        beforeRouteEnter(to, from, next) {
+            console.log('activated: repo')
+            next()
         },
         methods: {
             network_getData() {
                 this.network_getRepoBasicInfo()
-                this.network_ifViewerACollaborator()
-                if(this.accessToken) this.network_getViewerHasStarred()
+                if(this.accessToken) this.network_ifViewerACollaborator()
+                if(this.accessToken) this.network_getExtraData()
                 if(this.accessToken) this.network_getSubscription()
             },
             //获取仓库基本信息
@@ -362,21 +368,23 @@ import fileSize from '../../util/fileSize'
             generateRouterMeta() {
                 return `${this.$route.params.owner}/${this.$route.params.repo}`
             },
-            async network_getViewerHasStarred() {
+            async network_getExtraData() {
                 try {
                     this.viewerHasStarred.loading = true
+                    this.viewerPermission.loading = true
                     let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.VIEWER_HAS_STARRED,
+                        graphql.EXTRA_DATA,
                         {
                             variables: {
                                 name: this.repo,
                                 owner: this.owner
                             },
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_viewer_has_starred')
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data')
                         }
                     )
                     try{
                         this.viewerHasStarred.data = res.data.data.repository.viewerHasStarred
+                        this.viewerPermission.data = res.data.data.repository.viewerPermission
                     }catch(e) {
                         console.log(e)
                         this.handleGraphqlError(res)
@@ -385,6 +393,7 @@ import fileSize from '../../util/fileSize'
                     console.log(e)
                 }finally{
                     this.viewerHasStarred.loading = false
+                    this.viewerPermission.loading = false
                 }
             },
             async network_changeStarStatus() {
@@ -415,7 +424,6 @@ import fileSize from '../../util/fileSize'
                         }
                     )
                     this.subscription.data = res.data
-                    console.log(res.data)
                 }catch(e) {
                     console.log(e)
                 }finally{
