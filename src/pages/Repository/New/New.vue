@@ -75,21 +75,21 @@
                         </div>
                     </CommitChoice>
 
-                    <button class="btn btn-primary my-3 width-full" :disabled="inputDisabledFlag || alreadyHaveSameBranchWithNewBranchName" @click="network_createNewFile">
+                    <button class="btn btn-primary my-3 width-full" :disabled="inputDisabledFlag || alreadyHaveSameBranchWithNewBranchName || !fileName" @click="network_createNewFile">
                         {{loading ? 'Committing...' : 'Commit new file'}}
                     </button>
 
-                    <button class="btn mb-3 width-full" :disabled="inputDisabledFlag || alreadyHaveSameBranchWithNewBranchName" @click="test">
+                    <button class="btn mb-3 width-full" :disabled="inputDisabledFlag || alreadyHaveSameBranchWithNewBranchName || !fileName" @click="test">
                         Cancel
                     </button>
                 </div>
 
                 <div v-else>
-                    <button class="btn btn-primary my-3 width-full" :disabled="inputDisabledFlag" @click="network_createNewFile">
+                    <button class="btn btn-primary my-3 width-full" :disabled="inputDisabledFlag || !fileName" @click="network_forkAndCreateNewBranchAndCommit">
                         {{loading ? 'Trying...' : 'Propose new file'}}
                     </button>
 
-                    <button class="btn mb-3 width-full" :disabled="inputDisabledFlag" @click="test">
+                    <button class="btn mb-3 width-full" :disabled="inputDisabledFlag || !fileName" @click="test">
                         Cancel
                     </button>
                 </div>
@@ -102,7 +102,7 @@
     import styled from 'vue-styled-components'
     import {CommonLoadingWrapper,HyperlinkWrapper,AnimatedHeightWrapper} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {authRequiredPut,commonPost,authRequiredPost} from '@/network'
+    import {authRequiredPut,commonPost,authRequiredPost,authRequiredGet} from '@/network'
     import * as api from '@/network/api'
     import {WithRefDistinguishMixin} from '../components'
         export default {
@@ -191,10 +191,13 @@
                 })[0].object.sha
             }
         },
-        async created() {
-            this.network_getAllBranchesAndTags()
+        created() {
+            this.network_getData()
         },
         methods: {
+            network_getData() {
+                this.network_getAllBranchesAndTags()
+            },
             network_createNewFile() {
                 switch(this.commitMode) {
                     case 'quick-pull':
@@ -275,6 +278,57 @@
                         this.topNoticeShow('repository','A file with the same name already exists. Please choose a different name and try again.','error',true)
                     }
                 }finally{
+                    this.loading = false
+                }
+            },
+            async network_forkAndCreateNewBranchAndCommit() {
+                try {
+                    this.loading = true
+
+                    //fork操作
+                    let url_createFork = api.API_FORK({
+                        repo: this.repo,
+                        owner: this.owner
+                    })
+                    let res_createFork = await authRequiredPost(url_createFork)
+
+                    let url_newForkRepo = res_createFork.data.url
+                    let res_newForkRepo = await authRequiredGet(url_newForkRepo)
+
+                    let newForkRepoName = res_newForkRepo.data.name
+                    let newForkRepoOwner = newForkRepoName.replace(`/${res_newForkRepo.data.name}`,'')
+
+                    let magicIndex = 1
+                    let nameOfNewBranchOfNewForkRepo = `patch-${magicIndex}`
+
+                    let alreadyHaveABranchWithTheName = true
+                    while(alreadyHaveABranchWithTheName) {
+                        try{
+                            let url_branchCheck = api.API_BRANCH({
+                                repo: newForkRepoName,
+                                owner: newForkRepoOwner,
+                                branch: nameOfNewBranchOfNewForkRepo
+                            })
+
+                            await authRequiredGet()
+
+                            nameOfNewBranchOfNewForkRepo = `patch-${++magicIndex}`
+
+                        }catch(e) {
+                            if(e.response && e.response.status == 404) {
+                                alreadyHaveABranchWithTheName = false
+                            }else{
+                                break
+                            }
+                        }
+                    }
+
+                    
+
+                    console.log(res_newForkRepo)
+                } catch (e) {
+                    this.handleError(e)
+                } finally {
                     this.loading = false
                 }
             },

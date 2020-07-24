@@ -13,7 +13,7 @@
     import * as graphql from './graphql'
     export default {
         mixins: [RouteUpdateAwareMixin],
-        inject: ['owner','repo'],
+        inject: ['owner','repo','repoBasicInfo'],
         data() {
             return {
                 data: {},
@@ -26,8 +26,8 @@
         },
         computed: {
             documentTitle() {
-                if(!this.data.description) return location.href
-                return `${this.owner()}/${this.repo()}: ${this.data.description}`
+                if(!this.repoBasicInfo().description) return location.href
+                return `${this.owner()}/${this.repo()}: ${this.repoBasicInfo().description}`
             }
         },
         created() {

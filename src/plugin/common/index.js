@@ -82,6 +82,9 @@ export default {
                     return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
                 },
             },
+            created() {
+                if(this.documentTitle) document.title = this.documentTitle
+            },
             beforeRouteEnter(to,from,next) {
                 next(vm => {
                     if(vm.documentTitle) {
