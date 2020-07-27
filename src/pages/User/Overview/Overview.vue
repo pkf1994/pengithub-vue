@@ -73,6 +73,7 @@
                     isEmpty: false
                 },
                 loading: false,
+                isDynamicDocumentTitle: true
             }
         },
         computed: {
@@ -80,7 +81,8 @@
                 return this.$route.params.login
             },
             documentTitle() {
-                return `${this.userBasicInfoProvided().data.login}(${this.userBasicInfoProvided().data.name})`
+                if(this.userBasicInfoProvided().data.name) return `${this.userBasicInfoProvided().data.login}(${this.userBasicInfoProvided().data.name})`
+                return this.userBasicInfoProvided().data.login
             }
         },
         created() {

@@ -1,5 +1,5 @@
 <template>
-        <CommonLoadingWrapper :loading="loading || allBranchesAndTags.loading || viewerPermission().loading" position="corner"> 
+        <CommonLoadingWrapper :loading="loading || allBranchesAndTags.loading || viewerPermission().loading || file.loading" position="corner"> 
 
             <AnimatedHeightWrapper :stretch="viewerPermission().data == 'READ' && !viewerPermission().loading" >
                 <DontHaveWriteAccessNotice class="pb-4">
@@ -10,28 +10,15 @@
             </AnimatedHeightWrapper>
             
 
-            <Breadcrumb class="breadcrumb d-flex flex-items-center px-3 flex-wrap mr-sm-4 text-bold">
-                <span class="d-inline-block wb-break-all">
-                    <router-link :to="`/${owner}/${repo}`">{{repo}}</router-link>
-                </span>
-                <span class="separator">/</span>
-                <input type="text" :disabled="inputDisabledFlag" class="form-control mr-1 mt-1 mt-sm-0 col-12 width-sm-auto" v-model="fileName" placeholder="Name your file…" autofocus="">
-            </Breadcrumb>
+            <FilePath class="breadcrumb d-flex flex-items-center px-3 flex-wrap mr-sm-4 text-bold">
+                <router-link :to="`/${owner}/${repo}`">{{repo}}</router-link>&nbsp;/&nbsp;<Breadcrumb :spaceArround="true" :routePath="breadcrumbRoutePath" :displayPath="path && path.replace(/^\//,'').replace(/\/$/,'')" :disableLastFragment="true"/>
+            </FilePath>
 
-            <FileEditor class="file">
-                <div class="file-header">
-                    <svg class="octicon octicon-code mr-1" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4.72 3.22a.75.75 0 011.06 1.06L2.06 8l3.72 3.72a.75.75 0 11-1.06 1.06L.47 8.53a.75.75 0 010-1.06l4.25-4.25zm6.56 0a.75.75 0 10-1.06 1.06L13.94 8l-3.72 3.72a.75.75 0 101.06 1.06l4.25-4.25a.75.75 0 000-1.06l-4.25-4.25z"></path></svg>
-                    Edit new file
-                </div>  
-
-                <div class="p-2 pt-5 textarea-wrapper" :disabled="inputDisabledFlag">
-                    <textarea :disabled="inputDisabledFlag" v-model="content" class="form-control file-editor-textarea" rows="35" name="value" placeholder="Enter file contents here" spellcheck="false" wrap="off" autofocus=""></textarea>
-                </div>
-            </FileEditor>
+            <Diff :file="file.data" :currentRef="currentRef" :path="path" class="mx-3"></Diff>    
 
             <ActionPane class="p-3">
-                <h3>Commit new file</h3>
-                <input v-model="commitMessageHeadline" type="text" :disabled="inputDisabledFlag" :placeholder="`Create ${fileName || 'new file'}`" class="form-control input-block input-contrast"  name="message" value="" autocomplete="off">
+                <h3>Commit change</h3>
+                <input v-model="commitMessageHeadline" type="text" :disabled="inputDisabledFlag" :placeholder="`Delete ${file.data.name || ''}`" class="form-control input-block input-contrast"  name="message" value="" autocomplete="off">
                 <textarea v-model="commitMessageBody" :disabled="inputDisabledFlag" id="commit-description-textarea" name="description" class="form-control input-block input-contrast comment-form-textarea" placeholder="Add an optional extended description…"></textarea>
 
                 <div v-if="viewerPermission().data == 'ADMIN'">
@@ -75,21 +62,21 @@
                         </div>
                     </CommitChoice>
 
-                    <button class="btn btn-primary my-3 width-full" :disabled="inputDisabledFlag || alreadyHaveSameBranchWithNewBranchName || !fileName" @click="network_createNewFile">
-                        {{loading ? 'Committing...' : 'Commit new file'}}
+                    <button class="btn btn-primary my-3 width-full" :disabled="inputDisabledFlag || alreadyHaveSameBranchWithNewBranchName" @click="network_deleteFile">
+                        {{loading ? 'Committing...' : 'Commit change'}}
                     </button>
 
-                    <button class="btn mb-3 width-full" :disabled="inputDisabledFlag || alreadyHaveSameBranchWithNewBranchName || !fileName" @click="test">
+                    <button class="btn mb-3 width-full" :disabled="inputDisabledFlag || alreadyHaveSameBranchWithNewBranchName">
                         Cancel
                     </button>
                 </div>
 
                 <div v-else>
-                    <button class="btn btn-primary my-3 width-full" :disabled="inputDisabledFlag || !fileName" @click="network_forkAndCreateNewBranchAndCommit">
-                        {{loading ? 'Trying...' : 'Propose new file'}}
+                    <button class="btn btn-primary my-3 width-full" :disabled="inputDisabledFlag" @click="network_forkAndCreateNewBranchAndCommit">
+                        {{loading ? 'Trying...' : 'Propose change'}}
                     </button>
 
-                    <button class="btn mb-3 width-full" :disabled="inputDisabledFlag || !fileName" @click="test">
+                    <button class="btn mb-3 width-full" :disabled="inputDisabledFlag">
                         Cancel
                     </button>
                 </div>
@@ -100,26 +87,29 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoadingWrapper,HyperlinkWrapper,AnimatedHeightWrapper} from '@/components'
+    import {CommonLoadingWrapper,HyperlinkWrapper,AnimatedHeightWrapper,Breadcrumb} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {authRequiredPut,commonPost,authRequiredPost,authRequiredGet} from '@/network'
+    import {authRequiredPut,authRequiredDelete,commonPost,authRequiredPost,authRequiredGet} from '@/network'
     import * as api from '@/network/api'
     import {WithRefDistinguishMixin} from '../components'
-        export default {
-        name: "repository_new_file_page",
+    import Diff from './Diff'
+    export default {
+        name: "repository_delete_file_page",
         inject: ['repoBasicInfo','viewerPermission'],
         mixins: [WithRefDistinguishMixin,RouteUpdateAwareMixin],
         data() {
             return {
-                fileName: '',
-                content: '',
+                file: {
+                    data: {},
+                    loading: false
+                },
                 commitMode: 'direct',
                 commitMessageHeadline: '',
                 commitMessageBody: '',
                 loading: false,
                 newBranchName: '',
-                documentTitle: 'New File',
-                newBranchOfNewForkRepo: undefined
+                documentTitle: 'Delete File',
+                newBranchOfNewForkRepo: undefined,
             }
         },
         computed: {
@@ -129,54 +119,14 @@
             repo() {
                 return this.$route.params.repo
             },
-            currentRef() {
-                let pathMatch = this.$route.params.pathMatch
-                if(!pathMatch && this.defaultBranch) return this.defaultBranch
-
-                if(this.allBranchesAndTags.branches.length == 0) return
-
-                let ref
-
-                try {
-                    this.allBranchesAndTags.branches.forEach(item => {
-                        let candidateBranch =  item.ref.replace('refs/heads/','')
-                        if(pathMatch == candidateBranch) {
-                            ref = candidateBranch
-                            throw new Error('abort')
-                        }
-                    })
-                } catch (e) {
-                    
-                }
-
-                if(!ref && pathMatch[pathMatch.length - 1] == '/') {
-                    pathMatch = pathMatch.slice(0,pathMatch.length - 1)
-                    try {
-                        this.allBranchesAndTags.branches.forEach(item => {
-                            let candidateBranch =  item.ref.replace('refs/heads/','')
-                            if(pathMatch == candidateBranch) {
-                                ref = candidateBranch
-                                throw new Error('abort')
-                            }
-                        })
-                    } catch (e) {
-                        
-                    }
-                }
-
-                if(!ref && this.allBranchesAndTags.branches.length > 0) {
-                    this.emitNotFoundEvent(this.$el)
-                }
-                return ref
-            },
             defaultBranch() {
                 return this.repoBasicInfo().default_branch
             },
             commitMessage() {
-                return `${this.commitMessageHeadline || 'Create ' + this.fileName}\n\n${this.commitMessageBody}`
+                return `${this.commitMessageHeadline || 'Update ' + this.fileName}\n\n${this.commitMessageBody}`
             },
             inputDisabledFlag() {
-                return this.loading || this.allBranchesAndTags.loading || this.viewerPermission().loading
+                return this.loading || this.allBranchesAndTags.loading || this.viewerPermission().loading || this.file.loading
             },
             alreadyHaveSameBranchWithNewBranchName() {
                 return [
@@ -191,15 +141,51 @@
                     return i.ref.replace('refs/heads/','') == this.currentRef
                 })[0].object.sha
             },
+            breadcrumbRoutePath() {
+                let regExp = new RegExp(`^\/${this.owner}\/${this.repo}\/delete`)
+                return this.$route.path.replace(regExp,`/${this.owner}/${this.repo}/tree`)
+            },
         },
         created() {
             this.network_getData()
         },
         methods: {
-            network_getData() {
-                this.network_getAllBranchesAndTags()
+            async network_getData() {
+                await this.network_getAllBranchesAndTags()
+                this.network_getFile()
             },
-            network_createNewFile() {
+            async network_getFile() {
+                try {
+                    this.file.loading = true
+                    let url = api.API_CONTENTS({
+                        repo: this.repo,
+                        owner: this.owner,
+                        path: this.path,
+                        ref: this.currentRef
+                    })
+
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_file_content'),
+                            headers: {
+                                "accept": "application/vnd.github.VERSION.object"
+                            }
+                        }
+                    )
+
+                    if(res.data.type != 'file') this.$router.replace(`/${this.owner}/${this.repo}/tree/${this.currentRef}/${this.path}`)
+                    this.file.data = res.data
+                } catch (e) {
+                    this.handleError(e)
+                    if(e.response && e.response.status == 404) {
+                        this.emitNotFoundEvent(this.$el)
+                    }
+                } finally {
+                    this.file.loading = false
+                }
+            },
+            network_deleteFile() {
                 switch(this.commitMode) {
                     case 'quick-pull':
                         this.network_createBranchAndStartAPullRequest()
@@ -254,32 +240,31 @@
                     let url = api.API_FILE_ACTION({
                         repo: this.repo,
                         owner: this.owner,
-                        path: this.fileName
+                        path: this.path
                     })
 
                     let contentBase64 = window.btoa(this.content)
 
-                    let res = await authRequiredPut(
+                    let res = await authRequiredDelete(
                         url,
                         {
-                            message: this.commitMessage,
-                            content: contentBase64,
-                            branch: targetBranch || this.currentRef
+                            data: { 
+                                message: this.commitMessage,
+                                sha: this.file.data.sha,
+                                branch: targetBranch || this.currentRef
+                            }
                         }
                     )
                    
                     if(targetBranch) {
                         this.$router.replace(`/${this.owner}/${this.repo}/compare/${this.currentRef}...${targetBranch}`)
-                    } else {
+                    }else{
                         this.$router.replace(`/${this.owner}/${this.repo}/tree/${this.currentRef}?update=true`)
                     }
                     this.routeResetHook()
+                    this.topNoticeShow('repository','File successfully deleted.','normal',true)
                 }catch(e) {
                     this.handleError(e)
-                    if(e.response && e.response.status == 422) {
-                        this.scrollToTop()
-                        this.topNoticeShow('repository','A file with the same name already exists. Please choose a different name and try again.','error',true)
-                    }
                 }finally{
                     this.loading = false
                 }
@@ -350,17 +335,18 @@
                             let url = api.API_FILE_ACTION({
                                 repo: this.repo,
                                 owner: this.viewer.login,
-                                path: this.fileName
+                                path: this.path
                             })
 
-                            let contentBase64 = window.btoa(this.content)
 
-                            let res = await authRequiredPut(
+                            let res = await authRequiredDelete(
                                 url,
-                                {
-                                    message: this.commitMessage,
-                                    content: contentBase64,
-                                    branch: nameOfNewBranchOfNewForkRepo
+                                {   
+                                    data: {
+                                        message: this.commitMessage,
+                                        sha: this.file.data.sha,
+                                        branch: nameOfNewBranchOfNewForkRepo
+                                    }
                                 }
                             )
                         
@@ -373,16 +359,14 @@
                         let url = api.API_FILE_ACTION({
                             repo: this.repo,
                             owner: this.viewer.login,
-                            path: this.fileName
+                            path: this.path
                         })
-
-                        let contentBase64 = window.btoa(this.content)
 
                         let res = await authRequiredPut(
                             url,
                             {
                                 message: this.commitMessage,
-                                content: contentBase64,
+                                sha: this.file.data.sha,
                                 branch: this.newBranchOfNewForkRepo
                             }
                         )
@@ -395,62 +379,21 @@
 
                 } catch (e) {
                     this.handleError(e)
-                    if(e.response && e.response.status == 422) {
-                        this.scrollToTop()
-                        this.topNoticeShow('repository','A file with the same name already exists. Please choose a different name and try again.','error',true)
-                    }
                 } finally {
                     this.loading = false
                 }
             },
-            test() {
-                let pathMatch = this.$route.params.pathMatch
-                if(!pathMatch && this.defaultBranch) return this.defaultBranch
-
-                if(this.allBranchesAndTags.branches.length == 0) return
-
-                let ref
-
-                try {
-                    this.allBranchesAndTags.branches.forEach(item => {
-                        let candidateBranch =  item.ref.replace('refs/heads/','')
-
-                        console.log(pathMatch)
-                        console.log(candidateBranch)
-                        if(pathMatch == candidateBranch) ref = candidateBranch
-                        throw new Error('abort')
-                    })
-                } catch (e) {
-                    
-                }
-
-                if(!ref && pathMatch[pathMatch.length - 1] == '/') {
-                    pathMatch = pathMatch.slice(0,pathMatch.length - 1)
-                    try {
-                        this.allBranchesAndTags.branches.forEach(item => {
-                            let candidateBranch =  item.ref.replace('refs/heads/','')
-                            if(pathMatch == candidateBranch) ref = candidateBranch
-                            throw new Error('abort')
-                        })
-                    } catch (e) {
-                        
-                    }
-                }
-
-                if(!ref && this.allBranchesAndTags.branches.length > 0) {
-                   // this.emitNotFoundEvent(this.$el)
-                }
-                return ref
-            }
         },
         components: {
             CommonLoadingWrapper,
             HyperlinkWrapper,
             AnimatedHeightWrapper,
+            Breadcrumb,
+            Diff,
             Container: styled.div``,
             DontHaveWriteAccessNotice: styled.div``,
-            Breadcrumb: styled.div``,
-            FileEditor: styled.div``,
+            FilePath: styled.div``,
+            FileDiff: styled.div``,
             ActionPane: styled.div``,
             CommitChoice: styled.div``,
         }

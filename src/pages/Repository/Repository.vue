@@ -14,7 +14,7 @@
                     <span v-if="data.private" class="Label Label--outline v-align-middle ">Private</span>
                 </h1>
                
-                <ForkFlag class="fork-flag mt-1" v-if="data.fork && data.parent">
+                <ForkFlag class="fork-flag mt-1 text-small" v-if="data.fork && data.parent">
                     <span>
                         forked from
                         <router-link :to="`/${data.parent.full_name}`">{{data.parent.full_name}}</router-link>
@@ -139,7 +139,7 @@ import fileSize from '../../util/fileSize'
                     data: {},
                     loading: false
                 },
-                resetBeforeUpdate: true
+                resetBeforeUpdate: true,
             }
         },
         provide() {
@@ -228,9 +228,6 @@ import fileSize from '../../util/fileSize'
                 }
                 return false
             },
-            documentTitle() {
-                return `${this.owner}/${this.repo}`
-            },
             availableSettings() {
                 return [
                     {
@@ -266,7 +263,6 @@ import fileSize from '../../util/fileSize'
             this.network_getData()
         },
         beforeRouteEnter(to, from, next) {
-            console.log('activated: repo')
             next()
         },
         methods: {

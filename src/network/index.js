@@ -57,7 +57,7 @@ export const authRequiredGet = (url, config = {}) => {
     })
 }
 
-export const authRequiredDelete = (url, config = {}) => {
+export const authRequiredDelete = (url,config = {}) => {
     return authRequiredAxios.delete(url,config).then(res => {
         return res
     })

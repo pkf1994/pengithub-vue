@@ -351,7 +351,7 @@ export const API_THREAD_SUBSCRIPTION = payload => `${GITHUB_REST_API_BASE}/notif
 
 export const API_CREATE_COMMIT = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/commits`
 
-export const API_CREATE_OR_REPLACE_FILE = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/contents/${payload.path}`
+export const API_FILE_ACTION = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/contents/${payload.path}`
 
 export const API_CREATE_REF = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/refs`
 

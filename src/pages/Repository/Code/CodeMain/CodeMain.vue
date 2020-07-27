@@ -1,7 +1,7 @@
 <template>
     <CommonLoadingWrapper 
-    :loading="ref.loading || !repoBasicInfo().node_id || readme.loading || commitCount.loading || latestCommit.loading" 
-    :position="(ref.loading || !repoBasicInfo().node_id) ? 'center' : 'corner'"
+    :loading="!repoBasicInfo().node_id || readme.loading" 
+    :position="!repoBasicInfo().node_id ? 'center' : 'corner'"
     class="px-3">
         <FileNavigation class="d-flex flex-items-start flex-justify-between position-relative">
             <button class="btn css-truncate text-gray" :disabled="!currentRef"  @click="() => showModal('switchBranchOrTagModal')">
@@ -35,108 +35,11 @@
             </div> 
         </AnimatedHeightWrapper>
 
-        <AnimatedHeightWrapper>
-            <div v-if="currentRef && defaultRef && (currentRef != defaultRef) && (compareWithDefaultRef.data.status || compareWithDefaultRef.message)" class="pt-3">
-                <CompareWithDefaultRef class="Box Box-body bg-gray-light">
-                    <div v-if="compareWithDefaultRef.data.status">
-                        This branch is
-                        <span v-if="compareWithDefaultRef.data.ahead_by > 0">{{compareWithDefaultRef.data.ahead_by}} {{compareWithDefaultRef.data.ahead_by > 1 ? 'commits' : 'commit'}} ahead</span><span v-if="compareWithDefaultRef.data.ahead_by && compareWithDefaultRef.data.behind_by">,</span>
-                        <span v-if="compareWithDefaultRef.data.behind_by > 0">{{compareWithDefaultRef.data.behind_by}} {{compareWithDefaultRef.data.behind_by > 1 ? 'commits' : 'commit'}} behind</span> 
-                        dev.
-                    </div>
-                    <div v-else-if="compareWithDefaultRef.message" class="d-flex flex-auto">
-                        {{compareWithDefaultRef.message}}
-                    </div>
-                </CompareWithDefaultRef>
-            </div>
-        </AnimatedHeightWrapper>
-      
-        <FileBrowser class="Box my-3">
-            <div class="Box-header Box-header--blue position-relative">
-                <Skeleton v-if="!latestCommit.data.node_id || latestCommit.loading" class="d-flex flex-items-center">
-                    <SkeletonCircle :diameter="24" color="#EEEEEE"></SkeletonCircle>
-                    <SkeletonRectangle :height="14" color="#EEEEEE" class="flex-grow-1 ml-2 mr-6"></SkeletonRectangle>
-                </Skeleton> 
+        <keep-alive>
+            <router-view class="my-3"></router-view>
+        </keep-alive>
 
-                <div v-else class="d-flex flex-items-center flex-wrap">
-                    <div style="height: 24px" class="AvatarStack flex-self-start AvatarStack--two" v-if="latestCommit.data.author && latestCommit.data.committer && latestCommit.data.author.login != latestCommit.data.committer.login">
-                        <div class="AvatarStack-body">
-                            <router-link style="height: 24px;width: 24px;border-radius:2em;overflow:hidden" v-if="latestCommit.data.author && latestCommit.data.author.avatar_url" class="avatar avatar-user" :to="`/${latestCommit.data.author.login}`">
-                                <img width="24" height="24" :src="latestCommit.data.author.avatar_url" :alt="`@${latestCommit.data.author.login}`">
-                            </router-link>
-                            <router-link style="height: 24px;width: 24px;border-radius:2em;overflow:hidden" v-if="latestCommit.data.committer && latestCommit.data.committer.avatar_url" class="avatar avatar-user" :to="`/${latestCommit.data.author.login}`">
-                                <img width="24" height="24" :src="latestCommit.data.committer.avatar_url" :alt="`@${latestCommit.data.committer.login}`">
-                            </router-link>
-                        </div>
-                    </div>
-                    
-                    <router-link v-else-if="latestCommit.data.author && latestCommit.data.author.avatar_url" class="avatar avatar-user" :to="`/${latestCommit.data.author.login}`">
-                        <ImgWrapper>
-                            <img width="24" height="24" :src="latestCommit.data.author.avatar_url" :alt="`@${latestCommit.data.author.login || latestCommit.data.author.name || 'Unknow'}`">
-                        </ImgWrapper>
-                    </router-link>
-
-                    <div class="flex-1 d-flex flex-items-center ml-2 min-width-0">
-                        <div class="css-truncate css-truncate-overflow text-gray" v-if="latestCommit.data.node_id">
-                            <router-link v-if="latestCommit.data.author && latestCommit.data.author.login" class="user-mention" :to="`/${latestCommit.data.author.login}`">
-                                {{latestCommit.data.author.login}}
-                            </router-link>
-                            committed
-                            <span v-if="latestCommit.data.commit && latestCommit.data.commit.committer && latestCommit.data.commit.committer.date">
-                                {{latestCommit.data.commit.committer.date | getDateDiff}}
-                            </span>
-                        </div>
-                        <button v-if="latestCommit.data.commit && latestCommit.data.commit.message" class="ellipsis-expander js-details-target ml-2 d-inline-block " @click="triggerShowLatestCommitMessage">
-                            …
-                        </button>
-
-                        <svg v-if="latestCommit.status == 'SUCCESS'" class="octicon text-green octicon-check v-align-middle flex-shrink-0 ml-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
-                        <svg v-else-if="latestCommit.status == 'FAILURE'" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true" class="octicon octicon-x v-align-middle text-red flex-shrink-0 ml-2"><path data-v-74bab622="" fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
-                    </div>
-
-                    <router-link v-if="commitCount.data !== undefined" :to="`/${owner}/${repo}/commits/${currentRef}`" class="link-gray-dark no-underline d-block ml-3">
-                        <svg height="16" class="octicon octicon-history text-gray" text="gray" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.643 3.143L.427 1.927A.25.25 0 000 2.104V5.75c0 .138.112.25.25.25h3.646a.25.25 0 00.177-.427L2.715 4.215a6.5 6.5 0 11-1.18 4.458.75.75 0 10-1.493.154 8.001 8.001 0 101.6-5.684zM7.75 4a.75.75 0 01.75.75v2.992l2.028.812a.75.75 0 01-.557 1.392l-2.5-1A.75.75 0 017 8.25v-3.5A.75.75 0 017.75 4z"></path></svg>
-                        <span>
-                            <strong>
-                                {{commitCount.data | thousands}}
-                            </strong>
-                            <!-- {{commitCount.data > 1 ? 'commits' : 'commit'}} -->
-                        </span>
-                    </router-link>
-
-                    <!-- commit message -->
-                    <div class="pl-5 mt-2 width-full" v-if="latestCommit.data.commit && latestCommit.data.commit.message && latestCommit.showMessage">
-                        <router-link class="link-gray-dark" :to="`/${owner}/${repo}/commits/${latestCommit.data.sha}`">
-                            {{latestCommit.data.commit.message}}
-                        </router-link>
-                    </div>
-                </div>
-                
-            </div>
-
-            <div class="position-relative" :style="{minHeight: contents.show ? '120px':'auto'}" style="background:#fafbfc">
-                <div v-if="!contents.show" class="Details-content--shown Box-footer d-md-none p-0" @click="showContents">
-                    <button class="d-block btn-link js-details-target width-full px-3 py-2">
-                        View code
-                    </button>
-                </div>
-                
-                <transition-group name="fade-group" appear>
-                    <ContentListItem v-for="item in (contents.show ? contents.data : [])" :key="item.sha || item.type" :content="item" :currentRef="currentRef"></ContentListItem>
-                </transition-group>
-
-                <div v-if="contents.loading && contents.show" class="loading-contents">
-                    <div class="loading-contents-inner d-flex flex-justify-center flex-items-center">
-                        <LoadingIconEx class="loading-icon"></LoadingIconEx>
-                    </div>
-                </div>
-            </div> 
-
-            
-        </FileBrowser>
-       
-
-        <Readme v-if="!(!readme.data && !readme.loading)" class="read-me Box">
+        <Readme v-if="!(!readme.data && !readme.loading) && !path && !allBranchesAndTags.loading" class="read-me Box">
             <div class="Box-header d-flex flex-items-center flex-justify-between bg-white border-bottom-0">
                 <h2 class="Box-title pr-3">
                     README.md
@@ -158,7 +61,7 @@
         </Readme>
 
         <AnimatedHeightWrapper>
-            <Releases class="py-4" v-if="releases.data && !this.path">
+            <Releases class="py-4" v-if="releases.data && !path && !allBranchesAndTags.loading">
                 <h2 class="h4 mb-3">
                     <router-link class="link-gray-dark no-underline " :to="`/${owner}/${repo}/releases`">
                         Releasess
@@ -195,7 +98,7 @@
             </Releases>
         </AnimatedHeightWrapper>
         
-        <Contributors class="py-4 border-top" v-if="contributors.data.length > 0 && !this.path">
+        <Contributors class="py-4 border-top" v-if="contributors.data.length > 0 && !path && !allBranchesAndTags.loading">
             <h2 class="h4 mb-3">
                 <router-link class="link-gray-dark no-underline " :to="`/${owner}/${repo}/contributors`">
                     Contributors
@@ -219,7 +122,7 @@
                 </div>
         </Contributors>
 
-        <Languages class="py-4 border-top" v-if="languagesDistribution && languagesDistribution.length > 0 && !this.path">
+        <Languages class="py-4 border-top" v-if="languagesDistribution && languagesDistribution.length > 0 && !path && !allBranchesAndTags.loading">
             <h2 class="h4 mb-3">
                 Languages
             </h2>
@@ -295,29 +198,21 @@
     import {RouteUpdateAwareMixin,ComponentActiveAwareMixin} from '@/mixins'
     import {util_analyseFileType} from '@/util'
     import {WithRefDistinguishMixin} from '../../components'
-    import {ContentListItem} from './components'
+    import {ContentListItem,FileBrowser} from './components'
     let parse = require('parse-link-header')
     import Vue from 'vue'
     export default {
         name: 'repository_code_main',
         inject: ['repoBasicInfo'],
         mixins: [RouteUpdateAwareMixin,WithRefDistinguishMixin,ComponentActiveAwareMixin],
+        provide() {
+            return {
+                path: () => this.path,
+                currentRef: () => this.currentRef
+            }
+        },
         data() {
             return {
-                ref: {
-                    data: {},
-                    loading: false
-                },
-                latestCommit: {
-                    data: {},
-                    status: null,
-                    loading: false,
-                    showMessage: false
-                },
-                commitCount: {
-                    data: undefined,
-                    loading: false
-                },
                 readme: {
                     data: '',
                     loading: false,
@@ -350,17 +245,6 @@
                         loading: false
                     }
                 },
-                contents: {
-                    show: false,
-                    data: [],
-                    loading: false,
-                    loadingLastUpdateDate: false
-                },
-                compareWithDefaultRef: {
-                    data: {},
-                    message: '',
-                    loading: false
-                }
             }
         },
         computed: {
@@ -438,7 +322,6 @@
             },
         },
         created() {
-            console.log('create')
             this.network_getData()
         },
         methods: {
@@ -448,16 +331,10 @@
                 this.network_getContributors()
                 this.network_getLanguages()
                 if(!this.currentRef) return
-                this.network_getBranch()
-                this.networl_getLatestCommit()
-                this.network_getCommitsCount()
+                //this.network_getBranch()
                 this.network_getReadme()
-                this.network_getContents()
-                if(this.defaultRef && this.currentRef && (this.currentRef != this.defaultRef)) {
-                    this.network_getCompareWithDefaultRef()
-                }
             },
-            async network_getBranch() {
+            /* async network_getBranch() {
                 try{
                     this.ref.loading = true
                     let url = api.API_BRANCH({
@@ -482,57 +359,8 @@
                         this.ref.loading = false
                     }
                 }
-            },
-            async networl_getLatestCommit() {
-                try{
-                    this.latestCommit.loading = true
-                    let url = api.API_COMMITS({
-                        repo: this.repo,
-                        owner: this.owner,
-                        params: {
-                            path: this.path,
-                            sha: this.currentRef,
-                            per_page: 1
-                        }
-                    })
-
-                    let res = await authRequiredGet(
-                        url,
-                        {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_latest_commit')
-                        }
-                    )
-
-                    this.latestCommit.data = res.data[0]
-                    this.network_getLatestCommitStatus()
-                }catch(e) {
-                    console.log(e)
-                }finally{
-                    this.latestCommit.loading = false
-                }
-            },
-            async network_getLatestCommitStatus() {
-                try{
-                    let url = api.API_PROXY_COMMIT_STATUS({
-                        repo: this.repo,
-                        owner: this.owner,
-                        sha: this.latestCommit.data.sha
-                    })
-
-                    let res = await commonGet(
-                        url,
-                        {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_latest_commit_status')
-                        }
-                    )
-
-                    if(res.data) this.parseLatestCommitStatus(res.data)
-                   
-                }catch(e) {
-                    console.log(e)
-                }
-            },
-            async network_getTag() {
+            }, */
+            /* async network_getTag() {
                 try{
                     this.ref.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_tag')
@@ -555,35 +383,7 @@
                     this.ref.loading = false
                     this.latestCommit.loading = false
                 }
-            },
-            async network_getCommitsCount() {
-               
-                try{
-                    this.commitCount.loading = true
-                    let url = api.API_COMMITS({
-                        repo: this.repo,
-                        owner: this.owner,
-                        params: {
-                            sha: this.currentRef,
-                            per_page: 1
-                        }
-                    })
-                    
-                    let res = await authRequiredGet(
-                        url,
-                        {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_commit_count')
-                        }
-                    )
-
-                    let commitCountHolder = parse(res.headers.link) || {}
-                    this.commitCount.data = commitCountHolder.last ? commitCountHolder.last.page : res.data.length
-                }catch(e) {
-                    console.log(e)
-                }finally{
-                    this.commitCount.loading = false
-                }       
-            },
+            }, */
             triggerShowLatestCommitMessage() {
                 this.latestCommit.showMessage = !this.latestCommit.showMessage
             },
@@ -772,104 +572,6 @@
                     this.selectRefModal.tags.loading = false
                 }
             },
-            async network_getContents() {
-                try{
-                    this.contents.loading = true 
-                    let url = api.API_CONTENTS({
-                        path: this.path && this.path.replace(/^\//,''),
-                        owner: this.owner,
-                        repo: this.repo,
-                        ref: this.currentRef
-                    })
-                    let res = await authRequiredGet(
-                        url,
-                        {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_contents')
-                        }
-                    )
-
-                    let contents = res.data.sort((a,b) => {
-                        return (b.type == 'dir' ? 1 : 0) - (a.type == 'dir' ? 1 : 0)
-                    })
-                    if(this.path) contents.unshift({
-                        name: '. .',
-                        type: 'prevLink'
-                    })
-                    this.contents.data = contents
-                    if(this.path) this.contents.show = true
-                    if(this.accessToken) {
-                        this.network_getContentsLastUpdateInfo()
-                    }
-                }catch(e) {
-                    this.handleError(e)
-                    if(e.response && e.response.status == 404) {
-                        this.emitNotFoundEvent(this.$el)
-                    }
-                }finally{
-                    this.contents.loading = false
-                }
-            },
-            async network_getContentsLastUpdateInfo() {
-                try{
-                    this.contents.loadingLastUpdateDate = true 
-
-                    let graphQL_contentsLastUpdateInfo = graphql.GRAPHQL_REPOSITORY_LAST_COMMITDATE_BY_PATH({
-                        path: this.path,
-                        contents: this.contents.data,
-                        owner: this.owner,
-                        repo: this.repo,
-                        branch: this.currentRef
-                    }) 
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphQL_contentsLastUpdateInfo,
-                        {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.name + ' get_contents_last_update_date')
-                        }
-                    )
-
-                    let dataHolder
-                    try{
-                        dataHolder = res.data.data.repository.object
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-                    let i = 0
-                    for(let key in dataHolder) {
-                       Vue.set(this.contents.data[i],'committedDate',dataHolder[key].nodes[0] && dataHolder[key].nodes[0].committedDate)
-                        i += 1
-                    }
-                }catch(e) {
-                    console.log(e)
-                }finally{
-                    this.contents.loadingLastUpdateDate = false
-                }
-            },
-            async network_getCompareWithDefaultRef() {
-                try{
-                    this.compareWithDefaultRef.loading = true
-                    let url = api.API_COMMITS_COMPARE({
-                        repo: this.repo,
-                        owner: this.owner,
-                        baseHead: `${this.defaultRef}...${this.currentRef}`
-                    })
-
-                    let res = await authRequiredGet(
-                        url,
-                        {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_compare_with_default_ref')
-                        }
-                    )
-
-                    this.compareWithDefaultRef.data = res.data
-                }catch(e) {
-                    console.log(e)
-                    if(e.response) {
-                        this.compareWithDefaultRef.message = e.response.data.message
-                    }
-                }finally{
-                    this.compareWithDefaultRef.loading = false
-                }
-            },
             parseBranchesFromHTML(HTML) {
                 let pattern = /<span class="(?:flex-1 )?break-word" data-menu-button-text data-filter-item-text>(.*)<\/span>/g
                 let execResult
@@ -899,28 +601,6 @@
            /*  generateRouterMeta() {
                 return `${this.owner}/${this.repo}/${this.currentRef}`
             }, */
-            routeUpdateHook(to,from) {
-                
-                this.selectRefModal.branches.data = []
-                this.selectRefModal.tags.data = []
-
-                if(to.params.repo != from.params.repo || to.params.owner != from.params.owner) {
-                    this.network_getContributors() 
-                    this.network_getLanguages() 
-                    this.network_getReleases()
-
-                    this.allBranchesAndTags.branches = []
-                    this.allBranchesAndTags.tags = []
-                    this.network_getAllBranchesAndTags()
-                }
-                if(!this.currentRef) return
-                this.network_getReadme()
-                this.networl_getLatestCommit()
-                this.network_getContents()
-                if(!this.defaultRef) return 
-                if(this.defaultRef == this.currentRef) return 
-                this.network_getCompareWithDefaultRef()
-            },
             routeResetHook(to,from){
                 if(to.path.indexOf(from.path) == 0 || from.path.indexOf(to.path) == 0) return
                 Object.assign(this.$data,this.$options.data())
@@ -937,23 +617,14 @@
                     this.latestCommit.status = 'SUCCESS'
                 }
             },
+            generateRouterMeta() {
+                if(!this.componentActive) return undefined
+                return `${this.owner}/${this.repo}`
+            },
         },  
-        
         watch: {
             currentRef(newOne,oldOne) {
-                if(newOne && !oldOne && this.componentActive) {
-                    this.network_getBranch()
-                    this.networl_getLatestCommit()
-                    this.network_getCommitsCount()
-                    this.network_getReadme()
-                    this.network_getContents()
-                    if(this.defaultRef) this.network_getCompareWithDefaultRef()
-                }
-            },
-            defaultRef(newOne,oldOne) {
-                if(newOne && !oldOne && this.componentActive) {
-                    if(this.currentRef) this.network_getCompareWithDefaultRef()
-                }
+                if(newOne && !oldOne)  this.network_getReadme()
             }
         },
         components: {
@@ -968,9 +639,9 @@
             Popover,
             SkeletonCircle,
             SkeletonRectangle,
+            FileBrowser,
             Container: styled.div``,
             FileNavigation: styled.div``,
-            FileBrowser: styled.div``,
             Readme: styled.div``,
             Releases: styled.div``,
             Contributors: styled.div``,
@@ -999,11 +670,6 @@
 @import 'node_modules/@primer/css/forms/index.scss';
 @import 'node_modules/@primer/css/select-menu/index.scss';
 
-.user-mention{
-    font-weight: 600;
-    color: #24292e;
-    white-space: nowrap;
-}
 .read-me{
     margin-right: -15px;
     margin-left: -15px;

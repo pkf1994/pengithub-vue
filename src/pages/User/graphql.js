@@ -1,6 +1,7 @@
 export const GRAPHQL_USER_INFO = payload => `
 {
     user(login: "${payload}") {
+      twitterUsername
       viewerCanFollow
       viewerIsFollowing
       isDeveloperProgramMember

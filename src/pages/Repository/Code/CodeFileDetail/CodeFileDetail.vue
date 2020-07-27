@@ -18,9 +18,9 @@
                         </router-link>
                     </div>
                     <div class="dropdown-divider"></div>
-                         <router-link class="dropdown-item" :to="`/${owner}/${repo}/new/${currentRef}`">
-                            Create new file
-                        </router-link>
+                    <div class="dropdown-item" v-clipboard:copy="location.href" v-clipboard:success="copyPathSuccess">
+                        Copy path
+                    </div>
             </Popover>
         </FileNavigation>
 
@@ -44,18 +44,18 @@
 
                         <div style="height: 24px" class="AvatarStack flex-self-start AvatarStack--two" v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.login != contributionMessage.latestCommit.data.committer.login">
                             <div class="AvatarStack-body">
-                                <router-link style="height: 24px;width: 24px;border-radius:2em;" v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" class="avatar avatar-user"  :to="`/${contributionMessage.latestCommit.data.author.login}`">
+                                <router-link style="height: 24px;width: 24px;border-radius:2em!important;overflow:hidden;background:transparent" v-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" class="avatar avatar-user"  :to="`/${contributionMessage.latestCommit.data.author.login}`">
                                     <img width="24" height="24" :src="contributionMessage.latestCommit.data.author.avatar_url" :alt="`@${contributionMessage.latestCommit.data.author.login}`" class="avatar-user" style="border-radius:2em">
                                 </router-link>
-                                <router-link style="height: 24px;width: 24px;border-radius:2em;" v-if="contributionMessage.latestCommit.data.committer && contributionMessage.latestCommit.data.committer.avatar_url" class="avatar avatar-user" :to="`/${contributionMessage.latestCommit.data.author.login}`">
+                                <router-link style="height: 24px;width: 24px;border-radius:2em!important;overflow:hidden;background:transparent" v-if="contributionMessage.latestCommit.data.committer && contributionMessage.latestCommit.data.committer.avatar_url" class="avatar avatar-user" :to="`/${contributionMessage.latestCommit.data.author.login}`">
                                     <img width="24" height="24" :src="contributionMessage.latestCommit.data.committer.avatar_url" :alt="`@${contributionMessage.latestCommit.data.committer.login}`" class="avatar-user" style="border-radius:2em">
                                 </router-link>
                             </div>
                         </div>
                         
-                        <router-link v-else-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" class="avatar avatar-user" :to="`/${contributionMessage.latestCommit.data.author.login}`">
-                            <ImgWrapper>
-                                <img width="24" height="24" :src="contributionMessage.latestCommit.data.author.avatar_url" :alt="`@${contributionMessage.latestCommit.data.author.login}`">
+                        <router-link v-else-if="contributionMessage.latestCommit.data.author && contributionMessage.latestCommit.data.author.avatar_url" :to="`/${contributionMessage.latestCommit.data.author.login}`">
+                            <ImgWrapper class="avatar avatar-user">
+                                <img width="24" height="24" :src="contributionMessage.latestCommit.data.author.avatar_url" class="avatar avatar-user" :alt="`@${contributionMessage.latestCommit.data.author.login}`">
                             </ImgWrapper>
                         </router-link>
 
@@ -210,7 +210,6 @@
 <script>
     import styled from 'vue-styled-components'
     import {Breadcrumb,Modal,SelectMenuItem,LoadingIconEx,CommonLoadingWrapper,AnimatedHeightWrapper,ImgWrapper,Popover,SkeletonCircle,SkeletonRectangle} from '@/components'
-    import ClipboardJS from 'clipboard'
     import {Content} from './components'
     import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet,commonGet} from '@/network'
     import {RouteUpdateAwareMixin,ComponentActiveAwareMixin} from '@/mixins'
@@ -259,6 +258,7 @@
                     data: 0,
                     loading: false
                 },
+                isDynamicDocumentTitle: true
             }
         },
       
@@ -548,12 +548,6 @@
                     this.contributionMessage.latestCommitStatus = 'SUCCESS'
                 }
             },
-            initClipboard() {
-                let clip = new ClipboardJS('#file-detail-copy-btn');
-                clip.on('success',e => {
-                    this.$toast("Clip OK!")
-                })
-            },
             switchModalTab(payload) {
                 this.switchBranchOrTagModalTab = payload
                 this.network_getAvailableRefs()
@@ -667,6 +661,10 @@
                 this.selectRefModal.tab = payload
                 this.network_getModalAvailableRef()
             },
+            copyPathSuccess() {
+                this.$toast('Copy path success!')
+                this.closeModal()
+            }
         },
         watch: {
             currentRef(newOne, oldOne) {

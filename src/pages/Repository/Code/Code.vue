@@ -21,7 +21,8 @@
                 branches: {
                     data: [],
                     loading: false
-                }
+                },
+                isDynamicDocumentTitle: true
             }
         },
         computed: {

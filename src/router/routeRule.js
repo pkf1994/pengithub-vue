@@ -33,6 +33,7 @@ const OrganizationPackages = () => import('../pages/Organization/Packages/Packag
 const Repository = () => import('../pages/Repository/Repository.vue')
 const RepositoryCode = () => import('../pages/Repository/Code/Code.vue')
 const RepositoryCodeMain = () => import('../pages/Repository/Code/CodeMain/CodeMain.vue')
+const RepositoryCodeMainFileBrowser = () => import('../pages/Repository/Code/CodeMain/components/FileBrowser.vue')
 const RepositoryCodeFileDetail = () => import('../pages/Repository/Code/CodeFileDetail/CodeFileDetail.vue')
 const RepositoryIssues = () => import('../pages/Repository/Issues/Issues.vue')
 const RepositoryIssuesBrowser = () => import('../pages/Repository/Issues/IssuesBrowser.vue')
@@ -66,6 +67,8 @@ const RepositoryMilestoneDetail = () => import('../pages/Repository/MilestoneDet
 const RepositoryCompare = () => import('../pages/Repository/Compare/Compare.vue')
 const RepositoryContributors = () => import('../pages/Repository/Contributors/Contributors.vue')
 const RepositoryNew = () => import('../pages/Repository/New/New.vue')
+const RepositoryEdit = () => import('../pages/Repository/Edit/Edit.vue')
+const RepositoryDelete = () => import('../pages/Repository/Delete/Delete.vue')
 const SignOut = () => import('../pages/SignOut/SignOut.vue')
 const Notifications = () => import('../pages/Notifications/Notifications.vue')
 const NotFoundPage = () => import('../pages/NotFoundPage/NotFoundPage.vue')
@@ -231,7 +234,6 @@ export default [
         children: [
             {
                 path: '/',
-                name: 'userOverview',
                 component: UserOverview,
                 children: [
                     {
@@ -317,13 +319,23 @@ export default [
                 children: [
                     {
                         path: '/',
-                        name: 'repositoryCodeMain',
-                        component: RepositoryCodeMain
+                        component: RepositoryCodeMain,
+                        children: [
+                            {
+                                path: '',
+                                component: RepositoryCodeMainFileBrowser
+                            }
+                        ]
                     },
                     {
                         path: 'tree/(\.*)+',
-                        name: 'repositoryCodeMain',
-                        component: RepositoryCodeMain
+                        component: RepositoryCodeMain,
+                        children: [
+                            {
+                                path: '',
+                                component: RepositoryCodeMainFileBrowser
+                            }
+                        ]
                     },
                     {
                         path: 'blob/(\.*)+',
@@ -497,6 +509,22 @@ export default [
                 path: 'new/(\.*)?',
                 name: 'repositoryNew',
                 component: RepositoryNew,
+                meta: {
+                    authRequired: true
+                }
+            },
+            {
+                path: 'edit/(\.*)?',
+                name: 'repositoryEdit',
+                component: RepositoryEdit,
+                meta: {
+                    authRequired: true
+                }
+            },
+            {
+                path: 'delete/(\.*)?',
+                name: 'repositoryDelete',
+                component: RepositoryDelete,
                 meta: {
                     authRequired: true
                 }

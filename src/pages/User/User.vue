@@ -3,7 +3,7 @@
         <CommonLoadingWrapper :loading="loading || changeUserStatusModalData.loading" :position="loading ? 'center' : 'corner'" class="clearfix p-3">
         <transition name="fade" appear>
             <Main >
-                <AnimatedHeightWrapper :appear="false" :style="{overflow: `${showBlockOrReportUserPopover ? 'visible' : 'hidden'}!important`}">
+                <AnimatedHeightWrapper class="ml-n3 mr-n3 px-3" :appear="false" :style="{overflow: `${showBlockOrReportUserPopover ? 'visible' : 'hidden'}!important`}">
                     <Skeleton v-if="loading && !data.node_id">
                         <div class="d-flex flex-items-center mb-4">
                             <div class="col-2 mr-3">
@@ -57,7 +57,7 @@
                                 </div>
                             </UserStatus>
 
-                            <UserStatus v-else-if="accessToken && viewer.login == login" @click="() => showModal('setStatusModal')">
+                            <UserStatus v-else-if="accessToken && viewer.login == login" @click="() => showModal('setStatusModal')"  class="mb-3 user-status-container">
                                 <div v-if="extraData.data.status" class="d-flex py-2 width-full flex-items-center border rounded-1 pl-2" :class="{busy:extraData.data.status.indicatesLimitedAvailability}">
                                     <UserStatusEmoji class="mr-1 ml-1 user-status-emoji" v-html="extraData.data.status.emojiHTML || '💭'">
                                     </UserStatusEmoji>
@@ -74,10 +74,20 @@
                                     </UserStatusMessage>
                                 </div>
                             </UserStatus>
-                    
                         </UserBasicInfo>
 
                         <UserProfile>
+                            <button v-if="login == viewer.login && !showUserProfileEditor" class="btn btn-block mb-3" @click="() => triggerShowUserProfileEditor(true)">
+                                Edit profile
+                            </button> 
+
+                            <UserProfileEditor v-if="login == viewer.login && data.login" 
+                            v-show="showUserProfileEditor" 
+                            :twitterUserNameHolder="extraData" 
+                            @cancel="() => triggerShowUserProfileEditor(false)"
+                            @user-update-success="userUpdatedHandler"
+                            ></UserProfileEditor>
+
                             <Bio v-if="data.bio" class="pb-2 user-profile-bio">
                                 {{data.bio}}
                             </Bio>
@@ -352,6 +362,7 @@
     import {CommonLoadingWrapper,ComplexTopTab,ImgWrapper,HyperlinkWrapper,Modal,AnimatedHeightWrapper,Popover,WithTopNoticeWrapper,Img,SkeletonCircle,SkeletonRectangle} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet,authRequiredAjax,commonGet} from '@/network'
+    import {UserProfileEditor} from './components'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
     import emojiHTML from './emojiHTML'
@@ -427,7 +438,8 @@
                     following: undefined,
                     stars: undefined
                 },
-                resetBeforeUpdate: true
+                resetBeforeUpdate: true,
+                showUserProfileEditor: false
             }   
         },
         computed: {
@@ -459,10 +471,6 @@
                     },
                 ]
             },
-            documentTitle() {
-                return this.$route.params.login
-            }
-          
         },
         async created() {
             this.network_getData()
@@ -685,6 +693,17 @@
                     default:
                         return 
                 }
+            },
+            triggerShowUserProfileEditor(payload) {
+                if(payload === undefined) {
+                    this.showUserProfileEditor = !this.showUserProfileEditor
+                }else{
+                    this.showUserProfileEditor = payload
+                }
+            },
+            userUpdatedHandler(payload) {
+                this.showUserProfileEditor = false
+                this.data = payload
             }
         },
         watch: {
@@ -741,6 +760,7 @@
             SkeletonCircle,
             Img,
             SkeletonRectangle,
+            UserProfileEditor,
             Container: styled.div``,
             Main: styled.div``,
             UserBasicInfo: styled.div``,

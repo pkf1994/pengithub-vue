@@ -9,8 +9,9 @@
 <script>
     import styled from 'vue-styled-components'
     import {util_throttle} from '../../util'
-    import {WithRandomMetaMixin} from '../../mixins'
+    import {ComponentActiveAwareMixin} from '@/mixins'
     export default {
+        mixins: [ComponentActiveAwareMixin],
         props: {
             stretch: {
                 type: Boolean,
@@ -46,6 +47,9 @@
             })
           
         },
+        deactivated() {
+            this.transition = 'none'
+        },
         activated() {
             this.computeHeight()
         },
@@ -55,9 +59,12 @@
                 if(this.height === this.$refs.content.$el.offsetHeight) return
                 this.height = this.$refs.content.$el.offsetHeight
 
-                setTimeout(() => {
-                    this.transition = 'height .4s'
-                },0)
+                if(this.componentActive) {
+                    setTimeout(() => {
+                        this.transition = 'height .4s'
+                    },0)
+                }
+                
 
                 setTimeout(() => {
                     this.emitComputeHeightEvent()

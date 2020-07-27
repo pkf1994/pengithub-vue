@@ -11,7 +11,7 @@
                 allBranchesAndTags: {
                     branches: [],
                     tags: [],
-                    loading: false
+                    loading: true
                 },
             }
         },
@@ -29,6 +29,7 @@
                     if(this.defaultRef) return this.defaultRef
                     return
                 }
+                if(this.allBranchesAndTags.loading) return 
                 if(pathMatch.match(/^[^\/]+\/?$/)) return pathMatch.replace('/','')
                 if(this.allBranchesAndTags.branches.length == 0) return
                 let ref
