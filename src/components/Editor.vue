@@ -78,6 +78,7 @@
                             :style="textareaStyle"
                             :value="markdownRaw"
                             :id="uniqueId"
+                            ref="textarea"
                             v-on:input="$emit('change',$event.target.value)"
                             v-on:change="$emit('change',$event.target.value)"
                             @focus="() => triggerTextareaIsFocused(true)" 
@@ -187,6 +188,9 @@
             },
             triggerTextareaIsFocused(flag) {
                 this.textareaIsFocused = flag
+            },
+            focus() {
+                this.$refs.textarea && this.$refs.textarea.focus()
             }
         },
         components: {

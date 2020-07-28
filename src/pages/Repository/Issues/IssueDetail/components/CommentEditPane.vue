@@ -6,7 +6,7 @@
                 :disabled="editCommentLoading"
                 :uniqueId="comment.id.toString()"
                 :withGidelines="false"
-                :textareaStyle="{height: '180px',maxHeight:'300px'}"
+                :textareaStyle="{height: '240px',maxHeight:'300px'}"
                 >
             <div class="py-2 d-flex flex-justify-end">
                 <button class="btn" :disabled="editCommentLoading" @click="() => $emit('cancel',markdownRaw)">
@@ -39,6 +39,9 @@
                 markdownRaw: '',
                 editCommentLoading: false,
             }
+        },
+        mounted() {
+            this.$refs.editor.focus()
         },
         methods: {
             append(payload) {
