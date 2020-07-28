@@ -11,7 +11,7 @@
                 allBranchesAndTags: {
                     branches: [],
                     tags: [],
-                    loading: true
+                    loading: false
                 },
             }
         },

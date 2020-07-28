@@ -1,6 +1,6 @@
 <template>
-    <Container class="the-container" :class="{loading:!this.file.sha}">
-        <Header class="header d-flex flex-column">
+    <Container class="the-container" :class="{loading:!file.sha}">
+        <Header class="header d-flex flex-column position-relative">
             <Info class="info flex-auto min-width-0 mb-md-0 mb-2">
                 <button class="btn-octicon" style="width: 22px;" @click="triggerStretch">
                     <svg v-if="stretch" class="octicon octicon-chevron-down Details-content--hidden" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 11L0 6l1.5-1.5L5 8.25 8.5 4.5 10 6l-5 5z"></path></svg>
@@ -21,25 +21,25 @@
                 <svg v-else class="octicon octicon-check js-clipboard-check-icon mx-1 d-inline-block text-green d-none" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
             </Info>    
 
-            <Actions class="actions pt-0 mb-2 flex-shrink-0 text-right position-relative" @click="openPopover">
+            <Actions class="actions pt-0 mb-2 flex-shrink-0 text-right" @click="openPopover">
                 <svg aria-label="Show options" class="octicon octicon-kebab-horizontal mx-2" viewBox="0 0 13 16" version="1.1" width="13" height="16" role="img"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
-                <Popover ref="popover" class="f5" :popoverStyle="{right:0}">
-                    <router-link :to="viewFileRouterLink" class="pl-5 btn-link py-2 dropdown-item">
-                        View file
-                    </router-link>
-                </Popover>
             </Actions>
+            <Popover ref="popover" class="f5" :popoverStyle="{right:'8px',top:'calc(100% - 4px)'}">
+                <router-link :to="viewFileRouterLink" class="btn-link py-2 px-3 link-gray">
+                    View file
+                </router-link> 
+            </Popover>
         </Header>
 
         <div v-if="!showDiff" class="p-4 d-flex flex-column flex-items-center flex-justify-center" @click="triggerShowDiff">
-           <div class="text-bold f4 js-button-text" style="color: #0366d6;">Load diff</div>
+           <div class="text-bold f4 js-button-text" style="color: #0366d6;">{{file.sha ? 'Show Diff' : 'Loading Diff...'}}</div>
            <p class="hidden-diff-reason text-gray-light f6 mb-0 text-center">
                 This file was deleted.
             </p>
         </div>
 
         <DiffView v-else-if="stretch"  class="diff-view">
-            <div class="d-inline-block">
+            <div class="d-inline-block" style="min-width:100%">
                 <CodeLine class="d-flex width-full">
                     <BlobNum    class="blob-num blob-num-hunk" 
                                 data-line-number="..."></BlobNum>
@@ -92,7 +92,7 @@
                 loading: false,
                 clippyFlag: true,
                 patch: '',
-                lazyLoadedLines:[]
+                lazyLoadedLines:[],
             }
         },
         computed: {

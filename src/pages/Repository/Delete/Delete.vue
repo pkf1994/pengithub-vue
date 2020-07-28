@@ -123,7 +123,7 @@
                 return this.repoBasicInfo().default_branch
             },
             commitMessage() {
-                return `${this.commitMessageHeadline || 'Update ' + this.fileName}\n\n${this.commitMessageBody}`
+                return `${this.commitMessageHeadline || 'Delete ' + this.path}\n\n${this.commitMessageBody}`
             },
             inputDisabledFlag() {
                 return this.loading || this.allBranchesAndTags.loading || this.viewerPermission().loading || this.file.loading
@@ -260,9 +260,9 @@
                         this.$router.replace(`/${this.owner}/${this.repo}/compare/${this.currentRef}...${targetBranch}`)
                     }else{
                         this.$router.replace(`/${this.owner}/${this.repo}/tree/${this.currentRef}?update=true`)
+                        this.routeResetHook()
                     }
-                    this.routeResetHook()
-                    this.topNoticeShow('repository','File successfully deleted.','normal',true)
+                    if(!targetBranch) this.topNoticeShow('repository','File successfully deleted.','normal',true)
                 }catch(e) {
                     this.handleError(e)
                 }finally{
@@ -351,7 +351,6 @@
                             )
                         
                             this.$router.replace(`/${this.owner}/${this.repo}/compare/${this.currentRef}...${this.viewer.login}:${nameOfNewBranchOfNewForkRepo}`)
-                            this.routeResetHook()
                         }else {
                             throw new Error('create new branch fail.')
                         }
@@ -362,17 +361,18 @@
                             path: this.path
                         })
 
-                        let res = await authRequiredPut(
+                        let res = await authRequiredDelete(
                             url,
                             {
-                                message: this.commitMessage,
-                                sha: this.file.data.sha,
-                                branch: this.newBranchOfNewForkRepo
+                                data: {
+                                    message: this.commitMessage,
+                                    sha: this.file.data.sha,
+                                    branch: this.newBranchOfNewForkRepo
+                                }
                             }
                         )
                         
                         this.$router.replace(`/${this.owner}/${this.repo}/compare/${this.currentRef}...${this.viewer.login}:${this.newBranchOfNewForkRepo}`)
-                        this.routeResetHook()
                     }
 
                     this.newBranchOfNewForkRepo = undefined

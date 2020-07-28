@@ -47,6 +47,7 @@
                 <div v-else>
                     <transition-group name="fade-group" appear>
                         <IssueListItem v-for="item in data" 
+                                class="border-bottom"
                                 :showRepoFullName="issueItemShowRepoFullName"
                                 :issue="item"
                                 :key="item.id" 

@@ -32,7 +32,7 @@
         </Header>
 
         <DiffView v-if="viewStyle == 'unified' && stretch"  class="diff-view">
-            <div class="d-inline-block">
+            <div class="d-inline-block" style="min-width:100%">
                 <CodeLine v-for="(item,index) in diffHunkEntries" :key="`${index}_${item.type}_${item.code}`" class="d-flex width-full" :data-type="lazyLoadedLines.indexOf(item.additionLineIndex) > -1 ? 'lazyLoaded' :item.type">
                     <BlobNum    v-if="item.type !== 'hunk' || item.additionLineIndex == 0"
                                 class="blob-num" 

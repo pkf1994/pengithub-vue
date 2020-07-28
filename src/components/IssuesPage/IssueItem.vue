@@ -1,5 +1,5 @@
 <template>
-    <Container v-if="!issueIsEmpty" class="d-flex relative container Box-row p-0">
+    <Container v-if="!issueIsEmpty" class="d-flex relative container p-0">
         <Icon class="flex-shrink-0 pt-2 pl-3">
             <span class="relative">
                 <IssueIcon :issue="issue"></IssueIcon>

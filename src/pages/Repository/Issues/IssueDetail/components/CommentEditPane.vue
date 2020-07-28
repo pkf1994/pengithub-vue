@@ -22,7 +22,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {Editor} from '@/components'
-    import {authRequiredAjax,cancelAndUpdateAxiosCancelTokenSource} from '@/network'
+    import {authRequiredPatch,cancelAndUpdateAxiosCancelTokenSource} from '@/network'
     import * as api from '@/network/api'
     export default {
         name: 'repository_issue_comment_edit_pane',
@@ -31,7 +31,8 @@
             comment: {
                 type: Object,
                 required: true
-            }
+            },
+            updateHook: Function
         },
         data() {
             return {
@@ -47,22 +48,24 @@
                 if(this.editCommentLoading) return
                 try{
                     this.editCommentLoading = true
-                    let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' update_issue_comment')
-                    let url = api.API_HANDLE_ISSUE_COMMENT({
-                        ...this.$route.params,
-                        comment: this.comment.id
-                    })
+                    if(this.updateHook) {
+                        await this.updateHook(this.markdownRaw)
+                    } else {
+                         let url = api.API_HANDLE_ISSUE_COMMENT({
+                            ...this.$route.params,
+                            comment: this.comment.id
+                        })
 
-                    let res = await authRequiredAjax(
-                        url,
-                        {
-                            cancelToken,
-                            body: this.markdownRaw
-                        },
-                        'patch'
-                    )
+                        let res = await authRequiredPatch(
+                            url,
+                            {
+                                body: this.markdownRaw
+                            },
+                        )
 
-                    this.$emit('update-comment',res.data)
+                        this.$emit('update-comment',res.data)
+                    }
+                   
                 }catch(e) {
                     this.handleError(e)
                 }finally{

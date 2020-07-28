@@ -38,7 +38,7 @@
             locked: Boolean,
             viewerIsCollaborator: Boolean,
             viewerDidAuthor: Boolean,
-            lockedReason: String
+            lockedReason: String,
         },
         data() {
             return {

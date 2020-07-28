@@ -271,7 +271,7 @@
                     if(targetBranch) {
                         this.$router.replace(`/${this.owner}/${this.repo}/compare/${this.currentRef}...${targetBranch}`)
                     } else {
-                        this.$router.replace(`/${this.owner}/${this.repo}/tree/${this.currentRef}?update=true`)
+                        this.$router.replace(`/${this.owner}/${this.repo}/tree/${this.currentRef}?update_file_browser=true`)
                     }
                     this.routeResetHook()
                 }catch(e) {

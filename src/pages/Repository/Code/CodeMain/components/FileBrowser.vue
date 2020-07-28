@@ -371,6 +371,13 @@
                 this.network_getLatestCommit()
             }
         },  
+        beforeRouteEnter(to,from,next) {
+            next(vm => {
+                if(to.query.update_file_browser) {
+                    vm.network_getData()
+                }
+            })
+        },
         watch: {
             theCurrentRef(newOne,oldOne) {
                 if(newOne && !oldOne){

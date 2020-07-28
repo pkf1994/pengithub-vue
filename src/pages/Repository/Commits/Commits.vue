@@ -1,13 +1,13 @@
 <template>
     <CommonLoadingWrapper class="px-3" :loading="loading || graphqlData.loading || allBranchesAndTags.loading" :position="loading || allBranchesAndTags.loading ? 'center' : 'corner'">
         <transition-group name="fade-group" appear>
-            <button key="refSwitchBtn" v-if="firstLoadedFlag && !path" class="btn css-truncate btn-sm" @click="() => openModal('switchBranchOrTagModal')">
+            <button v-if="!path && firstLoadedFlag" key="refSwitchBtn" class="btn css-truncate btn-sm mb-2" :disabled="!currentRef" @click="() => openModal('switchBranchOrTagModal')">
                 <i>{{refType | capitalize}}:</i>
                 <span class="css-truncate-target" v-if="currentRef">{{currentRef}}</span>
                 <span class="dropdown-caret"></span>
             </button>
             
-            <FileNavigation key="fileNavigation" v-if="firstLoadedFlag && path" class="file-path text-bold">
+            <FileNavigation key="fileNavigation" class="file-path text-bold">
                 <span class="text-normal">History for</span>         
                 <router-link :to="`/${owner()}/${repo()}/commits`">{{repo()}}</router-link> /
                 <Breadcrumb :spaceArround="true" :routePath="$route.fullPath" :displayPath="path && path.replace(/^\//,'').replace(/\/$/,'')">
@@ -165,6 +165,8 @@
                     })
                     let res = await authRequiredGet(url,{cancelToken})
 
+                    if(!this.pageInfo.prev && res.data.length == 0) this.emitNotFoundEvent(this.$el)
+
                     window.scrollTo(0,0)
                     this.data = res.data
                     this.pageInfo = parse(res.headers.link) || {}
@@ -276,7 +278,7 @@
             },
             routerWithRef(ref) {
                 this.closeModal()
-                this.$router.push(`/${this.owner()}/${this.repo()}/commits/${ref}`)
+                this.$router.push(`/${this.owner()}/${this.repo()}/commits/${ref}/${this.path}`)
             },
             switchModalTab(payload) {
                 this.switchBranchOrTagModalTab = payload

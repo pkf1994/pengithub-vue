@@ -1,5 +1,5 @@
 <template>
-    <WithSignInNoticeWrapper  ref="signInNotice" class="p-3">
+    <WithSignInNoticeWrapper  ref="signInNotice" class="px-3">
         <CommonLoadingWrapper :loading="loading || allBranchesAndTags.loading">
             <FilePath class="file-path text-normal my-2 flex-auto text-bold">
                 <router-link :to="`/${owner()}/${repo()}`">{{repo()}}</router-link>&nbsp;/&nbsp;<Breadcrumb :disableLastFragment="true" :spaceArround="true" :routePath="breadcrumbRouterPath" :displayPath="path && path.replace(/^\//,'').replace(/\/$/,'')"/>
@@ -24,13 +24,6 @@
                                     </BtnGroup>
                                 </Pane>
                                 <LineAndSize  class="text-mono f6 flex-auto pt-2 text-normal">
-                                    <span v-if="fileRowCount != 0">
-                                        {{fileRowCount}} lines 
-                                    </span>
-                                    <span class="file-info-divider"></span>
-                                    {{file.byteSize | fileSize}}
-
-
                                     <Legend class="float-right">
                                         <span>Newer</span>
                                         <ol class="d-inline-block mx-1 list-style-none">

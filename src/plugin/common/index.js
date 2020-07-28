@@ -68,7 +68,9 @@ export default {
                         return 
                     }
                     for(let modalRef in this.$refs) {
-                        if(this.$refs[modalRef]) this.$refs[modalRef].show = false
+                        if(this.$refs[modalRef]) {
+                            this.$refs[modalRef].show = false
+                        }
                     }
                 },
                 scrollToTop() {
@@ -93,7 +95,9 @@ export default {
                 })
             },
             deactivated() {
+                if(this.debug)console.log('===================deactivated=======================')
                 this.closeModal()
+                if(this.debug)console.log('===================deactivated=======================')
             },
             watch: {
                 documentTitle() {

@@ -83,7 +83,7 @@
 @import 'node_modules/@primer/css/avatars/index.scss';
 .blame-commit{
     border-bottom: 1px solid #e1e4e8;
-    border-right: 2px solid;
+    border-right: 4px solid;
     .date{
         color: #6a737d;
     }

@@ -2,15 +2,23 @@
     <CommonLoadingWrapper :loading="loading || timeline.loading || timeline.extraData.loading" :position="loading ? 'center' : 'corner'" class="px-3 bg-white flex-grow-1">
         
         <Header>
-            <HeaderActions class="d-flex flex-justify-between flex-items-center mb-3">
-                <router-link to="/" class="btn btn-primary d-inline-block btn-sm">
-                    New issue
-                </router-link>
+            <HeaderActions v-if="!titleEditPane.show" class="d-flex flex-justify-between flex-items-center mb-3">
+                <span>
+                    <AnimatedWidthWrapper class="v-align-bottom">
+                        <button v-if="extraData.data.viewerCanUpdate" @click="triggerShowTitleEditPane" class="btn btn-sm d-inline-block float-none mr-2">
+                            Edit
+                        </button>
+                    </AnimatedWidthWrapper>
+                    <router-link to="/" class="btn btn-primary d-inline-block btn-sm">
+                        New issue
+                    </router-link>
+                </span>
+                
 
                 <button class="btn-link" @click="scrollToBottom">Jump to bottom</button>
             </HeaderActions>
 
-            <HeaderTitle class="title f1">
+            <HeaderTitle v-if="!titleEditPane.show" class="title f1">
                 <transition-group name="fade-group">
                     <Skeleton key="1" v-if="!data.id && loading">
                         <SkeletonRectangle :height="20" style="width:100%"></SkeletonRectangle>
@@ -24,8 +32,16 @@
                 
             </HeaderTitle>
 
+            <TitleEditPane v-if="titleEditPane.show" class="mb-3">
+                <input :disabled="titleEditPane.loading" v-model="titleEditPane.title" ref="titleEditInput" class="form-control flex-auto input-lg input-contrast mr-0 width-full" autofocus="autofocus" autocomplete="off" type="text">
+                <div style="margin-top:12px">
+                    <button class="btn btn-sm mr-2" :disabled="titleEditPane.loading || !titleEditPane.title" @click="network_updateIssueTitle">{{titleEditPane.loading ? 'Saving' : 'Save'}}</button>
+                    <button class="btn btn-link" style="background:white" :disabled="titleEditPane.loading || !titleEditPane.title" @click="() => triggerShowTitleEditPane(false)">Cancel</button>
+                </div> 
+            </TitleEditPane>
+
             <HeaderMeta class="d-flex mt-2 mb-3 flex-items-center header-meta">
-                <State v-if="!data.state"  class="State State--green mr-2 d-inline-flex flex-items-center flex-self-start"
+                <State v-if="!data.state"  class="State State--green mr-2 d-inline-flex flex-items-center"
                         :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" 
                         style="text-transform:capitalize;border-radius: 2em">
                     <IssueIcon class="flex-shrink-0 mr-1" color="#fff" :issue="data"></IssueIcon>
@@ -34,7 +50,7 @@
                     &nbsp;
                     &nbsp;
                 </State>   
-                <State v-else  class="State State--green mr-2 d-inline-flex flex-items-center flex-self-start"
+                <State v-else  class="State State--green mr-2 d-inline-flex flex-items-center"
                         :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" 
                         style="text-transform:capitalize;border-radius: 2em">
                     <IssueIcon class="flex-shrink-0 mr-1" color="#fff" :issue="data"></IssueIcon>
@@ -96,7 +112,7 @@
             </AnimatedHeightWrapper>
         </Info>
       
-        <Comment    :data="data"
+        <IssueBody  :data="data"
                     style="padding-top:0px!important;margin-top:16px;"
                     :headerStyle="{
                         backgroundColor:'#f1f8ff',
@@ -522,6 +538,7 @@
     import styled from 'vue-styled-components'
     import {CommonLoadingWrapper,
             Label,
+            AnimatedWidthWrapper,
             AnimatedHeightWrapper,
             LoadingIconEx,
             Progress,
@@ -536,10 +553,11 @@
             SkeletonRectangle,
             HiddenItemLoading} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
-    import {TimelineItem,Comment,ProjectCard,CommentCreatePane,LoadMore} from './components'
+    import {TimelineItem,Comment,IssueBody,ProjectCard,CommentCreatePane,LoadMore} from './components'
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
+        authRequiredPatch,
         authRequiredAjax,
         authRequiredGitHubGraphqlApiQuery,
         cancelAndUpdateAxiosCancelTokenSource} from '@/network'
@@ -555,7 +573,8 @@
             return {
                 deletedCommentsProvided: () => this.deletedComments,
                 commentExtraDataProvided: () => this.timeline.extraData.data,
-                issueGetter: () => Object.assign({},this.data,this.extraData.data)
+                issueGetter: () => Object.assign({},this.data,this.extraData.data),
+                network_updateIssue: () => this.network_updateIssue
             }
         },
         data() {
@@ -735,7 +754,12 @@
                 },
                 createdComments: [],
                 deletedComments: [],
-                isDynamicDocumentTitle: true
+                isDynamicDocumentTitle: true,
+                titleEditPane: {
+                    show: false,
+                    loading: false,
+                    title: ''
+                },
             }
         },
        
@@ -817,7 +841,7 @@
                 return mergedTimelineData
             },
             repoOwnerType() {
-                return this.repoBasicInfo().owner.type
+                return this.repoBasicInfo().owner && this.repoBasicInfo().owner.type
             }
         },
         created() {
@@ -851,6 +875,7 @@
                     this.data = res_issue.data
                     this.loading = false
                     if(this.accessToken) this.network_getIssueExtraData()
+                    this.titleEditPane.title = res_issue.data.title
                 }catch(e){
                     this.handleError(e)
                     if(e.response && e.response.status == 404) {
@@ -1322,6 +1347,38 @@
                     this.deleteIssueModal.loading = false
                 }
             },
+            async network_updateIssue(data) {
+                try {
+                    let url = api.API_ISSUE({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number
+                    })
+
+                    let res = await authRequiredPatch(
+                        url,
+                        {
+                            ...data
+                        }
+                    )
+                    
+                    this.data = res.data
+                } catch (e) {
+                    this.handleError(e)
+                    throw(e)
+                }
+            },
+            async network_updateIssueTitle() {
+                try {
+                    this.titleEditPane.loading = true
+                    await this.network_updateIssue({title: this.titleEditPane.title})
+                    this.titleEditPane.show = false
+                } catch (e) {
+                    
+                }finally{
+                    this.titleEditPane.loading = false
+                }
+            },
             triggerSubscription() {
                 if(this.extraData.data.viewerSubscription == 'SUBSCRIBED') {
                     this.network_setSubscription('UNSUBSCRIBED')
@@ -1368,6 +1425,14 @@
                 if(theComment) {
                     Object.assign(theComment,payload)
                 }
+            },
+            triggerShowTitleEditPane(payload = true) {
+                this.titleEditPane.show = payload
+                if(payload) {
+                    this.$nextTick(() => {
+                        this.$refs.titleEditInput.focus()
+                    })
+                }
             }
         },
         watch: {
@@ -1377,17 +1442,18 @@
                 this.setMilestoneModal.milestones.data = []
                 this.transferIssueModal.availableRepositories.data = []
             },
-            
         },
         components: {
             CommonLoadingWrapper,
             Label,
             Comment,
+            IssueBody,
             TimelineItem,
             HiddenItemLoading,
             LoadingIconEx,
             ImgWrapper,
             AnimatedHeightWrapper,   
+            AnimatedWidthWrapper,
             Progress,
             IssueIcon,
             ProjectCard,
@@ -1402,6 +1468,7 @@
             SkeletonCircle,
             SkeletonRectangle,
             Container: styled.div``,
+            TitleEditPane: styled.div``,
             Header: styled.div``,
             HeaderActions: styled.div``,
             HeaderTitle: styled.h1``,
@@ -1422,7 +1489,7 @@
             LabelsPageLink: styled.div``,
             EmptyNotice: styled.div``,
             IssueHandle: styled.div``,
-            Skeleton: styled.div``
+            Skeleton: styled.div``,
         }
     }
 </script>
