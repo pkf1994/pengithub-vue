@@ -91,14 +91,13 @@
         methods: {
             async network_getData() {
                 if(!this.accessToken) return 
-                console.log('get pinned repos')
                 try{
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_pinned_repositories')
                     let graphql_pinnedRepositories = graphql.GRAPHQL_USER_PINNED_REPOSITORIES(this.login)
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_pinnedRepositories,{cancelToken})
                     try{
-                        this.pinnedRepositories.data = res.data.data.user.pinnedItems.nodes
+                        this.pinnedRepositories.data = res.data.data.user.itemShowcase.items.nodes
                         this.dosenotHaveAnyPublicRepo = false
                         this.pinnedRepositories.isEmpty = false
                         if(this.pinnedRepositories.data.length == 0) this.pinnedRepositories.isEmpty = true

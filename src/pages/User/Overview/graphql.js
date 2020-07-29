@@ -3,25 +3,27 @@ export const GRAPHQL_USER_PINNED_REPOSITORIES = payload => `
 {
   user(login: "${payload}") {
     id
-    pinnedItems(types: REPOSITORY, first: 6) {
-      nodes {
-        ... on Repository {
-          name
-          id
-          owner {
-            login
-          }
-          stargazers {
-            totalCount
-          }
-          primaryLanguage {
-            color
+    itemShowcase {
+      items(first:6) {
+        nodes {
+          ... on Repository {
             name
+            id
+            owner {
+              login
+            }
+            stargazers {
+              totalCount
+            }
+            primaryLanguage {
+              color
+              name
+            }
+            forks {
+              totalCount
+            }
+            description
           }
-          forks {
-            totalCount
-          }
-          description
         }
       }
     }

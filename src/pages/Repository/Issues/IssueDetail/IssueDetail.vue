@@ -760,6 +760,7 @@
                     loading: false,
                     title: ''
                 },
+            
             }
         },
        
@@ -1625,4 +1626,6 @@
     position: sticky;
     top: 100%;
 }
+
+
 </style>

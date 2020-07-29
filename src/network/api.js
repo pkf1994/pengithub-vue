@@ -319,6 +319,8 @@ export const API_CREATE_ISSUE_COMMENT = payload => `${GITHUB_REST_API_BASE}/repo
 
 export const API_HANDLE_ISSUE_COMMENT = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.comment}`
 
+export const API_ISSUE_REACTIONS = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/reactions`
+
 export const API_ISSUE_COMMENT_REACTIONS = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.comment}/reactions`
 
 export const API_PROXY_ISSUE_COMMENT_EDIT_HISTORIES = payload => `${PROXY_API_BASE}/_render_node/${payload}/comments/comment_edit_history_log`
@@ -356,3 +358,5 @@ export const API_FILE_ACTION = payload => `${GITHUB_REST_API_BASE}/repos/${paylo
 export const API_CREATE_REF = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/refs`
 
 export const API_FORK = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/forks`
+
+export const API_PROXY_USER_EDIT = payload => `${PROXY_API_BASE}/user_content_edits/${payload}`

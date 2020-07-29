@@ -64,22 +64,10 @@
                         commented
                         <span class="no-wrap">{{data.created_at | getDateDiff}}</span>
 
-                        <span class="d-inline-block text-gray-light" v-if="withEditHistory || data.updated_at != data.created_at">•</span>    
-                        <span class="d-inline-block text-gray btn-link" v-if="withEditHistory || data.updated_at != data.created_at" @click="() => showModal('editedPopover')">
+                        <span class="d-inline-block text-gray-light">•</span>    
+                        <span class="d-inline-block text-gray btn-link" @click="() => showModal('editHistoriesModal')">
                             edited
                             <svg height="11" class="octicon octicon-triangle-down v-align-middle" viewBox="0 0 12 16" version="1.1" width="8" aria-hidden="true"><path fill-rule="evenodd" d="M0 5l6 6 6-6H0z"></path></svg>
-                            <Popover ref="editedPopover" :popoverStyle="{left: '16px',right: '16px',top:'calc(100% + 8px)'}" @show="network_getEditHistories">
-                                <div class="dropdown-header px-3 py-2 border-bottom">
-                                    Edited {{editHistories.data.length}} {{editHistories.data.length > 1 ? 'times' : 'time'}}
-                                </div> 
-                                <div class="edit-history-popover">
-                                    <button class="btn-link dropdown-item p-2" v-for="(item,index) in editHistories.data" :key="item.editedAt">
-                                        <img :src="item.avatarUrl" width="20" height="20" class="avatar avatar-user avatar-small v-align-middle mr-1" :alt="`@${item.login}`">
-                                        <span class="css-truncate-target v-align-middle text-bold">pkf1994</span>
-                                        <span class="v-align-middle">edited <span class="no-wrap">{{item.editedAt | getDateDiff}}o</span> <span v-if="index == 0">(most recent)</span></span>
-                                    </button>
-                                </div>
-                            </Popover>
                         </span>
 
                     </HeaderInner>
@@ -265,24 +253,64 @@
                         <span class="no-wrap text-gray">{{dateStampGap > dataStampGapThreshold ? 'on' : ''}} {{data.created_at | getDateDiff}}</span>
                     </h4>
 
-                        <Body v-if="bodyHTML" v-html="bodyHTML" style="padding:15px;padding-bottom:0" class="markdown-body comment-body">
-                        </Body>
+                    <Body v-if="bodyHTML" v-html="bodyHTML" style="padding:15px;padding-bottom:0" class="markdown-body comment-body">
+                    </Body>
 
-                        <Body v-else>
-                            <p class="text-gray p-3 mb-0">
-                                <em>No description provided.</em>
-                            </p>
-                        </Body>
+                    <Body v-else>
+                        <p class="text-gray p-3 mb-0">
+                            <em>No description provided.</em>
+                        </p>
+                    </Body>
                 </Body>
             </Main>
         </Inner>
 
-        <Modal ref="pickReactionModal" title="Pick your reaction">
+        <Modal ref="pickReactionModal" :title="reactionPickModalTitle">
             <div class="d-flex flex-wrap mx-2">
-                <button :disabled="loadingCreateReaction" v-for="item in availableReaction" @click="network_createReaction(item.content)" :key="item.label" class="btn-link col-3 d-flex flex-justify-center flex-items-center no-underline add-reactions-options-item">
+                <button :disabled="loadingCreateReaction" @mouseenter="reactionPickItemmouseenterHandler" @mouseleave="reactionPickItemmouseleaveHandler" :value="item.content" v-for="item in availableReaction" @click="network_createReaction(item.content)" :key="item.label" class="btn-link col-3 d-flex flex-justify-center flex-items-center no-underline add-reactions-options-item">
                     {{item.label}}
                 </button>
             </div>
+        </Modal>
+
+        <Modal ref="editHistoriesModal" :title="editHistories.loading ? 'Loading edit history...' : `Edited ${editHistories.data.length} ${editHistories.data.length > 1 ? 'times' : 'time'}`" :modalStyle="{maxHeight:'80vh'}" @show="network_getEditHistories">
+            <div class="overflow-y-auto position-relative" style="min-height:240px">
+                <div v-if="editHistories.loading" class="position-absolute d-flex flex-items-center flex-justify-center" style="top:0;bottom:0;right:0;left:0">
+                    <LoadingIconEx></LoadingIconEx>
+                </div>
+                <transition-group v-else name="fade-group" appear>
+                    <button @click="() => showEditHistoryDetail(item)" class="d-block btn-link dropdown-item p-2 border-bottom" v-for="item in editHistories.data" :key="item.editedAt">
+                        <img :src="item.avatarUrl" width="20" height="20" class="avatar avatar-user avatar-small v-align-middle mr-1" :alt="`@${item.login}`">
+                        <span class="css-truncate-target v-align-middle text-bold">pkf1994</span>
+                        <span class="v-align-middle">edited <span class="no-wrap">{{item.editedAt | getDateDiff}}</span></span>
+                    </button> 
+                </transition-group>
+                 <div v-if="editHistories.isEmpty && !editHistories.loading" class="position-absolute d-flex flex-items-center flex-justify-center" style="top:0;bottom:0;right:0;left:0">
+                    No edit history yet.
+                </div>
+            </div> 
+
+             <Modal ref="editHistoryDetailModal" @show="network_getEditHistoryDetail" :modalStyle="{maxHeight:'80vh'}">
+                <template v-slot:header>
+                    <div>
+                        <img :src="editHistoryDetailModal.data.avatarUrl" width="20" height="20" class="avatar avatar-user avatar-small v-align-middle" :alt="`@${editHistoryDetailModal.data.login}`">
+                        <span class="css-truncate-target v-align-middle text-bold text-small">{{editHistoryDetailModal.data.login}}</span>
+                        <span class="v-align-middle text-small">edited <span class="no-wrap">{{editHistoryDetailModal.data.editedAt | getDateDiff}}</span></span>
+                    </div>
+                </template>
+                <div class="overflow-y-auto position-relative" style="min-height:240px">
+                    <transition-group name="fade-group" appear>
+                        <div key="0" v-if="editHistoryDetailModal.loading" class="position-absolute d-flex flex-items-center flex-justify-center" style="top:0;bottom:0;right:0;left:0">
+                            <LoadingIconEx></LoadingIconEx>
+                        </div>
+                        <div key="1" v-else class="prose-diff p-3" v-html="editHistoryDetailModal.data.contentHTML">
+
+                        </div>
+                    </transition-group>
+                  
+                </div>
+               
+            </Modal>
         </Modal>
     </CommonLoadingWrapper>
 </template>
@@ -295,7 +323,7 @@
     import {mapState} from 'vuex'
     import ClipboardJS from 'clipboard';
     import * as api from '@/network/api'
-    import {authRequiredAjax,authRequiredGitHubGraphqlApiQuery,commonGet,authRequiredPost } from '@/network'
+    import {authRequiredAjax,authRequiredGitHubGraphqlApiQuery,commonGet,authRequiredPost,cancelAndUpdateAxiosCancelTokenSource  } from '@/network'
     import * as graphql from '../graphql'
     import CommentEditPane from './CommentEditPane'
     export default {
@@ -361,7 +389,12 @@
                         content: "eyes"
                     },
                 ],
-                loadingCreateReaction: false
+                loadingCreateReaction: false,
+                reactionPickModalTitle: 'Pick your reaction',
+                editHistoryDetailModal: {
+                    data: {},
+                    loading: false
+                }
             }
         },
         props: {
@@ -403,9 +436,6 @@
                     }
                 }
                 return commentExtraDataHolder
-            },
-            withEditHistory() {
-                return this.commentExtraDataHolder.userContentEdits && this.commentExtraDataHolder.userContentEdits.totalCount > 0
             },
             authorAssociation() {
                 if(this.commentExtraDataHolder.authorAssociation && this.commentExtraDataHolder.authorAssociation !== "NONE"){
@@ -580,12 +610,30 @@
                     this.editHistories.loading = true
                     let url = api.API_PROXY_ISSUE_COMMENT_EDIT_HISTORIES(this.data.node_id)
                     let res = await commonGet(url)
+                    this.parseEditHistories(res.data)
                 }catch(e) {
                     this.handleError(e)
                 }finally{
                     this.editHistories.loading = false
                 }
             },
+            async network_getEditHistoryDetail() {
+                try{
+                    this.editHistoryDetailModal.loading = true
+                    let url = api.API_PROXY_USER_EDIT(this.editHistoryDetailModal.data.editNodeId)
+                    let res = await commonGet(
+                        url,
+                        {
+                            cancelToken: cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_edit_history_detail').cancelToken
+                        }
+                    )
+
+                    this.parseEditHistoryDetail(res.data)
+                    this.editHistoryDetailModal.loading = false
+                }catch(e) {
+                    this.handleError(e)
+                }
+            },  
             async network_createReaction(content) {
                 this.closeModal()
                 try{
@@ -595,6 +643,8 @@
                         owner: this.owner,
                         comment: this.data.id
                     })
+
+                    this.reactions.data[content] += 1
 
                     await authRequiredPost(
                         url,
@@ -607,11 +657,11 @@
                             }
                         }
                     )
-
-                    this.reactions.data[content] += 1
+                    
 
                 }catch(e) {
                     this.handleError(e)
+                    this.reactions.data[content] -= 1
                 }finally{
                     this.loadingCreateReaction = false
                 }
@@ -643,6 +693,40 @@
                         this.triggerEdit(false)
                     }
                 }
+            },
+            reactionPickItemmouseenterHandler(e) {
+                this.reactionPickModalTitle = e.target.value
+            },
+            reactionPickItemmouseleaveHandler(e) {
+                this.reactionPickModalTitle = 'Pick your reaction'
+            },
+            parseEditHistories(HTML) {
+                let editHistories = []
+                let pattern = /<li[^>]*>(?:[\S\s]*?)<button.*data-edit-history-url="\/user_content_edits\/(.*?)">(?:[\S\s]*?)<img src="(.*?)".*alt="@(.*?)">(?:[\S\s]*?)<relative-time datetime="(.*?)"[^>]*?>(?:[\S\s]*?)<\/li>/g
+                let execResult
+                while((execResult = pattern.exec(HTML)) != null) {
+                    editHistories.push({
+                        editNodeId: execResult[1],
+                        avatarUrl: execResult[2],
+                        login: execResult[3],
+                        editedAt    : execResult[4]
+                    })
+                }
+                
+                this.editHistories.data = editHistories
+                this.editHistories.isEmpty = false
+                if(editHistories.length == 0) this.editHistories.isEmpty = true
+            },
+            parseEditHistoryDetail(HTML) {
+                let pattern = /<article[^>]*?>(?:[\S\s]*)<\/article>/g
+                let execResult
+                if((execResult = pattern.exec(HTML)) != null) {
+                    this.editHistoryDetailModal.data = Object.assign({},this.editHistoryDetailModal.data,{contentHTML:execResult[0]})
+                }
+            },
+            showEditHistoryDetail(payload) {
+                this.editHistoryDetailModal.data = payload
+                if(this.$refs.editHistoryDetailModal)  this.$refs.editHistoryDetailModal.show = true
             }
         },
         watch: {
@@ -694,11 +778,26 @@
 
 <style lang="scss">
 @import 'node_modules/@primer/css/markdown/index.scss';
+@import './user_edit_contents.scss';
 .team-mention, .user-mention {
     font-weight: 600;
     color: #24292e;
     white-space: nowrap;
 }
+
+.team-mention, .user-mention {
+    font-weight: 600;
+    color: #24292e;
+    white-space: nowrap;
+}
+
+.comment-body {
+    width: 100%;
+    overflow: visible;
+    font-size: 14px;
+}
+
+
 </style>
 
 <style scoped lang="scss">
@@ -826,6 +925,10 @@ button{
     line-height: 29px;
     font-size: 16px;
     border: 1px solid transparent;
+}
+
+.add-reactions-options-item:hover{
+    transform:scale(1.2)
 }
 
 </style>
