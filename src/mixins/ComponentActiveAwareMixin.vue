@@ -14,7 +14,7 @@
             this.componentActive = true
         },
         deactivated() {
-             this.componentActive = false
+            this.componentActive = false
         }
     }
 </script>

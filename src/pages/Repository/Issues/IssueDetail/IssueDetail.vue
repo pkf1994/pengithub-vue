@@ -63,7 +63,7 @@
 
                 <MetaContent v-else class="meta-content">
                     <router-link to="/" class="text-bold link-gray">{{data.user && data.user.login}}</router-link>
-                    {{data.state}} this issue
+                    {{data.state == 'open' ? 'opened' : data.state}} this issue
                     <span class="no-wrap">on {{data.created_at | dateFormat('dd zzz yyyy')}}</span>
                     · {{data.comments}} {{data.comments > 1 ? 'comments' : 'comment'}} 
                 </MetaContent>
@@ -249,7 +249,7 @@
                     {{extraData.data.participants && extraData.data.participants.totalCount}} participants
                 </InfoBottomItemTitle>
                 <div style="margin-bottom:10px" class="d-flex flex-wrap">
-                    <router-link to="/" v-for="item in extraData.data.participants ? extraData.data.participants.nodes : []" :key="item.id" class="mt-1 ml-1">
+                    <router-link :to="`/${item.login}`" v-for="item in extraData.data.participants ? extraData.data.participants.nodes : []" :key="item.id" class="mt-1 ml-1">
                         <ImgWrapper class="avatar" style="border-radius: 2em" >
                             <img class="avatar" style="border-radius: 2em" :src="item.avatarUrl" width="26" height="26" :alt="`@${item.login}`"> 
                         </ImgWrapper>

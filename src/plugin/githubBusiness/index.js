@@ -1,7 +1,7 @@
 import {mapState,mapActions} from 'vuex'
 import {ACTION_SIGN_OUT} from "@/store/modules/oauth/actionTypes"
 import {util_ramdonString} from '@/util'
-import {authRequiredGitHubGraphqlApiQuery,authRequiredDelete,authRequiredPut} from '@/network'
+import {authRequiredGitHubGraphqlApiQuery,authRequiredDelete,authRequiredPut,authRequiredPost} from '@/network'
 import * as api from '@/network/api'
 import * as graphql from './graphql'
 export default {
@@ -109,6 +109,25 @@ export default {
                     }
                     
                     return subscriptionResult
+                },
+                async github_createIssueReaction(payload) {
+                    let url = api.API_ISSUE_REACTIONS({
+                        repo: payload.repo,
+                        owner: payload.owner,
+                        number: payload.number
+                    })
+
+                    await authRequiredPost(
+                        url,
+                        {
+                            content: payload.content
+                        },
+                        {
+                            headers: {
+                                "accept": "application/vnd.github.squirrel-girl-preview+json"
+                            }
+                        }
+                    )
                 },
                 signIn(signInFromPath) {
                     let state = util_ramdonString.randomString()

@@ -139,7 +139,7 @@
                     data: {},
                     message: '',
                     loading: false
-                }
+                },
             }
         },
         computed: {
@@ -392,8 +392,8 @@
                 }
             },
             repoAndRef(newOne,oldOne) {
-                this.network_getLatestCommit()
-                this.network_getCommitsCount()
+                this.componentActive && this.network_getLatestCommit()
+                this.componentActive && this.network_getCommitsCount()
                 if(this.defaultRef && this.currentRef() && (this.currentRef() != this.defaultRef)) {
                     this.componentActive && this.network_getCompareWithDefaultRef()
                 }

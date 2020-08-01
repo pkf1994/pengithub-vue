@@ -603,7 +603,7 @@
         },
         watch: {
             organization() {
-                this.network_getStatisticData()
+                this.componentActive && this.network_getStatisticData()
             }
         },
         components: {

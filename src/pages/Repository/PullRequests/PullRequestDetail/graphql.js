@@ -1,61 +1,34 @@
-export const GRAPHQL_PR_BODY_HTML_AND_REACTIONS = payload => {
-    return `
-      {
-        repository(name: "${payload.repo}", owner: "${payload.owner}")  {
-          pullRequest(number: ${payload.number}) {
-            bodyHTML
-            id
-            activeLockReason
-            viewerCannotUpdateReasons
-            viewerDidAuthor
-            viewerSubscription
-            viewerCanUpdate
-            viewerCanSubscribe
-            viewerCanReact
-            locked
-            userContentEdits(first:1) {
-              totalCount
-              nodes {
-                editedAt
-              }
-            }
-            participants(first: 21) {
-              totalCount
-              nodes {
-                avatarUrl
-                id
-                login
-              }
-            }
-            THUMBS_UP :reactions(content: THUMBS_UP) {
-                totalCount
-            }
-            THUMBS_DOWN :reactions(content: THUMBS_DOWN) {
-                totalCount
-            }
-            LAUGH :reactions(content: LAUGH) {
-                totalCount
-            }
-            HOORAY :reactions(content: HOORAY) {
-                totalCount
-            }
-            CONFUSED :reactions(content: CONFUSED) {
-                totalCount
-            }
-            HEART :reactions(content: HEART) {
-                totalCount
-            }
-            ROCKET :reactions(content: ROCKET) {
-                totalCount
-            }
-            EYES :reactions(content: EYES) {
-                totalCount
-            }
-          }
+export const GRAPHQL_PR = `
+query($name:String!,$owner:String!,$number:Int!){
+  repository(name: $name, owner: $owner)  {
+    pullRequest(number: $number) {
+      id
+      activeLockReason
+      viewerCannotUpdateReasons
+      viewerDidAuthor
+      viewerSubscription
+      viewerCanUpdate
+      viewerCanSubscribe
+      viewerCanReact
+      locked
+      userContentEdits(first:1) {
+        totalCount
+        nodes {
+          editedAt
         }
-      }  
-    `
+      }
+      participants(first: 21) {
+        totalCount
+        nodes {
+          avatarUrl
+          id
+          login
+        }
+      }
+    }
   }
+}  
+`
 
   export const GRAPHQL_PR_COMMENT_AND_REVIEW_EXTRA_DATA = payload => {
     let graphql = ''

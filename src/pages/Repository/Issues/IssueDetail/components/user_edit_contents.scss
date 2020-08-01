@@ -38,3 +38,16 @@
     display: block;
     border-radius: 0;
 }
+
+.prose-diff .markdown-body>del:first-child *, .prose-diff .markdown-body>ins:first-child * {
+    margin-top: 0;
+}
+
+.prose-diff .rich-diff-level-zero.unchanged, .prose-diff .rich-diff-level-zero.vicinity {
+    margin-left: 15px;
+}
+
+.prose-diff .markdown-body>del {
+    text-decoration: none;
+    box-shadow: inset 4px 0 0 #cb2431;
+}

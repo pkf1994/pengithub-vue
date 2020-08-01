@@ -1,165 +1,101 @@
 <template>
-    <Container>
-        <AnimatedHeightWrapper>
-            <Body class="pb-2 p-3" v-if="!loading && commentExtraDataHolder.bodyHTML">
-                <BodyHTML v-html="commentExtraDataHolder.bodyHTML"  class="markdown-body p-0 mb-3 " style="font-size:15px">
+    <Container class="pb-2 p-3">
+        <BodyHTML v-html="pullRequestBodyHTML"  class="markdown-body p-0 mb-3 " style="font-size:15px">
 
-                </BodyHTML>
+        </BodyHTML>
 
-                 <Reaction   v-if="commentExtraDataHolder.viewerCanReact || withReaction" 
-                            :data="reactionStatistic" 
-                            :disabled="!commentExtraDataHolder.viewerCanReact"></Reaction>
-              
-            </Body>
-
-            <LoadingWrapper v-else class="loading-wrapper d-flex flex-justify-center flex-items-center">
-                <LoadingIconEx/>
-            </LoadingWrapper>
-            
-        </AnimatedHeightWrapper>
+        <Reaction v-if="extraData.viewerCanReact || reactions.data.total_count > 0" 
+                    :data="reactions.data" 
+                    :disabled="!extraData.viewerCanReact"></Reaction>
+        
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_dateFormat} from '@/util'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '@/components'
+    import {LoadingIconEx,AnimatedHeightWrapper} from '@/components'
+    import {util_markdownParse} from '@/util'
     import {mapState} from 'vuex'
     import Reaction from './Reaction'
-    import ClipboardJS from 'clipboard';
+    import * as api from '@/network/api'
+    import {authRequiredGet} from '@/network'
     export default {
-        inject: ['timelineExtraDataProvided','pullRequestProvided'],
+        inject: ['pullRequestProvided'],
         data() {
             return {
                 showMinimized: false,
                 popoverStyle: {
                     top: '100%',
                     right: '-6px'
+                },
+                reactions: {
+                    data: {},
+                    loading: false
                 }
             }
         },
         props: {
-            data: {
-                type: Object,
-                required: true
-            },
             extraData: {
                 type: Object,
                 required: false
             },
-            loading: {
-                type: Boolean,
-                default: false
-            },
-            headerStyle: {
-                type: Object,
-                required: false
-            }
         },
         computed: {
-            ...mapState({
-                //commentBodyHTMLAndReactions: state => state.repository.issue.issueDetail.timeline.commentBodyHTMLAndReactions.data
-            }),
-            commentExtraDataHolder() {
-                if(this.extraData) return this.extraData
-                let commentExtraDataHolder = this.timelineExtraDataProvided().filter(item => {
-                    return item.id === this.data.node_id
-                })[0] || {}
-                if(commentExtraDataHolder.bodyHTML) {
-                    let pattern = /href="https:\/\/github\.com\/(\S+)"/g
-                    let execResult
-                    while((execResult = pattern.exec(commentExtraDataHolder.bodyHTML)) !== null) {
-                        commentExtraDataHolder.bodyHTML = commentExtraDataHolder.bodyHTML.replace(execResult[0],`href="/${execResult[1]}"`)
-                    }
-                }
-                return commentExtraDataHolder
+            repo() {
+                return this.$route.params.repo
             },
-            createdAt() {
-                return util_dateFormat.getDateDiff(this.data.created_at)
+            owner() {
+                return this.$route.params.owner
             },
-            editedAt() {
-                return util_dateFormat.getDateDiff(this.commentExtraDataHolder.userContentEdits.nodes[0].editedAt)
+            number() {
+                return this.$route.params.number
             },
-            reactionStatistic() {
-                let reactionStatistic
-                for(let key in this.commentExtraDataHolder) {
-                    switch(key) {
-                        case 'THUMBS_UP':
-                        case 'THUMBS_DOWN':
-                        case 'LAUGH':
-                        case 'HOORAY':
-                        case 'CONFUSED':
-                        case 'HEART':
-                        case 'ROCKET':
-                        case 'EYES':
-                            if(!reactionStatistic)reactionStatistic = {}
-                            reactionStatistic[key] = this.commentExtraDataHolder[key].totalCount
-                            break
-                        default:
-                    }
-                }
-                return reactionStatistic 
+            pull() {
+                return this.pullRequestProvided()
             },
-            withReaction() {
-                for(let key in this.reactionStatistic) {
-                    switch(this.reactionStatistic[key]) {
-                        case 0:
-                            break
-                        default:
-                            return true
-                    }
-                }
-                return false
-            },
-            withEditHistory() {
-                return this.commentExtraDataHolder.userContentEdits && this.commentExtraDataHolder.userContentEdits.totalCount > 0
-            },
-            authorAssociation() {
-                if(this.commentExtraDataHolder.authorAssociation && this.commentExtraDataHolder.authorAssociation !== "NONE"){
-                    return this.commentExtraDataHolder.authorAssociation.toLowerCase()
-                }
-                if(this.pullRequestProvided().user.login === this.data.user.login) return 'author'
-                return undefined
-            },
-            dateStampGap() {
-                return Date.parse(new Date()) - Date.parse(this.data.created_at)
-            },
-            location() {
-                return location
+            pullRequestBodyHTML() {
+                return util_markdownParse.markdownToHTML(this.pullRequestProvided().body)
             }
         },
+        created() {
+            this.network_getPullRequestReactions()
+        },
         methods: {
-            triggerShowMinimized() {
-                this.showMinimized = !this.showMinimized
-            },
-            showActionPopover() {
-                this.$refs.actionPopover.show = true
-            },
-            initClipboard() {
-                let clip = new ClipboardJS('#file-detail-copy-btn');
-                clip.on('success',e => {
-                    this.$toast("Clip OK!")
-                })
+            async network_getPullRequestReactions() {
+                try {
+                    this.reactions.loading = false
+
+                    let url = api.API_ISSUE({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.pullRequestProvided().number
+                    })
+
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            headers: {
+                                "accept": "application/vnd.github.squirrel-girl-preview+json"
+                            }
+                        }
+                    )
+
+                    this.reactions.data = res.data.reactions
+
+                } catch (e) {
+                    console.log(e)
+                } finally {
+                    this.reactions.loading = true
+                }
             }
         },
         components: {
             LoadingIconEx,
             AnimatedHeightWrapper,
-            Popover,
             Reaction,
             Container: styled.div``,
-            Inner: styled.div``,
-            Header: styled.div``,
-            Avatar: styled.div``,
-            Meta: styled.div``,
             LoadingWrapper: styled.div``,
-            HeaderInner: styled.div``,
-            Main: styled.div``,
-            Body: styled.div``,
             BodyHTML: styled.div``,
-            Action: styled.div``,
-            AuthorAssociation: styled.span``,
-            StretchCommentBtn: styled.div``
         }
     }
 </script>

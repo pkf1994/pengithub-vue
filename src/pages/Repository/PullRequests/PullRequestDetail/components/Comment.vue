@@ -12,9 +12,9 @@
         </HideAndShowPane>
         <AnimatedHeightWrapper :stretch="showMinimized || !extraData.isMinimized">
             <Header class="header " :style="headerStyle">
-                <Action class="float-right mt-2 ml-2">
+                <!-- <Action class="float-right mt-2 ml-2">
                     <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
-                </Action>
+                </Action> -->
                 
                 <Avatar class="float-left relative">
                     <ImgWrapper>
@@ -32,17 +32,18 @@
 
             </Header>
 
-            <Body class="pb-2 p-3" v-if="extraData.bodyHTML">
+            <Body class="px-3 pt-3 pb-2" v-if="extraData.bodyHTML">
                 <BodyHTML v-html="extraData.bodyHTML"  class="markdown-body f5 p-0">
 
                 </BodyHTML>
 
-                <Reaction   v-if="(extraData.viewerCanReact || withReaction) && !extraData.isMinimized" 
-                            :data="extraData" 
+                <Reaction   v-if="(extraData.viewerCanReact || reactions.data.total_count > 0) && !extraData.isMinimized" 
+                            :data="reactions.data" 
+                            :commentId="propsData.id"
                             :disabled="!extraData.viewerCanReact"></Reaction>
             </Body>
 
-            <LoadingWrapper v-if="!extraData.id" class="loading-wrapper flex flex-justify-center flex-items-center">
+            <LoadingWrapper v-if="!extraData.id" class="loading-wrapper d-flex flex-justify-center flex-items-center">
                 <LoadingIconEx/>
             </LoadingWrapper>
              
@@ -56,6 +57,7 @@
     import {LoadingIconEx,AnimatedHeightWrapper,Popover,ImgWrapper} from '@/components'
     import ClipboardJS from 'clipboard';
     import Reaction from './Reaction'
+    import {authRequiredGet} from '@/network'
     export default {
         inject: ['timelineExtraDataProvided'],
         data() {
@@ -64,6 +66,10 @@
                 popoverStyle: {
                     top: '100%',
                     right: '-6px'
+                },
+                reactions: {
+                    data: {},
+                    loading: false
                 }
             }
         },
@@ -98,25 +104,6 @@
                 if(!this.extraData.userContentEdits.nodes) return
                 return util_dateFormat.getDateDiff(this.extraData.userContentEdits.nodes[0].editedAt)
             },
-            withReaction() {
-                 for(let key in this.extraData) {
-                    switch(key) {
-                        case 'THUMBS_UP':
-                        case 'THUMBS_DOWN':
-                        case 'LAUGH':
-                        case 'HOORAY':
-                        case 'CONFUSED':
-                        case 'HEART':
-                        case 'ROCKET':
-                        case 'EYES':
-                            if(this.extraData[key].totalCount > 0) return true
-                            if(this.extraData[key] > 0) return true
-                            break
-                        default:
-                    }
-                }
-                return false
-            },
             withEditHistory() {
                 return this.extraData.userContentEdits && this.extraData.userContentEdits.totalCount > 0
             },
@@ -124,18 +111,32 @@
                 return location
             }
         },
+        created() {
+            this.network_getReactions()
+        },
         methods: {
             triggerShowMinimized() {
                 this.showMinimized = !this.showMinimized
             },
-            showActionPopover() {
-                this.$refs.actionPopover.show = true
-            },
-            initClipboard() {
-                let clip = new ClipboardJS('#file-detail-copy-btn');
-                clip.on('success',e => {
-                    this.$toast("Clip OK!")
-                })
+            async network_getReactions() {
+                try{
+                    this.reactions.loading = true
+                    let url = this.propsData.url
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            headers: {
+                                "accept": "application/vnd.github.squirrel-girl-preview+json"
+                            }
+                        }
+                    )
+
+                    this.reactions.data = res.data.reactions
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.reactions.loading = false
+                }
             }
         },
         components: {

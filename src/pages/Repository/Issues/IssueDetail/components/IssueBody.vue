@@ -61,8 +61,8 @@
                         commented
                         <span class="no-wrap">{{data.created_at | getDateDiff}}</span>
 
-                        <span class="d-inline-block text-gray-light">•</span>    
-                        <span class="d-inline-block text-gray btn-link" @click="() => showModal('editHistoriesModal')">
+                         <span v-if="!accessToken || (extraData.userContentEdits && extraData.userContentEdits.totalCount > 0)" class="d-inline-block text-gray btn-link" @click="() => showModal('editHistoriesModal')">
+                            <span class="d-inline-block text-gray-light">•</span> 
                             edited
                             <svg height="11" class="octicon octicon-triangle-down v-align-middle" viewBox="0 0 12 16" version="1.1" width="8" aria-hidden="true"><path fill-rule="evenodd" d="M0 5l6 6 6-6H0z"></path></svg>
                         </span>
@@ -165,7 +165,7 @@
                     <div>
                         <img :src="editHistoryDetailModal.data.avatarUrl" width="20" height="20" class="avatar avatar-user avatar-small v-align-middle" :alt="`@${editHistoryDetailModal.data.login}`">
                         <span class="css-truncate-target v-align-middle text-bold text-small">{{editHistoryDetailModal.data.login}}</span>
-                        <span class="v-align-middle text-small">edited <span class="no-wrap">{{editHistoryDetailModal.data.editedAt | getDateDiff}}</span></span>
+                        <span class="v-align-middle text-small text-normal">edited <span class="no-wrap">{{editHistoryDetailModal.data.editedAt | getDateDiff}}</span></span>
                     </div>
                 </template>
                 <div class="overflow-y-auto position-relative" style="min-height:240px">
@@ -236,7 +236,7 @@
                     },
                     {
                         label: "😕",
-                        content: "comfused"
+                        content: "confused"
                     },
                     {
                         label: "❤️",
@@ -366,25 +366,15 @@
                 this.closeModal()
                 try{
                     this.loadingCreateReaction = true
-                    let url = api.API_ISSUE_REACTIONS({
-                        repo: this.repo,
-                        owner: this.owner,
-                        number: this.issueGetter().number
-                    })
 
                     this.issueGetter().reactions[content] += 1
 
-                    await authRequiredPost(
-                        url,
-                        {
-                            content
-                        },
-                        {
-                            headers: {
-                                "accept": "application/vnd.github.squirrel-girl-preview+json"
-                            }
-                        }
-                    )
+                    await this.github_createIssueReaction({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.issueGetter().number,
+                        content
+                    })
 
                 }catch(e) {
                     this.handleError(e)
@@ -559,11 +549,10 @@
         }
         .emoj{
             font-family: Apple Color Emoji,Segoe UI,Segoe UI Emoji,Segoe UI Symbol;
-            font-size: 1.2em;
             font-style: normal!important;
             font-weight: 400;
             line-height: 20px;
-            vertical-align: middle;
+            vertical-align: text-top;
         }
     }
 }

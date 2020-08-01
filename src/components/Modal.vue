@@ -7,7 +7,7 @@
         </transition>
         <transition name="modal-basic">
             <Main class="main Box d-flex flex-column transition-all" v-if="show" :style="modalStyle" style="width: 640px;">
-                <Title class="p-3 Box-title Box-header modal-title">
+                <Title v-if="!noHeader" class="p-3 Box-title Box-header modal-title">
                     <button @click="close" class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog="">
                         <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
                     </button>
@@ -34,6 +34,10 @@
                  type: Object,
                  default: () => ({})
             },
+            noHeader: {
+                type: Boolean,
+                default: false
+            }
         },
         data() {
             return {

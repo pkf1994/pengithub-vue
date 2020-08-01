@@ -22,7 +22,7 @@
         provide() {
             return {
                 number:() => this.number,
-                pullRequestProvided: () => this.data,
+                pullRequestProvided: () => this.$data,
             }
         },
         data() {
@@ -71,7 +71,6 @@
         methods: {
              async network_getData() {
                 try{
-                    let sourceAndCancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
                     //获取基本数据
                     this.loading = true
                     let url_pullRequest = api.API_PULLREQUEST({
@@ -79,7 +78,15 @@
                         owner: this.owner,
                         number: this.number
                     })
-                    let res_pullRequest = await authRequiredGet(url_pullRequest,{cancelToken:sourceAndCancelToken.cancelToken})
+                    let res_pullRequest = await authRequiredGet(
+                        url_pullRequest,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name),
+                            headers: {
+                                "accept": 'application/vnd.github.squirrel-girl-preview'
+                            }
+                        }
+                    )
                     this.data = res_pullRequest.data
                 }catch(e){
                    this.handleError(e)

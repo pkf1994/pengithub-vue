@@ -47,11 +47,15 @@ export default {
                 handleGraphqlError(graphqlRes) {
                     let errors = graphqlRes.data && graphqlRes.data.errors
                     if(errors) {
-                        errors.forEach(i => {
-                            console.log(i.message)
-                            this.$toast(i.message,'error')
+                        errors.forEach((i,index) => {
+                            if(index < errors.length - 1) {
+                                console.log(i.message)
+                                this.$toast(i.message,'error')
+                            }else{
+                                console.log(i.message)
+                                throw new Error(i.message)
+                            }
                         })
-                        throw new Error('GraphQL response error')
                     }
                 },
                 emitNotFoundEvent(el) {

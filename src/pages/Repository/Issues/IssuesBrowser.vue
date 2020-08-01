@@ -485,8 +485,6 @@
                         }
                     )
 
-                    console.log(res.data)
-
                      try{
                          issues.forEach((i,index) => {
                             Vue.set(

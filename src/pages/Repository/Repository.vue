@@ -152,6 +152,7 @@ import fileSize from '../../util/fileSize'
                 viewerIsCollaboratorGetter: () => this.network_ifViewerACollaborator,
                 topNoticeShow: () => this.topNoticeShow,
                 repoSubscription: () => this.subscription.data,
+                graphqlWritePermission: () => this.graphqlWritePermission,
             }
         },
         computed: {
@@ -163,6 +164,9 @@ import fileSize from '../../util/fileSize'
             },
             repo: function() {
                 return this.$route.params.repo
+            },
+            graphqlWritePermission() {
+                return this.data.owner && this.data.owner.type == 'User'
             },
             tabs: function() {
                 let path = `/${this.owner}/${this.repo}`
@@ -345,7 +349,7 @@ import fileSize from '../../util/fileSize'
                     this.viewerIsCollaborator.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name + ' check_if_viewer_a_collaborator')
                     let url = api.API_CHECK_IF_COLLABORATOR({
-                        login: this.viewerLogin,
+                        login: this.viewer.login,
                         repo: this.repo,
                         owner: this.owner
                     })
