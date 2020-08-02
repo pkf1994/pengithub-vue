@@ -9,7 +9,7 @@
                         &nbsp;{{pullRequestProvided().data.draft ? 'Draft' : pullRequestProvided().data.state}}
                     </State>   
 
-                    <a href="javascript:return false">Jump to bottom</a>
+                    <a href="javascript:return false" @click="scrollToBottom">Jump to bottom</a>
                 </HeaderActions>
 
                 <Skeleton v-if="!pullRequestProvided().data.title">
@@ -72,17 +72,15 @@
                 v-if="pullRequestProvided().data.labels && pullRequestProvided().data.labels.length !== 0"
                 >
             <!-- label --> 
-            <AnimatedHeightWrapper class=" border-bottom">
-                <div class="pb-3" v-if="pullRequestProvided().data.labels && pullRequestProvided().data.labels.length !== 0">
-                    <div class="my-1 f6">Labels</div>    
-                    <router-link to="/" v-for="item in pullRequestProvided().data.labels" :key="item.name">
-                        <Label  class="mr-1 mt-1"
-                                :style="{height:'18px',fontSize:'10px'}"
-                                :name="item.name"
-                                :color="`#${item.color}`"></Label> 
-                    </router-link>
-                </div> 
-            </AnimatedHeightWrapper>
+            <div class="pb-3" v-if="pullRequestProvided().data.labels && pullRequestProvided().data.labels.length !== 0">
+                <div class="my-1 f6">Labels</div>    
+                <router-link to="/" v-for="item in pullRequestProvided().data.labels" :key="item.name">
+                    <Label  class="mr-1 mt-1"
+                            :style="{height:'18px',fontSize:'10px'}"
+                            :name="item.name"
+                            :color="`#${item.color}`"></Label> 
+                </router-link>
+            </div> 
         </Info>
 
         <PullRequestBody   
@@ -92,28 +90,17 @@
 
         <transition-group tag="div" appear name="fade-group">
             <div v-for="(item,index) in timeline.data" :key="(item.id || '') + index">
-                <TimelineItem :data="item" class="border-top"/>
+                <TimelineItem :data="item" class="border-top" style="background:#fafbfc"/>
             </div> 
         </transition-group>
 
-        <AnimatedHeightWrapper :stretch="timeline.loading && (timeline.data.length === 0)">
-            <LoadingTimeline class="loading-timeline d-flex flex-items-center flex-justify-center">
-                <LoadingIconEx/>
-            </LoadingTimeline> 
-        </AnimatedHeightWrapper>   
-
-        <HiddenItemLoading v-if="(timeline.pageInfo) && (timeline.pageInfo.next) && (timeline.pageInfo.next.page < timeline.pageInfo.last.page - 1) && (timeline.data.length !== 0)"
+        <HiddenItemLoading v-if="timeline.pageInfo.next || timeline.loading"
                             class="border-top"
                             :loading="timeline.loading"
                             :dataGetter="loadingMore">
-            {{hiddenItemCount}} item{{hiddenItemCount > 1 ? 's' : ''}} not shown.
+            <span v-if="timelineRemainedCount > 0">{{timelineRemainedCount}} {{timelineRemainedCount > 1 ? 'items' : 'item'}} remained.</span>    
         </HiddenItemLoading>
 
-        <transition-group tag="div" appear name="fade-group">
-            <div v-for="(item,index) in timeline.lastData" :key="(item.id || '') + index">
-                <TimelineItem :data="item" class="border-top"/>
-            </div> 
-        </transition-group>
 
         <MergePull v-if="extraData.data.viewerCanUpdate && pullRequestProvided().data.merged == false" >
             <Header class="header" v-if="extraData.data.id">
@@ -243,7 +230,6 @@
                         loading: false
                     },
                     perPage: 20,
-                    lastData: [],
                     pageInfo: {},
                     count: {
                         data: 0,
@@ -367,7 +353,7 @@
             viewerCannotComment() {
                 return this.pullRequestProvided().data.locked && !this.extraData.data.viewerCanUpdate
             },
-            hiddenItemCount() {
+            timelineRemainedCount() {
                 let alreadyCount = 0
                 this.timeline.data.forEach(item => {
                     if(this.timelineTypes.some(_item => {
@@ -376,14 +362,6 @@
                         alreadyCount ++
                     }
                 })
-                this.timeline.lastData.forEach(item => {
-                    if(this.timelineTypes.some(_item => {
-                        return _item.rest === item.event
-                    })){
-                        alreadyCount ++
-                    }
-                })
-                
                 return this.timeline.count.data - alreadyCount
             },
             editHistory() {
@@ -394,21 +372,13 @@
                 return this.viewerSubscription.toLowerCase()
             } */
         },
-        async created() {
+        created() {
             this.network_getData()
-
-           /*  let url = "https://api.github.com/repos/pkf1994/pengblog-react/pulls/1/comments"
-
-            let res = await authRequiredGet(url)
-            console.log(res.data) */
-            
         },
         methods: {
             loadingMore() {
                 if(this.timeline.loading) return
-                this.network_getTimeline({
-                    changePage: true
-                })
+                this.network_getTimeline()
             },
             async network_getData() {
                
@@ -448,19 +418,11 @@
                     this.extraData.loading = false
                 }
             },
-            async network_getTimeline(payload) {
-                 payload = {
-                    changePage: false,
-                    ...payload
-                }
+            async network_getTimeline() {
                 try{
                     this.timeline.loading = true
-
                     let url_timeline
-                    if(payload.changePage) {
-                        if(this.timeline.pageInfo.next.page > this.timeline.pageInfo.last.page - 2) {
-                            throw new Error("No data avaliable.")
-                        }
+                    if(this.timeline.pageInfo.next) {
                         url_timeline = this.timeline.pageInfo.next.url
                     } else {
                         url_timeline = api.API_ISSUE_TIMELINE({
@@ -470,11 +432,8 @@
                         }) + `?per_page=${this.timeline.perPage}`
                     }
 
-                    let cancelTokenAndSource = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + '_timeline_' + url_timeline)
-                    this.cancelSources.push(cancelTokenAndSource.source)
-
                     let config = {
-                        cancelToken:cancelTokenAndSource.cancelToken,
+                        cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_timeline ' + url_timeline),
                         headers:{
                             'Accept': 'application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json'
                         }   
@@ -482,28 +441,10 @@
                     
                     let res_timeline = await authRequiredGet(url_timeline,config)
 
-                    this.timeline.pageInfo = parse(res_timeline.headers.link)
 
-                    //获取末端数据
-                    if((!payload.changePage) && this.timeline.pageInfo && this.timeline.pageInfo.last) {
-                        let res_issueTimeline_last = await authRequiredGet(this.timeline.pageInfo.last.url,config)
-                        let lastData = res_issueTimeline_last.data
+                    this.timeline.pageInfo = parse(res_timeline.headers.link) || {}
 
-                        let pageInfo_atLast = parse(res_issueTimeline_last.headers.link)
-                        if(pageInfo_atLast.prev.page > 1) {
-                           //获取issue timeline count(异步)
-                            this.network_getTimelineCount()
-                            let res_issueTimeline_lastButOne = await authRequiredGet(pageInfo_atLast.prev.url,config)
-                            lastData = res_issueTimeline_lastButOne.data.concat(lastData)
-                        }
-                        this.timeline.lastData = lastData
-                    }
-
-                    if(payload.changePage) {
-                        this.timeline.data = this.timeline.data.concat(res_timeline.data)
-                    }else{
-                        this.timeline.data = res_timeline.data
-                    }
+                    this.timeline.data = this.timeline.data.concat(res_timeline.data)
 
                     this.timeline.loading = false
 
@@ -512,31 +453,25 @@
                     this.timeline.extraData.loading = true
                        
                     let commentsAndReviews = []
-                    this.timeline.data.forEach(item => {
-                        if(item.event === 'commented' || item.event === 'reviewed') {
-                            commentsAndReviews.push(item)
-                        }
-                    })
-                    this.timeline.lastData.forEach(item => {
+                    res_timeline.data.forEach(item => {
                         if(item.event === 'commented' || item.event === 'reviewed') {
                             commentsAndReviews.push(item)
                         }
                     })
 
-                    let graphql_commentsAndReviewExtraData = graphql.GRAPHQL_PR_COMMENT_AND_REVIEW_EXTRA_DATA(commentsAndReviews)
-                    let res_commentsAndReviewExtraData = await authRequiredGitHubGraphqlApiQuery(graphql_commentsAndReviewExtraData,{cancelToken:cancelTokenAndSource.cancelToken})
+                    let graphql_commentsAndReviewExtraData = graphql.GRAPHQL_TIMELINE_EXTRA_DATA(commentsAndReviews)
+                    let res_commentsAndReviewExtraData = await authRequiredGitHubGraphqlApiQuery(graphql_commentsAndReviewExtraData)
 
-                    if(!payload.changePage) this.timeline.extraData.data = []
                     let dataHolder
                     try{
                         dataHolder = res_commentsAndReviewExtraData.data.data
                     }catch(e) {
                         this.handleGraphqlError(res_commentsAndReviewExtraData)
                     }
-                    for(let key in res_commentsAndReviewExtraData.data.data) {
-                        this.timeline.extraData.data.push(res_commentsAndReviewExtraData.data.data[key])
-                    }
+
+                    this.timeline.extraData.data = this.timeline.extraData.data.concat(Object.values(res_commentsAndReviewExtraData.data.data))
                 }catch(e){
+                    console.log(e)
                     this.handleError(e)
                 }finally{
                     this.timeline.loading = false
@@ -587,22 +522,34 @@
             async network_getReviewCommentReplies() {
                 try{
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_review_comment_replies')
-                    this.cancelSources.push(cancelToken.source)
 
                     this.reviewCommentReplies.loading = true
-                    let url_reviewComment = api.API_PULL_REQUEST_REVIEW_COMMENT({
-                        repo: this.repo,
-                        owner: this.owner,
-                        number: this.number,
-                        perPage: 100
-                    })
-                    let res_pullRequest = await authRequiredGet(url_reviewComment,{cancelToken:cancelToken})
 
-                    let replies = []
-                    res_pullRequest.data.forEach(item => {
-                        if(item.in_reply_to_id) replies.push(item)
-                    })
-                    this.reviewCommentReplies.data = replies
+                    let pageInfo
+                    let reviewComments = []
+
+                    while((!pageInfo || (pageInfo && pageInfo.next)) && reviewComments.length < 300) {
+                        let url 
+                        if(pageInfo) {
+                            url = pageInfo.next.url
+                        } else {
+                            url = api.API_REVIEW_COMMENTS_OF_PULL_REQUEST({
+                                repo: this.repo,
+                                owner: this.owner,
+                                number: this.number,
+                                params: {
+                                    per_page: 100
+                                }
+                            })
+                        }
+
+                        let res = await authRequiredGet(url,{cancelToken})
+                        reviewComments = reviewComments.concat(res.data.filter(i => i.in_reply_to_id))
+
+                        pageInfo = parse(res.headers.link) || {}
+                    }
+                 
+                    this.reviewCommentReplies.data = reviewComments
                 }catch(e){
                     console.log(e)
                 }finally{

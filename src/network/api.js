@@ -176,8 +176,14 @@ export const API_PULLREQUEST = (payload) => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}`
 }
 
-export const API_PULL_REQUEST_REVIEW_COMMENT = (payload) => {
-    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/comments?sort=created&direction=asc${payload.perPage ? '&per_page=' + payload.perPage : ''}`
+export const API_REVIEW_COMMENTS_OF_REVIEW = (payload) => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/reviews/${payload.reviewId}/comments?${query}`
+}
+
+export const API_REVIEW_COMMENTS_OF_PULL_REQUEST = (payload) => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/comments?${query}`
 }
 
 

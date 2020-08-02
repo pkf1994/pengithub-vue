@@ -10,7 +10,7 @@
                     {{showMinimized ? 'Hide' : 'Show'}}
             </button>
         </HideAndShowPane>
-        <AnimatedHeightWrapper :stretch="showMinimized || !extraData.isMinimized">
+        <div v-show="showMinimized || !extraData.isMinimized">
             <Header class="header " :style="headerStyle">
                 <!-- <Action class="float-right mt-2 ml-2">
                     <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
@@ -32,8 +32,8 @@
 
             </Header>
 
-            <Body class="px-3 pt-3 pb-2" v-if="extraData.bodyHTML">
-                <BodyHTML v-html="extraData.bodyHTML"  class="markdown-body f5 p-0">
+            <Body class="px-3 pt-3 pb-2">
+                <BodyHTML v-html="bodyHTML" class="markdown-body f5 p-0">
 
                 </BodyHTML>
 
@@ -43,18 +43,14 @@
                             :disabled="!extraData.viewerCanReact"></Reaction>
             </Body>
 
-            <LoadingWrapper v-if="!extraData.id" class="loading-wrapper d-flex flex-justify-center flex-items-center">
-                <LoadingIconEx/>
-            </LoadingWrapper>
-             
-        </AnimatedHeightWrapper>
+        </div>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_dateFormat} from '@/util'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover,ImgWrapper} from '@/components'
+    import {util_dateFormat,util_markdownParse} from '@/util'
+    import {LoadingIconEx,Popover,ImgWrapper} from '@/components'
     import ClipboardJS from 'clipboard';
     import Reaction from './Reaction'
     import {authRequiredGet} from '@/network'
@@ -109,6 +105,9 @@
             },
             location() {
                 return location
+            },
+            bodyHTML() {
+                return util_markdownParse.markdownToHTML(this.propsData.body)
             }
         },
         created() {
@@ -122,16 +121,18 @@
                 try{
                     this.reactions.loading = true
                     let url = this.propsData.url
-                    let res = await authRequiredGet(
-                        url,
-                        {
-                            headers: {
-                                "accept": "application/vnd.github.squirrel-girl-preview+json"
+                    if(url) {
+                        let res = await authRequiredGet(
+                            url,
+                            {
+                                headers: {
+                                    "accept": "application/vnd.github.squirrel-girl-preview+json"
+                                }
                             }
-                        }
-                    )
+                        )
+                        this.reactions.data = res.data.reactions
+                    }
 
-                    this.reactions.data = res.data.reactions
                 }catch(e) {
                     console.log(e)
                 }finally{
@@ -141,7 +142,6 @@
         },
         components: {
             LoadingIconEx,
-            AnimatedHeightWrapper,
             Popover,
             Reaction,
             ImgWrapper,

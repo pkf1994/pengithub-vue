@@ -30,7 +30,7 @@ query($name:String!,$owner:String!,$number:Int!){
 }  
 `
 
-  export const GRAPHQL_PR_COMMENT_AND_REVIEW_EXTRA_DATA = payload => {
+  export const GRAPHQL_TIMELINE_EXTRA_DATA = payload => {
     let graphql = ''
     payload.forEach((item,index) => {
       if(item.event === 'commented') {
@@ -39,7 +39,6 @@ query($name:String!,$owner:String!,$number:Int!){
         comment${index}:node(id: "${item.node_id}") {
           ... on IssueComment {
             id
-            bodyHTML
             isMinimized
             minimizedReason
             viewerCanDelete
@@ -55,30 +54,6 @@ query($name:String!,$owner:String!,$number:Int!){
               }
             }
             authorAssociation
-            THUMBS_UP :reactions(content: THUMBS_UP) {
-                totalCount
-            }
-            THUMBS_DOWN :reactions(content: THUMBS_DOWN) {
-                totalCount
-            }
-            LAUGH :reactions(content: LAUGH) {
-                totalCount
-            }
-            HOORAY :reactions(content: HOORAY) {
-                totalCount
-            }
-            CONFUSED :reactions(content: CONFUSED) {
-                totalCount
-            }
-            HEART :reactions(content: HEART) {
-                totalCount
-            }
-            ROCKET :reactions(content: ROCKET) {
-                totalCount
-            }
-            EYES :reactions(content: EYES) {
-                totalCount
-            }
           }
         }
        
@@ -89,7 +64,6 @@ query($name:String!,$owner:String!,$number:Int!){
         review${index}:node(id: "${item.node_id}") {
           ... on PullRequestReview {
             id
-            bodyHTML
             viewerCanDelete
             viewerCanReact
             viewerCanUpdate
@@ -102,30 +76,6 @@ query($name:String!,$owner:String!,$number:Int!){
               }
             }
             authorAssociation
-            THUMBS_UP :reactions(content: THUMBS_UP) {
-                totalCount
-            }
-            THUMBS_DOWN :reactions(content: THUMBS_DOWN) {
-                totalCount
-            }
-            LAUGH :reactions(content: LAUGH) {
-                totalCount
-            }
-            HOORAY :reactions(content: HOORAY) {
-                totalCount
-            }
-            CONFUSED :reactions(content: CONFUSED) {
-                totalCount
-            }
-            HEART :reactions(content: HEART) {
-                totalCount
-            }
-            ROCKET :reactions(content: ROCKET) {
-                totalCount
-            }
-            EYES :reactions(content: EYES) {
-                totalCount
-            }
           }
         }
       `
@@ -157,12 +107,11 @@ query($name:String!,$owner:String!,$number:Int!){
       `
   }
 
-  export const GRAPHQL_PR_REVIEW_COMMENTS = payload => {
-    return `
-    {
-      node(id: "${payload.nodeId}") {
+  export const GRAPHQL_PR_REVIEW_COMMENTS = `
+    query($id:ID!,$first:Int!,$after:String){
+      node(id: $id) {
         ... on PullRequestReview {
-          comments(first: ${payload.perPage}${payload.after ? ',after:"' + payload.after +'"' : ''}) {
+          comments(first:$first,after:$after) {
             totalCount
             nodes {
               id
@@ -173,39 +122,15 @@ query($name:String!,$owner:String!,$number:Int!){
               createdAt
               updatedAt
               state
-              bodyHTML
               viewerCanReact
               resourcePath
+              bodyHTML
               replyTo {
                 id
               }
               author {
                 login
                 avatarUrl
-              }
-              THUMBS_UP :reactions(content: THUMBS_UP) {
-                totalCount
-              }
-              THUMBS_DOWN :reactions(content: THUMBS_DOWN) {
-                  totalCount
-              }
-              LAUGH :reactions(content: LAUGH) {
-                  totalCount
-              }
-              HOORAY :reactions(content: HOORAY) {
-                  totalCount
-              }
-              CONFUSED :reactions(content: CONFUSED) {
-                  totalCount
-              }
-              HEART :reactions(content: HEART) {
-                  totalCount
-              }
-              ROCKET :reactions(content: ROCKET) {
-                  totalCount
-              }
-              EYES :reactions(content: EYES) {
-                  totalCount
               }
             }
             pageInfo {
@@ -217,7 +142,6 @@ query($name:String!,$owner:String!,$number:Int!){
       }
     }
     `
-  }
 
   export const GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID = payload => {
     return `

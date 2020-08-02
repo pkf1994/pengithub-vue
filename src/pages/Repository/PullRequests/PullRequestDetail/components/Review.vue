@@ -16,38 +16,28 @@
                     {{propsData.user.login}}
                 </router-link>
                 {{statusAction}}
-                <span class="no-wrap">{{createdAt}}</span>
+                <span class="no-wrap">{{propsData.submitted_at | getDateDiff}}</span>
             </WhoDidWhat>
 
             <Label class="ml-1 no-wrap" :name="propsData.state" :color="propsData.state == 'pending' ? '#fffbdd' : '#ffffff'" style="font-size: 10px;color:#735c0f" ></Label>
         </Inner>
 
-
-        <AnimatedHeightWrapper style="margin-top:15px">
-             <Body class="bubble " v-if="extraData.bodyHTML" style="padding:15px;">
-                <BodyHTML v-html="extraData.bodyHTML"  class="markdown-body p-0" style="font-size:15px">
-
-                </BodyHTML>
-
-                <Reaction      v-if="(extraData.viewerCanReact || withReaction)" 
-                                :data="extraData" 
-                                :disabled="!extraData.viewerCanReact"></Reaction>
-
-            </Body>
-        </AnimatedHeightWrapper>
+        <Body class="bubble mt-3" v-if="bodyHTML" style="padding:15px;">
+            <BodyHTML v-html="bodyHTML"  class="markdown-body p-0" style="font-size:15px">
+            </BodyHTML>
+        </Body>
        
-
-        <LoadingWrapper v-if="!extraData.id" class="loading-wrapper flex flex-justify-center flex-items-center">
+        <LoadingWrapper v-if="comments.loading" class="loading-wrapper d-flex flex-justify-center flex-items-center">
             <LoadingIconEx/>
         </LoadingWrapper>
 
         <transition-group name="fade" appear>
-            <ReviewComment v-for="item in data.filter(i => i.replyTo == null)" :key="item.id" :reviewComment="item"/>
+            <ReviewComment v-for="item in comments.data.filter(i => !i.in_reply_to_id)" :key="item.id" :reviewComment="item"/>
+            <ReviewComment v-for="item in commentsOfPendingReview.data.filter(i => !i.replyTo)" :key="item.id" :reviewComment="item"/>
         </transition-group>
         
-
-        <HiddenItemLoading v-if="pageInfo.hasNextPage" style="padding-bottom:0px!important" :loading="loading" :dataGetter="network_getComment">
-            {{totalCount - data.length}} {{totalCount - data.length > 1 ? 'comments' : 'comment'}} remained.
+        <HiddenItemLoading v-if="comments.pageInfo.next" style="padding-bottom:0px!important" :loading="comments.loading" :dataGetter="network_getReviewComments">
+            {{comments.totalCount - data.length}} {{comments.totalCount - data.length > 1 ? 'comments' : 'comment'}} remained.
         </HiddenItemLoading>
       
     </Container>
@@ -56,36 +46,47 @@
 <script>
     import styled from 'vue-styled-components'
     import {LoadingIconEx,AnimatedHeightWrapper,Popover,Label,ImgWrapper} from '@/components'
-    import {util_dateFormat} from '@/util'
-    import Reaction from './Reaction'
+    import {util_markdownParse} from '@/util'
     import ReviewComment from './ReviewComment'
     import HiddenItemLoading from './HiddenItemLoading'
     import * as graphql from '../graphql'
+    import * as api from '@/network/api'
     import Comment from './Comment'
-    import { authRequiredGitHubGraphqlApiQuery } from '@/network'
+    import { authRequiredGet,authRequiredGitHubGraphqlApiQuery  } from '@/network'
+    let parse = require('parse-link-header')
     export default {
         mixins: [Comment],
         provide() {
             return {
                 reviewProvided: () => this.propsData,
-                pendingReviewCommentRepliesProvided: () => this.pendingCommentReplies
+                commentsOfPendingReview: () => this.comments.data,
             }
         },
         data() {
             return {
-                data: [],
-                pageInfo: {
-
+                comments: {
+                    data: [],
+                    loading: false,
+                    pageInfo: {},
+                    totalCount: 0,
                 },
-                totalCount: 0,
-                perPage: 5,
-                loading: false
+                commentsOfPendingReview: {
+                    data: [],
+                    loading: false,
+                    pageInfo: {},
+                    totalCount: 0
+                }
             }
         },
         computed: {
-            createdAt() {
-                if(!this.propsData.submitted_at) return 'before long'
-                return util_dateFormat.getDateDiff(this.propsData.submitted_at)
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
+            number() {
+                return this.$route.params.number
             },
             statusAction() {
                 let status = 'approved'
@@ -102,71 +103,105 @@
                 }
                 return status
             },
-            pendingCommentReplies() {
-                return this.data.filter(i => i.replyTo != null)
-            }
+            bodyHTML() {
+                return util_markdownParse.markdownToHTML(this.propsData.body)
+            },
         },
         created() {
             this.network_getData()
         },
         methods: {
-            
-            async network_getData() {
+            network_getData() {
+                this.network_getReviewComments()
+                this.network_getReviewCommentsCount()
+            },
+            async network_getReviewComments() {
                 try{
-                    this.loading = true
-
-                    let graphql_reviewComments
-
-                    if(this.propsData.state == 'pending') {
-                        graphql_reviewComments = graphql.GRAPHQL_PR_REVIEW_COMMENTS({
-                            nodeId: this.propsData.node_id,
-                            after: this.pageInfo.hasNextPage ? this.pageInfo.endCursor : undefined,
-                            perPage: 100
-                        })
+                    this.comments.loading = true
+                    let url 
+                    if(this.comments.pageInfo.next) {
+                        url = this.comments.pageInfo.next.url
                     }else{
-                        graphql_reviewComments = graphql.GRAPHQL_PR_REVIEW_COMMENTS({
-                            nodeId: this.propsData.node_id,
-                            after: this.pageInfo.hasNextPage ? this.pageInfo.endCursor : undefined,
-                            perPage: this.perPage
+                        url = api.API_REVIEW_COMMENTS_OF_REVIEW({
+                            repo: this.repo,
+                            owner: this.owner,
+                            number: this.number,
+                            reviewId: this.propsData.id,
+                            params: {
+                                sort: 'created',
+                                direction: 'asc',
+                                per_page: this.propsData.state == 'pending' ? 100 : 5
+                            }
                         })
                     }
 
-                    
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_reviewComments)
-                    //当review的state为pending时，返回的数据中将包含review comment reply
-                    let dataHolder
-                    try{
-                        dataHolder =  res.data.data.node.comments.nodes
-                        this.pageInfo = res.data.data.node.comments.pageInfo
-                        this.totalCount = res.data.data.node.comments.totalCount
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-                    let data_temp = {}
-                    dataHolder.forEach(i => {
-                        if(!data_temp[i.path]) data_temp[i.path] = []
-                        data_temp[i.path].push(i)
-                    })
-                    let data = []
-                    for(let key in data_temp) {
-                        data_temp[key].forEach(i => {
-                            data.push(i)
-                        })
-                    }
-                    this.data = data
+                    let res = await authRequiredGet(url)
+
+                    this.comments.data = this.comments.data.concat(res.data)
+                    this.comments.pageInfo = parse(res.headers.link) || {}
                 }catch(e) {
                     console.log(e)
                 }finally{
-                    this.loading = false
+                    this.comments.loading = false
                 }
-            }
+            },
+            async network_getReviewCommentsCount() {
+                try{
+                    let url = api.API_REVIEW_COMMENTS_OF_REVIEW({
+                            repo: this.repo,
+                            owner: this.owner,
+                            number: this.number,
+                            reviewId: this.propsData.id,
+                            params: {
+                                per_page: 1
+                            }
+                        })
+
+                    let res = await authRequiredGet(url)
+
+                    let pageInfo = parse(res.headers.link) || {}
+
+                    this.comments.count = pageInfo.last ? pageInfo.last.page : res.data.length
+
+                }catch(e) {
+                    console.log(e)
+                }
+            },
+           /*  async network_getCommentsOfPendingReview() {
+                try{
+                    this.commentsOfPendingReview.loading = true
+
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_PR_REVIEW_COMMENTS,
+                        {
+                            variables: {
+                                id: this.propsData.node_id,
+                                after: this.commentsOfPendingReview.pageInfo.hasNextPage ? this.commentsOfPendingReview.pageInfo.endCursor : undefined,
+                                first: 100
+                            }
+                        }
+                    )
+                   
+                    try{
+                        this.commentsOfPendingReview.data = this.commentsOfPendingReview.data.concat(res.data.data.node.comments.nodes)
+                        this.commentsOfPendingReview.pageInfo = res.data.data.node.comments.pageInfo
+                        this.commentsOfPendingReview.totalCount = res.data.data.node.comments.totalCount
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.commentsOfPendingReview.loading = false
+                }
+            } */
         },
         components: {
             LoadingIconEx,
             AnimatedHeightWrapper,
             Popover,
             ImgWrapper,
-            Reaction,
             ReviewComment,
             HiddenItemLoading,
             Label,

@@ -1,6 +1,6 @@
 <template> 
     <Container class="bubble bg-white" style="margin-top:15px">
-        <FileHeader class="file-header" :class="{pending:reviewComment.state == 'PENDING'}">
+        <FileHeader class="file-header" :class="{pending:reviewProvided().state == 'pending'}">
             <button class="btn-link text-gray float-right f6 d-block" v-if="reviewComment.outdated" @click="triggerShowOutdated">
                 <svg class="octicon octicon-fold position-relative mr-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 9l3 3H8v3H6v-3H4l3-3zm3-6H8V0H6v3H4l3 3 3-3zm4 2c0-.55-.45-1-1-1h-2.5l-1 1h3l-2 2h-7l-2-2h3l-1-1H1c-.55 0-1 .45-1 1l2.5 2.5L0 10c0 .55.45 1 1 1h2.5l1-1h-3l2-2h7l2 2h-3l1 1H13c.55 0 1-.45 1-1l-2.5-2.5L14 5z"></path></svg>
                 {{showOutdated ? 'Hide outdated' : 'Show outdated'}}
@@ -78,12 +78,12 @@
 
                 <WhoDidWhatAt class="d-flex flex-row">
                     <div class="flex-auto">
-                        <router-link :to="`/${reviewComment.author.login}`" class="d-inline-block">
+                        <router-link :to="`/${reviewComment.user.login}`" class="d-inline-block">
                             <ImgWrapper>
-                                <img :src="reviewComment.author.avatarUrl" :alt="`@${reviewComment.author.login}`" width="16" height="16">
+                                <img :src="reviewComment.user.avatar_url" :alt="`@${reviewComment.user.login}`" width="16" height="16">
                             </ImgWrapper>
                         </router-link>
-                        <router-link :to="`/${reviewComment.author.login}`" class="f5 text-bold link-gray-dark">{{reviewComment.author.login}}</router-link> 
+                        <router-link :to="`/${reviewComment.user.login}`" class="f5 text-bold link-gray-dark">{{reviewComment.user.login}}</router-link> 
                         <span class="text-gray" v-if="reviewProvided().state != 'pending'"> • {{dateFormat(reviewComment.createdAt)}}</span>
                     </div>
 
@@ -92,7 +92,7 @@
                     </div>
                 </WhoDidWhatAt>
 
-                <CommentBody v-html="reviewComment.bodyHTML" class="markdown-body p-0 pt-2 f5">
+                <CommentBody v-html="markdownToHTML(reviewComment.body)" class="markdown-body p-0 pt-2 f5">
                 </CommentBody>
                 <Reaction class="mt-2" :data="reviewComment" :disabled="!reviewComment.viewerCanReact">
                 </Reaction>
@@ -100,8 +100,8 @@
             </Comment>
 
             <!-- replies -->
-            <Replies v-if="reviewProvided().state != 'pending'">
-                 <Comment class="px-3 pt-3 pb-2" v-for="item in replies.slice(0,repliesExtraData.cursor)" :key="item.id">
+            <Replies>
+                 <Comment class="px-3 pt-3 pb-2" v-for="item in reviewProvided().state == 'pending' ? replies : replies.slice(0,repliesExtraData.cursor)" :key="item.id">
 
                     <WhoDidWhatAt class="d-flex flex-row">
                         <div class="flex-auto">
@@ -119,7 +119,7 @@
                         </div>
                     </WhoDidWhatAt>
 
-                    <CommentBody v-if="repliesExtraData.data.filter(i => {return i.id === item.node_id})[0]" v-html="repliesExtraData.data.filter(i => {return i.id === item.node_id})[0].bodyHTML" class="markdown-body p-0 pt-2 f5">
+                    <CommentBody v-html="markdownToHTML(item.body)" class="markdown-body p-0 pt-2 f5">
                     </CommentBody>
                     <Reaction class="mt-2" v-if="repliesExtraData.data.filter(i => {return i.id === item.node_id})[0]" :data="repliesExtraData.data.filter(i => {return i.id === item.node_id})[0]" :disabled="!reviewComment.viewerCanReact">
                     </Reaction>
@@ -127,8 +127,8 @@
                 </Comment>
             </Replies>
             
-            <Replies v-else>
-                <Comment class="px-3 pt-3 pb-2" v-for="item in pendingReviewCommentRepliesProvided().filter(i => i.replyTo.id == reviewComment.id)" :key="item.id">
+           <!--  <Replies v-else>
+                <Comment class="px-3 pt-3 pb-2" v-for="item in commentsOfPendingReview().filter(i => i.replyTo && i.replyTo.id == reviewComment.id)" :key="item.id">
 
                     <WhoDidWhatAt class="d-flex flex-row">
                         <div class="flex-auto">
@@ -152,10 +152,10 @@
                     </Reaction>
 
                 </Comment>
-            </Replies>
+            </Replies> -->
             
 
-            <HiddenItemLoading v-if="repliesExtraData.cursor < replies.length" style="padding-bottom:0px!important" :loading="repliesExtraData.loading" :dataGetter="network_getData">
+            <HiddenItemLoading v-if="repliesExtraData.cursor < replies.length && reviewProvided().state != 'pending'" style="padding-bottom:0px!important" :loading="repliesExtraData.loading" :dataGetter="network_getData">
                 {{replies.length - repliesExtraData.cursor}} {{replies.length - repliesExtraData.cursor > 1 ? 'replies' : 'reply'}} remained.
             </HiddenItemLoading>
 
@@ -169,7 +169,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_dateFormat,util_analyseFileType} from '@/util'
+    import {util_dateFormat,util_analyseFileType,util_markdownParse} from '@/util'
     import {LoadingIconEx,AnimatedHeightWrapper,Popover,SimpleDiffView, ImgWrapper} from '@/components'
     import HiddenItemLoading from './HiddenItemLoading'
     import {mapState} from 'vuex'
@@ -178,7 +178,7 @@
     import * as graphql from '../graphql'
     import { authRequiredGitHubGraphqlApiQuery } from '@/network'
     export default {
-        inject: ['reviewCommentReplies','pendingReviewCommentRepliesProvided','reviewProvided','pullRequestProvided'],
+        inject: ['reviewCommentReplies','commentsOfPendingReview','reviewProvided','pullRequestProvided'],
         data() {
             return {
                 showHiddenDiffHunk: false,
@@ -207,11 +207,12 @@
                 return location
             },
             diffHunkEntries() {
-                let hunkStatistic = (this.reviewComment.diffHunk.split('@@')[1]).replace(/@/g,'').trim().split(' ')
+                let diffHunk = this.reviewComment.diffHunk || this.reviewComment.diff_hunk
+                let hunkStatistic = (diffHunk.split('@@')[1]).replace(/@/g,'').trim().split(' ')
                 let deletionLineIndex,deletionStartLineIndex,addititonLineIndex,additionStartLineIndex
                 deletionLineIndex = deletionStartLineIndex = parseInt(hunkStatistic[0].split(',')[0].replace(/[-|\+]/g,'')) - 1
                 addititonLineIndex = additionStartLineIndex = parseInt(hunkStatistic[1].split(',')[0].replace(/[-|\+]/g,'')) - 1
-                let lines = this.reviewComment.diffHunk.split(/\n/)
+                let lines = diffHunk.split(/\n/)
                 let diffHunkEntries = []
                 lines.forEach(item => {
                     switch(item[0]) {
@@ -257,15 +258,15 @@
                 return `...${this.reviewComment.path.match(/(\/(([^\/])+)){3}$/g)[0]}`
             },
             replies() {
-                let replies = this.reviewCommentReplies().filter(item => {
-                    return item.in_reply_to_id == this.reviewComment.resourcePath.match(/[0-9]+$/)[0]
+                let replies = [...this.reviewCommentReplies(),...this.commentsOfPendingReview()].filter(item => {
+                    return item.in_reply_to_id == this.reviewComment.id
                 })
                 return replies || []
             },
             isProseFileType() {
                 if(!this.reviewComment.path) return 
                 return util_analyseFileType.isProse(this.reviewComment.path)
-            }
+            },
         },
         created() {
             this.network_getData()
@@ -313,7 +314,9 @@
             dateFormat(date) {
                 return util_dateFormat.getDateDiff(date)
             },
-            
+            markdownToHTML(markdown) {
+                return util_markdownParse.markdownToHTML(markdown)
+            }
         },
         watch: {
             replies(newValue,oldValue) {

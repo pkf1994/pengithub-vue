@@ -6,6 +6,7 @@
             </p>
             <LoadMore class="text-center">
                  <button class="ajax-pagination-btn no-underline pb-1 pt-0 px-4 mt-0 mb-1 border-0"
+                    :disabled="loading"
                     :class="{'loading-animation':loading}"
                     @click="dataGetter">
                     {{loading ? 'Loading...' : 'Load more'}}

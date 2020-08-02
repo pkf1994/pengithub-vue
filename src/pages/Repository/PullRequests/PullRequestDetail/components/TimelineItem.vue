@@ -15,7 +15,7 @@
             <template v-slot:additional>
                 <Commit class="py-1 d-flex" style="margin-top:7.5px">
                     <div class="d-flex">
-                        <AnimatedWidthWrapper>
+                        <AnimatedWidthWrapper class="flex-shrink-0">
                              <router-link v-if="commit.author && commit.author.avatar_url" :to="`/${commit.author && commit.author.login}`" class="pr-2 d-inline-block">
                                 <ImgWrapper>
                                     <img class="avatar v-align-baseline" width="16" height="16" :src="commit.author && commit.author.avatar_url" :alt="`@${commit.author && commit.author.login}`">
@@ -335,9 +335,10 @@
                {{(data.actor.login === owner || data.actor.login === 'ghost') && data.actor.type !== 'Organization'? "Repository owner" : ''}} deleted a comment 
             </template>
         </SimpleTimelineItem>
+        
 
         <!-- review_requested  -->
-        <!-- <SimpleTimelineItem v-else-if="data.event === 'review_requested'" :data="data">
+        <SimpleTimelineItem v-else-if="data.event === 'review_requested'" :data="data">
             <template v-slot:icon>
                 <svg class="octicon octicon-eye" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"></path></svg>
             </template>
@@ -345,7 +346,7 @@
                 requested review from 
                 <strong>{{data.requested_reviewer ? data.requested_reviewer.login : data.requested_team.login}}</strong>
             </template>
-        </SimpleTimelineItem> -->
+        </SimpleTimelineItem>
          <!-- review_request_removed  -->
         <!-- <SimpleTimelineItem v-else-if="data.event === 'review_request_removed'" :data="data">
             <template v-slot:icon>

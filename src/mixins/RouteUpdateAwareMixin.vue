@@ -94,7 +94,10 @@
                     console.log(this.componentActive)
                     console.log('========================watch routerMeta========================')
                 }
-                if(newOne && oldOne && this.componentActive) this.routeUpdateHook()
+                if(newOne && oldOne && this.componentActive) {
+                    this.cancelUntimelyAxios()
+                    this.routeUpdateHook()
+                }
             }
         }
     }
