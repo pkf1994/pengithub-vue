@@ -143,52 +143,50 @@ query($name:String!,$owner:String!,$number:Int!){
     }
     `
 
-  export const GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID = payload => {
-    return `
-    {
-      nodes(ids:${JSON.stringify(payload.nodeIds)}) {
-        ... on PullRequestReviewComment {
-          id
-          path
-          position
-          outdated
-          diffHunk
-          createdAt
-          bodyHTML
-          viewerCanReact
-          author {
-            login
-            avatarUrl
-          }
-          THUMBS_UP :reactions(content: THUMBS_UP) {
+  export const GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID = `
+  query($ids:[ID!]!){
+    nodes(ids:$ids) {
+      ... on PullRequestReviewComment {
+        id
+        path
+        position
+        outdated
+        diffHunk
+        createdAt
+        bodyHTML
+        viewerCanReact
+        author {
+          login
+          avatarUrl
+        }
+        THUMBS_UP :reactions(content: THUMBS_UP) {
+          totalCount
+        }
+        THUMBS_DOWN :reactions(content: THUMBS_DOWN) {
             totalCount
-          }
-          THUMBS_DOWN :reactions(content: THUMBS_DOWN) {
-              totalCount
-          }
-          LAUGH :reactions(content: LAUGH) {
-              totalCount
-          }
-          HOORAY :reactions(content: HOORAY) {
-              totalCount
-          }
-          CONFUSED :reactions(content: CONFUSED) {
-              totalCount
-          }
-          HEART :reactions(content: HEART) {
-              totalCount
-          }
-          ROCKET :reactions(content: ROCKET) {
-              totalCount
-          }
-          EYES :reactions(content: EYES) {
-              totalCount
-          }
+        }
+        LAUGH :reactions(content: LAUGH) {
+            totalCount
+        }
+        HOORAY :reactions(content: HOORAY) {
+            totalCount
+        }
+        CONFUSED :reactions(content: CONFUSED) {
+            totalCount
+        }
+        HEART :reactions(content: HEART) {
+            totalCount
+        }
+        ROCKET :reactions(content: ROCKET) {
+            totalCount
+        }
+        EYES :reactions(content: EYES) {
+            totalCount
         }
       }
     }
-    `
   }
+  `
 
   export const GRAPHQL_PULLS_COMMITS = (payload) => {
     payload = {

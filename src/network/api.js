@@ -176,6 +176,8 @@ export const API_PULLREQUEST = (payload) => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}`
 }
 
+export const API_REVIEW = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/reviews/${payload.reviewId}`
+
 export const API_REVIEW_COMMENTS_OF_REVIEW = (payload) => {
     let query = util_queryParse.querify(payload.params)
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/reviews/${payload.reviewId}/comments?${query}`
@@ -185,6 +187,8 @@ export const API_REVIEW_COMMENTS_OF_PULL_REQUEST = (payload) => {
     let query = util_queryParse.querify(payload.params)
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/comments?${query}`
 }
+
+export const API_REVIEW_COMMENT_OF_PULL_REQUEST = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/comments/${payload.commentId}`
 
 
 export const API_COMMIT = (payload) => {
@@ -323,7 +327,7 @@ export const API_ISSUE_LOCK = payload => `${GITHUB_REST_API_BASE}/repos/${payloa
 
 export const API_CREATE_ISSUE_COMMENT = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/comments`
 
-export const API_HANDLE_ISSUE_COMMENT = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.comment}`
+export const API_ISSUE_COMMENT = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.comment}`
 
 export const API_ISSUE_REACTIONS = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/reactions`
 

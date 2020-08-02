@@ -74,57 +74,11 @@
                 </div>
             </DiffView>
 
-            <Comment class="px-3 pt-3 pb-2">
-
-                <WhoDidWhatAt class="d-flex flex-row">
-                    <div class="flex-auto">
-                        <router-link :to="`/${reviewComment.user.login}`" class="d-inline-block">
-                            <ImgWrapper>
-                                <img :src="reviewComment.user.avatar_url" :alt="`@${reviewComment.user.login}`" width="16" height="16">
-                            </ImgWrapper>
-                        </router-link>
-                        <router-link :to="`/${reviewComment.user.login}`" class="f5 text-bold link-gray-dark">{{reviewComment.user.login}}</router-link> 
-                        <span class="text-gray" v-if="reviewProvided().state != 'pending'"> • {{dateFormat(reviewComment.createdAt)}}</span>
-                    </div>
-
-                    <div class="ml-2 btn-link height-full">
-                        <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
-                    </div>
-                </WhoDidWhatAt>
-
-                <CommentBody v-html="markdownToHTML(reviewComment.body)" class="markdown-body p-0 pt-2 f5">
-                </CommentBody>
-                <Reaction class="mt-2" :data="reviewComment" :disabled="!reviewComment.viewerCanReact">
-                </Reaction>
-
-            </Comment>
+            <ReviewCommentReply :reply="reviewComment"></ReviewCommentReply>
 
             <!-- replies -->
             <Replies>
-                 <Comment class="px-3 pt-3 pb-2" v-for="item in reviewProvided().state == 'pending' ? replies : replies.slice(0,repliesExtraData.cursor)" :key="item.id">
-
-                    <WhoDidWhatAt class="d-flex flex-row">
-                        <div class="flex-auto">
-                            <router-link :to="`/${item.user.login}`" class="d-inline-block">
-                                <ImgWrapper>   
-                                    <img :src="item.user.avatar_url" :alt="`@${item.user.login}`" width="16" height="16">
-                                </ImgWrapper>
-                            </router-link>
-                            <router-link :to="`/${item.user.login}`" class="f5 text-bold link-gray-dark">{{item.user.login}}</router-link> 
-                            <span class="text-gray"> • {{dateFormat(item.created_at)}}</span>
-                        </div>
-
-                        <div class="ml-2 btn-link height-full">
-                            <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
-                        </div>
-                    </WhoDidWhatAt>
-
-                    <CommentBody v-html="markdownToHTML(item.body)" class="markdown-body p-0 pt-2 f5">
-                    </CommentBody>
-                    <Reaction class="mt-2" v-if="repliesExtraData.data.filter(i => {return i.id === item.node_id})[0]" :data="repliesExtraData.data.filter(i => {return i.id === item.node_id})[0]" :disabled="!reviewComment.viewerCanReact">
-                    </Reaction>
-
-                </Comment>
+                <ReviewCommentReply v-for="item in reviewProvided().state == 'pending' ? replies : replies.slice(0,repliesExtraData.cursor)" :reply="item" :key="item.id"></ReviewCommentReply>
             </Replies>
             
            <!--  <Replies v-else>
@@ -175,10 +129,17 @@
     import {mapState} from 'vuex'
     import ClipboardJS from 'clipboard';
     import Reaction from './Reaction'
+    import ReviewCommentReply from './ReviewCommentReply'
     import * as graphql from '../graphql'
-    import { authRequiredGitHubGraphqlApiQuery } from '@/network'
+    import * as api from '@/network/api'
+    import { authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
     export default {
         inject: ['reviewCommentReplies','commentsOfPendingReview','reviewProvided','pullRequestProvided'],
+        provide() {
+            return {
+                repliesExtraData: () => [...this.repliesExtraData.data,this.extraData.data]
+            }
+        },
         data() {
             return {
                 showHiddenDiffHunk: false,
@@ -186,6 +147,18 @@
                 repliesExtraData: {
                     cursor: 0,
                     data: [],
+                    loading: false
+                },
+                reactions: {
+                    data: {},
+                    loading: false
+                },
+                repliesReactions: {
+                    data: [],
+                    loading: false
+                },
+                extraData: {
+                    data: {},
                     loading: false
                 }
             }
@@ -197,9 +170,12 @@
             },
         },
         computed: {
-            ...mapState({
-                //commentBodyHTMLAndReactions: state => state.repository.issue.issueDetail.timeline.commentBodyHTMLAndReactions.data
-            }),
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
             pullRequestProvided_() {
                 return this.pullRequestProvided()
             },
@@ -272,6 +248,95 @@
             this.network_getData()
         },
         methods: {
+            network_getData() {
+                this.network_getRepliesExtraData()
+                this.network_getReviewCommentExtraData()
+                this.network_getReactions()
+            },
+            async network_getReactions() {
+                try {
+                    this.reactions.loading = true
+                    let url = api.API_REVIEW_COMMENT_OF_PULL_REQUEST({
+                        repo: this.repo,
+                        owner: this.owner,
+                        commentId: this.reviewComment.id
+                    })
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            headers: {
+                                "accept":"application/vnd.github.comfort-fade-preview+json,application/vnd.github.squirrel-girl-preview"
+                            }
+                        }
+                    )
+
+                    this.reactions.data = res.data.reactions
+                } catch (e) {
+                    console.log(e)
+                }finally{
+                    this.reactions.loading = false
+                }
+            },
+            async network_getRepliesExtraData() {
+                if(this.reviewProvided().state == 'pending') return
+                if(this.repliesExtraData.loading || this.replies.length === 0) return
+                if(this.repliesExtraData.cursor >= this.replies.length) return
+                let nodeIds = []
+                this.replies.forEach(i => nodeIds.push(i.node_id))
+                try{
+                    this.repliesExtraData.loading = true
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID,
+                        {
+                            variables: {
+                                ids: nodeIds.slice(this.repliesExtraData.cursor,this.repliesExtraData.cursor + 5)
+                            }
+                        }
+                    )
+
+                    try{
+                        this.repliesExtraData.data = this.repliesExtraData.data.concat(res.data.data.nodes)
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                    
+                    this.repliesExtraData.cursor += 5
+                }catch(e) {
+                    console.log(e)
+                }finally{
+                    this.repliesExtraData.loading = false
+                }
+            },
+            async network_getReviewCommentExtraData() {
+                try {
+                    this.extraData.loading = true
+
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID,
+                        {
+                            variables: {
+                                ids: [this.reviewComment.node_id]
+                            }
+                        }
+                    )
+
+                     try{
+                        this.extraData.data = res.data.data.nodes[0]
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+                } catch (e) {
+                    console.log(e)
+                } finally {
+                    this.extraData.loading = false
+                }
+            },
+            dateFormat(date) {
+                return util_dateFormat.getDateDiff(date)
+            },
+            markdownToHTML(markdown) {
+                return util_markdownParse.markdownToHTML(markdown)
+            },
             showActionPopover() {
                 this.$refs.actionPopover.show = true
             },
@@ -287,36 +352,6 @@
             triggerShowOutdated() {
                 this.showOutdated = !this.showOutdated
             },
-            async network_getData() {
-                if(this.reviewProvided().state == 'pending') return
-                if(this.repliesExtraData.loading || this.replies.length === 0) return
-                if(this.repliesExtraData.cursor >= this.replies.length) return
-                let nodeIds = []
-                this.replies.forEach(i => nodeIds.push(i.node_id))
-                try{
-                    this.repliesExtraData.loading = true
-                    let graphql_replies = graphql.GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID({nodeIds:nodeIds.slice(this.repliesExtraData.cursor,this.repliesExtraData.cursor + 5)})
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_replies)
-
-                    try{
-                        this.repliesExtraData.data = this.repliesExtraData.data.concat(res.data.data.nodes)
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-                    
-                    this.repliesExtraData.cursor += 5
-                }catch(e) {
-                    console.log(e)
-                }finally{
-                    this.repliesExtraData.loading = false
-                }
-            },
-            dateFormat(date) {
-                return util_dateFormat.getDateDiff(date)
-            },
-            markdownToHTML(markdown) {
-                return util_markdownParse.markdownToHTML(markdown)
-            }
         },
         watch: {
             replies(newValue,oldValue) {
@@ -331,6 +366,7 @@
             HiddenItemLoading,
             SimpleDiffView,
             ImgWrapper,
+            ReviewCommentReply,
             Container: styled.div``,
             Main: styled.div``,
             FileHeader: styled.div``,

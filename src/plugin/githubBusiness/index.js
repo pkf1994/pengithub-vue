@@ -10,7 +10,8 @@ export default {
             computed: {
                 ...mapState({
                     accessToken: state => state.oauth.accessToken.accessToken
-                })
+                }),
+               
             },
             methods: {
                 ...mapActions({

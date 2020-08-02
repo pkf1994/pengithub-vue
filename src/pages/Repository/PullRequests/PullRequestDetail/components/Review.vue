@@ -75,6 +75,10 @@
                     loading: false,
                     pageInfo: {},
                     totalCount: 0
+                },
+                reactions: {
+                    data: {},
+                    loading: false
                 }
             }
         },
