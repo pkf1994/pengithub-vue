@@ -25,7 +25,7 @@
                     </div>
                     <SkeletonRectangle :height="16" class="ml-6 mt-3"></SkeletonRectangle>
                     <SkeletonRectangle :height="16" class="mt-3"></SkeletonRectangle>
-                    <SkeletonRectangle :height="16" class="mr-6 mt-3"></SkeletonRectangle>
+                    <SkeletonRectangle :height="16" class="mr-6 my-3"></SkeletonRectangle>
                 </Skeleton>
 
                 <div v-else>
@@ -128,10 +128,10 @@
             </MergePull>
 
             <div>
-                <Header class="header" v-if="extraData.data.id">
+                <Header class="header">
                     Comment on pull request
                 </Header>
-                <PullRequestCommentCreator v-if="extraData.data.id" 
+                <PullRequestCommentCreator 
                         @create-comment-success="createCommentHandler"
                         class="m-3">
                 </PullRequestCommentCreator>
@@ -145,9 +145,13 @@
                 <IssueNotificationSettingPane class="p-3" :viewerSubscriptionInfo="extraData.data"></IssueNotificationSettingPane>
             </div> 
 
-        </div>
+            <LockIssueButton 
+                class="p-3 border-top"
+                v-if="extraData.data.viewerCanUpdate" 
+                :issue="pullRequestProvided().data" 
+                @change-lock-status-success="changeLockStatusSuccessPostHandler"></LockIssueButton>
 
- 
+        </div>
 
         <transition name="fade" appear>
             <CommonLoading v-if="!pullRequestProvided().data.node_id || timeline.loading || timeline.extraData.loading || reviewCommentReplies.loading"
@@ -191,7 +195,7 @@
     import {CommonLoading,Label,AnimatedHeightWrapper,ImgWrapper,LoadingIconEx,Progress,IssueIcon,Subscription,SkeletonCircle,SkeletonRectangle} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
     import {TimelineItem,Comment,HiddenItemLoading,PullRequestCommentCreator,ProjectCard,PullRequestBody} from './components'
-    import {IssueNotificationSettingPane} from '../../components'
+    import {IssueNotificationSettingPane,LockIssueButton} from '../../components'
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
@@ -386,12 +390,18 @@
                 if(this.timeline.loading) return
                 this.network_getTimeline()
             },
+           
             async network_getData() {
-               
-                try{
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
+                if(this.accessToken) await this.network_getPullRequestExtraData()
 
-                     //获取bodyHTML以及其他来自graphql的数据
+                //获取timeline(异步)
+                this.network_getTimeline()
+
+                //获取review comment replies
+                this.network_getReviewCommentReplies()
+            },
+            async network_getPullRequestExtraData() {
+                try {
                     this.extraData.loading = true
                     let res = await authRequiredGitHubGraphqlApiQuery(
                         graphql.GRAPHQL_PR,
@@ -410,15 +420,7 @@
                     }catch(e) {
                         this.handleGraphqlError(res)
                     }
-                    
-
-                    //获取timeline(异步)
-                    this.network_getTimeline()
-
-                    //获取review comment replies
-                    this.network_getReviewCommentReplies()
-
-                }catch(e){
+                } catch(e){
                     this.handleError()
                 }finally{
                     this.extraData.loading = false
@@ -686,6 +688,9 @@
                 this.commentsJustCreated.push(payload)
                 this.network_getTimelineExtraData([payload])
             },
+            changeLockStatusSuccessPostHandler(payload) {
+                this.pullRequestProvided().data.locked = payload
+            },
             routeUpdateHook() {
                 this.network_getData()
             },
@@ -710,6 +715,7 @@
             SkeletonCircle,
             SkeletonRectangle,
             IssueNotificationSettingPane,
+            LockIssueButton,
             Container: styled.div``,
             Header: styled.div``,
             HeaderActions: styled.div``,

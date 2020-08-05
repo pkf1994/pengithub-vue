@@ -19,6 +19,11 @@
     export default {
         components: {
             Container: styled.div``
+        },
+        methods: {
+            signIn() {
+                this.$router.push(`/sign_out?return_to=${this.$route.fullPath}`)
+            }
         }
     }
 </script>

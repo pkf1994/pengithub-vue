@@ -330,9 +330,15 @@ export const API_CREATE_ISSUE_COMMENT = payload => `${GITHUB_REST_API_BASE}/repo
 
 export const API_ISSUE_COMMENT = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.comment}`
 
-export const API_ISSUE_REACTIONS = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/reactions`
+export const API_ISSUE_REACTIONS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/reactions?${query}`
+}
 
-export const API_ISSUE_COMMENT_REACTIONS = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.comment}/reactions`
+export const API_ISSUE_COMMENT_REACTIONS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.comment}/reactions?${query}`
+}
 
 export const API_PROXY_ISSUE_COMMENT_EDIT_HISTORIES = payload => `${PROXY_API_BASE}/_render_node/${payload}/comments/comment_edit_history_log`
 

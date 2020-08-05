@@ -1,6 +1,6 @@
 <template>
     <Container class="p-3 relative container">
-        <Inner class="d-flex position-relative pl-4">
+        <Header class="d-flex position-relative pl-4">
 
             <div class="pr-simple-timeline-icon-wrapper">
                 <svg class="octicon octicon-eye" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"></path></svg>
@@ -19,8 +19,11 @@
                 <span class="no-wrap">{{propsData.submitted_at | getDateDiff}}</span>
             </WhoDidWhat>
 
-            <Label class="ml-1 no-wrap" :name="propsData.state" :color="propsData.state == 'pending' ? '#fffbdd' : '#ffffff'" style="font-size: 10px;color:#735c0f" ></Label>
-        </Inner>
+        <button v-if="extraData.viewerCanUpdate" :disabled="showReviewBodyEditor" type="button" class="btn-link muted-link js-comment-edit-button">
+            <svg class="octicon octicon-pencil" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"></path></svg>
+        </button>
+            <!-- <Label class="ml-1 no-wrap" :name="propsData.state" :color="propsData.state == 'pending' ? '#fffbdd' : '#ffffff'" style="font-size: 10px;color:#735c0f" ></Label> -->
+        </Header>
 
         <Body class="bubble mt-3" v-if="bodyHTML" style="padding:15px;">
             <BodyHTML v-html="bodyHTML"  class="markdown-body p-0" style="font-size:15px">
@@ -79,7 +82,8 @@
                 reactions: {
                     data: {},
                     loading: false
-                }
+                },
+                showReviewBodyEditor: false
             }
         },
         computed: {
@@ -210,7 +214,7 @@
             HiddenItemLoading,
             Label,
             Container: styled.div``,
-            Inner: styled.div``,
+            Header: styled.div``,
             WhoDidWhat: styled.div``,
             Body: styled.div``,
             BodyHTML: styled.div``,
