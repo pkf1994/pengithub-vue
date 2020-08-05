@@ -212,35 +212,7 @@
 
              <!-- notifications -->
             <InfoBottomItem class="info-bottom-item" v-if="accessToken">
-                <InfoBottomItemTitle class="info-bottom-item-title d-flex flex-justify-between">
-                    Notifications
-                    <button v-if="repoOwnerType &&  repoOwnerType != 'Organization'" class="text-normal" @click="() => showModal('notificationSettingsModal')">Customize</button>
-                </InfoBottomItemTitle>
-               <button style="height: 40px" @click="triggerSubscription" :disabled="notificationSettingsModal.loading || repoOwnerType == 'Organization'" class="btn btn-block d-block width-full d-flex flex-items-center flex-justify-center">
-                    <span class="d-flex flex-items-center" v-if="!notificationSettingsModal.loading">
-                        <svg class="octicon octicon-mute mr-1" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2.81v10.38c0 .67-.81 1-1.28.53L3 10H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h2l3.72-3.72C7.19 1.81 8 2.14 8 2.81zm7.53 3.22l-1.06-1.06-1.97 1.97-1.97-1.97-1.06 1.06L11.44 8 9.47 9.97l1.06 1.06 1.97-1.97 1.97 1.97 1.06-1.06L13.56 8l1.97-1.97z"></path></svg> 
-                        <span class="v-align-top">
-                            {{extraData.data.viewerSubscription == 'SUBSCRIBED' ? 'Unsubscribe' : 'Subscribe'}}
-                        </span>    
-                    </span>
-                    <span v-else>
-                        Updating...
-                    </span>    
-                </button>
-                <span class="mt-1 d-inline-block" v-if="extraData.data.viewerSubscription">
-                    You're {{extraData.data.viewerSubscription.toLowerCase()}} to this thread.
-                    <span v-if="repoSubscription().subscribed && extraData.data.viewerSubscription == 'UNSUBSCRIBED'">
-                        But you can still receive notification because you’re watching this repository.     
-                    </span>    
-                    <span v-if="repoOwnerType == 'Organization'">
-                        And you can't update subscription it at Pengithub. 
-                        <HyperlinkWrapper>
-                            <a href="https://docs.github.com/en/github/setting-up-and-managing-organizations-and-teams/restricting-access-to-your-organizations-data">
-                                Why?
-                            </a>
-                        </HyperlinkWrapper>
-                    </span>    
-                </span>
+                <IssueNotificationSettingPane :viewerSubscriptionInfo="extraData.data"></IssueNotificationSettingPane>
             </InfoBottomItem>
 
             <!-- participants -->
@@ -466,19 +438,6 @@
             </div>
         </Modal>
 
-        <Modal title="Unlock conversation on this issue" ref="unlockConversationModal" :modalStyle="{maxHeight:'80vh'}"> 
-            <div class="p-3 bg-white">
-                <ul class="ml-3">
-                    <li><strong>Everyone</strong> will be able to comment on this issue once more.</li>
-                    <li li>You can always lock this issue again in the future.</li>
-                </ul>
-            </div> 
-            <div class="Box-footer modal-footer bg-white">
-                <button class="btn btn-block" :disabled="unlockConversationModal.loading" @click="network_unlockConversation">
-                    {{unlockConversationModal.loading ? 'Trying...' : 'Unlock conversation on this issue'}}
-                </button>
-            </div>
-        </Modal>
 
         <Modal title="Transfer this issue" ref="transferIssueModal" :modalStyle="{height:'80vh'}" @show="network_getAvailableTransferTargetRepositories"> 
             <div v-if="transferIssueModal.availableRepositories.loading" class="flex-row-center height-full">
@@ -554,6 +513,7 @@
             HiddenItemLoading} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
     import {TimelineItem,Comment,IssueBody,ProjectCard,CommentCreatePane,LoadMore} from './components'
+    import {IssueNotificationSettingPane} from '../../components'
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
@@ -1468,6 +1428,7 @@
             LoadMore,
             SkeletonCircle,
             SkeletonRectangle,
+            IssueNotificationSettingPane,
             Container: styled.div``,
             TitleEditPane: styled.div``,
             Header: styled.div``,

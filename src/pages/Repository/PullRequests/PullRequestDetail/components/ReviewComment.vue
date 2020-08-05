@@ -78,45 +78,18 @@
 
             <!-- replies -->
             <Replies>
-                <ReviewCommentReply v-for="item in reviewProvided().state == 'pending' ? replies : replies.slice(0,repliesExtraData.cursor)" :reply="item" :key="item.id"></ReviewCommentReply>
+                <ReviewCommentReply v-for="item in replies" :reply="item" :key="item.id"></ReviewCommentReply>
             </Replies>
-            
-           <!--  <Replies v-else>
-                <Comment class="px-3 pt-3 pb-2" v-for="item in commentsOfPendingReview().filter(i => i.replyTo && i.replyTo.id == reviewComment.id)" :key="item.id">
 
-                    <WhoDidWhatAt class="d-flex flex-row">
-                        <div class="flex-auto">
-                            <router-link :to="`/${item.author.login}`" class="d-inline-block">
-                                <ImgWrapper>
-                                    <img :src="item.author.avatarUrl" :alt="`@${item.author.login}`" width="16" height="16">
-                                </ImgWrapper>
-                            </router-link>
-                            <router-link :to="`/${item.author.login}`" class="f5 text-bold link-gray-dark">{{item.author.login}}</router-link> 
-                        </div>
-
-                        <div class="ml-2 btn-link height-full">
-                            <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
-                        </div>
-                    </WhoDidWhatAt>
-
-                    <CommentBody    v-html="item.bodyHTML" 
-                                    class="markdown-body p-0 pt-2 f5">
-                    </CommentBody>
-                    <Reaction class="mt-2" :data="item" :disabled="!reviewComment.viewerCanReact">
-                    </Reaction>
-
-                </Comment>
-            </Replies> -->
-            
-
-            <HiddenItemLoading v-if="repliesExtraData.cursor < replies.length && reviewProvided().state != 'pending'" style="padding-bottom:0px!important" :loading="repliesExtraData.loading" :dataGetter="network_getData">
-                {{replies.length - repliesExtraData.cursor}} {{replies.length - repliesExtraData.cursor > 1 ? 'replies' : 'reply'}} remained.
-            </HiddenItemLoading>
-
-            <div v-if="pullRequestProvided().viewerCanUpdate" class="border-top reply btn-link text-bold text-left muted-link btn-block">
+            <button @click="triggerShowReviewCommentReplyCreator" v-if="pullRequestProvided().viewerCanUpdate && !pullRequestProvided().locked && !showReviewCommentReplyCreator" class="border-top reply btn-link text-bold text-left muted-link btn-block">
                 Reply...
-            </div>
+            </button>
 
+            <ReviewCommentReplyCreator v-if="showReviewCommentReplyCreator" class="border-top" :commentId="reviewComment.id" @cancel="() => triggerShowReviewCommentReplyCreator(false)" @reply-success="createReplySuccessHandler"></ReviewCommentReplyCreator>
+
+            <ResolveConversation>
+
+            </ResolveConversation>
        
     </Container>
 </template>
@@ -130,6 +103,7 @@
     import ClipboardJS from 'clipboard';
     import Reaction from './Reaction'
     import ReviewCommentReply from './ReviewCommentReply'
+    import ReviewCommentReplyCreator from './ReviewCommentReplyCreator'
     import * as graphql from '../graphql'
     import * as api from '@/network/api'
     import { authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
@@ -137,7 +111,7 @@
         inject: ['reviewCommentReplies','commentsOfPendingReview','reviewProvided','pullRequestProvided'],
         provide() {
             return {
-                repliesExtraData: () => [...this.repliesExtraData.data,this.extraData.data]
+                repliesExtraData: () => this.repliesExtraData.data
             }
         },
         data() {
@@ -145,7 +119,6 @@
                 showHiddenDiffHunk: false,
                 showOutdated: false,
                 repliesExtraData: {
-                    cursor: 0,
                     data: [],
                     loading: false
                 },
@@ -157,10 +130,8 @@
                     data: [],
                     loading: false
                 },
-                extraData: {
-                    data: {},
-                    loading: false
-                }
+                repliesJustCreated: [],
+                showReviewCommentReplyCreator: false
             }
         },
         props: {
@@ -234,7 +205,7 @@
                 return `...${this.reviewComment.path.match(/(\/(([^\/])+)){3}$/g)[0]}`
             },
             replies() {
-                let replies = [...this.reviewCommentReplies(),...this.commentsOfPendingReview()].filter(item => {
+                let replies = [...this.reviewCommentReplies(),...this.commentsOfPendingReview(),...this.repliesJustCreated].filter(item => {
                     return item.in_reply_to_id == this.reviewComment.id
                 })
                 return replies || []
@@ -249,8 +220,8 @@
         },
         methods: {
             network_getData() {
-                this.network_getRepliesExtraData()
-                this.network_getReviewCommentExtraData()
+                this.network_getRepliesExtraData(this.replies)
+                this.network_getRepliesExtraData([this.reviewComment])
                 this.network_getReactions()
             },
             async network_getReactions() {
@@ -277,19 +248,17 @@
                     this.reactions.loading = false
                 }
             },
-            async network_getRepliesExtraData() {
-                if(this.reviewProvided().state == 'pending') return
-                if(this.repliesExtraData.loading || this.replies.length === 0) return
-                if(this.repliesExtraData.cursor >= this.replies.length) return
+            async network_getRepliesExtraData(replies) {
                 let nodeIds = []
-                this.replies.forEach(i => nodeIds.push(i.node_id))
+                replies.forEach(i => nodeIds.push(i.node_id))
+                if(nodeIds.length == 0) return 
                 try{
                     this.repliesExtraData.loading = true
                     let res = await authRequiredGitHubGraphqlApiQuery(
                         graphql.GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID,
                         {
                             variables: {
-                                ids: nodeIds.slice(this.repliesExtraData.cursor,this.repliesExtraData.cursor + 5)
+                                ids:nodeIds
                             }
                         }
                     )
@@ -300,35 +269,10 @@
                         this.handleGraphqlError(res)
                     }
                     
-                    this.repliesExtraData.cursor += 5
                 }catch(e) {
                     console.log(e)
                 }finally{
                     this.repliesExtraData.loading = false
-                }
-            },
-            async network_getReviewCommentExtraData() {
-                try {
-                    this.extraData.loading = true
-
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID,
-                        {
-                            variables: {
-                                ids: [this.reviewComment.node_id]
-                            }
-                        }
-                    )
-
-                     try{
-                        this.extraData.data = res.data.data.nodes[0]
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-                } catch (e) {
-                    console.log(e)
-                } finally {
-                    this.extraData.loading = false
                 }
             },
             dateFormat(date) {
@@ -352,10 +296,20 @@
             triggerShowOutdated() {
                 this.showOutdated = !this.showOutdated
             },
+            triggerShowReviewCommentReplyCreator(flag = true) {
+                this.showReviewCommentReplyCreator = flag
+            },
+            createReplySuccessHandler(payload) {
+                this.showReviewCommentReplyCreator = false
+                this.repliesJustCreated.push(payload)
+            }
         },
         watch: {
             replies(newValue,oldValue) {
-                if(newValue.length > 0 && oldValue.length === 0) this.network_getData()
+                let additions = newValue.filter(i => {
+                    return !oldValue.some(i_ => i_.node_id == i.node_id)
+                })
+                if(additions.length > 0) this.network_getRepliesExtraData(additions)
             }
         },
         components: {
@@ -367,6 +321,7 @@
             SimpleDiffView,
             ImgWrapper,
             ReviewCommentReply,
+            ReviewCommentReplyCreator,
             Container: styled.div``,
             Main: styled.div``,
             FileHeader: styled.div``,
@@ -379,6 +334,7 @@
             WhoDidWhatAt: styled.div``,
             CommentBody: styled.div``,
             Replies: styled.div``,
+            ResolveConversation: styled.div``,
         }
     }
 </script>

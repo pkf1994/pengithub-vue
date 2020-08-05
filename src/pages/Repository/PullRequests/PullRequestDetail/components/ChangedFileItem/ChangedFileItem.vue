@@ -52,21 +52,21 @@
                         <AnimatedHeightWrapper>
                             <transition name="fade-group">
                                 <div class="comment-btn-wrapper" v-if="editorShowAt != item.deletionLineIndex">
-                                    <button type="button" class="btn btn-block" @click="() => triggerShowEditor(item.deletionLineIndex)">
+                                    <button type="button" class="btn btn-block" @click="() => triggerShowPullRequestCommentCreator(item.deletionLineIndex)">
                                         Add an additional review comment
                                     </button>
                                 </div>
                             </transition>
                          
 
-                            <Editor class="mx-3 pb-3" :ref="`editor-${item.deletionLineIndex}`" style="background-color: #fafbfc" v-if="editorShowAt == item.deletionLineIndex">
-                                <button class="btn" @click="hideEditor">
+                            <PullRequestCommentCreator class="mx-3 pb-3" :ref="`editor-${item.deletionLineIndex}`" style="background-color: #fafbfc" v-if="editorShowAt == item.deletionLineIndex">
+                                <button class="btn" @click="hidePullRequestCommentCreator">
                                     <span>Cancel</span>
                                 </button>
                                 <button class="btn btn-primary ml-1" :disabled="!$refs[`editor-${item.deletionLineIndex}`] || !$refs[`editor-${item.deletionLineIndex}`][0] || $refs[`editor-${item.deletionLineIndex}`][0].commentTextValue === ''">
                                     <span>Add comment</span>
                                 </button>
-                            </Editor>
+                            </PullRequestCommentCreator>
                         </AnimatedHeightWrapper>
                         
                     </ReviewComments>
@@ -83,7 +83,7 @@
      import {util_analyseFileType} from '@/util'
     import {AnimatedHeightWrapper} from '@/components'
     import HiddenItemLoading from '../HiddenItemLoading'
-    import Editor from '../Editor'
+    import PullRequestCommentCreator from '../PullRequestCommentCreator'
     import Comment from './Comment'
     import { authRequiredGet } from '@/network'
     export default {
@@ -213,16 +213,16 @@
             }
         },
         methods: {
-            triggerShowEditor(index) {
+            triggerShowPullRequestCommentCreator(index) {
                 this.editorShowAt = index
             },
-            hideEditor() {
+            hidePullRequestCommentCreator() {
                 this.editorShowAt = -2
             }
         },
         components: {
             Comment,
-            Editor,
+            PullRequestCommentCreator,
             AnimatedHeightWrapper,
             Container: styled.div``,
             DiffHeader: styled.div``,
@@ -232,7 +232,7 @@
             BlobNum: styled.div``,
             BlobCode: styled.div``,
             ReviewComments: styled.div``,
-            ReviewCommentEditor: styled.div``,
+            ReviewCommentPullRequestCommentCreator: styled.div``,
         }
     }
 </script>

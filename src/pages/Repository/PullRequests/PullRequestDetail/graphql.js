@@ -10,6 +10,7 @@ query($name:String!,$owner:String!,$number:Int!){
       viewerCanUpdate
       viewerCanSubscribe
       viewerCanReact
+      viewerCanApplySuggestion
       locked
       userContentEdits(first:1) {
         totalCount
@@ -29,62 +30,45 @@ query($name:String!,$owner:String!,$number:Int!){
   }
 }  
 `
-
-  export const GRAPHQL_TIMELINE_EXTRA_DATA = payload => {
-    let graphql = ''
-    payload.forEach((item,index) => {
-      if(item.event === 'commented') {
-        graphql = `
-        ${graphql}
-        comment${index}:node(id: "${item.node_id}") {
-          ... on IssueComment {
-            id
-            isMinimized
-            minimizedReason
-            viewerCanDelete
-            viewerCanMinimize
-            viewerCanReact
-            viewerCanUpdate
-            viewerCannotUpdateReasons
-            viewerDidAuthor
-            userContentEdits(first:1) {
-              totalCount
-              nodes {
-                editedAt
-              }
-            }
-            authorAssociation
+export const GRAPHQL_PULL_TIMELINE = `
+  query($ids:[ID!]!) {
+    nodes(ids:$ids) {
+      ... on PullRequestReview {
+        id
+        viewerCanDelete
+        viewerCanReact
+        viewerCanUpdate
+        viewerCannotUpdateReasons
+        viewerDidAuthor
+        userContentEdits(first:1) {
+          totalCount
+          nodes {
+            editedAt
           }
         }
-       
-      `
-      }else if(item.event === 'reviewed') {
-        graphql = `
-        ${graphql}
-        review${index}:node(id: "${item.node_id}") {
-          ... on PullRequestReview {
-            id
-            viewerCanDelete
-            viewerCanReact
-            viewerCanUpdate
-            viewerCannotUpdateReasons
-            viewerDidAuthor
-            userContentEdits(first:1) {
-              totalCount
-              nodes {
-                editedAt
-              }
-            }
-            authorAssociation
-          }
-        }
-      `
+        authorAssociation
       }
-     
-    })
-    return `{${graphql}}`
+      ... on IssueComment {
+        id
+        isMinimized
+        minimizedReason
+        viewerCanDelete
+        viewerCanMinimize
+        viewerCanReact
+        viewerCanUpdate
+        viewerCannotUpdateReasons
+        viewerDidAuthor
+        userContentEdits(first:1) {
+          totalCount
+          nodes {
+            editedAt
+          }
+        }
+        authorAssociation
+      }
+    }
   }
-
+`
 
   export const GRAPHQL_PR_TIMELINE_COUNT = payload => {
       let graphql = ''
@@ -115,16 +99,8 @@ query($name:String!,$owner:String!,$number:Int!){
             totalCount
             nodes {
               id
-              path
-              position
-              outdated
-              diffHunk
-              createdAt
-              updatedAt
-              state
               viewerCanReact
               resourcePath
-              bodyHTML
               replyTo {
                 id
               }
@@ -148,41 +124,9 @@ query($name:String!,$owner:String!,$number:Int!){
     nodes(ids:$ids) {
       ... on PullRequestReviewComment {
         id
-        path
-        position
-        outdated
-        diffHunk
-        createdAt
-        bodyHTML
         viewerCanReact
-        author {
-          login
-          avatarUrl
-        }
-        THUMBS_UP :reactions(content: THUMBS_UP) {
-          totalCount
-        }
-        THUMBS_DOWN :reactions(content: THUMBS_DOWN) {
-            totalCount
-        }
-        LAUGH :reactions(content: LAUGH) {
-            totalCount
-        }
-        HOORAY :reactions(content: HOORAY) {
-            totalCount
-        }
-        CONFUSED :reactions(content: CONFUSED) {
-            totalCount
-        }
-        HEART :reactions(content: HEART) {
-            totalCount
-        }
-        ROCKET :reactions(content: ROCKET) {
-            totalCount
-        }
-        EYES :reactions(content: EYES) {
-            totalCount
-        }
+        viewerCanUpdate
+        viewerCanDelete
       }
     }
   }
@@ -254,7 +198,6 @@ query($name:String!,$owner:String!,$number:Int!){
                     }
                     authorAssociation
                     path
-                    bodyHTML
                     position
                     originalPosition
                     replyTo {
@@ -275,30 +218,6 @@ query($name:String!,$owner:String!,$number:Int!){
                     viewerDidAuthor
                     state
                     createdAt
-                    THUMBS_UP :reactions(content: THUMBS_UP) {
-                      totalCount
-                    }
-                    THUMBS_DOWN :reactions(content: THUMBS_DOWN) {
-                        totalCount
-                    }
-                    LAUGH :reactions(content: LAUGH) {
-                        totalCount
-                    }
-                    HOORAY :reactions(content: HOORAY) {
-                        totalCount
-                    }
-                    CONFUSED :reactions(content: CONFUSED) {
-                        totalCount
-                    }
-                    HEART :reactions(content: HEART) {
-                        totalCount
-                    }
-                    ROCKET :reactions(content: ROCKET) {
-                        totalCount
-                    }
-                    EYES :reactions(content: EYES) {
-                        totalCount
-                    }
                   }
                 }
                 userContentEdits {

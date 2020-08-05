@@ -1,7 +1,5 @@
 <template>
-        <CommentWrapper v-if="data.event === 'commented'" class="p-3">
-            <Comment :propsData="data"></Comment>
-        </CommentWrapper>
+        <Comment :propsData="data" v-if="data.event === 'commented'" class="p-3"></Comment>
         <!-- review -->
         <Review v-else-if="data.event === 'reviewed'" :propsData="data"></Review>
         <!-- committed  -->
@@ -18,7 +16,7 @@
                         <AnimatedWidthWrapper class="flex-shrink-0">
                              <router-link v-if="commit.author && commit.author.avatar_url" :to="`/${commit.author && commit.author.login}`" class="pr-2 d-inline-block">
                                 <ImgWrapper>
-                                    <img class="avatar v-align-baseline" width="16" height="16" :src="commit.author && commit.author.avatar_url" :alt="`@${commit.author && commit.author.login}`">
+                                    <img class="avatar v-align-top" style="margin-top:2px" width="16" height="16" :src="commit.author && commit.author.avatar_url" :alt="`@${commit.author && commit.author.login}`">
                                 </ImgWrapper>
                             </router-link>
                         </AnimatedWidthWrapper>

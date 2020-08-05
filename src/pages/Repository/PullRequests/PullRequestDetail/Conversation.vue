@@ -63,91 +63,91 @@
                     </AuthorAndLastEdit>
                 </div> 
 
-                
-
             </Header>
         
+        <div v-if="pullRequestProvided().data.node_id">
 
-        <Info  class="pt-3 px-3 bg-white " 
+            <Info  class="pt-3 px-3 bg-white " 
                 v-if="pullRequestProvided().data.labels && pullRequestProvided().data.labels.length !== 0"
-                >
-            <!-- label --> 
-            <div class="pb-3" v-if="pullRequestProvided().data.labels && pullRequestProvided().data.labels.length !== 0">
-                <div class="my-1 f6">Labels</div>    
-                <router-link to="/" v-for="item in pullRequestProvided().data.labels" :key="item.name">
-                    <Label  class="mr-1 mt-1"
-                            :style="{height:'18px',fontSize:'10px'}"
-                            :name="item.name"
-                            :color="`#${item.color}`"></Label> 
-                </router-link>
-            </div> 
-        </Info>
+                    >
+                <!-- label --> 
+                <div class="pb-3" v-if="pullRequestProvided().data.labels && pullRequestProvided().data.labels.length !== 0">
+                    <div class="my-1 f6">Labels</div>    
+                    <router-link to="/" v-for="item in pullRequestProvided().data.labels" :key="item.name">
+                        <Label  class="mr-1 mt-1"
+                                :style="{height:'18px',fontSize:'10px'}"
+                                :name="item.name"
+                                :color="`#${item.color}`"></Label> 
+                    </router-link>
+                </div> 
+            </Info>
 
-        <PullRequestBody   
-                    :extraData="extraData.data"
-                    class="bg-white "
-                    v-if="pullRequestProvided().data.node_id" />
+            <PullRequestBody   
+                        :extraData="extraData.data"
+                        class="bg-white" />
 
-        <transition-group tag="div" appear name="fade-group">
-            <div v-for="(item,index) in timeline.data" :key="(item.id || '') + index">
-                <TimelineItem :data="item" class="border-top" style="background:#fafbfc"/>
-            </div> 
-        </transition-group>
+            <transition-group tag="div" appear name="fade-group">
+                <div v-for="(item,index) in timeline.data" :key="(item.id || '') + index">
+                    <TimelineItem :data="item" class="border-top" style="background:#fafbfc"/>
+                </div> 
+            </transition-group>
 
-        <HiddenItemLoading v-if="timeline.pageInfo.next || timeline.loading"
-                            class="border-top"
-                            :loading="timeline.loading"
-                            :dataGetter="loadingMore">
-            <span v-if="timelineRemainedCount > 0">{{timelineRemainedCount}} {{timelineRemainedCount > 1 ? 'items' : 'item'}} remained.</span>    
-        </HiddenItemLoading>
+            <HiddenItemLoading v-if="timeline.pageInfo.next || timeline.loading"
+                                class="border-top"
+                                :loading="timeline.loading"
+                                :dataGetter="loadingMore">
+                <span v-if="timelineRemainedCount > 0">{{timelineRemainedCount}} {{timelineRemainedCount > 1 ? 'items' : 'item'}} remained.</span>    
+            </HiddenItemLoading>
+
+            <transition-group name="fade-group" appear>
+                <Comment v-for="item in commentsJustCreated" :key="item.id" :propsData="item" class="p-3 border-top"></Comment>
+            </transition-group>
 
 
-        <MergePull v-if="extraData.data.viewerCanUpdate && pullRequestProvided().data.merged == false" >
-            <Header class="header" v-if="extraData.data.id">
-                Merge this pull request
-            </Header>
-            <div v-if="pullRequestProvided().data.mergeable_state == 'clean'" class="branch-action branch-action-with-icon">
-                <svg class="octicon octicon-check branch-action-icon text-green" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
-                <h3 class="branch-action-heading">This branch has no conflicts with the base branch.</h3>
-                    Merging can be performed automatically.
+            <MergePull v-if="extraData.data.viewerCanUpdate && pullRequestProvided().data.merged == false" >
+                <Header class="header" v-if="extraData.data.id">
+                    Merge this pull request
+                </Header>
+                <div v-if="pullRequestProvided().data.mergeable_state == 'clean'" class="branch-action branch-action-with-icon">
+                    <svg class="octicon octicon-check branch-action-icon text-green" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
+                    <h3 class="branch-action-heading">This branch has no conflicts with the base branch.</h3>
+                        Merging can be performed automatically.
+                </div>
+                <div v-else-if="pullRequestProvided().data.mergeable_state == 'dirty'" class="branch-action branch-action-with-icon">
+                    <svg class="octicon octicon-x branch-action-icon" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
+                    <h3 class="branch-action-heading">This branch has conflicts that must be resolved.</h3>
+                    Use the command line to resolve conflicts before continuing.
+                </div>
+                <div class="p-3 branch-action">
+                    <button :disabled="!pullRequestProvided().data.mergeable_state == 'clean' || !pullRequestProvided().data.mergeable" class="btn btn-block js-mergeable-state-check">
+                        <svg class="octicon octicon-git-merge" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 3.254V3.25v.005a.75.75 0 110-.005v.004zm.45 1.9a2.25 2.25 0 10-1.95.218v5.256a2.25 2.25 0 101.5 0V7.123A5.735 5.735 0 009.25 9h1.378a2.251 2.251 0 100-1.5H9.25a4.25 4.25 0 01-3.8-2.346zM12.75 9a.75.75 0 100-1.5.75.75 0 000 1.5zm-8.5 4.5a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg>
+                        <span class="mergeable-state-loading"></span>
+                        <span>Merge pull request</span>
+                    </button>
+                </div> 
+            </MergePull>
+
+            <div>
+                <Header class="header" v-if="extraData.data.id">
+                    Comment on pull request
+                </Header>
+                <PullRequestCommentCreator v-if="extraData.data.id" 
+                        @create-comment-success="createCommentHandler"
+                        class="m-3">
+                </PullRequestCommentCreator>
             </div>
-            <div v-else-if="pullRequestProvided().data.mergeable_state == 'dirty'" class="branch-action branch-action-with-icon">
-                <svg class="octicon octicon-x branch-action-icon" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
-                <h3 class="branch-action-heading">This branch has conflicts that must be resolved.</h3>
-                Use the command line to resolve conflicts before continuing.
-            </div>
-            <div class="p-3 branch-action">
-                <button :disabled="!pullRequestProvided().data.mergeable_state == 'clean' || !pullRequestProvided().data.mergeable" class="btn btn-block js-mergeable-state-check">
-                    <svg class="octicon octicon-git-merge" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 3.254V3.25v.005a.75.75 0 110-.005v.004zm.45 1.9a2.25 2.25 0 10-1.95.218v5.256a2.25 2.25 0 101.5 0V7.123A5.735 5.735 0 009.25 9h1.378a2.251 2.251 0 100-1.5H9.25a4.25 4.25 0 01-3.8-2.346zM12.75 9a.75.75 0 100-1.5.75.75 0 000 1.5zm-8.5 4.5a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg>
-                    <span class="mergeable-state-loading"></span>
-                    <span>Merge pull request</span>
-                </button>
+
+            <div v-if="extraData.data.viewerSubscription">
+                <Header class="header" >
+                    Notifications for this thread
+                </Header>
+
+                <IssueNotificationSettingPane class="p-3" :viewerSubscriptionInfo="extraData.data"></IssueNotificationSettingPane>
             </div> 
-        </MergePull>
-        
-         
-        <Header class="header" v-if="extraData.data.id">
-            Comment on pull request
-        </Header>
-        <Editor v-if="extraData.data.id" 
-                ref="editor"
-                class="m-3"
-                :lockedReason="pullRequestProvided().data.activeLockReason"
-                :locked="pullRequestProvided().data.locked && !pullRequestProvided().data.viewerCanUpdate">
-            <button class="btn btn-mobile" v-if="extraData.data.viewerCanUpdate">
-                <svg class="octicon octicon-issue-closed text-red v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 10h2v2H7v-2zm2-6H7v5h2V4zm1.5 1.5l-1 1L12 9l4-4.5-1-1L12 7l-1.5-1.5zM8 13.7A5.71 5.71 0 012.3 8c0-3.14 2.56-5.7 5.7-5.7 1.83 0 3.45.88 4.5 2.2l.92-.92A6.947 6.947 0 008 1C4.14 1 1 4.14 1 8s3.14 7 7 7 7-3.14 7-7l-1.52 1.52c-.66 2.41-2.86 4.19-5.48 4.19v-.01z"></path></svg>
-                <span>Close pull request</span>
-            </button>
-            <button class="btn  btn-primary btn-mobile ml-1" :disabled="!$refs.editor || $refs.editor.commentTextValue === ''">
-                <span>Comment</span>
-            </button>
-        </Editor>
 
-        <Header class="header"  v-if="extraData.data.viewerSubscription">
-            Notifications for this thread
-        </Header>
+        </div>
 
-        <Subscription class="p-3 bg-white" v-if="extraData.data.viewerSubscription" :viewerSubscription="extraData.data.viewerSubscription"></Subscription>
+ 
 
         <transition name="fade" appear>
             <CommonLoading v-if="!pullRequestProvided().data.node_id || timeline.loading || timeline.extraData.loading || reviewCommentReplies.loading"
@@ -190,7 +190,8 @@
     import styled from 'vue-styled-components'
     import {CommonLoading,Label,AnimatedHeightWrapper,ImgWrapper,LoadingIconEx,Progress,IssueIcon,Subscription,SkeletonCircle,SkeletonRectangle} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
-    import {TimelineItem,Comment,HiddenItemLoading,Editor,ProjectCard,PullRequestBody} from './components'
+    import {TimelineItem,Comment,HiddenItemLoading,PullRequestCommentCreator,ProjectCard,PullRequestBody} from './components'
+    import {IssueNotificationSettingPane} from '../../components'
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
@@ -328,8 +329,13 @@
                     {
                         graphql:'PULL_REQUEST_REVIEW',
                         rest:'reviewed',
+                    },
+                    {
+                        graphql:'REVIEW_REQUESTED_REVIEW',
+                        rest:'review_requested',
                     }
-                ]
+                ],
+                commentsJustCreated: []
             }
         },
        
@@ -452,24 +458,8 @@
                     //获取 review: bodyHTML reactions comments
                     this.timeline.extraData.loading = true
                        
-                    let commentsAndReviews = []
-                    res_timeline.data.forEach(item => {
-                        if(item.event === 'commented' || item.event === 'reviewed') {
-                            commentsAndReviews.push(item)
-                        }
-                    })
+                    this.network_getTimelineExtraData(res_timeline.data)
 
-                    let graphql_commentsAndReviewExtraData = graphql.GRAPHQL_TIMELINE_EXTRA_DATA(commentsAndReviews)
-                    let res_commentsAndReviewExtraData = await authRequiredGitHubGraphqlApiQuery(graphql_commentsAndReviewExtraData)
-
-                    let dataHolder
-                    try{
-                        dataHolder = res_commentsAndReviewExtraData.data.data
-                    }catch(e) {
-                        this.handleGraphqlError(res_commentsAndReviewExtraData)
-                    }
-
-                    this.timeline.extraData.data = this.timeline.extraData.data.concat(Object.values(res_commentsAndReviewExtraData.data.data))
                 }catch(e){
                     console.log(e)
                     this.handleError(e)
@@ -478,12 +468,35 @@
                     this.timeline.extraData.loading = false
                 }
             },
+            async network_getTimelineExtraData(timeline) {
+                let ids = timeline && timeline.map(i => i.node_id)
+                try {
+                    this.timeline.extraData.loading = true
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_PULL_TIMELINE,
+                        {
+                            variables: {
+                                ids: ids ? ids : this.timeline.data
+                            },
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_timeline_extra_data')
+                        }
+                    )
+                    try{
+                        let extraData = Object.values(res.data.data.nodes)
+                        this.timeline.extraData.data = this.timeline.extraData.data.concat(extraData)
+                    }catch(e) { 
+                        this.handleGraphqlError(res)
+                    }
+                } catch (e) {
+                     console.log(e)
+                } finally {
+                    this.timeline.extraData.loading = false
+                }
+            },
             async network_getTimelineCount() {
                 try{
                     this.timeline.count.loading = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + '_timeline_count')
-                    this.cancelSources.push(cancelToken.source)
-                    
+
                     let timelineTypes_graphql = []
                     this.timelineTypes.forEach(item => {
                         timelineTypes_graphql.push(item.graphql)
@@ -495,7 +508,12 @@
                             }
                         )
 
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_timelineCount,{cancelToken:cancelToken})
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql_timelineCount,
+                        {
+                            cancelToken:this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + '_timeline_count')
+                        }
+                    )
 
                     let dataHolder
                     try{
@@ -664,6 +682,10 @@
                 })
                 return mergedTimelineData
             },
+            createCommentHandler(payload) {
+                this.commentsJustCreated.push(payload)
+                this.network_getTimelineExtraData([payload])
+            },
             routeUpdateHook() {
                 this.network_getData()
             },
@@ -679,7 +701,7 @@
             HiddenItemLoading,
             LoadingIconEx,
             AnimatedHeightWrapper,
-            Editor,
+            PullRequestCommentCreator,
             Subscription,
             ImgWrapper,
             Progress,
@@ -687,6 +709,7 @@
             IssueIcon,
             SkeletonCircle,
             SkeletonRectangle,
+            IssueNotificationSettingPane,
             Container: styled.div``,
             Header: styled.div``,
             HeaderActions: styled.div``,

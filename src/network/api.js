@@ -190,6 +190,7 @@ export const API_REVIEW_COMMENTS_OF_PULL_REQUEST = (payload) => {
 
 export const API_REVIEW_COMMENT_OF_PULL_REQUEST = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/comments/${payload.commentId}`
 
+export const API_CREATE_REVIEW_REPLY = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/comments/${payload.commentId}/replies`
 
 export const API_COMMIT = (payload) => {
     let query = util_queryParse.querify(payload.params)
@@ -370,3 +371,5 @@ export const API_CREATE_REF = payload => `${GITHUB_REST_API_BASE}/repos/${payloa
 export const API_FORK = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/forks`
 
 export const API_PROXY_USER_EDIT = payload => `${PROXY_API_BASE}/user_content_edits/${payload}`
+
+

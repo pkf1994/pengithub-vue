@@ -2,7 +2,7 @@ export const GRAPHQL_ISSUE = `
       query($nodeID:ID!){
         node(id: $nodeID) {
           ... on Issue {
-            
+            id
             activeLockReason
             viewerCannotUpdateReasons
             viewerDidAuthor
@@ -20,30 +20,6 @@ export const GRAPHQL_ISSUE = `
                 id
                 login
               }
-            }
-            THUMBS_UP :reactions(content: THUMBS_UP) {
-                totalCount
-            }
-            THUMBS_DOWN :reactions(content: THUMBS_DOWN) {
-                totalCount
-            }
-            LAUGH :reactions(content: LAUGH) {
-                totalCount
-            }
-            HOORAY :reactions(content: HOORAY) {
-                totalCount
-            }
-            CONFUSED :reactions(content: CONFUSED) {
-                totalCount
-            }
-            HEART :reactions(content: HEART) {
-                totalCount
-            }
-            ROCKET :reactions(content: ROCKET) {
-                totalCount
-            }
-            EYES :reactions(content: EYES) {
-                totalCount
             }
           }
         }
@@ -67,30 +43,6 @@ export const GRAPHQL_ISSUE = `
               totalCount
             }
             authorAssociation
-            THUMBS_UP :reactions(content: THUMBS_UP) {
-                totalCount
-            }
-            THUMBS_DOWN :reactions(content: THUMBS_DOWN) {
-                totalCount
-            }
-            LAUGH :reactions(content: LAUGH) {
-                totalCount
-            }
-            HOORAY :reactions(content: HOORAY) {
-                totalCount
-            }
-            CONFUSED :reactions(content: CONFUSED) {
-                totalCount
-            }
-            HEART :reactions(content: HEART) {
-                totalCount
-            }
-            ROCKET :reactions(content: ROCKET) {
-                totalCount
-            }
-            EYES :reactions(content: EYES) {
-                totalCount
-            }
           }
         }
       }

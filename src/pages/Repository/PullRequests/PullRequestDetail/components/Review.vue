@@ -9,7 +9,7 @@
             <WhoDidWhat>
                 <router-link :to="`/${propsData.user.login}`" class="d-inline-block">
                     <ImgWrapper class="avatar mr-1">
-                        <img :src="propsData.user.avatar_url" :alt="`@${propsData.user.login}`" class="avatar mr-1" height="16" width="16">
+                        <img :src="propsData.user.avatar_url" :alt="`@${propsData.user.login}`" class="avatar" height="16" width="16">
                     </ImgWrapper>
                 </router-link>
                 <router-link  :to="`/${propsData.user.login}`" class="text-bold link-gray-dark">
