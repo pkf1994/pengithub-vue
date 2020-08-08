@@ -12,10 +12,9 @@
     import IssuesBrowser from '../Issues/IssuesBrowser.vue'
     export default {
         mixins: [RouteUpdateAwareMixin],
-        inject: ['owner','repo'],
-        computed: {
-            documentTitle() {
-                return `Pull Requests · ${this.owner()}/${this.repo()}`
+        data() {
+            return {
+                watchRouterMeta: false
             }
         },
         components: {
@@ -28,8 +27,7 @@
             routeResetHook() {
                 Object.assign(this.$refs.issueBrowser.$data, this.$refs.issueBrowser.$options.data())
             }
-        }
-       
+        },
     }
 </script>
 

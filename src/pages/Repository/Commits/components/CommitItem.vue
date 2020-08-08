@@ -1,5 +1,5 @@
 <template>
-    <Container class="commit Box-row Box-row--focus-gray mt-0 p-2 ">
+    <Container class="commit Box-row--focus-gray mt-0 p-2">
         <CommitTitle class="h5 text-gray-dark mb-0">
             <router-link style="color: #444d56" :to="commit.html_url.replace('https://github.com','')">
                 {{messageTitle}}
@@ -39,12 +39,7 @@
             </div>
             
             <div class="mx-1 d-flex flex-items-center"> 
-                <span>
-                    <transition-group appear name="fade">
-                        <svg v-if="state == 'SUCCESS'" key="1" class="octicon octicon-check v-align-middle text-green" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
-                        <svg v-else-if="state == 'FAILURE'" key="2" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
-                    </transition-group>
-                </span>
+                <CommitStatusIcon :sha="commit.sha"></CommitStatusIcon>
             </div>
 
         </CommitMeta>
@@ -54,8 +49,8 @@
 <script>
     import styled from 'vue-styled-components'
     import {AnimatedHeightWrapper,ImgWrapper} from '@/components'
+    import {CommitStatusIcon} from '../../components'
     export default {
-        inject: ['graphqlDataProvided'],
         props: {
             commit: {
                 type: Object,
@@ -68,12 +63,6 @@
                 if(!this.commit.committer) return
                 return this.commit.author.login != this.commit.committer.login
             },
-            state() {
-                let dataHolder = this.graphqlDataProvided().filter(i => {
-                    return i.id == this.commit.node_id
-                })[0]
-                return dataHolder && dataHolder.status && dataHolder.status.state
-            },
             messageTitle() {
                 return this.commit.commit.message.split('\n')[0]
             }
@@ -84,6 +73,7 @@
         components: {
             AnimatedHeightWrapper,
             ImgWrapper,
+            CommitStatusIcon,
             Container: styled.div``,
             Time: styled.div``,
             CommitTitle: styled.p``,

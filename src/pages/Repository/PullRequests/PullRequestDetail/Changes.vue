@@ -35,7 +35,7 @@
         <EditorHeader class="editor-header" v-if="changedFiles.data.length > 0">
             Submit your review
         </EditorHeader>
-        <Editor v-if="changedFiles.data.length > 0" 
+        <!-- <Editor v-if="changedFiles.data.length > 0" 
                 class="m-3"
                 ref="editor">
             <button class="btn">
@@ -45,7 +45,7 @@
                 <span>Submit review</span>
             </button>
         </Editor>
-
+ -->
         <transition name="fade" appear>
             <CommonLoading v-if="loading || reviewComments.loading || changedFiles.loading"
                             :preventClickEvent="false"
@@ -64,13 +64,15 @@
     import * as api from '@/network/api'
     import {util_dateFormat,util_emoji} from '@/util'
     import * as graphql from './graphql'
+    let parse = require("parse-link-header")
     export default {
         mixins: [RouteUpdateAwareMixin],
-        name: 'repository_pull_request_detail_commits_page',
-        inject: ['owner','repo','number','pullRequestProvided'],
+        name: 'repository_pull_request_detail_changes_page',
+        inject: ['pullRequestProvided'],
         provide() {
             return {
-                reviewCommentsProvided: () => this.reviewComments.data
+                reviewCommentsProvided: () => this.reviewComments.data,
+                reviewCommentsExtraData: () => this.reviewComments.extraData
             }
         },
         data() {
@@ -82,7 +84,8 @@
                 totalCount: 0,
                 reviewComments: {
                     data: [],
-                    loading: false
+                    loading: false,
+                    extraData: []
                 },
                 changedFiles: {
                     data: [],
@@ -91,19 +94,14 @@
             }
         },
         computed: {
-           committedDateMarkedData() {
-                let data = []
-                let lastItem
-                this.data.forEach(item => {
-                    if(lastItem) {
-                        if(util_dateFormat.dateFormat('zzz dd, yyyy',item.commit.committer.date) === util_dateFormat.dateFormat('zzz dd, yyyy',lastItem.commit.committer.date)) {
-                            item.someCommittedDateWithPrevOne = true
-                        }
-                    }
-                    data.push(item)
-                    lastItem = item
-                })
-                return data
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
+            number() {
+                return this.$route.params.number
             },
         },
         created() {
@@ -123,9 +121,9 @@
                     let sourceAndCancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
 
                     let url = api.API_PULLREQUEST({
-                        repo: this.repo(),
-                        owner: this.owner(),
-                        number: this.number()
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number
                     })
                     let res = await authRequiredGet(
                         url,
@@ -146,36 +144,60 @@
             async network_getReviewComments() {
                 try{
                     this.reviewComments.loading = true
-                    let sourceAndCancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_review_comments')
-                    let graphql_reviewComments = graphql.GRAPHQL_PR_ALL_REVIEW_COMMENTS({
-                        owner: this.owner(),
-                        repo: this.repo(),
-                        number: this.number()
-                    })
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql_reviewComments,
-                        {
-                            cancelToken: sourceAndCancelToken.cancelToken
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_review_comments')
+                    
+                    let reviewComments = []
+                    let pageInfo
+                    while(!pageInfo || (pageInfo && pageInfo.next)) {
+                        let url 
+                        if(pageInfo) {
+                            url = pageInfo.next.url
+                        }else {
+                            url = api.API_REVIEW_COMMENTS_OF_PULL_REQUEST({
+                                repo: this.repo,
+                                owner: this.owner,
+                                number: this.number,
+                                params: {
+                                    per_page: 100
+                                }
+                            })
                         }
-                    )
 
-                    let dataHolder
-                    try{
-                        dataHolder = res.data.data.repository.pullRequest.timelineItems.nodes
-                    }catch(e) {
-                        this.handleGraphqlError(res)
+                        let res = await authRequiredGet(
+                            url,
+                            {
+                                cancelToken,
+                                headers: {
+                                    'accept':'application/vnd.github.squirrel-girl-preview'
+                                }
+                            }
+                        )
+                        reviewComments = reviewComments.concat(res.data)
+                        pageInfo = parse(res.headers.link) || {}
                     }
 
-                    let reviewComment = []
-                    dataHolder.forEach(reviewItem => {
-                        reviewComment = reviewComment.concat(reviewItem.comments.nodes)
-                    })
-
-                    this.reviewComments.data = reviewComment
+                    this.reviewComments.data = reviewComments.filter(i => i.line)
+                    if(this.accessToken) this.network_getReviewCommentsExtraData() 
                 }catch(e) {
                     console.log(e)
                 }finally{
                     this.reviewComments.loading = false
+                }
+            },
+            async network_getReviewCommentsExtraData() {
+                if(this.reviewComments.data.length == 0) return 
+                try {
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_PR_REVIEW_COMMENTS,
+                        {
+                            variables: {
+                                ids: this.reviewComments.data.map( i => i.node_id)
+                            }
+                        }
+                    )
+                    this.reviewComments.extraData = res.data.data.nodes
+                } catch (e) {
+                    console.log(e)
                 }
             },
             async network_getChangedFiles() {
@@ -183,9 +205,9 @@
                     this.changedFiles.loading = true
                     let sourceAndCancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_changed_files')
                     let url = api.API_PR_CHANGED_FILES({
-                        repo: this.repo(),
-                        owner: this.owner(),
-                        number: this.number()
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number
                     })
                     let res = await authRequiredGet(
                         url,

@@ -10,7 +10,8 @@
             return {
                 cacheRouterMeta: undefined,
                 cancelSources: [],
-                resetBeforeUpdate: false
+                resetBeforeUpdate: false,
+                watchRouterMeta: true
             }
         },
         computed: {
@@ -94,7 +95,7 @@
                     console.log(this.componentActive)
                     console.log('========================watch routerMeta========================')
                 }
-                if(newOne && oldOne && this.componentActive) {
+                if(newOne && oldOne && this.componentActive && this.watchRouterMeta) {
                     this.cancelUntimelyAxios()
                     this.routeUpdateHook()
                 }

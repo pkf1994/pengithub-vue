@@ -1,7 +1,8 @@
 import axios from "axios";
 import store from '../store'
 import {API_GRAPHQL_ENDPOINT,API_OAUTH2} from "./api";
-
+import {util_throttle} from '@/util'
+import Vue from 'vue'
 const authRequiredAxios = axios.create({
 })
 
@@ -15,7 +16,20 @@ authRequiredAxios.interceptors.request.use(
         return config
     }, 
     error => {
-        if(axios.isCancel(error)) return
+        i/* f(axios.isCancel(error)) return */
+        return Promise.reject(error);
+    }
+)
+
+authRequiredAxios.interceptors.response.use(
+    response => response,
+    error => {
+        if(error.response && error.response.status == 403 && !store.state.oauth.accessToken.accessToken) {
+            util_throttle.throttleByGap(() => {
+                Vue.toast('GitHub api对匿名用户进行请求速率限制，请进行oauth2认证以正常访问')
+            },500,'login-notice')
+            return Promise.reject();
+        }
         return Promise.reject(error);
     }
 )

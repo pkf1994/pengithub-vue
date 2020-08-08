@@ -2,7 +2,7 @@
     <Container v-if="!issueIsEmpty" class="d-flex relative container p-0">
         <Icon class="flex-shrink-0 pt-2 pl-3">
             <span class="relative">
-                <IssueIcon :issue="issue"></IssueIcon>
+                <IssueIcon :issue="{...issue,merged}"></IssueIcon>
             </span>
         </Icon>
         
@@ -14,10 +14,10 @@
                 <router-link class="pr-2 muted-link" :to="repoRouterLink" v-if="showRepoFullName">{{repoFullName}}</router-link>
                 <router-link class="muted-link" :to="routerLink" >{{issue.title}}</router-link>
                 <transition appear name="fade">
-                    <svg v-if="issue.lastCommitState === 'SUCCESS'" class="octicon octicon-check v-align-middle text-green" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
+                    <svg v-if="lastCommitState === 'SUCCESS'" class="octicon octicon-check v-align-middle text-green" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
                 </transition>
                 <transition appear name="fade">
-                    <svg v-if="issue.lastCommitState === 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
+                    <svg v-if="lastCommitState === 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
                 </transition>
             </Title>
            
@@ -28,13 +28,14 @@
 
             <Byline v-if="issue.state.toLowerCase() === 'open'" class="byline">
                 #{{issue.number}} opened {{issue.created_at | getDateDiff}} by 
-                <router-link class="muted-link" :to="`/${issue.author ? issue.author.login : issue.user.login}`">{{issue.author ? issue.author.login : issue.user.login}}</router-link>
+                <router-link class="muted-link" :to="`/${issue.user.login}`">{{issue.user.login}}</router-link>
             </Byline>
             <Byline v-if="issue.state.toLowerCase() === 'closed'" class="byline">
-                #{{issue.number}} {{issue.merged ? 'merged' : 'closed'}} {{issue.closed_at | getDateDiff}}
-                <span v-if="issue.closed_by">
-                    by <router-link class="muted-link" :to="`/${issue.closed_by.login}`">{{issue.closed_by.login}}</router-link> 
-                </span> 
+                #{{issue.number}} 
+                by <router-link class="muted-link" :to="`/${issue.user.login}`">{{issue.user.login}}</router-link> 
+                was 
+                {{merged ? 'merged' : 'closed'}}
+                {{issue.closed_at | getDateDiff}}
             </Byline>
         </Main>
            
@@ -46,10 +47,9 @@
     import IssueIcon from '../IssueIcon'
     import {AnimatedHeightWrapper} from '../AnimatedSizeWrapper'
     import Label from '../Label'
-    import {util_dateFormat,util_adjustStyle,util_parseQuery} from '@/util'
     import {WithRandomMetaMixin} from '@/mixins'
-import { util_queryParse } from '../../util'
     export default {
+        inject: ['extraData'],
         mixins: [WithRandomMetaMixin],
         props: {
             issue: {
@@ -70,6 +70,21 @@ import { util_queryParse } from '../../util'
             }
         },
         computed: {
+            extraDataHolder() {
+                return this.extraData().filter(i => i.id == this.issue.node_id)[0]
+            },
+            merged() {
+                return this.extraDataHolder && this.extraDataHolder.merged
+            },
+            lastCommitState() {
+                if(!this.extraDataHolder) return 
+                if(!this.extraDataHolder.commits) return 
+                if(!this.extraDataHolder.commits.nodes) return 
+                if(!this.extraDataHolder.commits.nodes[0]) return 
+                if(!this.extraDataHolder.commits.nodes[0].commit) return 
+                if(!this.extraDataHolder.commits.nodes[0].commit.status) return 
+                return this.extraDataHolder && this.extraDataHolder.commits.nodes[0].commit.status.state
+            },
             routerLink: function () {
                 if(this.issue.pull_request) {
                     return this.issue.pull_request.html_url.replace("https://github.com","")
@@ -78,12 +93,6 @@ import { util_queryParse } from '../../util'
             },
             repoRouterLink() {
                return this.issue.repository_url.replace('https://api.github.com/repos','')
-            },
-            formatDate: function () {
-                return util_dateFormat.getDateDiff(this.issue.created_at)
-            },
-            formatClosedDate:function () {
-                return util_dateFormat.getDateDiff(this.issue.closed_at)
             },
             issueIsEmpty() {
                 return JSON.stringify(this.issue) === JSON.stringify(new Object())
@@ -97,7 +106,7 @@ import { util_queryParse } from '../../util'
             },
         },
        /*  updated() {
-            util_adjustStyle.adjustInlineBlockStyle(`.labels .label[meta=${this.randomMeta}]`)
+        .adjustInlineBlockStyle(`.labels .label[meta=${this.randomMeta}]`)
         }, */
         methods: {
             isLight: function (color) {

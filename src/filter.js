@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import {util_numberFormat,util_dateFormat,util_fileSize} from '@/util'
+import {util_numberFormat,util_dateFormat,util_fileSize,util_markdownParse} from '@/util'
 Vue.filter('capitalize', function (value) {
     if (!value) return ''
     value = value.toString()
@@ -24,4 +24,8 @@ Vue.filter('getDateDiff', function (standardDateString) {
 
 Vue.filter('fileSize', function(size) {
     return util_fileSize.getFileSize(size)
+})
+
+Vue.filter('markdownToHTML', function(markdown) {
+    return util_markdownParse.markdownToHTML(markdown)
 })

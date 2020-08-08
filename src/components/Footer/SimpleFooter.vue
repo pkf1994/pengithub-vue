@@ -8,7 +8,7 @@
             Sign in
         </button>
 
-        <button class="link-btn" v-else @click="signOut">
+        <button class="link-btn" v-else @click="goToSignOut">
             Sign out
         </button>
     </footer>
@@ -21,7 +21,7 @@
             Container: styled.div``
         },
         methods: {
-            signIn() {
+            goToSignOut() {
                 this.$router.push(`/sign_out?return_to=${this.$route.fullPath}`)
             }
         }

@@ -46,8 +46,11 @@
                                     }">{{item.code}}</BlobCode> 
                     </div>
 
-                    <ReviewComments class="review-comment-wrapper" v-if="reviewComments[item.deletionLineIndex]">
-                        <Comment class="m-3" v-for="commentItem in reviewComments[item.deletionLineIndex]" :key="commentItem.id" :propsData="commentItem"></Comment>
+                    <ReviewComments class="review-comment-wrapper" v-if="reviewCommentsAtRightSide[item.additionLineIndex] || reviewCommentsAtLeftSide[item.deletionLineIndex]">
+                        <Comment style="max-width: 100vw;" :propsData="reviewCommentsAtRightSide[item.additionLineIndex] || reviewCommentsAtLeftSide[item.deletionLineIndex]"></Comment>
+
+                        <Comment class="border-top" v-for="commentItem in reviewCommentsProvided().filter(i => i.in_reply_to_id == (reviewCommentsAtRightSide[item.additionLineIndex] || reviewCommentsAtLeftSide[item.deletionLineIndex]).id)" style="max-width: 100vw;" :propsData="commentItem" :key="commentItem.id"></Comment>
+                        
 
                         <AnimatedHeightWrapper>
                             <transition name="fade-group">
@@ -200,17 +203,26 @@
                 })
                 return diffHunkEntries
             },
-            reviewComments() {
+            reviewCommentsAtRightSide() {
                 let commentArr = this.reviewCommentsProvided().filter(item => {
-                    return item.path == this.file.filename
+                    return item.path == this.file.filename && item.line && !item.in_reply_to_id && item.side == 'RIGHT'
                 })
                 let reviewComments = {}
                 commentArr.forEach(i => {
-                    if(!reviewComments[i.position]) reviewComments[i.position] = []
-                    reviewComments[i.position].push(i)
+                    if(!reviewComments[i.line]) reviewComments[i.line] = i
                 })
                 return reviewComments
-            }
+            },
+            reviewCommentsAtLeftSide() {
+                let commentArr = this.reviewCommentsProvided().filter(item => {
+                    return item.path == this.file.filename && item.line && !item.in_reply_to_id && item.side == 'LEFT'
+                })
+                let reviewComments = {}
+                commentArr.forEach(i => {
+                    if(!reviewComments[i.line]) reviewComments[i.line] = i
+                })
+                return reviewComments
+            },
         },
         methods: {
             triggerShowPullRequestCommentCreator(index) {
@@ -238,6 +250,7 @@
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/labels/index.scss';
 .diff{
     position: relative;
     margin-bottom: 15px;

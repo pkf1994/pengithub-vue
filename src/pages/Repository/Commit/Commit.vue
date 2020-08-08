@@ -11,12 +11,10 @@
                 <router-link v-if="browseFilesRouterLink" :to="browseFilesRouterLink" class="float-right btn-outline btn" >
                     Browse files
                 </router-link>
-                <Status v-if="status.data !== undefined" class="mr-1 mt-1 float-left">
-                    <svg v-if="status.data === 'SUCCESS'" class="octicon octicon-check v-align-middle text-green" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
-                    <svg v-else-if="status.data === 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
-                </Status>
+                    
 
                 <p class="title">
+                    <CommitStatusIcon :sha="sha"></CommitStatusIcon>
                     {{messageHeadline}}
                 </p> 
 
@@ -58,8 +56,8 @@
 
                 <div v-else class="d-flex flex-wrap">
                     <WhoDidWhat class="flex-self-start mr-md-4 mr-0">
-                        <ImgWrapper>
-                            <img class="avatar mr-1 avatar-user v-align-bottom" height="20" width="20" :alt="`@${data.author && data.author.login}`" :src="data.author && data.author.avatar_url">
+                        <ImgWrapper class="avatar avatar-user mt-1" v-if="data.author && data.author.login">
+                            <img class="avatar avatar-user v-align-bottom" height="20" width="20" :alt="`@${data.author && data.author.login}`" :src="data.author && data.author.avatar_url">
                         </ImgWrapper>  
                         <router-link class="user-mention no-wrap " :to="`/${data.author && data.author.login}`">{{data.author && data.author.login}}</router-link>
                         <span class="no-wrap ">committed on {{committedAt}}</span>
@@ -173,7 +171,7 @@
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {CommonLoading,AnimatedHeightWrapper,LoadingIconEx,HiddenItemLoading,Editor,Subscription,ImgWrapper,CommonLoadingWrapper,SkeletonCircle,SkeletonRectangle} from '@/components'
     import Comment from './Comment'
-    import {Diff} from '../components'
+    import {Diff,CommitStatusIcon} from '../components'
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet } from '@/network'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
@@ -390,7 +388,7 @@
                         this.handleGraphqlError(res)
                     }
                    
-                    this.network_getComments()
+                    if(this.accessToken) this.network_getComments()
                   
                 }catch(e) {
                     console.log(e)
@@ -503,6 +501,7 @@
             CommonLoadingWrapper,
             AnimatedHeightWrapper,
             Diff,
+            CommitStatusIcon,
             ImgWrapper,
             Comment,
             LoadingIconEx,

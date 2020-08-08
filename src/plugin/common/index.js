@@ -18,7 +18,12 @@ export default {
                 }),
             },
             methods: {
-                handleError(e,config = {handle404: false, handle401: false}) {
+                handleError(e,config) {
+                    config = {
+                        handle404: false, 
+                        handle401: false,
+                        ...config
+                    }
                     if(!e) return
                     if(axios.isCancel(e)) return
                     console.log(e)
@@ -43,7 +48,9 @@ export default {
                     }else{
                         this.$toast(e,'error')
                     }
-                    if(!e.response && !this.accessToken) {
+                },
+                handleRateExceed(e) {
+                    if(e.response && e.response.status == 403 && !this.accessToken) {
                         util_throttle.throttleByGap(() => {
                             this.$toast(this.loginNotice)
                         },500,'login-notice')

@@ -30,7 +30,7 @@
             <CommentBody v-html="bodyHTML" class="markdown-body p-0 pt-2 f5">
             </CommentBody>
             
-            <Reaction class="mt-2" :data="reactions.data || {}" :disabled="!extraData.viewerCanReact || !reactions.data">
+            <Reaction class="mt-2" :data="reply.reactions || reactions.data || {}" :disabled="!extraData.viewerCanReact" commentType="reviewComment">
             </Reaction>
         </div>
 
@@ -89,6 +89,7 @@
                 this.network_getReactions()
             },
             async network_getReactions() {
+                if(this.reply.reactions) return 
                 try {
                     this.reactions.loading = true
                     let url = api.API_REVIEW_COMMENT_OF_PULL_REQUEST({

@@ -411,7 +411,7 @@
                                 owner: this.owner,
                                 number: parseInt(this.number),
                             },
-                            cancelToken:cancelToken
+                            cancelToken:this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_pull_request_extra_data')
                         }
                     )
 
@@ -421,7 +421,7 @@
                         this.handleGraphqlError(res)
                     }
                 } catch(e){
-                    this.handleError()
+                    this.handleError(e)
                 }finally{
                     this.extraData.loading = false
                 }
@@ -463,7 +463,6 @@
                     this.network_getTimelineExtraData(res_timeline.data)
 
                 }catch(e){
-                    console.log(e)
                     this.handleError(e)
                 }finally{
                     this.timeline.loading = false
@@ -471,7 +470,7 @@
                 }
             },
             async network_getTimelineExtraData(timeline) {
-                let ids = timeline && timeline.map(i => i.node_id)
+                let ids = timeline && timeline.map(i => i.node_id).filter(i => i)
                 try {
                     this.timeline.extraData.loading = true
                     let res = await authRequiredGitHubGraphqlApiQuery(
@@ -563,7 +562,15 @@
                             })
                         }
 
-                        let res = await authRequiredGet(url,{cancelToken})
+                        let res = await authRequiredGet(
+                            url,
+                            {
+                                cancelToken,
+                                headers: {
+                                    "accept": "application/vnd.github.squirrel-girl-preview"
+                                }
+                            }
+                        )
                         reviewComments = reviewComments.concat(res.data.filter(i => i.in_reply_to_id))
 
                         pageInfo = parse(res.headers.link) || {}

@@ -384,7 +384,7 @@
                     this.network_getReviewCommentReplies()
 
                 }catch(e){
-                    this.handleError()
+                    this.handleError(e)
                 }finally{
                     this.loading = false
                 }

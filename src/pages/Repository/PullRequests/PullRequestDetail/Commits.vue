@@ -14,20 +14,21 @@
                     <SkeletonRectangle :height="12" style="width:60%;margin-top:12px"></SkeletonRectangle>
                 </div>
             </Skeleton>
-            <Commit v-for="item in committedDateMarkedData" :key="item.commit.abbreviatedOid">
+            <Commit v-for="item in committedDateMarkedData" :key="item.sha">
                 <CommittedDate class="committed-date" v-if="!item.someCommittedDateWithPrevOne">
-                    <span>{{formatDate(item.commit.committer.date)}}</span>
+                    <span>{{item.commit.committer.date | dateFormat('zzz dd, yyyy')}}</span>
                 </CommittedDate>
                 <CommitInfo class="commit-info-item bg-white">
                     <ImgWrapper class="img">
-                        <img :src="item.commit.committer.user ? item.commit.committer.avatarUrl : item.commit.author.avatarUrl" width="20" height="20" :alt="item.commit.committer.user ? item.commit.committer.user.login : item.commit.author.user.login" class="avatar avatar-user">
+                        <img :src="item.committer.avatar_url" width="20" height="20" :alt="item.committer.login" class="avatar avatar-user">
                     </ImgWrapper>
                     <Title class="title">
-                        <router-link :to="item.commit.commitResourcePath" v-html="item.commit.messageHeadlineHTML">
+                        <router-link :to="`/${owner}/${repo}/commits/${item.sha}`">
+                            {{item.commit.message.split('\n\n')[0]}}
                         </router-link>
                     </Title>
                     <Meta class="meta">
-                        committed by {{item.commit.committer.user ? item.commit.committer.user.login : item.commit.author.user.login}} ⋅ <router-link to="/">{{item.commit.abbreviatedOid}}</router-link>
+                        committed by {{item.author.login}} ⋅ <router-link to="/">{{item.sha.slice(0,8)}}</router-link>
                     </Meta>
                 </CommitInfo>
             </Commit>
@@ -50,13 +51,14 @@
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {CommonLoading,ImgWrapper,SkeletonCircle,SkeletonRectangle} from '@/components'
     import {HiddenItemLoading} from './components'
-    import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery } from '@/network'
+    import { authRequiredGet } from '@/network'
     import {util_dateFormat,util_emoji} from '@/util'
     import * as graphql from './graphql'
+    import * as api from '@/network/api'
+    let parse = require('parse-link-header')
     export default {
         name: 'repository_pull_request_detail_commits_page',
         mixins: [RouteUpdateAwareMixin],
-        inject: ['owner','repo','number'],
         data() {
             return {
                 data: [],
@@ -66,6 +68,12 @@
             }
         },
         computed: {
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
            committedDateMarkedData() {
                 let data = []
                 let lastItem
@@ -85,30 +93,26 @@
             this.network_getData()
         },
         methods: {
-            formatDate(date) {
-                return util_dateFormat.dateFormat('zzz dd, yyyy',date)
-            },
-            parseEmoji(raw) {
-                return util_emoji.parse(raw)
-            },
             async network_getData() {
                 try{
                     this.loading = true
-                    let sourceAndCancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                    let graphql_commits = graphql.GRAPHQL_PULLS_COMMITS({
-                        owner: this.owner(),
-                        repo: this.repo(),
-                        number: this.number(),
-                        after: this.pageInfo.endCursor
-                    })
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_commits,{cancelToken:sourceAndCancelToken.cancelToken})
-                    try{
-                        this.data = this.data.concat(res.data.data.repository.pullRequest.commits.nodes)
-                        this.totalCount = res.data.data.repository.pullRequest.commits.totalCount
-                        this.pageInfo = res.data.data.repository.pullRequest.commits.pageInfo
-                    }catch(e) {
-                        this.handleGraphqlError(res)
+
+                    let url 
+                    if(this.pageInfo.next) {
+                        url = this.pageInfo.next.url
+                    } else {
+                        url = api.API_COMMITS_OF_PULL_REQUEST(this.$route.params)
                     }
+
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
+                        }
+                    )
+
+                    this.data = this.data.concat(this.data,res.data)
+                    this.pageInfo = parse(res.headers.link) || {}
                     
                 }catch(e) {
                     this.handleError(e)

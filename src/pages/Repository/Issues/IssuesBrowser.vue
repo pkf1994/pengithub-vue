@@ -20,7 +20,6 @@
         
 
         <IssuesPageTemplate :data="data" 
-                        :extraData="extraData"
                         :type="type"
                         :perPage="perPage"
                         v-model="searchQuery"
@@ -63,16 +62,19 @@
                                 placeholder="Filter users" 
                                 v-if="!availableAuthors.loading"
                                 v-model="authorModalSearchQuery"/>
-          
-            <transition-group name="slide-up" appear>
-                <SelectMenuItem v-for="item in filteredAvailableAuthors" :key="item.viewer.login" :selected="query.indexOf(`author:${item.viewer.login}`) > -1"  @click.native="() => selectTheAuthorOrNot(item.viewer.login)">
-                    <ImgWrapper class="mr-2">
-                        <img class="avatar" width="20" height="20" :src="item.avatarUrl">
-                    </ImgWrapper>
-                    <strong class='mr-1'>{{item.viewer.login}}</strong>
-                    <span>{{item.name}}</span>    
-                </SelectMenuItem>
-            </transition-group>
+
+            <div class="overflow-y-auto">
+                <transition-group name="slide-up" appear>
+                    <SelectMenuItem v-for="item in filteredAvailableAuthors" :key="item.login" :selected="query.indexOf(`author:${item.login}`) > -1"  @click.native="() => selectTheAuthorOrNot(item.login)">
+                        <ImgWrapper class="mr-2">
+                            <img class="avatar" width="20" height="20" :src="item.avatarUrl">
+                        </ImgWrapper>
+                        <strong class='mr-1'>{{item.login}}</strong>
+                        <span>{{item.name}}</span>    
+                    </SelectMenuItem>
+                </transition-group>
+            </div>
+           
             <router-link  @click.native="closeModal" v-if="authorModalSearchQuery !== ''" class="d-block p-3 text-gray-light bg-white" :to='authorModalSearchRouterLink'>
                 <div class="text-bold f5">author:{{authorModalSearchQuery}}</div>    
                 <div>Filter by this user</div>    
@@ -98,15 +100,18 @@
             <div v-if="!availableLabels.loading && availableLabels.length === 0" class="p-3" style="color: #586069;">
                 No availableLabels found. Sorry about that.
             </div>  
-            <transition-group name="slide-up" appear>
-                <SelectMenuItem v-for="item in filteredAvailableLabels" :key="item.name" :selected="query.indexOf(`label:${item.name}`) > -1"  @click.native="() => selectTheLabelOrNot(item.name)">
-                    <LabelBadge class="avatar mr-2 label-badge flex-shrink-0" :style="{background: item.color}" />
-                    <LabelContent style="min-width:0">
-                        <LabelName class="text-bold">{{item.name}}</LabelName>    
-                        <LabelDescription v-if="item.description && item.description !== ''" class="label-description">{{item.description}}</LabelDescription>    
-                    </LabelContent>
-                </SelectMenuItem>
-            </transition-group>
+            <div class="overflow-y-auto">
+                <transition-group name="slide-up" appear>
+                    <SelectMenuItem v-for="item in filteredAvailableLabels" :key="item.name" :selected="query.indexOf(`label:${item.name}`) > -1"  @click.native="() => selectTheLabelOrNot(item.name)">
+                        <LabelBadge class="avatar mr-2 label-badge flex-shrink-0" :style="{background: item.color}" />
+                        <LabelContent style="min-width:0">
+                            <LabelName class="text-bold">{{item.name}}</LabelName>    
+                            <LabelDescription v-if="item.description && item.description !== ''" class="label-description">{{item.description}}</LabelDescription>    
+                        </LabelContent>
+                    </SelectMenuItem>
+                </transition-group>
+            </div>
+           
         </Modal>
 
         <Modal title="Filter by who's assigned" ref="assigneeModal" :modalStyle="{height:'80vh'}" @show="network_getAvailableAssignees">
@@ -125,15 +130,21 @@
                     Assigned to nobody
                 </SelectMenuItem>    
             </router-link> 
-            <transition-group name="slide-up" appear>
-                <SelectMenuItem :selected="query.indexOf(`assignee:${item.viewer.login}`) > -1"  @click.native="() => selectTheAssigneeOrNot(item.viewer.login)" v-for="item in filteredAvailableAssignees" :key="item.viewer.login">
-                    <ImgWrapper class="mr-2">
-                        <img class="avatar" width="20" height="20" :src="item.avatarUrl">
-                    </ImgWrapper>
-                    <strong class='mr-1'>{{item.viewer.login}}</strong>
-                    <span>{{item.name}}</span>    
-                </SelectMenuItem>
-            </transition-group>
+            <div class="overflow-y-auto">
+                <transition-group name="slide-up" appear>
+                    <SelectMenuItem :selected="query.indexOf(`assignee:${item.login}`) > -1"  
+                                    @click.native="() => selectTheAssigneeOrNot(item.login)" 
+                                    v-for="item in filteredAvailableAssignees" 
+                                    :key="item.login">
+                        <ImgWrapper class="mr-2">
+                            <img class="avatar" width="20" height="20" :src="item.avatarUrl">
+                        </ImgWrapper>
+                        <strong class='mr-1'>{{item.login}}</strong>
+                        <span>{{item.name}}</span>    
+                    </SelectMenuItem>
+                </transition-group>
+            </div> 
+           
             
             <router-link  @click.native="closeModal" 
                             v-if="assigneeModalSearchQuery !== ''" 
@@ -144,25 +155,27 @@
             </router-link> 
         </Modal>
 
-        <Modal title="Sort by" ref="sortModal">
-            <router-link v-for="item in sortModalRouterLink" :key="item.label" :to='item.routerLink'>
-                <SelectMenuItem :selected="query.indexOf(item.queryFragment) > -1" @click.native="closeModal">
-                    <span>{{item.label}}</span>    
-                </SelectMenuItem>
-            </router-link> 
-            <div class="SelectMenu-divider">
-                Most reactions
-            </div>
-            <Reactions  class="p-3 ws-normal bg-white">
-                <router-link    @click.native="closeModal" 
-                                class="py-2 px-3 d-inline-block reaction-item" 
-                                v-for="item in sortModalReactionRouterLink" 
-                                :class="{'reaction-active':query.indexOf(item.queryFragment) > -1}" 
-                                :key="item.label" 
-                                :to='item.routerLink'>
-                    {{item.label}}
+        <Modal title="Sort by" ref="sortModal" :modalStyle="{maxHeight:'80vh'}">
+            <div class="overflow-y-auto">
+                <router-link v-for="item in sortModalRouterLink" :key="item.label" :to='item.routerLink'>
+                    <SelectMenuItem :selected="query.indexOf(item.queryFragment) > -1" @click.native="closeModal">
+                        <span>{{item.label}}</span>    
+                    </SelectMenuItem>
                 </router-link> 
-            </Reactions>
+                <div class="SelectMenu-divider">
+                    Most reactions
+                </div>
+                <Reactions  class="p-3 ws-normal bg-white">
+                    <router-link    @click.native="closeModal" 
+                                    class="py-2 px-3 d-inline-block reaction-item col-3"  
+                                    v-for="item in sortModalReactionRouterLink" 
+                                    :class="{'reaction-active':query.indexOf(item.queryFragment) > -1}" 
+                                    :key="item.label" 
+                                    :to='item.routerLink'>
+                        {{item.label}}
+                    </router-link> 
+                </Reactions>
+            </div> 
         </Modal>
 
         <Modal title="Filter issues" ref="filterModal">
@@ -205,6 +218,11 @@
     export default {
         name: 'repository_issues_browser',
         mixins: [RouteUpdateAwareMixin],
+        provide() {
+            return {
+                extraData: () => this.extraData.data
+            }
+        },
         props: {
             type: {
                 type: String,
@@ -416,7 +434,7 @@
             },
             filteredAvailableAuthors() {
                 return this.availableAuthors.data.filter(i => {
-                    return i.viewer.login.toLowerCase().indexOf(this.authorModalSearchQuery.toLowerCase()) != -1 || i.name.toLowerCase().indexOf(this.authorModalSearchQuery.toLowerCase()) != -1
+                    return i.login.toLowerCase().indexOf(this.authorModalSearchQuery.toLowerCase()) != -1 || i.name.toLowerCase().indexOf(this.authorModalSearchQuery.toLowerCase()) != -1
                 })
             },
             filteredAvailableLabels() {
@@ -426,11 +444,11 @@
             },
             filteredAvailableAssignees() {
                 return this.availableAssignees.data.filter(i => {
-                      return i.viewer.login.toLowerCase().indexOf(this.assigneeModalSearchQuery.toLowerCase()) != -1 || i.name.toLowerCase().indexOf(this.assigneeModalSearchQuery.toLowerCase()) != -1
+                      return i.login.toLowerCase().indexOf(this.assigneeModalSearchQuery.toLowerCase()) != -1 || i.name.toLowerCase().indexOf(this.assigneeModalSearchQuery.toLowerCase()) != -1
                 })
-            },
+            },  
             documentTitle() {
-                return `Issues · ${this.owner}/${this.repo}`
+                return `${this.type == 'issue' ? 'Issue' : 'Pull request'} · ${this.owner}/${this.repo}`
             }
         },
         created() {
@@ -458,13 +476,12 @@
                         )
                     }
                     let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
-                    window.scrollTo(0,0)
                     this.data = res.data.items
                     this.totalCount = res.data.total_count
                     this.pageInfo = parse(res.headers.link)
 
                     //获取其他数据
-                    if(res.data.items.length > 0 && this.accessToken)this.network_getExtraData(res.data.items)
+                    if(this.accessToken && this.type == 'pr') this.network_getExtraData(res.data.items)
                     if(!payload || !payload.url)this.network_getIssueCountByState()
                 }catch(e) {
                     this.handleError(e)
@@ -486,20 +503,7 @@
                     )
 
                      try{
-                         issues.forEach((i,index) => {
-                            Vue.set(
-                                i,
-                                'closed_by',
-                                {
-                                    login: res.data.data.nodes[index].timelineItems.nodes[0].actor.login
-                                }
-                            ),
-                            Vue.set(
-                                i,
-                                'lastCommitState',
-                                res.data.data.nodes[index].commits.nodes[0].commit.status.state
-                            )
-                        })
+                         this.extraData.data = res.data.data.nodes
                     }catch(e) {
                         this.handleGraphqlError(res)
                     }
@@ -667,14 +671,15 @@
                 Object.assign(this.$data, this.$options.data())
             },
             parseAvailableUsersFromHTML(HTML) {
-                let execPattern = /<img class="avatar mr-2 avatar-user" src="(.*)" width="20" height="20" alt="@.*" \/>\n\s*<strong class="mr-2">(.*)<\/strong>\n\s*<span class="text-gray-light">(.*)<\/span>/g
+                let execPattern = /<a.*?role="menuitemradio".*?href="(.*?)"[^>]*>[\s\S]*?<img.*?src="(.*?)".*?alt="@(.*?)"[^>]*>[\s\S]*?<span[^>]*>(.*)<\/span>[\s\S]*?<\/a>/g
                 let execResult
                 let availableAuthors = []
                 while((execResult = execPattern.exec(HTML)) != null) {
                     availableAuthors.push({
-                        avatarUrl: execResult[1],
-                        login: execResult[2],
-                        name: execResult[3],
+                        routerLink: execResult[1],
+                        avatarUrl: execResult[2],
+                        login: execResult[3],
+                        name: execResult[4],
                     })
                 }
                 return availableAuthors
@@ -722,6 +727,7 @@
 @import 'node_modules/@primer/css/dropdown/index.scss';
 @import 'node_modules/@primer/css/select-menu/index.scss';
 @import 'node_modules/@primer/css/avatars/index.scss';
+@import 'node_modules/@primer/css/layout/index.scss';
 
 .active{
     color: #fff;

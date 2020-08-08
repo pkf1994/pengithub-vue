@@ -340,13 +340,18 @@ export const API_ISSUE_COMMENT_REACTIONS = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.comment}/reactions?${query}`
 }
 
+export const API_PULL_REVIEW_COMMENT_REACTIONS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/comments/${payload.comment}/reactions?${query}`
+}
+
 export const API_PROXY_ISSUE_COMMENT_EDIT_HISTORIES = payload => `${PROXY_API_BASE}/_render_node/${payload}/comments/comment_edit_history_log`
 
 export const API_PROXY_FILE_CONTRIBUTION_MESSAGE = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/contributors/${payload.ref}/${payload.path}`
 
 export const API_PROXY_CONTRIBUTORS_LIST = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/contributors-list/${payload.ref}/${payload.path}`
 
-export const API_PROXY_COMMIT_STATUS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/commit/${payload.sha}/rollup?direction=e`
+export const API_PROXY_COMMIT_STATUS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/commit/${payload.sha}/rollup`
 
 export const API_PROXY_COMMIT_ASSOCIATED_REFS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/branch_commits/${payload.sha}`
 
@@ -378,4 +383,8 @@ export const API_FORK = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owne
 
 export const API_PROXY_USER_EDIT = payload => `${PROXY_API_BASE}/user_content_edits/${payload}`
 
+export const API_COMMITS_OF_PULL_REQUEST = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/commits?${query}`
+}
 

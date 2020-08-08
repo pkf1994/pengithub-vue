@@ -1,5 +1,7 @@
 <template>
-    <Container class="bg-white flex-grow-1 flex-column">
+    <CommonLoadingWrapper class="bg-white flex-grow-1 flex-column" 
+                            :loading="loading || !countByState"
+                            :position="loading ? 'center' : 'corner'">
         <SearchInput class="p-3">
             <slot name="searchInput">
               
@@ -66,40 +68,22 @@
 
         <slot></slot>    
 
-        <transition name="fade" appear>
-            <CommonLoading v-if="loading || extraData.loading || !countByState"
-                            :preventClickEvent="false"
-                            :position="loading ? 'center' : 'corner'"/>
-        </transition>  
-
-    </Container>
+    </CommonLoadingWrapper>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading, AnimatedHeightWrapper} from '../'
+    import {CommonLoadingWrapper, AnimatedHeightWrapper} from '../'
     import {util_numberFormat} from '@/util'
     import IssueListItem from './IssueItem'
     import IssueItemSkeleton from './IssueItemSkeleton'
     import {mapState, mapActions} from 'vuex'
     import { ACTION_HOME_REQUEST_ISSUES } from '../../store/modules/home/actionTypes'
     export default {
-        provide() {
-            return {
-                extraData: () => this.extraData.data
-            }
-        },
         props: {
             data: {
                 type: Array,
                 default: []
-            },
-            extraData: {
-                type: Object,
-                default: () => ({
-                    data: [],
-                    loading: false
-                })
             },
             loading: {
                 type: Boolean,
@@ -155,7 +139,7 @@
             }
         },
         components: {
-            CommonLoading,
+            CommonLoadingWrapper,
             AnimatedHeightWrapper,
             IssueListItem,
             IssueItemSkeleton,

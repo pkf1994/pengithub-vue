@@ -294,7 +294,7 @@
                 this.replies.forEach(i => nodeIds.push(i.node_id))
                 try{
                     this.repliesExtraData.loading = true
-                    let graphql_replies = graphql.GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID({nodeIds:nodeIds.slice(this.repliesExtraData.cursor,this.repliesExtraData.cursor + 5)})
+                    let graphql_replies = graphql.GRAPHQL_PR_REVIEW_COMMENTS({nodeIds:nodeIds.slice(this.repliesExtraData.cursor,this.repliesExtraData.cursor + 5)})
                     let res = await authRequiredGitHubGraphqlApiQuery(graphql_replies)
 
                     try{

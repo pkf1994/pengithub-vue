@@ -6,7 +6,7 @@
         </Time>
 
         <div class="commit-group Box Box--condensed">
-            <CommitItem v-for="item in commitGroup" :commit="item" :key="item.node_id"/>
+            <CommitItem class="commit-item border-top" v-for="item in commitGroup" :commit="item" :key="item.node_id"/>
         </div>
     </Container>
 </template>
@@ -16,25 +16,10 @@
     import {AnimatedHeightWrapper,ImgWrapper} from '@/components'
     import CommitItem from './CommitItem'
     export default {
-        inject: ['graphqlDataProvided'],
         props: {
             commitGroup: {
                 type: Array,
                 required: true
-            }
-        },
-        methods: {
-            getMessaageHeadlineHTML(nodeID) {
-                let dataHolder = this.graphqlDataProvided().filter(i => {
-                    return i.id == nodeID
-                })[0]
-                return dataHolder && dataHolder.messageHeadlineHTML
-            },
-            getState(nodeID) {
-                let dataHolder = this.graphqlDataProvided().filter(i => {
-                    return i.id == nodeID
-                })[0]
-                return dataHolder && dataHolder.status && dataHolder.status.state
             }
         },
         components: {
@@ -88,5 +73,9 @@
     font-weight: 600;
     color: #24292e;
     white-space: nowrap;
+}
+
+.commit-item:first-child{
+    border-top: none!important;
 }
 </style>

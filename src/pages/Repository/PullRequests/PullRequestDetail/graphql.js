@@ -92,45 +92,20 @@ export const GRAPHQL_PULL_TIMELINE = `
   }
 
   export const GRAPHQL_PR_REVIEW_COMMENTS = `
-    query($id:ID!,$first:Int!,$after:String){
-      node(id: $id) {
-        ... on PullRequestReview {
-          comments(first:$first,after:$after) {
-            totalCount
-            nodes {
-              id
-              viewerCanReact
-              resourcePath
-              replyTo {
-                id
-              }
-              author {
-                login
-                avatarUrl
-              }
-            }
-            pageInfo {
-              hasNextPage
-              endCursor
-            }
-          }
+    query($ids:[ID!]!){
+      nodes(ids: $ids) {
+        ... on PullRequestReviewComment {
+          id
+          viewerCanReact
+          viewerCanUpdate
+          viewerCanMinimize
+          viewerCanDelete
+          minimizedReason
+          isMinimized
         }
       }
     }
     `
-
-  export const GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID = `
-  query($ids:[ID!]!){
-    nodes(ids:$ids) {
-      ... on PullRequestReviewComment {
-        id
-        viewerCanReact
-        viewerCanUpdate
-        viewerCanDelete
-      }
-    }
-  }
-  `
 
   export const GRAPHQL_PULLS_COMMITS = (payload) => {
     payload = {

@@ -81,7 +81,9 @@
                     <span class="f4">Loading activity...</span>
                 </LoadingWrapper>
 
-                <AllActivityListItem v-for="item in allActivities.data" :activity="item" :key="item.id"></AllActivityListItem>
+                <transition-group name="fade-group" appear>
+                    <AllActivityListItem v-for="item in allActivities.data" :activity="item" :key="item.id"></AllActivityListItem>
+                </transition-group>
 
                 <button class="ajax-pagination-btn" v-if="allActivities.pageInfo.next" @click="network_getAllActivities">
                     {{allActivities.loading ? 'Loading more...' : 'More'}}
@@ -141,7 +143,7 @@ export default {
     created() {
         this.network_getRecentActivity()
         this.network_getRepositories()
-        this.network_getTeams()
+        //this.network_getTeams()
         this.network_getAllActivities()
     },
     methods: {
@@ -270,7 +272,7 @@ export default {
                     url = api.API_USER_RECEIVED_EVENTS({
                         user: this.viewer.login,
                         params: {
-                            per_page: 30
+                            per_page: 100
                         }
                     })
                 }
@@ -287,6 +289,8 @@ export default {
 
                 let allActivities = []
 
+                let prevAllActivitiesLength = this.allActivities.data.length
+
                 res.data.forEach(item => {
                     if(allActivityClub.indexOf(item.type) != -1) {
                         allActivities.push(item)
@@ -295,9 +299,16 @@ export default {
 
                 this.allActivities.data =  this.allActivities.data.concat(allActivities)
 
+                let afterAllActivitiesLength = this.allActivities.data.length
+
+                if(prevAllActivitiesLength == afterAllActivitiesLength && this.allActivities.pageInfo.next) {
+                    this.network_getAllActivities()
+                }else {
+                    this.allActivities.loading = false
+                }
+
             }catch(e) {
                 console.log(e)
-            }finally{
                 this.allActivities.loading = false
             }
         },

@@ -88,10 +88,6 @@
             return {
                 deleted: false,
                 showMinimized: false,
-                popoverStyle: {
-                    top: '100%',
-                    right: '-6px'
-                },
                 reactions: {
                     data: {},
                     loading: false
@@ -115,7 +111,6 @@
         created() {
             this.body = this.propsData.body
             this.network_getReactions()
-
         },
         computed: {
              repo() {

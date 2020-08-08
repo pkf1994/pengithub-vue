@@ -1,5 +1,5 @@
 <template>
-    <CommonLoadingWrapper class="px-3" :loading="loading || graphqlData.loading || allBranchesAndTags.loading" :position="loading || allBranchesAndTags.loading ? 'center' : 'corner'">
+    <CommonLoadingWrapper class="px-3" :loading="loading || allBranchesAndTags.loading" :position="loading || allBranchesAndTags.loading ? 'center' : 'corner'">
         <transition-group name="fade-group" appear>
             <button v-if="!path && firstLoadedFlag" key="refSwitchBtn" class="btn css-truncate btn-sm mb-2" :disabled="!currentRef" @click="() => openModal('switchBranchOrTagModal')">
                 <i>{{refType | capitalize}}:</i>
@@ -7,7 +7,7 @@
                 <span class="dropdown-caret"></span>
             </button>
             
-            <FileNavigation key="fileNavigation" class="file-path text-bold">
+            <FileNavigation key="fileNavigation" class="file-path text-bold" v-if="path">
                 <span class="text-normal">History for</span>         
                 <router-link :to="`/${owner()}/${repo()}/commits`">{{repo()}}</router-link> /
                 <Breadcrumb :spaceArround="true" :routePath="$route.fullPath" :displayPath="path && path.replace(/^\//,'').replace(/\/$/,'')">
@@ -66,7 +66,6 @@
     import {util_queryParse} from '@/util'
     import {CommitGroup} from './components'
     import * as api from '@/network/api'
-    import * as graphql from './graphql'
     import {RouteUpdateAwareMixin,WithModalMixin} from '@/mixins'
     import {WithRefDistinguishMixin} from '../components'
     var parse = require('parse-link-header');
@@ -74,11 +73,6 @@
         name: 'repository_commits_page',
         mixins: [RouteUpdateAwareMixin,WithModalMixin,WithRefDistinguishMixin],
         inject: ['repoBasicInfo','owner','repo'],
-        provide() {
-            return {
-                graphqlDataProvided: () => this.graphqlData.data
-            }
-        },
         data() {
             return {
                 data: [],
@@ -86,10 +80,6 @@
                 pageInfo: {},
                 perPage: 20,
                 paramIsBranch: true,
-                graphqlData: {
-                    data: [],
-                    loading: false
-                },
                 firstLoadedFlag: false,
                 switchBranchOrTagModalTab: "branches",
                 switchBranchOrTagModalSearchQuery: "",
@@ -178,34 +168,6 @@
                     this.handleError(e)
                 }finally{
                     this.loading = false
-                }
-            },
-            async network_getGraphqlData(payload) {
-                try{
-                    this.graphqlData.loading = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_graphql_data')
-                    
-                    let graphql_ = graphql.GRAPHQL_COMMITS(payload)
-
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_,{cancelToken})
-
-                    let dataHolder
-                    try{
-                        dataHolder = res.data.data
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-
-                    let graphqlData = []
-                    for(let key in dataHolder){
-                        graphqlData.push(dataHolder[key])
-                    }
-                    this.graphqlData.data = graphqlData
-
-                }catch(e) {
-                    console.log(e)
-                }finally{
-                    this.graphqlData.loading = false
                 }
             },
             network_getAvailableRef() {

@@ -8,9 +8,6 @@ export const GRAPHQL_COMMIT_EXTRA_DATA = payload => {
             messageHeadlineHTML
             viewerSubscription
             viewerCanSubscribe
-            status {
-                state
-            }
             repository{
                 refs(refPrefix: "refs/tags/", first: 100) {
                     nodes {

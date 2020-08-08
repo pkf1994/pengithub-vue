@@ -22,13 +22,14 @@
                         </AnimatedWidthWrapper>
                        
                         <router-link :to="`/${owner()}/${repo()}/commit/${commit.sha}`" class="link-gray" style="word-break: break-word;">
+                            <code>
                             {{data.message && parseEmoji(data.message.replace(/[\n\r]{2}[\S\s]*/g,''))}}
+                            </code>
                         </router-link> 
                     </div> 
                     
                     <CommitMeta class="commit-meta flex-grow-1 flex-shrink-0 text-right" >
-                        <svg v-if="commitStatus === 'FAILURE'" class="text-red octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
-                        <svg v-if="commitStatus === 'SUCCESS'" class="text-green octicon octicon-check" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
+                        <CommitStatusIcon :sha="data.sha"></CommitStatusIcon>
                     </CommitMeta>
                 </Commit>
             </template>
@@ -79,7 +80,10 @@
                 <svg class="octicon" :class="{'loading-animation':loading}" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 12h3V2h-3v10zm-4-2h3V2H6v8zm-4 4h3V2H2v12zm-1 1h13V1H1v14zM14 0H1a1 1 0 00-1 1v14a1 1 0 001 1h13a1 1 0 001-1V1a1 1 0 00-1-1z"></path></svg>
             </template>
             <template v-slot:action>
-                added this to <strong>{{data.project_card.column_name}}</strong> in <strong>{{project.name}}</strong>
+                added this to <strong>{{data.project_card.column_name}}</strong> 
+                <span v-if="project.name">
+                    in <strong>{{project.name}}</strong>
+                </span>    
             </template>
         </SimpleTimelineItem>
         <!-- removed_from_project  -->
@@ -88,7 +92,10 @@
                 <svg class="octicon" :class="{'loading-animation':loading}" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 12h3V2h-3v10zm-4-2h3V2H6v8zm-4 4h3V2H2v12zm-1 1h13V1H1v14zM14 0H1a1 1 0 00-1 1v14a1 1 0 001 1h13a1 1 0 001-1V1a1 1 0 00-1-1z"></path></svg>
             </template>
             <template v-slot:action>
-                removed this from <strong>{{data.project_card.column_name}}</strong> in <strong>{{project.name}}</strong>
+                removed this from <strong>{{data.project_card.column_name}}</strong>
+                <span v-if="project.name">
+                    in <strong>{{project.name}}</strong>
+                </span>   
             </template>
         </SimpleTimelineItem>
         <!-- moved_columns_in_project  -->
@@ -395,6 +402,7 @@
     import Review from './Review'
     import {util_emoji} from '@/util'
     import {Label,AnimatedHeightWrapper,AnimatedWidthWrapper,ImgWrapper} from '@/components'
+    import {CommitStatusIcon} from '../../../components'
     import CommitComment from './CommitComment/CommitComment.vue'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
     export default {
@@ -464,34 +472,34 @@
             }
         },
         mounted() {
-            this.getAdditionalData()
+            this.network_getAdditionalData()
         },
         methods: {
-            getAdditionalData() {
+            async network_getAdditionalData() {
                  try{
                     switch(this.data.event){
                         case "added_to_project":
                         case "moved_columns_in_project":
                         case "removed_from_project":
-                            this.getRelevantProject()
+                            await this.getRelevantProject()
                             break
                         case "locked":
-                            this.getLockReason()
+                            await this.getLockReason()
                             break
                         case "referenced":
                         case "closed":
                         case "committed":
-                            this.getRelevantCommit()
+                            await this.getRelevantCommit()
                            
                             break
                         case "transferred":
-                            this.getTransferredFrom()
+                            await this.getTransferredFrom()
                             break
                         case "user_blocked":
-                            this.getBlockedUser()
+                            await this.getBlockedUser()
                             break
                         case "head_ref_deleted":
-                            this.getHeadRefDeletedName(this.data.node_id)
+                            await this.getHeadRefDeletedName(this.data.node_id)
                             break
                        /*  case "cross-referenced":
                             if(this.data.source.issue.pull_request) {
@@ -502,6 +510,7 @@
                     }
                 }catch(e) {
                     console.log(e)
+                }finally {
                     this.loading = false
                 }
             },
@@ -513,9 +522,6 @@
                     url.replace('/git','')
                 )
                 this.commit = res.data
-                if(this.data.event === 'committed') {
-                    await this.getCommitStatus(res.data.node_id)
-                }
                 this.loading = false
             },
             /* async getRelevantPullRequest() {
@@ -538,6 +544,7 @@
             }, */
             async getRelevantProject() {
                 if(!this.data.project_card || !this.data.project_card.project_url ) return
+                
                 this.loading = true
                 let res = await authRequiredGet(
                     this.data.project_card.project_url,
@@ -551,8 +558,8 @@
                 this.loading = false
             },
             async getTransferredFrom() {
+                if(!this.accessToken) return
                 this.loading = true
-                
                 let res = await authRequiredGitHubGraphqlApiQuery(
                     `
                     {
@@ -575,6 +582,7 @@
                 this.loading = false
             },
             async getBlockedUser() {
+                if(!this.accessToken) return
                 this.loading = true
                 
                 let res = await authRequiredGitHubGraphqlApiQuery(
@@ -599,8 +607,8 @@
                 this.loading = false
             },
             async getLockReason() {
+                if(!this.accessToken) return
                 this.loading = true
-                
                 let res = await authRequiredGitHubGraphqlApiQuery(
                     `
                     {
@@ -621,8 +629,8 @@
                 this.loading = false
             },
             async getHeadRefDeletedName(nodeId) {
+                if(!this.accessToken) return
                 try{
-
                     let res = await authRequiredGitHubGraphqlApiQuery(`
                         {
                             node(id: "${nodeId}") {
@@ -638,35 +646,11 @@
                     }catch(e) {
                         this.handleGraphqlError(res)
                     }
-
                 }catch(e) {
                     console.log(e)
                 }
             },
-            async getCommitStatus(nodeId) {
-                try{
-
-                    let res = await authRequiredGitHubGraphqlApiQuery(`
-                        {
-                            node(id: "${nodeId}") {
-                                ... on Commit {
-                                    status {
-                                        state
-                                    }
-                                }
-                            }
-                        }
-                    `)
-                    
-                    try{
-                        this.commitStatus = res.data.data.node.status && res.data.data.node.status.state
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-                }catch(e) {
-                    console.log(e)
-                }
-            },
+           
             parseEmoji(raw) {
                 return util_emoji.parse(raw)
             }
@@ -681,6 +665,7 @@
             Review,
             CommitComment,
             AnimatedWidthWrapper,
+            CommitStatusIcon,
             CommentWrapper: styled.div``,
             SourceIssue: styled.div``,
             IssueTitle: styled.div``,

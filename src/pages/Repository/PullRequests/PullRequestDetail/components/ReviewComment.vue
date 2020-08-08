@@ -255,7 +255,7 @@
                 try{
                     this.repliesExtraData.loading = true
                     let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.GRAPHQL_PR_REVIEW_COMMENTS_WITH_NODE_ID,
+                        graphql.GRAPHQL_PR_REVIEW_COMMENTS,
                         {
                             variables: {
                                 ids:nodeIds

@@ -1,9 +1,7 @@
 <template>
     <Container>
         <slot></slot>
-        <transition name="fade" appear>
-            <CommonLoading :preventClickEvent="preventClickEvent" :position="position" v-if="loading" :size="size"/>
-        </transition>
+        <CommonLoading :preventClickEvent="preventClickEvent" :position="position" v-if="loading" :size="size"/>
     </Container>
 </template>
 
