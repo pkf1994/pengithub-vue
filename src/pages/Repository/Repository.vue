@@ -1,5 +1,21 @@
 <template>
     <WithTopNoticeWrapper theKey="repository">
+        <AnimatedHeightWrapper>
+            <OrganizationDataAccessRestrictNotice v-if="showOrganizationDataAccessRestrictNotice" class="p-3 flash flash-full">
+                 <button @click="() => {showOrganizationDataAccessRestrictNotice = false}" class="flash-close" type="button">
+                    <svg class="octicon octicon-x" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
+                </button>
+                <div class="px-2">
+                    Some features will not be available for 
+                    <HyperlinkWrapper>
+                        <a href="https://docs.github.com/en/github/setting-up-and-managing-organizations-and-teams/restricting-access-to-your-organizations-data">OAuth App access restrictions</a>
+                    </HyperlinkWrapper>
+                    to the organization({{data.owner.login}})'s data.
+                </div>
+            </OrganizationDataAccessRestrictNotice>
+        </AnimatedHeightWrapper>
+        
+
         <RepoBasicInfo class="bg-gray-light pb-0 pt-3 border-0">
             <RepoFullName class="mb-3 px-3 f3">
                 <h1 class="d-flex flex-wrap flex-items-center break-word f3 text-normal">
@@ -140,6 +156,7 @@
                     loading: false
                 },
                 resetBeforeUpdate: true,
+                showOrganizationDataAccessRestrictNotice: false
             }
         },
         provide() {
@@ -147,6 +164,7 @@
                 owner: () => this.owner,
                 repo: () => this.repo,
                 repoBasicInfo: () => this.data,
+                repoOwnerType: () => this.data.owner && this.data.owner.type,
                 viewerIsCollaborator: () => this.viewerIsCollaborator,
                 viewerPermission: () => this.viewerPermission,
                 viewerIsCollaboratorGetter: () => this.network_ifViewerACollaborator,
@@ -291,6 +309,7 @@
                     }
                 ).then(res => {
                     this.data = res.data
+                    if(res.data.owner.type == 'Organization') this.showOrganizationDataAccessRestrictNotice = true
                 }).catch(e => {
                     this.handleError(e,{handle404:true})
                 }).finally(() =>  this.loading = false)
@@ -478,6 +497,7 @@
             Description: styled.p``,
             RepoMeta: styled.div``,
             StarOrWatch: styled.div``,
+            OrganizationDataAccessRestrictNotice: styled.div``,
         }
     }
 </script>
@@ -486,6 +506,7 @@
 @import 'node_modules/@primer/css/labels/index.scss';
 @import 'node_modules/@primer/css/dropdown/index.scss';
 @import 'node_modules/@primer/css/navigation/index.scss';
+@import 'node_modules/@primer/css/alerts/index.scss';
 .octicon{
     color: #959da5;
 }

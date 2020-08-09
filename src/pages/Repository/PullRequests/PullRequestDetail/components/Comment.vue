@@ -183,7 +183,7 @@
                     let url = api.API_ISSUE_COMMENT({
                         repo: this.repo,
                         owner: this.owner,
-                        comment: this.propsData.id
+                        commentId: this.propsData.id
                     })
                     await authRequiredDelete(
                         url,

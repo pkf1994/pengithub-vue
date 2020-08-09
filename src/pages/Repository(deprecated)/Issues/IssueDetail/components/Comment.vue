@@ -466,9 +466,9 @@
                     this.closeModal()
                     try{
                         this.deleteThisCommentLoading = true
-                        let url = api.API_HANDLE_ISSUE_COMMENT({
+                        let url = api.API_ISSUE_COMMENT({
                             ...this.$route.params,
-                            comment: this.data.id
+                            commentId: this.data.id
                         })
                         
                         await authRequiredAjax(

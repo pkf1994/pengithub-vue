@@ -13,7 +13,7 @@
             </HideAndShowPane>
             <div v-show="showMinimized || !extraData.isMinimized">
                 <Header class="header " :style="headerStyle">
-                    <Action v-if="extraData.viewerCanUpdate || extraData.viewerCanDelete" class="float-right mt-2 ml-2" @click="() => showModal('popover')">
+                    <Action v-if="(extraData.viewerCanUpdate || extraData.viewerCanDelete) && repoOwnerType() == 'User'" class="float-right mt-2 ml-2" @click="() => showModal('popover')">
                         <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
                     </Action>
                     
@@ -31,21 +31,24 @@
                         {{propsData.created_at | getDateDiff}}
                     </Meta>
 
-                    <Popover ref="popover" :popoverStyle="{top: 'calc(100% - 4px)',right: '4px',paddingTop: '4px',paddingBottom: '4px',width:'120px'}">
-                        <div v-if="extraData.viewerCanUpdate" class="dropdown-item">
-                            <svg class="octicon octicon-pencil mr-1" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"></path></svg>
+                    <Popover ref="popover" :popoverStyle="{top: 'calc(100% - 4px)',right: '4px',paddingTop: '8px',paddingBottom: '8px',width:'120px'}">
+                        <div v-if="extraData.viewerCanUpdate" class="dropdown-item py-2 btn-link">
                             Edit
                         </div>
-                        <div v-if="extraData.viewerCanUpdate" class="division border-top my-1"></div> 
-                        <div v-if="extraData.viewerCanDelete" class="dropdown-item danger" @click="network_tryToDeleteThis">
-                            <svg class="octicon octicon-x mr-1" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
-                            <span class="text-red">
-                                Delete
-                            </span>    
+                        <div v-if="extraData.viewerCanMinimize" class="dropdown-item py-2 btn-link" @click="triggerShowMinimizePane">
+                            Hide
                         </div>
+                        <UnminimizeButton   :comment="propsData" 
+                                            v-if="extraData.viewerCanMinimize && extraData.isMinimized" 
+                                            @unminimize-comment="unminimizePostHandler"
+                                            class="dropdown-item py-2 btn-link"></UnminimizeButton>
+                         <div v-if="extraData.viewerCanUpdate" class="division border-top my-1"></div> 
+                        <CommentDeleteButton v-if="extraData.viewerCanDelete" commentType="reviewComment" class="text-red btn-link dropdown-item py-2 danger" :comment="propsData" @delete-comment="() => {deleted = true}"></CommentDeleteButton>  
                     </Popover>
 
                 </Header>
+
+                <MinimizePane v-if="showMinimizePane" :comment="propsData" @cancel="() => triggerShowMinimizePane(false)" @minimize-comment="minimizePostHandler"></MinimizePane>
 
                 <Body class="pb-2 p-3" >
                     <BodyHTML v-html="bodyHTML"  class="markdown-body f5 p-0">
@@ -72,16 +75,26 @@
     import styled from 'vue-styled-components'
     import {util_dateFormat,util_markdownParse} from '@/util'
     import {LoadingIconEx,Popover,ImgWrapper} from '@/components'
+    import {authRequiredGitHubGraphqlApiQuery} from '@/network'
     import ClipboardJS from 'clipboard';
     import Reaction from '../Reaction'
     import ReviewCommentEditor from '../ReviewCommentEditor'
+    import {MinimizePane,UnminimizeButton,CommentDeleteButton} from '../../../../components'
+    import * as graphql from '../../graphql.js'
     export default {
-        inject: ['reviewCommentsExtraData'],
+        inject: ['reviewCommentsExtraData','repoOwnerType'],
         data() {
             return {
                 showMinimized: false,
+                showMinimizePane: false,
                 loadingDeleteThis: false,
-                deleted: false
+                loadingUnminimizeComment: false,
+                deleted: false,
+                handledComment: {},
+                extraDataOfNewCreatedComment: {
+                    data: {},
+                    loading: false
+                }
             }
         },
         props: {
@@ -92,7 +105,8 @@
             headerStyle: {
                 type: Object,
                 required: false
-            }
+            },
+            newCreated: Boolean
         },
         computed: {
             repo() {
@@ -102,41 +116,82 @@
                 return this.$route.params.owner
             },
             extraData() {
-                return this.reviewCommentsExtraData().filter(i => i.id == this.propsData.node_id)[0] || {}
+                if(this.newCreated) return this.extraDataOfNewCreatedComment.data
+                return {
+                    ...this.reviewCommentsExtraData().filter(i => i.id == this.propsData.node_id)[0] || {},
+                    ...this.handledComment
+                }
             },
             bodyHTML() {
                 return util_markdownParse.markdownToHTML(this.propsData.body)
             }
         },
+        created() {
+            if(this.newCreated) this.network_getExtraDataForNewCreatedComment()
+        },
         methods: {
-            async network_tryToDeleteThis() {
-                this.closeModal()
-                if(!confirm("Are you sure you want to delete this comment?")) return
+            async network_getExtraDataForNewCreatedComment() {
                 try {
-                    this.loadingDeleteThis = true
-                    let url = api.API_REVIEW_COMMENT_OF_PULL_REQUEST({
-                        repo: this.repo,
-                        owner: this.owner,
-                        commentId: this.propsData.id
-                    })
-                    await authRequiredDelete(
-                        url,
+                    this.extraDataOfNewCreatedComment.loading = true
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_PR_REVIEW_COMMENTS,
                         {
-                            headers: {
-                                "accept":"application/vnd.github.v3+json"
+                            variables: {
+                                ids: [this.propsData.node_id]
                             }
                         }
                     )
-
-                    this.deleted = true
+                    try{
+                        this.extraDataOfNewCreatedComment.data = res.data.data.nodes[0]
+                    }catch(e) {
+                        this.handleGraphqlError(e)
+                    } 
                 } catch (e) {
-                    this.handleError(e)
+                    console.log(e)
                 } finally {
-                    this.loadingDeleteThis = false
+                    this.extraDataOfNewCreatedComment.loading = false
+                }
+            },
+            async network_unminimizeThisComment() {
+                if(this.loadingUnminimizeComment) return
+                try{
+                    this.loadingUnminimizeComment = true
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_MUTATION_UNMINIMIZE_COMMENT,
+                        {
+                            variables: {
+                                subjectId: this.propsData.node_id,
+                            }
+                        }
+                    )
+                    
+                    try{
+                        this.handledComment = res.data.data.unminimizeComment.unminimizedComment
+                        this.closeModal()
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+
+                }catch(e) {
+                    this.handleError(e)
+                }finally{
+                    this.loadingUnminimizeComment = false
                 }
             },
             triggerShowMinimized() {
                 this.showMinimized = !this.showMinimized
+            },
+            triggerShowMinimizePane(flag = true) {
+                this.closeModal()
+                this.showMinimizePane = flag
+            },
+            minimizePostHandler(payload) {
+                this.triggerShowMinimizePane(false)
+                this.handledComment = payload.info
+            },
+            unminimizePostHandler(payload) {
+                this.closeModal()
+                this.handledComment = payload.info
             }
         },
         components: {
@@ -144,7 +199,10 @@
             Popover,
             ImgWrapper,
             Reaction,
+            MinimizePane,
+            UnminimizeButton,
             ReviewCommentEditor,
+            CommentDeleteButton,
             Container: styled.div``,
             Inner: styled.div``,
             Header: styled.div``,
@@ -185,5 +243,9 @@
 .deleting{
     opacity: .4s;
     pointer-events: none;
+}
+
+.dropdown-item{
+    font-size: 14px;
 }
 </style>

@@ -54,7 +54,7 @@
                     let url = api.API_ISSUE_COMMENT({
                         repo: this.repo,
                         owner: this.owner,
-                        comment: this.comment.id
+                        commentId: this.comment.id
                     })
 
                     let res = await authRequiredPatch(

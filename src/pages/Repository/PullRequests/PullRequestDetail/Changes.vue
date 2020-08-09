@@ -32,7 +32,7 @@
             <ChangedFileItem :id="`diff-${item.sha}`" v-for="item in changedFiles.data" :key="item.sha" :file="item"></ChangedFileItem>
         </transition-group>
 
-        <EditorHeader class="editor-header" v-if="changedFiles.data.length > 0">
+        <EditorHeader class="editor-header" v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'">
             Submit your review
         </EditorHeader>
         <!-- <Editor v-if="changedFiles.data.length > 0" 
@@ -59,7 +59,7 @@
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {CommonLoading,AnimatedHeightWrapper,SimpleDiffView} from '@/components'
-    import {HiddenItemLoading,ChangedFileItem,Editor} from './components'
+    import {HiddenItemLoading,ChangedFileItem} from './components'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
     import * as api from '@/network/api'
     import {util_dateFormat,util_emoji} from '@/util'
@@ -68,7 +68,7 @@
     export default {
         mixins: [RouteUpdateAwareMixin],
         name: 'repository_pull_request_detail_changes_page',
-        inject: ['pullRequestProvided'],
+        inject: ['pullRequestProvided','repoOwnerType'],
         provide() {
             return {
                 reviewCommentsProvided: () => this.reviewComments.data,
@@ -252,7 +252,6 @@
             AnimatedHeightWrapper,
             SimpleDiffView,
             ChangedFileItem,
-            Editor,
             Container: styled.div``,
             EditorHeader: styled.div``,
             Switcher: styled.div``,

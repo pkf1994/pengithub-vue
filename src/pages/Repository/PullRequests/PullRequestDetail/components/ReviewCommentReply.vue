@@ -12,7 +12,7 @@
                     <span class="text-gray"> • {{data.created_at | getDateDiff}}</span>
                 </div>
 
-                <button class="ml-2 height-full" :disabled="loadingDeleteThis" @click="triggerShowPopover" v-if="extraData.viewerCanUpdate || extraData.viewerCanDelete">
+                <button class="ml-2 height-full" :disabled="loadingDeleteThis" @click="triggerShowPopover" v-if="(extraData.viewerCanUpdate || extraData.viewerCanDelete) && repoOwnerType() == 'User'">
                     <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
                 </button>
 
@@ -47,7 +47,7 @@
     import {authRequiredGet,authRequiredDelete} from '@/network'
     import * as api from '@/network/api'
     export default {
-        inject: ['repliesExtraData'],
+        inject: ['repliesExtraData','repoOwnerType'],
         data() {
             return {
                 data: {},

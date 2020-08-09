@@ -46,33 +46,7 @@
                                     }">{{item.code}}</BlobCode> 
                     </div>
 
-                    <ReviewComments class="review-comment-wrapper" v-if="reviewCommentsAtRightSide[item.additionLineIndex] || reviewCommentsAtLeftSide[item.deletionLineIndex]">
-                        <Comment style="max-width: 100vw;" :propsData="reviewCommentsAtRightSide[item.additionLineIndex] || reviewCommentsAtLeftSide[item.deletionLineIndex]"></Comment>
-
-                        <Comment class="border-top" v-for="commentItem in reviewCommentsProvided().filter(i => i.in_reply_to_id == (reviewCommentsAtRightSide[item.additionLineIndex] || reviewCommentsAtLeftSide[item.deletionLineIndex]).id)" style="max-width: 100vw;" :propsData="commentItem" :key="commentItem.id"></Comment>
-                        
-
-                        <AnimatedHeightWrapper>
-                            <transition name="fade-group">
-                                <div class="comment-btn-wrapper" v-if="editorShowAt != item.deletionLineIndex">
-                                    <button type="button" class="btn btn-block" @click="() => triggerShowPullRequestCommentCreator(item.deletionLineIndex)">
-                                        Add an additional review comment
-                                    </button>
-                                </div>
-                            </transition>
-                         
-
-                            <PullRequestCommentCreator class="mx-3 pb-3" :ref="`editor-${item.deletionLineIndex}`" style="background-color: #fafbfc" v-if="editorShowAt == item.deletionLineIndex">
-                                <button class="btn" @click="hidePullRequestCommentCreator">
-                                    <span>Cancel</span>
-                                </button>
-                                <button class="btn btn-primary ml-1" :disabled="!$refs[`editor-${item.deletionLineIndex}`] || !$refs[`editor-${item.deletionLineIndex}`][0] || $refs[`editor-${item.deletionLineIndex}`][0].commentTextValue === ''">
-                                    <span>Add comment</span>
-                                </button>
-                            </PullRequestCommentCreator>
-                        </AnimatedHeightWrapper>
-                        
-                    </ReviewComments>
+                    <ReviewCommentGroup class="review-comment-wrapper" v-if="getRootReviewComment(item)" :rootReviewComment="getRootReviewComment(item)"></ReviewCommentGroup>
 
                 </CodeLine>
             </div>
@@ -84,22 +58,14 @@
 <script>
     import styled from 'vue-styled-components'
      import {util_analyseFileType} from '@/util'
-    import {AnimatedHeightWrapper} from '@/components'
-    import HiddenItemLoading from '../HiddenItemLoading'
-    import PullRequestCommentCreator from '../PullRequestCommentCreator'
-    import Comment from './Comment'
+    import ReviewCommentGroup from './ReviewCommentGroup'
     import { authRequiredGet } from '@/network'
     export default {
-        inject: ['owner','repo','number','reviewCommentsProvided'],
+        inject: ['reviewCommentsProvided'],
         props: {
             file: {
                 type: Object,
                 required: true
-            }
-        },
-        data() {
-            return {
-                editorShowAt: -2
             }
         },
         computed: {
@@ -225,17 +191,12 @@
             },
         },
         methods: {
-            triggerShowPullRequestCommentCreator(index) {
-                this.editorShowAt = index
-            },
-            hidePullRequestCommentCreator() {
-                this.editorShowAt = -2
+            getRootReviewComment(diffHunkEntry) {
+                return this.reviewCommentsAtRightSide[diffHunkEntry.additionLineIndex] || this.reviewCommentsAtLeftSide[diffHunkEntry.deletionLineIndex]
             }
         },
         components: {
-            Comment,
-            PullRequestCommentCreator,
-            AnimatedHeightWrapper,
+            ReviewCommentGroup,
             Container: styled.div``,
             DiffHeader: styled.div``,
             DiffView: styled.div``,
@@ -243,8 +204,6 @@
             CodeLine: styled.div``,
             BlobNum: styled.div``,
             BlobCode: styled.div``,
-            ReviewComments: styled.div``,
-            ReviewCommentPullRequestCommentCreator: styled.div``,
         }
     }
 </script>
@@ -381,7 +340,6 @@
 
 .comment-btn-wrapper{
     width: 100vw;
-    padding: 15px;
     padding-top: 0px;
     background-color: #fafbfc;
 }

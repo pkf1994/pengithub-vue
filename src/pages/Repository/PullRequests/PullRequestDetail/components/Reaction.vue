@@ -126,13 +126,13 @@
                             url = api.API_ISSUE_COMMENT_REACTIONS({
                                 repo: this.repo,
                                 owner: this.owner,
-                                comment: this.commentId
+                                commentId: this.commentId
                             })
                         }else {
                             url = api.API_PULL_REVIEW_COMMENT_REACTIONS({
                                 repo: this.repo,
                                 owner: this.owner,
-                                comment: this.commentId
+                                commentId: this.commentId
                             })
                         }
                     }else {
@@ -173,7 +173,7 @@
                         url = api.API_ISSUE_COMMENT_REACTIONS({
                             repo: this.repo,
                             owner: this.owner,
-                            comment: this.commentId,
+                            commentId: this.commentId,
                             params: {
                                 content,
                                 per_page: 10

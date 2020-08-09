@@ -274,7 +274,7 @@
                 try{
                     this.availableBranches.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_available_branches')
-                    let url = api.API_REPOSITORY_CODE_FILE_DETAIL_AVAILABLE_BRANCHES({
+                    let url = api.API_REPOSITORY_AVAILABLE_BRANCHES({
                         repo: this.repo(),
                         owner: this.owner(),
                         ref: this.currentRef,
@@ -293,7 +293,7 @@
                 try{
                     this.availableTags.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_available_tags')
-                    let url = api.API_REPOSITORY_CODE_FILE_DETAIL_AVAILABLE_TAGS({
+                    let url = api.API_REPOSITORY_AVAILABLE_TAGS({
                         repo: this.repo(),
                         owner: this.owner(),
                         ref: this.currentRef,

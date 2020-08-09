@@ -75,41 +75,8 @@
               
             </Header>   
 
-            <AnimatedHeightWrapper>
-                <MinimizePane v-if="minimizePane.show" class="flash flash-warn flash-full" style="padding-bottom: 8px">
-                    <button class="flash-close" :disabled="minimizePane.loading" @click="() => triggerMinimizePane(false)" type="button"><svg aria-label="Cancel hiding comment" class="octicon octicon-x" viewBox="0 0 16 16" version="1.1" width="16" height="16" role="img"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
-                    </button>
-                    <h3 class="f4">Choose a reason for hiding this comment</h3>
-                    <p class="mb-3">
-                        The reason will be displayed to describe this comment to others. 
-                        <HyperlinkWrapper>
-                            <a href="https://help.github.com/articles/managing-disruptive-comments/#hiding-a-comment">
-                                Learn more
-                            </a>
-                        </HyperlinkWrapper>
-                        .
-                    </p>
-
-                    <div class="d-flex flex-wrap">
-                        <select name="classifier" class="form-select mb-2 mr-2" required v-model="minimizePane.reason" :disabled="minimizePane.loading">
-                            <option value="">
-                                Choose a reason
-                            </option>
-                            <option value="SPAM">Spam</option>
-                            <option value="ABUSE">Abuse</option>
-                            <option value="OFF_TOPIC">Off Topic</option>
-                            <option value="OUTDATED">Outdated</option>
-                            <option value="DUPLICATE">Duplicate</option>
-                            <option value="RESOLVED">Resolved</option>
-                        </select>
-
-                        <button type="submit" class="btn" style="height:34px;" :disabled="!minimizePane.reason || minimizePane.loading" @click="network_minimizeThisComment">
-                            {{minimizePane.loading ? 'Trying...' : 'Hide comment'}}
-                        </button>
-                    </div>
-                    
-                </MinimizePane>
-            </AnimatedHeightWrapper>
+            <MinimizePane :comment="data" v-if="showMinimizePane" @cancel="() => triggerMinimizePane(false)" @minimize-comment="payload => {triggerMinimizePane(false);$emit('minimize-comment',payload)}">
+            </MinimizePane>
 
             <CommentEditPane class="comment-create-edit-pane" 
                             @update-comment="updateCommentPostHook"
@@ -307,6 +274,7 @@
     import {authRequiredAjax,authRequiredGitHubGraphqlApiQuery,commonGet,authRequiredPost,cancelAndUpdateAxiosCancelTokenSource  } from '@/network'
     import * as graphql from '../graphql'
     import CommentEditPane from './CommentEditPane'
+    import {MinimizePane} from '../../../components'
     export default {
         inject: ['commentExtraDataProvided','issueGetter','viewerIsCollaborator','graphqlWritePermission'],
         data() {
@@ -321,11 +289,7 @@
                     paddingBottom: '8px',
                 },
                 deleteThisCommentLoading: false,
-                minimizePane: {
-                    show: false,
-                    reason: '',
-                    loading: false
-                },
+                showMinimizePane: false,
                 unminimizeLoading: false,
                 editing: false,
                 editHistories: {
@@ -495,9 +459,9 @@
                     this.closeModal()
                     try{
                         this.deleteThisCommentLoading = true
-                        let url = api.API_HANDLE_ISSUE_COMMENT({
+                        let url = api.API_ISSUE_COMMENT({
                             ...this.$route.params,
-                            comment: this.data.id
+                            commentId: this.data.id
                         })
                         
                         await authRequiredAjax(
@@ -520,39 +484,50 @@
                     }
                 }
             },
-            async network_minimizeThisComment() {
-                if(this.minimizePane.loading) return
-                if(!this.minimizePane.reason) {
-                    this.$toast('Please choose a minimize reason.')
-                    return 
-                }
+            async network_getEditHistories() {
+                if(this.editHistories.loading) return
+                if(this.editHistories.data.length > 0) return 
                 try{
-                    this.minimizePane.loading = true
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.GRAPHQL_MUTATION_MINIMIZE_COMMENT,
+                    this.editHistories.loading = true
+                    let url = api.API_PROXY_ISSUE_COMMENT_EDIT_HISTORIES(this.data.node_id)
+                    let res = await commonGet(url)
+                    this.parseEditHistories(res.data)
+                }catch(e) {
+                    this.handleError(e)
+                }finally{
+                    this.editHistories.loading = false
+                }
+            },
+            async network_createReaction(content) {
+                this.closeModal()
+                try{
+                    this.loadingCreateReaction = true
+                    let url = api.API_ISSUE_COMMENT_REACTIONS({
+                        repo: this.repo,
+                        owner: this.owner,
+                        commentId: this.data.id
+                    })
+
+                    this.reactions.data[content] += 1
+
+                    await authRequiredPost(
+                        url,
                         {
-                            variables: {
-                                subjectId: this.data.node_id,
-                                classifier: this.minimizePane.reason
+                            content
+                        },
+                        {
+                            headers: {
+                                "accept": "application/vnd.github.squirrel-girl-preview+json"
                             }
                         }
                     )
                     
-                    try{
-                        this.triggerMinimizePane(false)
-                        this.showMinimized = false
-                        this.$emit('minimize-comment',{
-                            comment: this.data,
-                            info: res.data.data.minimizeComment.minimizedComment
-                        })
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
 
                 }catch(e) {
                     this.handleError(e)
+                    this.reactions.data[content] -= 1
                 }finally{
-                    this.minimizePane.loading = false
+                    this.loadingCreateReaction = false
                 }
             },
             async network_unminimizeThisComment() {
@@ -584,54 +559,8 @@
                     this.unminimizeLoading = false
                 }
             },
-            async network_getEditHistories() {
-                if(this.editHistories.loading) return
-                if(this.editHistories.data.length > 0) return 
-                try{
-                    this.editHistories.loading = true
-                    let url = api.API_PROXY_ISSUE_COMMENT_EDIT_HISTORIES(this.data.node_id)
-                    let res = await commonGet(url)
-                    this.parseEditHistories(res.data)
-                }catch(e) {
-                    this.handleError(e)
-                }finally{
-                    this.editHistories.loading = false
-                }
-            },
-            async network_createReaction(content) {
-                this.closeModal()
-                try{
-                    this.loadingCreateReaction = true
-                    let url = api.API_ISSUE_COMMENT_REACTIONS({
-                        repo: this.repo,
-                        owner: this.owner,
-                        comment: this.data.id
-                    })
-
-                    this.reactions.data[content] += 1
-
-                    await authRequiredPost(
-                        url,
-                        {
-                            content
-                        },
-                        {
-                            headers: {
-                                "accept": "application/vnd.github.squirrel-girl-preview+json"
-                            }
-                        }
-                    )
-                    
-
-                }catch(e) {
-                    this.handleError(e)
-                    this.reactions.data[content] -= 1
-                }finally{
-                    this.loadingCreateReaction = false
-                }
-            },
-            triggerMinimizePane(payload) {
-                this.minimizePane.show = payload
+            triggerMinimizePane(payload = true) {
+                this.showMinimizePane = payload
                 if(payload) {
                     this.closeModal()
                 }
@@ -714,6 +643,7 @@
             SkeletonRectangle,
             SkeletonCircle,
             Modal,
+            MinimizePane,
             Container: styled.div``,
             Inner: styled.div``,
             Header: styled.div``,
@@ -725,7 +655,6 @@
             Action: styled.div``,
             AuthorAssociation: styled.span``,
             StretchCommentBtn: styled.div``,
-            MinimizePane: styled.div``,
             EditHistoryItem: styled.div``,
             Skeleton: styled.div``,
         }

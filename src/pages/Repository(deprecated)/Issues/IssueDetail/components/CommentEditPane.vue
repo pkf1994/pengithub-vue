@@ -48,9 +48,9 @@
                 try{
                     this.editCommentLoading = true
                     let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' update_issue_comment')
-                    let url = api.API_HANDLE_ISSUE_COMMENT({
+                    let url = api.API_ISSUE_COMMENT({
                         ...this.$route.params,
-                        comment: this.comment.id
+                        commentId: this.comment.id
                     })
 
                     let res = await authRequiredAjax(
