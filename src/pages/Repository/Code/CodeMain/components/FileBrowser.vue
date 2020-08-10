@@ -256,7 +256,6 @@
                 }       
             },
             async network_getContents() {
-                console.log('get content')
                 try{
                     this.contents.loading = true 
                     let url = api.API_CONTENTS({

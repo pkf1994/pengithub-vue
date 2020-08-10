@@ -46,7 +46,7 @@
                                     }">{{item.code}}</BlobCode> 
                     </div>
 
-                    <ReviewCommentGroup class="review-comment-wrapper" v-if="getRootReviewComment(item)" :rootReviewComment="getRootReviewComment(item)"></ReviewCommentGroup>
+                    <ReviewCommentGroup class="review-comment-wrapper" v-for="item in getRootReviewComments(item)" :key="item.id" :rootReviewComment="item"></ReviewCommentGroup>
 
                 </CodeLine>
             </div>
@@ -61,7 +61,7 @@
     import ReviewCommentGroup from './ReviewCommentGroup'
     import { authRequiredGet } from '@/network'
     export default {
-        inject: ['reviewCommentsProvided'],
+        inject: ['reviewCommentsProvided','pendingReviewComments'],
         props: {
             file: {
                 type: Object,
@@ -169,30 +169,38 @@
                 })
                 return diffHunkEntries
             },
-            reviewCommentsAtRightSide() {
+            reviewCommentsAtRightSideHolder() {
                 let commentArr = this.reviewCommentsProvided().filter(item => {
                     return item.path == this.file.filename && item.line && !item.in_reply_to_id && item.side == 'RIGHT'
                 })
-                let reviewComments = {}
+                let reviewCommentsHolder = {}
                 commentArr.forEach(i => {
-                    if(!reviewComments[i.line]) reviewComments[i.line] = i
+                    if(!reviewCommentsHolder[i.line]) {
+                        reviewCommentsHolder[i.line] = [i]
+                    }else{
+                        reviewCommentsHolder[i.line].push(i)
+                    }
                 })
-                return reviewComments
+                return reviewCommentsHolder
             },
-            reviewCommentsAtLeftSide() {
+            reviewCommentsAtLeftSideHolder() {
                 let commentArr = this.reviewCommentsProvided().filter(item => {
                     return item.path == this.file.filename && item.line && !item.in_reply_to_id && item.side == 'LEFT'
                 })
-                let reviewComments = {}
+                let reviewCommentsHolder = {}
                 commentArr.forEach(i => {
-                    if(!reviewComments[i.line]) reviewComments[i.line] = i
+                    if(!reviewCommentsHolder[i.line]) {
+                        reviewCommentsHolder[i.line] = [i]
+                    }else{
+                        reviewCommentsHolder[i.line].push(i)
+                    }
                 })
-                return reviewComments
+                return reviewCommentsHolder
             },
         },
         methods: {
-            getRootReviewComment(diffHunkEntry) {
-                return this.reviewCommentsAtRightSide[diffHunkEntry.additionLineIndex] || this.reviewCommentsAtLeftSide[diffHunkEntry.deletionLineIndex]
+            getRootReviewComments(diffHunkEntry) {
+                return this.reviewCommentsAtRightSideHolder[diffHunkEntry.additionLineIndex] || this.reviewCommentsAtLeftSideHolder[diffHunkEntry.deletionLineIndex]
             }
         },
         components: {

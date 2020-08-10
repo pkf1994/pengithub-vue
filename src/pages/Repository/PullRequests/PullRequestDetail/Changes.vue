@@ -35,6 +35,7 @@
         <EditorHeader class="editor-header" v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'">
             Submit your review
         </EditorHeader>
+
         <!-- <Editor v-if="changedFiles.data.length > 0" 
                 class="m-3"
                 ref="editor">
@@ -44,8 +45,8 @@
             <button class="btn btn-primary ml-1">
                 <span>Submit review</span>
             </button>
-        </Editor>
- -->
+        </Editor> -->
+
         <transition name="fade" appear>
             <CommonLoading v-if="loading || reviewComments.loading || changedFiles.loading"
                             :preventClickEvent="false"
@@ -72,7 +73,8 @@
         provide() {
             return {
                 reviewCommentsProvided: () => this.reviewComments.data,
-                reviewCommentsExtraData: () => this.reviewComments.extraData
+                reviewCommentsExtraData: () => this.reviewComments.extraData,
+                pendingReviewComments: () => this.pendingReviewComments.data
             }
         },
         data() {
@@ -86,6 +88,10 @@
                     data: [],
                     loading: false,
                     extraData: []
+                },
+                pendingReviewComments: {
+                    data: [],
+                    loading: false
                 },
                 changedFiles: {
                     data: [],
@@ -108,6 +114,7 @@
             this.network_getData()
             this.network_getReviewComments()
             this.network_getChangedFiles()
+            this.network_getPendingReview()
         },
         methods: {
             routeUpdateHook() {
@@ -228,6 +235,34 @@
                     this.changedFiles.loading = false
                 }
             },
+            async network_getPendingReview() {
+                if(!this.accessToken) return 
+                try {
+                    this.pendingReviewComments.loading = true
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_PR_PENDING_REVIEWS,
+                        {
+                            variables: {
+                                name: this.repo,
+                                owner: this.owner,
+                                number: parseInt(this.number)
+                            },
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_pending_review')
+                        }
+                    )
+
+                    try{
+                        console.log(res.data)
+                        this.pendingReviewComments.data = res.data.data.repository.pullRequest.reviews.nodes[0].comments.nodes
+                    }catch(e) {
+                        this.handleGraphqlError(e)
+                    }
+                } catch (e) {
+                    console.log(e)
+                } finally {
+                    this.pendingReviewComments.loading = false
+                }
+            },
             triggerSwitcherStretch() {
                 this.switcherStretched = !this.switcherStretched
             },
@@ -247,6 +282,7 @@
                 }
             }
         },
+      
         components: {
             CommonLoading,
             AnimatedHeightWrapper,

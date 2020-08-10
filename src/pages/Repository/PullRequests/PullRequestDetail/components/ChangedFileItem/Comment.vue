@@ -152,32 +152,6 @@
                     this.extraDataOfNewCreatedComment.loading = false
                 }
             },
-            async network_unminimizeThisComment() {
-                if(this.loadingUnminimizeComment) return
-                try{
-                    this.loadingUnminimizeComment = true
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.GRAPHQL_MUTATION_UNMINIMIZE_COMMENT,
-                        {
-                            variables: {
-                                subjectId: this.propsData.node_id,
-                            }
-                        }
-                    )
-                    
-                    try{
-                        this.handledComment = res.data.data.unminimizeComment.unminimizedComment
-                        this.closeModal()
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-
-                }catch(e) {
-                    this.handleError(e)
-                }finally{
-                    this.loadingUnminimizeComment = false
-                }
-            },
             triggerShowMinimized() {
                 this.showMinimized = !this.showMinimized
             },

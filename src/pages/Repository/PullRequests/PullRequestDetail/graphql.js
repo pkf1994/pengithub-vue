@@ -96,6 +96,9 @@ export const GRAPHQL_PULL_TIMELINE = `
       nodes(ids: $ids) {
         ... on PullRequestReviewComment {
           id
+          body
+          originalPosition
+          position
           viewerCanReact
           viewerCanUpdate
           viewerCanMinimize
@@ -208,3 +211,33 @@ export const GRAPHQL_PULL_TIMELINE = `
     
     `
   }
+
+  export const GRAPHQL_PR_PENDING_REVIEWS = `
+    query($name:String!,$owner:String!,$number:Int!) {
+      repository(name:$name,owner:$owner) {
+        pullRequest(number:$number) {
+          reviews(first:1,states:[PENDING]) {
+            totalCount
+            nodes{
+              id
+              body
+              viewerCanDelete
+              viewerCanUpdate
+              comments(first: 100) {
+                nodes{
+                  id
+                  body
+                  state
+                  createdAt
+                  viewerCanDelete
+                  viewerCanMinimize
+                  viewerCanReact
+                  viewerCanUpdate
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `

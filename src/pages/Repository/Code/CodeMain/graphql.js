@@ -13,7 +13,6 @@ query($id:ID!){
 `
 
 export const GRAPHQL_REPOSITORY_LAST_COMMITDATE_BY_PATH = payload => {
-  console.log(payload.path)
   let path = payload.path ? payload.path.replace(/^\//,'') : ''
   if(path.length > 0 && path[path.length - 1] !== '/') {
     path = `${path}/`
