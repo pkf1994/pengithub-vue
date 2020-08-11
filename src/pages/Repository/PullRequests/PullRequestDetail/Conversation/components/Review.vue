@@ -54,7 +54,7 @@
     import {util_markdownParse} from '@/util'
     import ReviewComment from './ReviewComment'
     import HiddenItemLoading from './HiddenItemLoading'
-    import * as graphql from '../graphql'
+    import * as graphql from '../../graphql'
     import * as api from '@/network/api'
     import Comment from './Comment'
     import { authRequiredGet,authRequiredGitHubGraphqlApiQuery  } from '@/network'

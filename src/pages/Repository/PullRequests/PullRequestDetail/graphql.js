@@ -96,9 +96,7 @@ export const GRAPHQL_PULL_TIMELINE = `
       nodes(ids: $ids) {
         ... on PullRequestReviewComment {
           id
-          body
-          originalPosition
-          position
+          
           viewerCanReact
           viewerCanUpdate
           viewerCanMinimize
@@ -219,24 +217,68 @@ export const GRAPHQL_PULL_TIMELINE = `
           reviews(first:1,states:[PENDING]) {
             totalCount
             nodes{
+              databaseId
               id
               body
               viewerCanDelete
               viewerCanUpdate
-              comments(first: 100) {
-                nodes{
-                  id
-                  body
-                  state
-                  createdAt
-                  viewerCanDelete
-                  viewerCanMinimize
-                  viewerCanReact
-                  viewerCanUpdate
-                }
-              }
             }
           }
+        }
+      }
+    }
+  `
+
+  export const GRAPHQL_COMMIT_COMMENTS = payload => {
+    return `
+    {
+      node(id: "${payload.nodeId}") {
+        ... on CommitCommentThread {
+          comments(first: ${payload.perPage}${payload.after ? ',after:"' + payload.after +'"' : ''}) {
+            totalCount
+            nodes {
+              id
+              position
+              createdAt
+              bodyHTML
+              isMinimized
+              minimizedReason
+              viewerCanUpdate
+              viewerCanDelete
+              viewerCanReact
+              viewerCanMinimize
+              viewerCannotUpdateReasons
+              viewerDidAuthor
+              resourcePath
+              userContentEdits {
+                totalCount
+              }
+              author {
+                login
+                avatarUrl
+              }
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+        }
+      }
+    }
+    `
+  }
+
+  export const GRAPHQL_COMMIT_COMMENT = `
+    query($ids: [ID!]!) {
+      nodes(ids:$ids) {
+        ... on CommitComment{
+          isMinimized
+          minimizedReason
+          viewerCanDelete
+          viewerCanUpdate
+          viewerCanMinimize
+          viewerCanReact
         }
       }
     }

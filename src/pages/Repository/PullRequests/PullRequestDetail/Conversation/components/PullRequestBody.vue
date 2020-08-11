@@ -4,9 +4,9 @@
 
         </BodyHTML>
 
-        <Reaction v-if="extraData.viewerCanReact || reactions.data.total_count > 0" 
+        <Reactions v-if="extraData.viewerCanReact || reactions.data.total_count > 0" 
                     :data="reactions.data" 
-                    :disabled="!extraData.viewerCanReact"></Reaction>
+                    :disabled="!extraData.viewerCanReact"></Reactions>
         
     </Container>
 </template>
@@ -16,7 +16,7 @@
     import {LoadingIconEx,AnimatedHeightWrapper} from '@/components'
     import {util_markdownParse} from '@/util'
     import {mapState} from 'vuex'
-    import Reaction from './Reaction'
+    import {Reactions} from '../../components'
     import * as api from '@/network/api'
     import {authRequiredGet} from '@/network'
     export default {
@@ -92,7 +92,7 @@
         components: {
             LoadingIconEx,
             AnimatedHeightWrapper,
-            Reaction,
+            Reactions,
             Container: styled.div``,
             LoadingWrapper: styled.div``,
             BodyHTML: styled.div``,

@@ -402,8 +402,8 @@
     import Review from './Review'
     import {util_emoji} from '@/util'
     import {Label,AnimatedHeightWrapper,AnimatedWidthWrapper,ImgWrapper} from '@/components'
-    import {CommitStatusIcon} from '../../../components'
-    import CommitComment from './CommitComment/CommitComment.vue'
+    import {CommitStatusIcon} from '../../../../components'
+    import CommitComment from './CommitComment.vue'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
     export default {
         inject: ['owner','repo','pullRequestProvided'],

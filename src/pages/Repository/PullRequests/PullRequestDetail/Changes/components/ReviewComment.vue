@@ -55,10 +55,10 @@
 
                     </BodyHTML>
 
-                    <Reaction   :data="propsData.reactions" 
+                    <Reactions   :data="propsData.reactions" 
                                 :commentId="propsData.id"
                                 commentType="reviewComment"
-                                :disabled="!extraData.viewerCanReact"></Reaction>
+                                :disabled="!extraData.viewerCanReact"></Reactions>
                 </Body>
 
                 <LoadingWrapper v-if="!propsData.id" class="loading-wrapper flex flex-justify-center flex-items-center">
@@ -77,8 +77,8 @@
     import {LoadingIconEx,Popover,ImgWrapper} from '@/components'
     import {authRequiredGitHubGraphqlApiQuery} from '@/network'
     import ClipboardJS from 'clipboard';
-    import Reaction from '../Reaction'
-    import ReviewCommentEditor from '../ReviewCommentEditor'
+    import {Reactions} from '../../components'
+    import {ReviewCommentEditor} from '../../Conversation/components'
     import {MinimizePane,UnminimizeButton,CommentDeleteButton} from '../../../../components'
     import * as graphql from '../../graphql.js'
     export default {
@@ -172,7 +172,7 @@
             LoadingIconEx,
             Popover,
             ImgWrapper,
-            Reaction,
+            Reactions,
             MinimizePane,
             UnminimizeButton,
             ReviewCommentEditor,

@@ -46,7 +46,9 @@
                                     }">{{item.code}}</BlobCode> 
                     </div>
 
-                    <ReviewCommentGroup class="review-comment-wrapper" v-for="item in getRootReviewComments(item)" :key="item.id" :rootReviewComment="item"></ReviewCommentGroup>
+                    <ReviewCommentGroup class="review-comment-wrapper" v-for="rootReviewCommentItem in getRootReviewComments(index)" :key="rootReviewCommentItem.id" :rootReviewComment="rootReviewCommentItem"></ReviewCommentGroup>
+
+                    <ReviewCommentGroup class="review-comment-wrapper" v-for="pendingRootReviewCommentItem in getPendingRootReviewComments(index)" :key="pendingRootReviewCommentItem.id" :rootReviewComment="pendingRootReviewCommentItem" :pending="true"></ReviewCommentGroup>
 
                 </CodeLine>
             </div>
@@ -169,38 +171,41 @@
                 })
                 return diffHunkEntries
             },
-            reviewCommentsAtRightSideHolder() {
+            rootReviewCommentsHolder() {
                 let commentArr = this.reviewCommentsProvided().filter(item => {
-                    return item.path == this.file.filename && item.line && !item.in_reply_to_id && item.side == 'RIGHT'
+                    return item.path == this.file.filename && item.position && !item.in_reply_to_id
                 })
                 let reviewCommentsHolder = {}
                 commentArr.forEach(i => {
-                    if(!reviewCommentsHolder[i.line]) {
-                        reviewCommentsHolder[i.line] = [i]
+                    if(!reviewCommentsHolder[i.position]) {
+                        reviewCommentsHolder[i.position] = [i]
                     }else{
-                        reviewCommentsHolder[i.line].push(i)
+                        reviewCommentsHolder[i.position].push(i)
                     }
                 })
                 return reviewCommentsHolder
             },
-            reviewCommentsAtLeftSideHolder() {
-                let commentArr = this.reviewCommentsProvided().filter(item => {
-                    return item.path == this.file.filename && item.line && !item.in_reply_to_id && item.side == 'LEFT'
+            pendingRootReviewCommentsHolder() {
+                let commentArr = this.pendingReviewComments().filter(item => {
+                    return item.path == this.file.filename && item.position && !item.in_reply_to_id
                 })
                 let reviewCommentsHolder = {}
                 commentArr.forEach(i => {
-                    if(!reviewCommentsHolder[i.line]) {
-                        reviewCommentsHolder[i.line] = [i]
+                    if(!reviewCommentsHolder[i.position]) {
+                        reviewCommentsHolder[i.position] = [i]
                     }else{
-                        reviewCommentsHolder[i.line].push(i)
+                        reviewCommentsHolder[i.position].push(i)
                     }
                 })
                 return reviewCommentsHolder
-            },
+            }
         },
         methods: {
-            getRootReviewComments(diffHunkEntry) {
-                return this.reviewCommentsAtRightSideHolder[diffHunkEntry.additionLineIndex] || this.reviewCommentsAtLeftSideHolder[diffHunkEntry.deletionLineIndex]
+            getRootReviewComments(index) {
+                return this.rootReviewCommentsHolder[index]
+            },
+            getPendingRootReviewComments(index) {
+                return this.pendingRootReviewCommentsHolder[index]
             }
         },
         components: {

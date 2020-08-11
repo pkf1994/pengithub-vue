@@ -30,8 +30,8 @@
             <CommentBody v-html="bodyHTML" class="markdown-body p-0 pt-2 f5">
             </CommentBody>
             
-            <Reaction class="mt-2" :data="reply.reactions || reactions.data || {}" :disabled="!extraData.viewerCanReact" commentType="reviewComment">
-            </Reaction>
+            <Reactions class="mt-2" :data="reply.reactions || reactions.data || {}" :disabled="!extraData.viewerCanReact" commentType="reviewComment">
+            </Reactions>
         </div>
 
         <ReviewCommentEditor v-show="showReviewCommentEditor" :comment="data" @cancel="() => triggerShowReviewCommentEditor(false)" @update-success="reviewCommentUpdateSuccessHandler"></ReviewCommentEditor>
@@ -42,7 +42,7 @@
     import styled from 'vue-styled-components'
     import {util_markdownParse} from '@/util'
     import {ImgWrapper,Popover} from '@/components'
-    import Reaction from './Reaction'
+    import {Reactions} from '../../components'
     import ReviewCommentEditor from './ReviewCommentEditor'
     import {authRequiredGet,authRequiredDelete} from '@/network'
     import * as api from '@/network/api'
@@ -153,7 +153,7 @@
         },
         components: {
             ImgWrapper,
-            Reaction,
+            Reactions,
             ReviewCommentEditor,
             Popover,
             Container: styled.div``,

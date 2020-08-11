@@ -23,7 +23,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_dateFormat} from '../../../../../util'
+    import {util_dateFormat} from '@/util'
     export default {
         props: {
             data: {

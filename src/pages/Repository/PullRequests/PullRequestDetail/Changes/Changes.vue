@@ -60,11 +60,12 @@
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {CommonLoading,AnimatedHeightWrapper,SimpleDiffView} from '@/components'
-    import {HiddenItemLoading,ChangedFileItem} from './components'
+    import {HiddenItemLoading} from '../components'
+    import {ChangedFileItem} from './components'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
     import * as api from '@/network/api'
     import {util_dateFormat,util_emoji} from '@/util'
-    import * as graphql from './graphql'
+    import * as graphql from '../graphql'
     let parse = require("parse-link-header")
     export default {
         mixins: [RouteUpdateAwareMixin],
@@ -74,7 +75,7 @@
             return {
                 reviewCommentsProvided: () => this.reviewComments.data,
                 reviewCommentsExtraData: () => this.reviewComments.extraData,
-                pendingReviewComments: () => this.pendingReviewComments.data
+                pendingReviewComments: () => this.pendingReview.reviewComments.data
             }
         },
         data() {
@@ -89,9 +90,13 @@
                     loading: false,
                     extraData: []
                 },
-                pendingReviewComments: {
-                    data: [],
-                    loading: false
+                pendingReview: {
+                    data: {},
+                    loading: false,
+                    reviewComments: {
+                        data: [],
+                        loading: false
+                    }
                 },
                 changedFiles: {
                     data: [],
@@ -238,7 +243,7 @@
             async network_getPendingReview() {
                 if(!this.accessToken) return 
                 try {
-                    this.pendingReviewComments.loading = true
+                    this.pendingReview.loading = true
                     let res = await authRequiredGitHubGraphqlApiQuery(
                         graphql.GRAPHQL_PR_PENDING_REVIEWS,
                         {
@@ -253,14 +258,45 @@
 
                     try{
                         console.log(res.data)
-                        this.pendingReviewComments.data = res.data.data.repository.pullRequest.reviews.nodes[0].comments.nodes
+                        this.pendingReview.data = res.data.data.repository.pullRequest.reviews.nodes[0] || {}
+                        this.network_getPendingReviewComments()
                     }catch(e) {
                         this.handleGraphqlError(e)
                     }
                 } catch (e) {
                     console.log(e)
                 } finally {
-                    this.pendingReviewComments.loading = false
+                    this.pendingReview.loading = false
+                }
+            },
+            async network_getPendingReviewComments() {
+                try {
+                    this.pendingReview.reviewComments.loading = true
+                    let url = api.API_REVIEW_COMMENTS_OF_REVIEW({
+                        owner: this.owner,
+                        repo: this.repo,
+                        number: this.number,
+                        reviewId: this.pendingReview.data.databaseId,
+                        params: {
+                            per_page: 100
+                        }
+                    })
+
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_pending_review_comments'),
+                            headers: {
+                                'accept':'application/vnd.github.squirrel-girl-preview'
+                            }
+                        }
+                    )
+
+                    this.pendingReview.reviewComments.data = res.data
+                } catch (e) {
+                    console.log(e)
+                } finally {
+                    this.pendingReview.reviewComments.loading = false
                 }
             },
             triggerSwitcherStretch() {

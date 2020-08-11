@@ -1,10 +1,10 @@
 <template>
     <Container>
-        <Comment style="max-width: 100vw;border-right: 1px solid #d1d5da;" :propsData="rootReviewComment"></Comment>
+        <ReviewComment style="max-width: 100vw;border-right: 1px solid #d1d5da;" :propsData="rootReviewComment"></ReviewComment>
+        
+        <ReviewComment class="border-top" v-for="commentItem in reviewCommentsProvided().filter(i => i.in_reply_to_id == rootReviewComment.id)" style="max-width: 100vw;border-right: 1px solid #d1d5da;" :propsData="commentItem" :key="commentItem.id"></ReviewComment>
 
-        <Comment class="border-top" v-for="commentItem in reviewCommentsProvided().filter(i => i.in_reply_to_id == rootReviewComment.id)" style="max-width: 100vw;border-right: 1px solid #d1d5da;" :propsData="commentItem" :key="commentItem.id"></Comment>
-
-        <Comment :newCreated="true" class="border-top" v-for="commentItem in repliesJustCreated" style="max-width: 100vw;border-right: 1px solid #d1d5da;" :propsData="commentItem" :key="commentItem.id"></Comment>
+        <ReviewComment :newCreated="true" class="border-top" v-for="commentItem in repliesJustCreated" style="max-width: 100vw;border-right: 1px solid #d1d5da;" :propsData="commentItem" :key="commentItem.id"></ReviewComment>
 
         <div class="comment-btn-wrapper" v-if="repoOwnerType() == 'User'" style="border-right: 1px solid #d1d5da;">
             <div class="px-3 pb-3" v-if="!showReviewCommentCreator">
@@ -19,7 +19,7 @@
 </template>
 <script>
     import styled from 'vue-styled-components'
-    import Comment from './Comment'
+    import ReviewComment from './ReviewComment'
     import ReviewOrReviewCommentReplyCreator from './ReviewOrReviewCommentReplyCreator'
     export default {
         inject: ['reviewCommentsProvided','repoOwnerType'],
@@ -42,7 +42,7 @@
             }
         },
         components: {
-            Comment,
+            ReviewComment,
             ReviewOrReviewCommentReplyCreator,
             Container: styled.div``
         }

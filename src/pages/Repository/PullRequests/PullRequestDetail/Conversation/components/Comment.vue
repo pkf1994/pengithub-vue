@@ -60,10 +60,10 @@
 
                     </BodyHTML>
 
-                    <Reaction   v-if="!extraData.isMinimized" 
+                    <Reactions   v-if="!extraData.isMinimized" 
                                 :data="reactions.data" 
                                 :commentId="propsData.id"
-                                :disabled="!extraData.viewerCanReact"></Reaction>
+                                :disabled="!extraData.viewerCanReact"></Reactions>
                 </Body>
 
                 <PullRequestCommentEditor v-else :comment="{...propsData,body}" @update-comment-success="updateCommentPostHandler" @cancel="() => triggerShowCommentEditor(false)" class="p-3"></PullRequestCommentEditor>
@@ -78,7 +78,7 @@
     import {util_dateFormat,util_markdownParse} from '@/util'
     import {LoadingIconEx,Popover,ImgWrapper} from '@/components'
     import ClipboardJS from 'clipboard';
-    import Reaction from './Reaction'
+    import {Reactions} from '../../components'
     import PullRequestCommentEditor from './PullRequestCommentEditor'
     import {authRequiredGet,authRequiredDelete} from '@/network'
     import * as api from '@/network/api'
@@ -218,7 +218,7 @@
         components: {
             LoadingIconEx,
             Popover,
-            Reaction,
+            Reactions,
             ImgWrapper,
             PullRequestCommentEditor,
             Container: styled.div``,

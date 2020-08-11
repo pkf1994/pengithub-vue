@@ -50,10 +50,10 @@
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {CommonLoading,ImgWrapper,SkeletonCircle,SkeletonRectangle} from '@/components'
-    import {HiddenItemLoading} from './components'
+    import {HiddenItemLoading} from '../components'
     import { authRequiredGet } from '@/network'
     import {util_dateFormat,util_emoji} from '@/util'
-    import * as graphql from './graphql'
+    import * as graphql from '../graphql'
     import * as api from '@/network/api'
     let parse = require('parse-link-header')
     export default {

@@ -1,7 +1,7 @@
 <template>
     <Container class="flex-grow-1">
             <Header  class="px-3 pt-3">
-                <HeaderActions class="d-flex flex-justify-between flex-items-center">
+               <!--  <HeaderActions class="d-flex flex-justify-between flex-items-center">
                    <State class="State mr-2 d-inline-flex flex-items-center" 
                         :class="{'State--green':pullRequestProvided().data.state === 'open' && !pullRequestProvided().data.draft || !pullRequestProvided().data.node_id,'State--red':pullRequestProvided().data.state === 'closed'}" 
                         style="text-transform:capitalize;border-radius:2em;padding: 5px 12px;min-width: 70px">
@@ -11,14 +11,8 @@
 
                     <a href="javascript:return false" @click="scrollToBottom">Jump to bottom</a>
                 </HeaderActions>
-
+ -->
                 <Skeleton v-if="!pullRequestProvided().data.title">
-                    <SkeletonRectangle :height="18" style="width:100%;" class="mt-3"></SkeletonRectangle>
-                    <SkeletonRectangle :height="18" style="width:60%;margin-top:12px"></SkeletonRectangle>
-                    <div  class="d-flex flex-items-center" style="margin-top:12px">
-                        <SkeletonRectangle :height="14" :width="12" class="mr-2"></SkeletonRectangle> 
-                        <SkeletonRectangle :height="14" style="width:40%"></SkeletonRectangle>
-                    </div> 
                     <div class="d-flex flex-items-center mt-3 pb-3 border-bottom">
                         <SkeletonCircle :diameter="32" class="mr-2"></SkeletonCircle>
                         <SkeletonRectangle :height="14" class="flex-grow-1"></SkeletonRectangle>
@@ -29,7 +23,7 @@
                 </Skeleton>
 
                 <div v-else>
-                    <HeaderTitle class="title" style="font-weight: bold; margin-top:10px">
+                    <!-- <HeaderTitle class="title" style="font-weight: bold; margin-top:10px">
                         {{pullRequestProvided().data.title}}
                         <span class="text-normal text-gray">#{{pullRequestProvided().data.number}}</span>
                     </HeaderTitle>
@@ -39,7 +33,7 @@
                             <svg class="octicon octicon-git-branch" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 5c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v.3c-.02.52-.23.98-.63 1.38-.4.4-.86.61-1.38.63-.83.02-1.48.16-2 .45V4.72a1.993 1.993 0 00-1-3.72C.88 1 0 1.89 0 3a2 2 0 001 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-.53-.2-1-.53-1.36.09-.06.48-.41.59-.47.25-.11.56-.17.94-.17 1.05-.05 1.95-.45 2.75-1.25S8.95 7.77 9 6.73h-.02C9.59 6.37 10 5.73 10 5zM2 1.8c.66 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2C1.35 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2zm0 12.41c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm6-8c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
                             {{pullRequestProvided().data.head && pullRequestProvided().data.head.label}}
                         </span>    
-                    </Branch>
+                    </Branch> -->
 
                     <AuthorAndLastEdit class="author-and-last-edit d-flex">
                         <div class="flex-auto">
@@ -57,9 +51,6 @@
                             </div>
                         </div> 
 
-                        <!-- <div class="ml-2">
-                            <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
-                        </div>   -->
                     </AuthorAndLastEdit>
                 </div> 
 
@@ -195,13 +186,13 @@
     import {CommonLoading,Label,AnimatedHeightWrapper,ImgWrapper,LoadingIconEx,Progress,IssueIcon,Subscription,SkeletonCircle,SkeletonRectangle} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
     import {TimelineItem,Comment,HiddenItemLoading,PullRequestCommentCreator,ProjectCard,PullRequestBody} from './components'
-    import {IssueNotificationSettingPane,LockIssueButton} from '../../components'
+    import {IssueNotificationSettingPane,LockIssueButton} from '../../../components'
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
         authRequiredGitHubGraphqlApiQuery} from '@/network'
     import * as api from '@/network/api'
-    import * as graphql from './graphql'
+    import * as graphql from '../graphql'
     import {mapState,mapActions} from 'vuex'
     var parse = require('parse-link-header');
     var parse = require('parse-link-header');

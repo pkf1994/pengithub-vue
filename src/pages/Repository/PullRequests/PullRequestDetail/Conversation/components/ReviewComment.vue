@@ -98,13 +98,13 @@
     import styled from 'vue-styled-components'
     import {util_dateFormat,util_analyseFileType,util_markdownParse} from '@/util'
     import {LoadingIconEx,AnimatedHeightWrapper,Popover,SimpleDiffView, ImgWrapper} from '@/components'
-    import HiddenItemLoading from './HiddenItemLoading'
+    import {HiddenItemLoading} from '../../components'
     import {mapState} from 'vuex'
     import ClipboardJS from 'clipboard';
-    import Reaction from './Reaction'
+    import {Reactions} from '../../components'
     import ReviewCommentReply from './ReviewCommentReply'
     import ReviewCommentReplyCreator from './ReviewCommentReplyCreator'
-    import * as graphql from '../graphql'
+    import * as graphql from '../../graphql'
     import * as api from '@/network/api'
     import { authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
     export default {
@@ -316,7 +316,7 @@
             LoadingIconEx,
             AnimatedHeightWrapper,
             Popover,
-            Reaction,
+            Reactions,
             HiddenItemLoading,
             SimpleDiffView,
             ImgWrapper,

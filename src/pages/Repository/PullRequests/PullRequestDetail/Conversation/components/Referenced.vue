@@ -25,7 +25,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '../../../../../components'
+    import {LoadingIconEx,AnimatedHeightWrapper,Popover} from '@/components'
     import {mapState} from 'vuex'
     import ClipboardJS from 'clipboard';
     export default {

@@ -1,12 +1,15 @@
 <template>
-    <nav class="tabs">
-        <router-link class="router-link" v-for="tabItem in tabs"
-                     exact
-                     :key="tabItem.label"
-                     :to="tabItem.to">
-            {{tabItem.label}}
-        </router-link>
-    </nav>
+    <div class="tabs mt-2 px-3">
+        <nav style="margin-bottom: -1px" class="no-wrap overflow-x-auto">
+            <router-link class="router-link" v-for="tabItem in tabs"
+                        exact
+                        :key="tabItem.label"
+                        :to="tabItem.to">
+                {{tabItem.label}}
+            </router-link>
+        </nav>
+    </div>
+    
 </template>
 
 <script>
@@ -25,24 +28,27 @@
         display: table;
         width: 100%;
         table-layout: fixed;
+        border-bottom: 1px solid #e1e4e8;
     }
     .tabs>a:first-child {
         border-left: 0;
     }
     .router-link {
-        background: #fafbfc;
-        display: table-cell;
-        padding: 10px 0;
+        display: inline-block;
+        flex-shrink: 0;
+        padding: 8px 16px;
         font-size: 14px;
-        font-weight: 600;
-        text-align: center;
-        border-bottom: 1px solid #dfe2e5;
+        line-height: 23px;
+        color: #24292e;
+        text-decoration: none;
+        background-color: initial;
+        border: 1px solid transparent;
+        border-bottom: 0;
     }
     .router-link-active{
         color: #444d56;
         background-color: #fff;
-        border-right: 1px solid #dfe2e5;
-        border-bottom-color: #fff;
-        border-left: 1px solid #dfe2e5;
+        border-color: #e1e4e8;
+        border-radius: 6px 6px 0 0;
     }
 </style>
