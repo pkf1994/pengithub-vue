@@ -16,8 +16,8 @@
 
         <DiffView class="diff-view">
             <div :class="{'d-inline-block':!isProseFileType}" style="min-width: 100%;">
-                <CodeLine v-for="(item,index) in diffHunkEntries" :key="index" class="width-full">
-                    <div class="d-flex">
+                <CodeLine  v-for="(item,index) in diffHunkEntries" :key="index" class="width-full">
+                    <div @click.stop="triggerShowSingleCommentCreator(index)" class="d-flex">
                         <BlobNum    class="blob-num"  
                                     :data-line-number="item.type === 'hunk' ? '...' : item.deletionLineIndex" 
                                     :class="{
@@ -48,11 +48,14 @@
 
                     <ReviewCommentGroup class="review-comment-wrapper" v-for="rootReviewCommentItem in getRootReviewComments(index)" :key="rootReviewCommentItem.id" :rootReviewComment="rootReviewCommentItem"></ReviewCommentGroup>
 
-                    <ReviewCommentGroup class="review-comment-wrapper" v-for="pendingRootReviewCommentItem in getPendingRootReviewComments(index)" :key="pendingRootReviewCommentItem.id" :rootReviewComment="pendingRootReviewCommentItem" :pending="true"></ReviewCommentGroup>
+                    <!--  <ReviewCommentGroup class="review-comment-wrapper" v-for="pendingRootReviewCommentItem in getPendingRootReviewComments(index)" :key="pendingRootReviewCommentItem.id" :rootReviewComment="pendingRootReviewCommentItem" :pending="true"></ReviewCommentGroup> -->
 
+                    <SingleCommentCreator style="width:100vw" :path="file.filename" :position="index" v-if="showSingleCommentCreatorAt.some(i => i == index)" @cancel="() => triggerShowSingleCommentCreator(index,false)"></SingleCommentCreator>
                 </CodeLine>
             </div>
         </DiffView>
+
+        
 
     </Container>
 </template>
@@ -61,6 +64,7 @@
     import styled from 'vue-styled-components'
      import {util_analyseFileType} from '@/util'
     import ReviewCommentGroup from './ReviewCommentGroup'
+    import SingleCommentCreator from './SingleCommentCreator'
     import { authRequiredGet } from '@/network'
     export default {
         inject: ['reviewCommentsProvided','pendingReviewComments'],
@@ -68,6 +72,11 @@
             file: {
                 type: Object,
                 required: true
+            }
+        },
+        data() {
+            return {
+                showSingleCommentCreatorAt: []
             }
         },
         computed: {
@@ -206,9 +215,19 @@
             },
             getPendingRootReviewComments(index) {
                 return this.pendingRootReviewCommentsHolder[index]
+            },
+            triggerShowSingleCommentCreator(payload,flag = true) {
+                if(payload == 0) return 
+                let idx = this.showSingleCommentCreatorAt.indexOf(payload)
+                if(flag) {
+                    if(idx == -1) this.showSingleCommentCreatorAt.push(payload)
+                } else {
+                    if(idx !== undefined) this.showSingleCommentCreatorAt.splice(idx,1)
+                }
             }
         },
         components: {
+            SingleCommentCreator,
             ReviewCommentGroup,
             Container: styled.div``,
             DiffHeader: styled.div``,
@@ -279,7 +298,6 @@
 
 .diff-view{
     position: relative;
-    overflow-y: hidden;
     overflow-x: auto;
 }
 

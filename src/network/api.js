@@ -169,7 +169,8 @@ export const API_ISSUE = (payload) => {
 }
 
 export const API_ISSUE_TIMELINE = (payload) => {
-    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/timeline`
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/timeline?${query}`
 }
 
 export const API_PULLREQUEST = (payload) => {
@@ -177,6 +178,10 @@ export const API_PULLREQUEST = (payload) => {
 }
 
 export const API_REVIEW = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/reviews/${payload.reviewId}`
+
+export const API_CREATE_REVIEW = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/reviews`
+
+export const API_SUBMIT_REVIEW = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/reviews/${payload.reviewId}/events`
 
 export const API_REVIEW_COMMENTS_OF_REVIEW = (payload) => {
     let query = util_queryParse.querify(payload.params)

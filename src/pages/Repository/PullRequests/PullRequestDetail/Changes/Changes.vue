@@ -1,20 +1,20 @@
 <template>
-    <Container>
-            <Switcher class="switcher ">
+    <CommonLoadingWrapper :loading="reviewComments.loading || reviewCommentsExtraData.loading || changedFiles.loading" :position="changedFiles.loading ? 'center' : 'corner'">
+            <Switcher v-if="changedFiles.data.length > 0" class="switcher ">
                 <button class="text-left width-full btn-link text-gray-dark" @click="triggerSwitcherStretch" >
                     <svg data="stretch-icon" v-if="!switcherStretched" class="octicon octicon-chevron-down switcher-icon-open" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 11L0 6l1.5-1.5L5 8.25 8.5 4.5 10 6l-5 5z"></path></svg>
                     <svg data="stretch-icon" v-else class="octicon octicon-chevron-up switcher-icon-close" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 10l-1.5 1.5L5 7.75 1.5 11.5 0 10l5-5 5 5z"></path></svg>
 
                     <svg class="octicon octicon-diff switcher-icon" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6 7h2v1H6v2H5V8H3V7h2V5h1v2zm-3 6h5v-1H3v1zM7.5 2L11 5.5V15c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h6.5zM10 6L7 3H1v12h9V6zM8.5 0H3v1h5l4 4v8h1V4.5L8.5 0z"></path></svg>
 
-                    {{pullRequestProvided().changed_files}} changed {{pullRequestProvided().changed_files > 1 ? 'files' : 'file'}}
+                    {{pullRequestProvided().data.changed_files}} changed {{pullRequestProvided().data.changed_files > 1 ? 'files' : 'file'}}
                     <span class="meta text-gray">
                         <span class="text-green">
-                            {{pullRequestProvided().additions}} {{pullRequestProvided().additions > 1 ? 'additions' : 'addition'}}
+                            {{pullRequestProvided().data.additions}} {{pullRequestProvided().data.additions > 1 ? 'additions' : 'addition'}}
                         </span>
                         and
                         <span class="text-red">
-                            {{pullRequestProvided().deletions}} {{pullRequestProvided().deletions > 1 ? 'deletions' : 'deletion'}}
+                            {{pullRequestProvided().data.deletions}} {{pullRequestProvided().data.deletions > 1 ? 'deletions' : 'deletion'}}
                         </span>
                     </span>    
                 </button>
@@ -35,6 +35,7 @@
         <EditorHeader class="editor-header" v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'">
             Submit your review
         </EditorHeader>
+        <ReviewSubmitter v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'"></ReviewSubmitter>
 
         <!-- <Editor v-if="changedFiles.data.length > 0" 
                 class="m-3"
@@ -47,21 +48,15 @@
             </button>
         </Editor> -->
 
-        <transition name="fade" appear>
-            <CommonLoading v-if="loading || reviewComments.loading || changedFiles.loading"
-                            :preventClickEvent="false"
-                            :position="loading ? 'center' : 'corner'"/>
-        </transition> 
-
-    </Container>
+    </CommonLoadingWrapper>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading,AnimatedHeightWrapper,SimpleDiffView} from '@/components'
+    import {CommonLoadingWrapper,AnimatedHeightWrapper,SimpleDiffView} from '@/components'
     import {HiddenItemLoading} from '../components'
-    import {ChangedFileItem} from './components'
+    import {ChangedFileItem,ReviewSubmitter} from './components'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
     import * as api from '@/network/api'
     import {util_dateFormat,util_emoji} from '@/util'
@@ -73,29 +68,34 @@
         inject: ['pullRequestProvided','repoOwnerType'],
         provide() {
             return {
-                reviewCommentsProvided: () => this.reviewComments.data,
-                reviewCommentsExtraData: () => this.reviewComments.extraData,
-                pendingReviewComments: () => this.pendingReview.reviewComments.data
+                reviewCommentsProvided: () => [...this.reviewComments.data,...this.pendingReview.reviewComments.data],
+                reviewCommentsExtraData: () => this.reviewCommentsExtraData.data,
+                pendingReviewComments: () => this.pendingReview.reviewComments.data,
+                pendingReview: () => this.pendingReview,
+                reviewCommentsGetter: () => this.network_getReviewComments,
+                pendingReviewGetter: () => this.network_getPendingReview,
+                replyCreatedHook: () => this.replyCreatedHook
             }
         },
         data() {
             return {
                 switcherStretched: false,
-                data: '',
-                loading: false,
                 pageInfo: {},
                 totalCount: 0,
                 reviewComments: {
                     data: [],
                     loading: false,
-                    extraData: []
+                },
+                reviewCommentsExtraData: {
+                    data: [],
+                    loading: false
                 },
                 pendingReview: {
                     data: {},
                     loading: false,
                     reviewComments: {
                         data: [],
-                        loading: false
+                        loading: false,
                     }
                 },
                 changedFiles: {
@@ -117,41 +117,12 @@
         },
         created() {
             this.network_getData()
-            this.network_getReviewComments()
-            this.network_getChangedFiles()
-            this.network_getPendingReview()
         },
         methods: {
-            routeUpdateHook() {
-                this.network_getData()
+            network_getData() {
                 this.network_getReviewComments()
                 this.network_getChangedFiles()
-            },
-            async network_getData() {
-                try{
-                    this.loading = true
-                    let sourceAndCancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-
-                    let url = api.API_PULLREQUEST({
-                        repo: this.repo,
-                        owner: this.owner,
-                        number: this.number
-                    })
-                    let res = await authRequiredGet(
-                        url,
-                        {
-                            cancelToken:sourceAndCancelToken.cancelToken,
-                            headers: {
-                                "Accept": "application/vnd.github.VERSION.diff"
-                            }
-                        }
-                    )
-                    this.data = res.data
-                }catch(e) {
-                    this.handleError(e)
-                }finally{
-                    this.loading = false
-                }
+                this.network_getPendingReview()
             },
             async network_getReviewComments() {
                 try{
@@ -189,27 +160,30 @@
                     }
 
                     this.reviewComments.data = reviewComments.filter(i => i.line)
-                    if(this.accessToken) this.network_getReviewCommentsExtraData() 
+                    if(this.accessToken) await this.network_getReviewCommentsExtraData() 
                 }catch(e) {
                     console.log(e)
                 }finally{
                     this.reviewComments.loading = false
                 }
             },
-            async network_getReviewCommentsExtraData() {
-                if(this.reviewComments.data.length == 0) return 
+            async network_getReviewCommentsExtraData(comments) {
+                if(this.reviewComments.data.length == 0 && !comments) return 
                 try {
+                    this.reviewCommentsExtraData.loading = true
                     let res = await authRequiredGitHubGraphqlApiQuery(
                         graphql.GRAPHQL_PR_REVIEW_COMMENTS,
                         {
                             variables: {
-                                ids: this.reviewComments.data.map( i => i.node_id)
+                                ids: comments ? comments.map(i => i.node_id) : this.reviewComments.data.map( i => i.node_id)
                             }
                         }
                     )
-                    this.reviewComments.extraData = res.data.data.nodes
+                    this.reviewCommentsExtraData.data = this.reviewCommentsExtraData.data.concat(res.data.data.nodes)
                 } catch (e) {
                     console.log(e)
+                }finally {
+                    this.reviewCommentsExtraData.loading = false
                 }
             },
             async network_getChangedFiles() {
@@ -257,9 +231,12 @@
                     )
 
                     try{
-                        console.log(res.data)
-                        this.pendingReview.data = res.data.data.repository.pullRequest.reviews.nodes[0] || {}
-                        this.network_getPendingReviewComments()
+                        this.pendingReview.data = res.data.data.repository.pullRequest.reviews.nodes[0]
+                        if(this.pendingReview.data) {
+                            await this.network_getPendingReviewComments(this.pendingReview.data)
+                        }else {
+                            this.pendingReview.reviewComments.data = []
+                        }
                     }catch(e) {
                         this.handleGraphqlError(e)
                     }
@@ -270,6 +247,7 @@
                 }
             },
             async network_getPendingReviewComments() {
+                if(!this.pendingReview.data.databaseId) return 
                 try {
                     this.pendingReview.reviewComments.loading = true
                     let url = api.API_REVIEW_COMMENTS_OF_REVIEW({
@@ -293,10 +271,77 @@
                     )
 
                     this.pendingReview.reviewComments.data = res.data
+                    this.network_getReviewCommentsExtraData(res.data)
                 } catch (e) {
                     console.log(e)
                 } finally {
                     this.pendingReview.reviewComments.loading = false
+                }
+            },
+            async network_getNewCreatedPendingReviewComment() {
+                if(!this.pendingReview.data.databaseId) return 
+                try {
+                    let url_pageInfo = api.API_REVIEW_COMMENTS_OF_REVIEW({
+                        owner: this.owner,
+                        repo: this.repo,
+                        number: this.number,
+                        reviewId: this.pendingReview.data.databaseId,
+                        params: {
+                            per_page: 1
+                        }
+                    })
+
+                    let res_pageInfo = await authRequiredGet(url_pageInfo)
+
+                    let pageInfo = parse(res_pageInfo.headers.link) || {}
+
+                    if(!pageInfo.last) return 
+
+                    let res_newCreatedComment = await authRequiredGet(
+                        pageInfo.last.url,
+                        {
+                            headers: {
+                                "Accept": "application/vnd.github.squirrel-girl-preview"
+                            }
+                        }
+                    ) 
+
+                    return res_newCreatedComment.data[0]
+                } catch (e) {
+                    this.handleError(e)
+                } finally {
+                    this.pendingReview.reviewComments.loading = false
+                }
+            },
+            async network_getNewCreatedReviewComment() {
+                 try{
+                    this.reviewComments.loading = true
+                   
+                    let url = api.API_REVIEW_COMMENTS_OF_PULL_REQUEST({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number,
+                        params: {
+                            per_page: 1,
+                            sort: 'created',
+                            direction: 'desc'
+                        }
+                    })
+
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            headers: {
+                                'accept':'application/vnd.github.squirrel-girl-preview'
+                            }
+                        }
+                    )
+
+                    return res.data[0]
+                }catch(e) {
+                    this.handleError(e)
+                }finally{
+                    this.reviewComments.loading = false
                 }
             },
             triggerSwitcherStretch() {
@@ -316,14 +361,30 @@
                 }else{
                    return ['deletion','neutral']
                 }
-            }
+            },
+            async replyCreatedHook(comment) {
+                let newCreatedComment
+                if(comment.state == 'PENDING') {
+                    newCreatedComment = await this.network_getNewCreatedPendingReviewComment()
+                    this.pendingReview.reviewComments.data.push(newCreatedComment)
+                }else {
+                    newCreatedComment = await this.network_getNewCreatedReviewComment()
+                    this.reviewComments.data.push(newCreatedComment)
+                }
+                this.network_getReviewCommentsExtraData([newCreatedComment])
+            },
+            pendingReviewCommentDeletedEventHandler(){
+                this.network_getPendingReview()
+            },
+            
         },
       
         components: {
-            CommonLoading,
+            CommonLoadingWrapper,
             AnimatedHeightWrapper,
             SimpleDiffView,
             ChangedFileItem,
+            ReviewSubmitter,
             Container: styled.div``,
             EditorHeader: styled.div``,
             Switcher: styled.div``,

@@ -1,5 +1,5 @@
 <template> 
-    <Container v-if="!deleted" class="p-3" :class="{deleting: loadingDeleteThis}">
+    <Container v-if="!deleted" class="p-3">
         <div class="bubble m-0 bg-white">
             <HideAndShowPane v-if="extraData.isMinimized" class="p-3 d-flex flex-justify-between p-3 text-gray text-small border-bottom">
                 <span class="text-italic">
@@ -13,9 +13,11 @@
             </HideAndShowPane>
             <div v-show="showMinimized || !extraData.isMinimized">
                 <Header class="header " :style="headerStyle">
-                    <Action v-if="(extraData.viewerCanUpdate || extraData.viewerCanDelete) && repoOwnerType() == 'User'" class="float-right mt-2 ml-2" @click="() => showModal('popover')">
+                    <Action v-if="(extraData.viewerCanUpdate || extraData.viewerCanDelete) && repoOwnerType() == 'User'" class="float-right mt-2 ml-2" @click="() => showModal('modal')">
                         <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
                     </Action>
+
+                    <span v-if="extraData.state == 'PENDING'" class="Label--outline bg-yellow-light float-right mt-1 ml-2" style="border-radius:2em;padding: 2px 7px">Pending</span>
                     
                     <Avatar class="float-left relative">
                         <ImgWrapper>
@@ -30,21 +32,6 @@
                         commented 
                         {{propsData.created_at | getDateDiff}}
                     </Meta>
-
-                    <Popover ref="popover" :popoverStyle="{top: 'calc(100% - 4px)',right: '4px',paddingTop: '8px',paddingBottom: '8px',width:'120px'}">
-                        <div v-if="extraData.viewerCanUpdate" class="dropdown-item py-2 btn-link">
-                            Edit
-                        </div>
-                        <div v-if="extraData.viewerCanMinimize" class="dropdown-item py-2 btn-link" @click="triggerShowMinimizePane">
-                            Hide
-                        </div>
-                        <UnminimizeButton   :comment="propsData" 
-                                            v-if="extraData.viewerCanMinimize && extraData.isMinimized" 
-                                            @unminimize-comment="unminimizePostHandler"
-                                            class="dropdown-item py-2 btn-link"></UnminimizeButton>
-                         <div v-if="extraData.viewerCanUpdate" class="division border-top my-1"></div> 
-                        <CommentDeleteButton v-if="extraData.viewerCanDelete" commentType="reviewComment" class="text-red btn-link dropdown-item py-2 danger" :comment="propsData" @delete-comment="() => {deleted = true}"></CommentDeleteButton>  
-                    </Popover>
 
                 </Header>
 
@@ -67,22 +54,45 @@
                 
             </div>
         </div>
-       
+
+        
+
+        <DeletingCovor v-if="loadingDeleteThis" class="position-absolute bg-white" style="top:0;left:0;right:0;bottom:0;opacity:.4" ></DeletingCovor>
+
+        <Modal :noHeader="true" ref="modal">
+            <div class="py-2">
+                <div v-if="extraData.viewerCanUpdate" class="dropdown-item py-2 btn-link border-bottom">
+                    Edit
+                </div>
+                <div v-if="extraData.viewerCanMinimize" class="dropdown-item py-2 btn-link border-bottom" @click="triggerShowMinimizePane">
+                    Hide
+                </div>
+                <UnminimizeButton   :comment="propsData" 
+                                    v-if="extraData.viewerCanMinimize && extraData.isMinimized" 
+                                    @unminimize-comment="unminimizePostHandler"
+                                    class="dropdown-item py-2 btn-link border-bottom"></UnminimizeButton>
+                <button v-if="extraData.viewerCanDelete" class="text-red btn-link dropdown-item py-2 danger" @click="network_deleteThisComment">
+                    Delete
+                </button>  
+            </div>
+            
+        </Modal>
     </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
     import {util_dateFormat,util_markdownParse} from '@/util'
-    import {LoadingIconEx,Popover,ImgWrapper} from '@/components'
-    import {authRequiredGitHubGraphqlApiQuery} from '@/network'
+    import {LoadingIconEx,Popover,ImgWrapper,Modal} from '@/components'
+    import {authRequiredGitHubGraphqlApiQuery,authRequiredDelete } from '@/network'
     import ClipboardJS from 'clipboard';
     import {Reactions} from '../../components'
     import {ReviewCommentEditor} from '../../Conversation/components'
-    import {MinimizePane,UnminimizeButton,CommentDeleteButton} from '../../../../components'
+    import {MinimizePane,UnminimizeButton} from '../../../../components'
     import * as graphql from '../../graphql.js'
+    import * as api from '@/network/api'
     export default {
-        inject: ['reviewCommentsExtraData','repoOwnerType'],
+        inject: ['reviewCommentsExtraData','repoOwnerType','triggerReplyButtonDisabled','reviewCommentsGetter','pendingReviewGetter'],
         data() {
             return {
                 showMinimized: false,
@@ -106,7 +116,7 @@
                 type: Object,
                 required: false
             },
-            newCreated: Boolean
+            newCreated: Boolean,
         },
         computed: {
             repo() {
@@ -152,6 +162,40 @@
                     this.extraDataOfNewCreatedComment.loading = false
                 }
             },
+             async network_deleteThisComment() {
+                if(this.loadingDeleteThis) return
+                if(!confirm("Are you sure you want to delete this comment?")) return
+                this.closeModal()
+                try {
+                    this.triggerReplyButtonDisabled()()
+                    this.loadingDeleteThis = true
+                     let url = api.API_REVIEW_COMMENT_OF_PULL_REQUEST({
+                        repo: this.repo,
+                        owner: this.owner,
+                        commentId: this.propsData.id
+                    })
+
+                    await authRequiredDelete(
+                        url,
+                        {
+                            headers: {
+                                "accept":"application/vnd.github.v3+json"
+                            }
+                        }
+                    )
+                    console.log(this.extraData.state)
+                    if(this.extraData.state == 'PENDING') {
+                        await this.pendingReviewGetter()()
+                        console.log('pendingReviewGetter finish!!')
+                    }else{
+                        await this.reviewCommentsGetter()()
+                    }
+                } catch (e) {
+                    this.handleError(e)
+                } finally {
+                    this.triggerReplyButtonDisabled()(false)
+                }
+            }, 
             triggerShowMinimized() {
                 this.showMinimized = !this.showMinimized
             },
@@ -166,17 +210,21 @@
             unminimizePostHandler(payload) {
                 this.closeModal()
                 this.handledComment = payload.info
+            },
+            deletedPostHandler() {
+                this.deleted = true
+                this.$emit('delete-comment')
             }
         },
         components: {
             LoadingIconEx,
             Popover,
+            Modal,
             ImgWrapper,
             Reactions,
             MinimizePane,
             UnminimizeButton,
             ReviewCommentEditor,
-            CommentDeleteButton,
             Container: styled.div``,
             Inner: styled.div``,
             Header: styled.div``,
@@ -190,13 +238,15 @@
             Action: styled.div``,
             AuthorAssociation: styled.span``,
             StretchCommentBtn: styled.div``,
-            HideAndShowPane: styled.div``
+            HideAndShowPane: styled.div``,
+            DeletingCovor: styled.div``,
         }
     }
 </script>
 
 <style scoped lang="scss">
 @import 'node_modules/@primer/css/dropdown/index.scss';
+@import 'node_modules/@primer/css/labels/index.scss';
 .header{
     position: relative;
     padding: 10px 15px;
@@ -215,7 +265,7 @@
 }
 
 .deleting{
-    opacity: .4s;
+    opacity: .4;
     pointer-events: none;
 }
 

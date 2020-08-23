@@ -4,7 +4,7 @@
                         :style="tabStyle"
                         :exact="tabItem.exact"
                         :class="{'router-link-active':tabItem.active}"
-                        v-for="tabItem in tabs"
+                        v-for="tabItem in tabs.filter(i => !i.disabled)"
                         :key="tabItem.label"
                         :to="tabItem.to">
             <span>{{tabItem.label}}</span>

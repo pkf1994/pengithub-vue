@@ -1,5 +1,5 @@
 <template>
-    <Container class="p-3 relative container">
+    <Container class="p-3 relative container" :id="propsData.id">
         <Header class="d-flex position-relative pl-4">
             
             <div class="pr-simple-timeline-icon-wrapper">
@@ -32,8 +32,8 @@
             </BodyHTML>
         </Body>
        
-        <LoadingWrapper v-if="comments.loading" class="loading-wrapper d-flex flex-justify-center flex-items-center">
-            <LoadingIconEx/>
+        <LoadingWrapper v-if="comments.loading" class="loading-wrapper py-3 d-flex flex-justify-center flex-items-center">
+            Loading...
         </LoadingWrapper>
 
         <transition-group name="fade" appear>
@@ -265,7 +265,17 @@
 }
 
 .loading-wrapper{
-    height: 120px;
+    font-weight: 600;
+    animation: breathe 1s linear infinite alternate;
+}
+
+@keyframes breathe {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 </style>

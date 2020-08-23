@@ -47,7 +47,9 @@
                                 <router-link :to="`/${pullRequestProvided().data.user && pullRequestProvided().data.user.login}`">
                                     <strong>{{pullRequestProvided().data.user && pullRequestProvided().data.user.login}}</strong>
                                 </router-link>  
-                                {{editHistory}}
+                                opened this pull request
+                                <br>
+                                {{pullRequestProvided().data.created_at | getDateDiff}}
                             </div>
                         </div> 
 
@@ -83,15 +85,17 @@
                 </div> 
             </transition-group>
 
-            <HiddenItemLoading v-if="timeline.pageInfo.next || timeline.loading"
+            <HiddenItemLoading v-if="(timeline.pageInfo.next && timeline.pageInfo.next.page != timeline.pageInfo.last.page) || timeline.loading"
                                 class="border-top"
                                 :loading="timeline.loading"
                                 :dataGetter="loadingMore">
                 <span v-if="timelineRemainedCount > 0">{{timelineRemainedCount}} {{timelineRemainedCount > 1 ? 'items' : 'item'}} remained.</span>    
             </HiddenItemLoading>
 
-            <transition-group name="fade-group" appear>
-                <Comment v-for="item in commentsJustCreated" :key="item.id" :propsData="item" class="p-3 border-top"></Comment>
+             <transition-group tag="div" appear name="fade-group">
+                <div v-for="(item,index) in timeline.newestTimeline.data" :key="(item.id || '') + index">
+                    <TimelineItem :data="item" class="border-top" style="background:#fafbfc"/>
+                </div> 
             </transition-group>
 
 
@@ -230,6 +234,10 @@
                     count: {
                         data: 0,
                         loading: false
+                    },
+                    newestTimeline: {
+                        data: [],
+                        loading: false
                     }
                 },
                 timelineTypes: [
@@ -326,7 +334,7 @@
                         rest:'reviewed',
                     },
                     {
-                        graphql:'REVIEW_REQUESTED_REVIEW',
+                        graphql:'REVIEW_REQUESTED_EVENT',
                         rest:'review_requested',
                     }
                 ],
@@ -363,11 +371,21 @@
                         alreadyCount ++
                     }
                 })
+                this.timeline.newestTimeline.data.forEach(item => {
+                    if(this.timelineTypes.some(_item => {
+                        return _item.rest === item.event
+                    })){
+                        alreadyCount ++
+                    }
+                })
                 return this.timeline.count.data - alreadyCount
             },
             editHistory() {
                 return `opened this pull request ${this.createdAt} ${this.extraData.data.userContentEdits && this.extraData.data.userContentEdits.totalCount > 0 ? ' • edited ' + util_dateFormat.getDateDiff(this.extraData.data.userContentEdits.nodes[0].editedAt) : ''}`
             },
+            newCreatedTimelineItem() {
+                return this.$route.query.new_created_timeline_item
+            }
 
             /* subscriptionNotice() {
                 return this.viewerSubscription.toLowerCase()
@@ -390,6 +408,8 @@
 
                 //获取review comment replies
                 this.network_getReviewCommentReplies()
+
+                if(this.accessToken) this.network_getTimelineCount()
             },
             async network_getPullRequestExtraData() {
                 try {
@@ -432,7 +452,7 @@
                     }
 
                     let config = {
-                        cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_timeline ' + url_timeline),
+                        cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_timeline'),
                         headers:{
                             'Accept': 'application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json'
                         }   
@@ -447,17 +467,53 @@
 
                     this.timeline.loading = false
 
-                    //获取comment bodyHTML 以及 comment reactions
-                    //获取 review: bodyHTML reactions comments
-                    this.timeline.extraData.loading = true
-                       
-                    this.network_getTimelineExtraData(res_timeline.data)
+                    if(res_timeline.data.length > 0) this.network_getTimelineExtraData(res_timeline.data)
+
+                    if(this.timeline.pageInfo.next && this.timeline.pageInfo.next.page == 2) {
+                        await this.network_getNewestTimeline()
+                    }
+
+                    if(this.newCreatedTimelineItem) this.scrollToNewestTimelineItem()
 
                 }catch(e){
                     this.handleError(e)
                 }finally{
                     this.timeline.loading = false
                     this.timeline.extraData.loading = false
+                }
+            },
+            async network_getNewestTimeline() {
+                 try{
+                    this.timeline.newestTimeline.loading = true
+                    let url_timeline = api.API_ISSUE_TIMELINE({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number,
+                        params: {
+                            per_page: this.timeline.perPage,
+                            page: this.timeline.pageInfo.last.page
+                        }
+                    })
+
+                    let config = {
+                        cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_newest_timeline'),
+                        headers:{
+                            'Accept': 'application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json'
+                        }   
+                    }
+                    
+                    let res_timeline = await authRequiredGet(url_timeline,config)
+
+                    this.timeline.newestTimeline.data = res_timeline.data
+
+                    
+
+                    if(this.timeline.newestTimeline.data.length > 0) this.network_getTimelineExtraData(this.timeline.newestTimeline.data)
+
+                }catch(e){
+                    this.handleError(e)
+                }finally{
+                    this.timeline.newestTimeline.loading = false
                 }
             },
             async network_getTimelineExtraData(timeline) {
@@ -689,11 +745,35 @@
             changeLockStatusSuccessPostHandler(payload) {
                 this.pullRequestProvided().data.locked = payload
             },
+            generateRouterMeta() {
+                return this.$route.path
+            },
             routeUpdateHook() {
                 this.network_getData()
             },
             routeResetHook() {
                 Object.assign(this.$data, this.$options.data())
+            },
+            scrollToNewestTimelineItem() {
+                if(this.newCreatedTimelineItem) {
+                    setTimeout(() => {
+                        let theEl = document.getElementById(this.newCreatedTimelineItem)
+                        theEl && theEl.scrollIntoView({block:'center'})
+                    },0)
+                }
+            }
+        },
+        watch: {
+            newCreatedTimelineItem(newOne, oldOne) {
+                if(this.timeline.data.length > 0 && !this.timeline.pageInfo.next) {
+                    this.scrollToTop()
+                    this.network_getTimeline()
+                    return 
+                }
+                if(this.timeline.pageInfo.last) {
+                    this.scrollToTop()
+                    this.network_getNewestTimeline()
+                }
             }
         },
         components: {

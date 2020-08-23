@@ -96,7 +96,7 @@ export const GRAPHQL_PULL_TIMELINE = `
       nodes(ids: $ids) {
         ... on PullRequestReviewComment {
           id
-          
+          state
           viewerCanReact
           viewerCanUpdate
           viewerCanMinimize
@@ -279,6 +279,17 @@ export const GRAPHQL_PULL_TIMELINE = `
           viewerCanUpdate
           viewerCanMinimize
           viewerCanReact
+        }
+      }
+    }
+  `
+
+  export const GRAPHQL_ADD_PULL_REQUEST_REVIEW_COMMENT = `
+    mutation($input:AddPullRequestReviewCommentInput!) {
+      addPullRequestReviewComment(input:$input) {
+        comment {
+          databaseId
+          state
         }
       }
     }

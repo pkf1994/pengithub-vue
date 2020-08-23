@@ -37,13 +37,20 @@ export default {
                             window.location.href = API_OAUTH2
                         }
                     }
-                    if(e.response) {
+                    if(e.response && e.response.data) {
                         if(e.response.data.message) this.$toast(e.response.data.message,'error')
                         if(e.response.data.detailMessage) this.$toast(e.response.data.detailMessage,'error')
                         if(e.response.data.errors) {
-                            e.response.data.errors.forEach(i => {
-                                this.$toast(i.message,'error')
-                            })
+                            if(e.response.data.errors[0].message) {
+                                e.response.data.errors.forEach(i => {
+                                    this.$toast(i.message,'error')
+                                })
+                            }
+                            if(typeof(e.response.data.errors[0]) == 'string') {
+                                e.response.data.errors.forEach(i => {
+                                    this.$toast(i,'error')
+                                })
+                            }
                         }
                     }else{
                         this.$toast(e,'error')

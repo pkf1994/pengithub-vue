@@ -47,6 +47,31 @@
                     <EntriesFilterItem class="px-3" @click="() => triggerModel('sortModal')">Sort</EntriesFilterItem>
             </template>
 
+            
+            <template v-if="emptyFlag && !noResultMatchedFlag" v-slot:emptyNotice>
+                <slot name="emptyNotice">
+                    <div  class="blankslate blankslate-spacious blankslate-large border-0">
+                        <div class="container-md">
+                            <svg height="40" class="octicon octicon-issue-opened blankslate-icon" viewBox="0 0 24 24" version="1.1" width="40" aria-hidden="true"><path d="M12 7a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0112 7zm1 9a1 1 0 11-2 0 1 1 0 012 0z"></path><path fill-rule="evenodd" d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zM2.5 12a9.5 9.5 0 1119 0 9.5 9.5 0 01-19 0z"></path></svg>
+                            <h3>Welcome to issues!</h3>
+                            <p>Issues are used to track todos, bugs, feature requests, and more. As issues are created, they’ll appear here in a searchable and filterable list. To get started, you should <router-link :to='`/${owner}/${repo}/issues/new`' >create an issue</router-link>.</p>
+                        </div>
+                    </div>
+                </slot>
+            </template>
+
+            <template v-if="noResultMatchedFlag" v-slot:noResultMatchedNotice>
+                <slot name="noResultMatchedNotice">
+                    <div  class="blankslate blankslate-spacious blankslate-large border-0">
+                        <div class="container-md">
+                            <svg height="40" class="octicon octicon-issue-opened blankslate-icon" viewBox="0 0 24 24" version="1.1" width="40" aria-hidden="true"><path d="M12 7a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0112 7zm1 9a1 1 0 11-2 0 1 1 0 012 0z"></path><path fill-rule="evenodd" d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zM2.5 12a9.5 9.5 0 1119 0 9.5 9.5 0 01-19 0z"></path></svg>
+                            <h3>No results matched your search.</h3>
+                            <p>You could search <router-link to="/search">all of GitHub</router-link> .</p>
+                        </div>
+                    </div>
+                </slot>
+            </template>
+
             <SimplePaginationRest   v-if="pageInfo && (pageInfo.next || pageInfo.prev)"   
                                 :pageInfo="pageInfo" 
                                 :loading="loading"
@@ -241,6 +266,8 @@
                 assigneeModalSearchQuery: '',
                 data: [],
                 loading: false,
+                emptyFlag: false,
+                noResultMatchedFlag: false,
                 extraData: {
                     data: [],
                     loading: false
@@ -449,7 +476,8 @@
             },  
             documentTitle() {
                 return `${this.type == 'issue' ? 'Issue' : 'Pull request'} · ${this.owner}/${this.repo}`
-            }
+            },
+        
         },
         created() {
             this.network_getData()
@@ -476,10 +504,19 @@
                         )
                     }
                     let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
+                    
                     this.data = res.data.items
                     this.totalCount = res.data.total_count
-                    this.pageInfo = parse(res.headers.link)
-
+                    this.pageInfo = parse(res.headers.link) || {}
+                    this.noResultMatchedFlag = false
+                    if(res.data.total_count == 0) {
+                        this.emptyFlag = true
+                        if(this.searchQuery != `is:open is:${this.type}` && this.searchQuery != `is:${this.type} is:open`) {
+                            this.noResultMatchedFlag = true
+                        }
+                    } else {
+                        this.emptyFlag = false
+                    }
                     //获取其他数据
                     if(this.accessToken && this.type == 'pr') this.network_getExtraData(res.data.items)
                     if(!payload || !payload.url)this.network_getIssueCountByState()
@@ -490,6 +527,7 @@
                 }
             },  
             async network_getExtraData(issues) {
+                if(issues.length == 0) return
                 try{
                     this.extraData.loading = true
                     let res = await authRequiredGitHubGraphqlApiQuery(
@@ -728,6 +766,7 @@
 @import 'node_modules/@primer/css/select-menu/index.scss';
 @import 'node_modules/@primer/css/avatars/index.scss';
 @import 'node_modules/@primer/css/layout/index.scss';
+@import 'node_modules/@primer/css/blankslate/index.scss';
 
 .active{
     color: #fff;

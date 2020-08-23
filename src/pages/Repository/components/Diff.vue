@@ -571,7 +571,6 @@
     border-top: 1px solid #d1d5da;
     border-bottom: 1px solid #d1d5da;
     overflow-x: auto;
-    overflow-y: hidden;
 }
 .diff-view-split{
     position: relative;

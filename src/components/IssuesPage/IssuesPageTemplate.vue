@@ -63,6 +63,8 @@
                     <EmptyNoticeTitle>No results matched your search.</EmptyNoticeTitle>
                     <EmptyNoticeSubTitle>You could search <router-link to="/search">all of GitHub</router-link>.</EmptyNoticeSubTitle>
                 </EmptyNotice> -->
+                <slot name="emptyNotice"></slot>
+                <slot name="noResultMatchedNotice"></slot>
             </EntriesContent>
         </Entries>
 

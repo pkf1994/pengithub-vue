@@ -81,7 +81,7 @@
                 <ReviewCommentReply v-for="item in replies" :reply="item" :key="item.id"></ReviewCommentReply>
             </Replies>
 
-            <button @click="triggerShowReviewCommentReplyCreator" v-if="!pullRequestProvided().locked && !showReviewCommentReplyCreator && repoOwnerType() == 'User'" class="border-top reply btn-link text-bold text-left muted-link btn-block">
+            <button @click="triggerShowReviewCommentReplyCreator" v-if="!(pullRequestProvided().locked && !viewerIsCollaborator().data) && !showReviewCommentReplyCreator && repoOwnerType() == 'User'" class="border-top reply btn-link text-bold text-left muted-link btn-block">
                 Reply...
             </button>
 
@@ -108,7 +108,7 @@
     import * as api from '@/network/api'
     import { authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
     export default {
-        inject: ['reviewCommentReplies','commentsOfPendingReview','reviewProvided','pullRequestProvided','repoOwnerType'],
+        inject: ['reviewCommentReplies','commentsOfPendingReview','reviewProvided','pullRequestProvided','repoOwnerType','viewerIsCollaborator'],
         provide() {
             return {
                 repliesExtraData: () => this.repliesExtraData.data

@@ -22,14 +22,16 @@
                 },
                 toastArr: [
                   
-                ]
+                ],
+                lastToastTimestamp: 0,
             }
         },
         methods: {
             pushToast(content,type = 'notice',duration = 3000) {
-                if((!content) && (!content.message) && (content.message.trim() == '')) return 
+
+                if(!content) return 
                 
-                if(content.toString() == this.prevToast.content.toString() && type == this.prevToast.type) {
+                if(content.toString() == this.prevToast.content.toString() && type == this.prevToast.type && this.toastArr.length > 0 ) {
                     Vue.set(this.toastArr,this.toastArr.length - 1,{
                         ...this.toastArr[this.toastArr.length - 1],
                         duration: parseInt(duration) + parseInt(this.prevToast.duration)
@@ -43,6 +45,16 @@
                         uniMeta: (new Date()).getTime() + parseInt(Math.random() * 100) 
                     })
                 }
+
+                    /* if(this.toastArr.length == 3) this.shiftToast()
+                    this.toastArr.push({
+                        content,
+                        type,
+                        duration,
+                        uniMeta: (new Date()).getTime() + parseInt(Math.random() * 100) 
+                    })
+
+                    this.lastToastTimestamp = (new Date()).getTime() */
 
                 this.prevToast = {
                     content,
@@ -99,7 +111,7 @@
 }
 .error{
     background: #FFEEEE;
-    color: #FF0000;
+    color: #DD002C;
 }
 
 

@@ -15,6 +15,10 @@
         },
         props: {
             commentType: String,
+            beginDeleteHook: {
+                type: Function,
+                default: () => {}
+            },
             comment: {
                 type: Object,
                 default: () => ({})
@@ -32,9 +36,10 @@
             async network_deleteThisComment() {
                 if(this.loading) return
                 if(!confirm("Are you sure you want to delete this comment?")) return
+                this.beginDeleteHook()
                 try {
                     this.loading = true
-                    let url
+                     let url
                     if(this.commentType == 'reviewComment') {
                         url = api.API_REVIEW_COMMENT_OF_PULL_REQUEST({
                             repo: this.repo,
@@ -56,8 +61,8 @@
                             }
                         }
                     )
-
-                    this.$emit('delete-comment',this.comment)
+                    let event = new CustomEvent('comment-deleted',{bubbles:true,detail: this.comment})
+                    this.$el.dispatchEvent(event)
                 } catch (e) {
                     this.handleError(e)
                 } finally {
