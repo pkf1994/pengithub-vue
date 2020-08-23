@@ -92,7 +92,7 @@
     import * as graphql from '../../graphql.js'
     import * as api from '@/network/api'
     export default {
-        inject: ['reviewCommentsExtraData','repoOwnerType','triggerReplyButtonDisabled','reviewCommentsGetter','pendingReviewGetter'],
+        inject: ['reviewCommentsExtraData','repoOwnerType','triggerReplyButtonDisabled','reviewCommentDeletedHook','pendingReviewGetter'],
         data() {
             return {
                 showMinimized: false,
@@ -188,7 +188,7 @@
                         await this.pendingReviewGetter()()
                         console.log('pendingReviewGetter finish!!')
                     }else{
-                        await this.reviewCommentsGetter()()
+                        await this.reviewCommentDeletedHook()()
                     }
                 } catch (e) {
                     this.handleError(e)

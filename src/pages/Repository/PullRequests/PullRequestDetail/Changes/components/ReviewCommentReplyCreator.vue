@@ -11,12 +11,11 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {authRequiredPost,authRequiredGitHubGraphqlApiQuery} from '@/network'
+    import {authRequiredPost,authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
     import * as api from '@/network/api'
     import * as graphql  from '../../graphql.js'
-import { authRequiredGet } from '../../../../../../store/modules/network.js'
     export default {
-        inject: ['pendingReview','pendingReviewGetter','replyCreatedHook'],
+        inject: ['pendingReview','pendingReviewGetter','reviewCommentCreatedHook'],
         props: {
             comment: Object,
             path: String,
@@ -91,7 +90,9 @@ import { authRequiredGet } from '../../../../../../store/modules/network.js'
 
                     try {
                         let comment = res.data.data.addPullRequestReviewComment.comment
-                        this.replyCreatedHook()(comment)
+                        await this.reviewCommentCreatedHook()(comment)
+                        this.content = ''
+                        this.$emit('cancel')
                     } catch (e) {
                         this.handleGraphqlError(res)
                     }

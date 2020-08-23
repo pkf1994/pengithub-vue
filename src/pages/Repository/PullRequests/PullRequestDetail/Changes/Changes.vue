@@ -72,9 +72,10 @@
                 reviewCommentsExtraData: () => this.reviewCommentsExtraData.data,
                 pendingReviewComments: () => this.pendingReview.reviewComments.data,
                 pendingReview: () => this.pendingReview,
-                reviewCommentsGetter: () => this.network_getReviewComments,
+                commentReviewCreatedHook: () => this.network_getReviewComments,
+                reviewCommentDeletedHook: () => this.network_getReviewComments,
                 pendingReviewGetter: () => this.network_getPendingReview,
-                replyCreatedHook: () => this.replyCreatedHook
+                reviewCommentCreatedHook: () => this.reviewCommentCreatedHook
             }
         },
         data() {
@@ -92,6 +93,7 @@
                 },
                 pendingReview: {
                     data: {},
+                    emptyFlag: false,
                     loading: false,
                     reviewComments: {
                         data: [],
@@ -101,7 +103,8 @@
                 changedFiles: {
                     data: [],
                     loading: false
-                }
+                },
+                dirty: false
             }
         },
         computed: {
@@ -231,8 +234,10 @@
                     )
 
                     try{
-                        this.pendingReview.data = res.data.data.repository.pullRequest.reviews.nodes[0]
-                        if(this.pendingReview.data) {
+                        this.pendingReview.data = res.data.data.repository.pullRequest.reviews.nodes[0] || {}
+                        this.pendingReview.emptyFlag = false
+                        if(!res.data.data.repository.pullRequest.reviews.nodes[0]) this.pendingReview.emptyFlag = true
+                        if(this.pendingReview.data.databaseId) {
                             await this.network_getPendingReviewComments(this.pendingReview.data)
                         }else {
                             this.pendingReview.reviewComments.data = []
@@ -362,7 +367,7 @@
                    return ['deletion','neutral']
                 }
             },
-            async replyCreatedHook(comment) {
+            async reviewCommentCreatedHook(comment) {
                 let newCreatedComment
                 if(comment.state == 'PENDING') {
                     newCreatedComment = await this.network_getNewCreatedPendingReviewComment()
