@@ -37,8 +37,8 @@
             async network_createCommentReview() {
                 try {
                     this.loadingAddComment = true
-                    let reviewCreated = await this.network_createReview('COMMENT')
 
+                    await this.network_createReview('COMMENT')
                     await this.commentReviewCreatedHook()()
                     
                     this.content = ''

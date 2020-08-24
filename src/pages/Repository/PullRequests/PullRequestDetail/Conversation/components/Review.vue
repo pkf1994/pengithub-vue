@@ -32,7 +32,7 @@
             </BodyHTML>
         </Body>
        
-        <LoadingWrapper v-if="comments.loading" class="loading-wrapper py-3 d-flex flex-justify-center flex-items-center">
+        <LoadingWrapper v-if="comments.loading" class="loading-wrapper pt-3 d-flex flex-justify-center flex-items-center">
             Loading...
         </LoadingWrapper>
 

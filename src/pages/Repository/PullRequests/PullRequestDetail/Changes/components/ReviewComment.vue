@@ -1,5 +1,5 @@
 <template> 
-    <Container v-if="!deleted" class="p-3">
+    <Container v-if="!deleted" class="p-3 position-relative">
         <div class="bubble m-0 bg-white">
             <HideAndShowPane v-if="extraData.isMinimized" class="p-3 d-flex flex-justify-between p-3 text-gray text-small border-bottom">
                 <span class="text-italic">
@@ -183,10 +183,8 @@
                             }
                         }
                     )
-                    console.log(this.extraData.state)
                     if(this.extraData.state == 'PENDING') {
                         await this.pendingReviewGetter()()
-                        console.log('pendingReviewGetter finish!!')
                     }else{
                         await this.reviewCommentDeletedHook()()
                     }

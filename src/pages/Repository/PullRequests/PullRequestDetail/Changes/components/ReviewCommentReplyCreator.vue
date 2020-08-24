@@ -15,7 +15,7 @@
     import * as api from '@/network/api'
     import * as graphql  from '../../graphql.js'
     export default {
-        inject: ['pendingReview','pendingReviewGetter','reviewCommentCreatedHook'],
+        inject: ['pendingReview','pendingReviewGetter','reviewCommentCreatedHook','pullRequestProvided'],
         props: {
             comment: Object,
             path: String,
@@ -164,9 +164,6 @@
                         ]
                     }
                 )
-
-                return res.data
-                   
             }
         },
         components: {

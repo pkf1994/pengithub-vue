@@ -294,3 +294,14 @@ export const GRAPHQL_PULL_TIMELINE = `
       }
     }
   `
+
+  export const GRAPHQL_ADD_PULL_REQUEST_REVIEW = `
+  mutation($input:AddPullRequestReviewInput!) {
+    addPullRequestReview(input:$input) {
+      pullRequestReview {
+        databaseId
+        state
+      }
+    }
+  }
+  `

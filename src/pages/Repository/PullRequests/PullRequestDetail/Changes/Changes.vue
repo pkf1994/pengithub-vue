@@ -35,7 +35,7 @@
         <EditorHeader class="editor-header" v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'">
             Submit your review
         </EditorHeader>
-        <ReviewSubmitter v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'"></ReviewSubmitter>
+        <ReviewSubmitter v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'" @review-submitted.native.stop="reviewSubmittedHook"></ReviewSubmitter>
 
         <!-- <Editor v-if="changedFiles.data.length > 0" 
                 class="m-3"
@@ -381,7 +381,17 @@
             pendingReviewCommentDeletedEventHandler(){
                 this.network_getPendingReview()
             },
-            
+            reviewSubmittedHook(payload) {
+                this.dirty = true
+                this.$router.push(`/${this.owner}/${this.repo}/pull/${this.number}?new_created_timeline_item=${payload.detail.id}`)
+            }
+        },
+        async activated() {
+            if(this.dirty) {
+                this.pendingReview.reviewComments = []
+                await this.network_getPendingReview()
+                this.dirty = false
+            }  
         },
       
         components: {

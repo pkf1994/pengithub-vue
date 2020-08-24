@@ -1,5 +1,7 @@
 <template>
-    <Container class="flex-grow-1">
+    <CommonLoadingWrapper :loading="pullRequestProvided().loading || timeline.loading || timeline.extraData.loading || reviewCommentReplies.loading" 
+    :position="pullRequestProvided().loading ? 'center' : 'corner'"
+    class="flex-grow-1">
             <Header  class="px-3 pt-3">
                <!--  <HeaderActions class="d-flex flex-justify-between flex-items-center">
                    <State class="State mr-2 d-inline-flex flex-items-center" 
@@ -85,15 +87,14 @@
                 </div> 
             </transition-group>
 
-            <HiddenItemLoading v-if="(timeline.pageInfo.next && timeline.pageInfo.next.page != timeline.pageInfo.last.page) || timeline.loading"
+            <HiddenItemLoading v-if="(timeline.pageInfo.next || timeline.loading) && !timeline.data.includes(timeline.newestTimeline[0])"
                                 class="border-top"
                                 :loading="timeline.loading"
                                 :dataGetter="loadingMore">
-                <span v-if="timelineRemainedCount > 0">{{timelineRemainedCount}} {{timelineRemainedCount > 1 ? 'items' : 'item'}} remained.</span>    
             </HiddenItemLoading>
 
              <transition-group tag="div" appear name="fade-group">
-                <div v-for="(item,index) in timeline.newestTimeline.data" :key="(item.id || '') + index">
+                <div v-for="(item,index) in timeline.newestTimeline.filter(i => !timeline.newestTimeline.includes(i))" :key="(item.id || '') + index">
                     <TimelineItem :data="item" class="border-top" style="background:#fafbfc"/>
                 </div> 
             </transition-group>
@@ -149,12 +150,6 @@
         </div>
 
         <transition name="fade" appear>
-            <CommonLoading v-if="!pullRequestProvided().data.node_id || timeline.loading || timeline.extraData.loading || reviewCommentReplies.loading"
-                            :preventClickEvent="false"
-                            :position="loading ? 'center' : 'corner'"/>
-        </transition>  
-
-        <transition name="fade" appear>
             <StickyTop v-if="scrollTop > 300" class="sticky-top px-3 py-2">
                 <StickyTopContent class="d-flex flex-items-center flex-justify-between">
                     <State class="State mr-2 d-inline-flex flex-items-center flex-shrink-0" :class="{'State--green':pullRequestProvided().data.state === 'open','State--red':pullRequestProvided().data.state === 'closed'}" style="text-transform:capitalize; border-radius:2em">
@@ -182,12 +177,12 @@
             </StickyTop>
         </transition>     
         
-    </Container>
+    </CommonLoadingWrapper>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading,Label,AnimatedHeightWrapper,ImgWrapper,LoadingIconEx,Progress,IssueIcon,Subscription,SkeletonCircle,SkeletonRectangle} from '@/components'
+    import {CommonLoadingWrapper,Label,AnimatedHeightWrapper,ImgWrapper,LoadingIconEx,Progress,IssueIcon,Subscription,SkeletonCircle,SkeletonRectangle} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
     import {TimelineItem,Comment,HiddenItemLoading,PullRequestCommentCreator,ProjectCard,PullRequestBody} from './components'
     import {IssueNotificationSettingPane,LockIssueButton} from '../../../components'
@@ -235,10 +230,7 @@
                         data: 0,
                         loading: false
                     },
-                    newestTimeline: {
-                        data: [],
-                        loading: false
-                    }
+                    newestTimeline: []
                 },
                 timelineTypes: [
                     {
@@ -338,7 +330,6 @@
                         rest:'review_requested',
                     }
                 ],
-                commentsJustCreated: []
             }
         },
        
@@ -469,9 +460,11 @@
 
                     if(res_timeline.data.length > 0) this.network_getTimelineExtraData(res_timeline.data)
 
-                    if(this.timeline.pageInfo.next && this.timeline.pageInfo.next.page == 2) {
+                    /* if(this.timeline.pageInfo.next && this.timeline.pageInfo.next.page == 2) {
                         await this.network_getNewestTimeline()
                     }
+
+                     */
 
                     if(this.newCreatedTimelineItem) this.scrollToNewestTimelineItem()
 
@@ -482,7 +475,7 @@
                     this.timeline.extraData.loading = false
                 }
             },
-            async network_getNewestTimeline() {
+            /* async network_getNewestTimeline() {
                  try{
                     this.timeline.newestTimeline.loading = true
                     let url_timeline = api.API_ISSUE_TIMELINE({
@@ -515,6 +508,42 @@
                 }finally{
                     this.timeline.newestTimeline.loading = false
                 }
+            }, */
+            async network_getNewestTimeline() {
+                let url_pageInfo = api.API_ISSUE_TIMELINE({
+                    repo: this.repo,
+                    owner: this.owner,
+                    number: this.number,
+                    params: {
+                        per_page: 1
+                    }
+                })
+
+                let res_pageInfo = await authRequiredGet(
+                    url_pageInfo,
+                    {
+                        headers: {
+                            "accept": "application/vnd.github.mockingbird-preview"
+                        }
+                    }
+                )
+
+                let pageInfo = parse(res_pageInfo.headers.link) || {}
+
+                if(!pageInfo.last) return
+
+                let url = pageInfo.last.url
+
+                let res = await authRequiredGet(
+                    url,
+                    {
+                        headers: {
+                            "accept": "application/vnd.github.mockingbird-preview"
+                        }
+                    }
+                )
+
+                return res.data[0]
             },
             async network_getTimelineExtraData(timeline) {
                 let ids = timeline && timeline.map(i => i.node_id).filter(i => i)
@@ -761,23 +790,27 @@
                         theEl && theEl.scrollIntoView({block:'center'})
                     },0)
                 }
-            }
+            },
         },
         watch: {
-            newCreatedTimelineItem(newOne, oldOne) {
-                if(this.timeline.data.length > 0 && !this.timeline.pageInfo.next) {
-                    this.scrollToTop()
-                    this.network_getTimeline()
-                    return 
-                }
-                if(this.timeline.pageInfo.last) {
-                    this.scrollToTop()
-                    this.network_getNewestTimeline()
-                }
+            async newCreatedTimelineItem(newOne, oldOne) {
+                try{    
+                    this.timeline.data.length > 0 && this.timeline.data.forEach((item,index) => {
+                        if(item.node_id == newOne) {
+                            this.timeline.data.splice(index,1)
+                            throw new Error('forEach abort')
+                        }
+                    })
+                }catch(e) {}
+
+                this.scrollToTop()
+                let newestTimeline = await this.network_getNewestTimeline()
+                newestTimeline && this.timeline.newestTimeline.push(newestTimeline)
+
             }
         },
         components: {
-            CommonLoading,
+            CommonLoadingWrapper,
             Label,
             Comment,
             TimelineItem,

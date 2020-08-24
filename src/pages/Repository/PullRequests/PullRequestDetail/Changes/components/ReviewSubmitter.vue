@@ -122,7 +122,9 @@
                         }
                     )
 
-                   this.$router.push(`/${this.owner}/${this.repo}/pull/${this.number}?new_created_timeline_item=${res.data.id}`)
+                    let event = new CustomEvent('review-submitted',{bubbles:true,detail:res.data})
+
+                    
                     
                 } catch (e) {
                     this.handleError(e)
