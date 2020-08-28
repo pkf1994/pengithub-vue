@@ -103,6 +103,7 @@ export const GRAPHQL_PULL_TIMELINE = `
           viewerCanDelete
           minimizedReason
           isMinimized
+          outdated
         }
       }
     }

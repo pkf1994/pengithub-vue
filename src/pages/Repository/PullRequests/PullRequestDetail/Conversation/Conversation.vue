@@ -82,19 +82,19 @@
                         class="bg-white" />
 
             <transition-group tag="div" appear name="fade-group">
-                <div v-for="(item,index) in timeline.data" :key="(item.id || '') + index">
+                <div v-for="(item,index) in timeline.data.filter(i => !timeline.newestTimeline.data.includes(i))" :key="(item.id || '') + index">
                     <TimelineItem :data="item" class="border-top" style="background:#fafbfc"/>
                 </div> 
             </transition-group>
 
-            <HiddenItemLoading v-if="(timeline.pageInfo.next || timeline.loading) && !timeline.data.includes(timeline.newestTimeline[0])"
+            <HiddenItemLoading v-if="(timeline.pageInfo.next || timeline.loading) && !timeline.data.some(i => timeline.newestTimeline.data[0] && i.node_id == timeline.newestTimeline.data[0].node_id)"
                                 class="border-top"
                                 :loading="timeline.loading"
                                 :dataGetter="loadingMore">
             </HiddenItemLoading>
 
              <transition-group tag="div" appear name="fade-group">
-                <div v-for="(item,index) in timeline.newestTimeline.filter(i => !timeline.newestTimeline.includes(i))" :key="(item.id || '') + index">
+                <div v-for="(item,index) in timeline.newestTimeline.data" :key="(item.id || '') + index">
                     <TimelineItem :data="item" class="border-top" style="background:#fafbfc"/>
                 </div> 
             </transition-group>
@@ -230,7 +230,10 @@
                         data: 0,
                         loading: false
                     },
-                    newestTimeline: []
+                    newestTimeline: {
+                        data: [],
+                        loading: false
+                    }
                 },
                 timelineTypes: [
                     {
@@ -460,11 +463,9 @@
 
                     if(res_timeline.data.length > 0) this.network_getTimelineExtraData(res_timeline.data)
 
-                    /* if(this.timeline.pageInfo.next && this.timeline.pageInfo.next.page == 2) {
-                        await this.network_getNewestTimeline()
+                    if(this.timeline.pageInfo.next && this.timeline.pageInfo.next.page == 2) {
+                        await this.network_getNewestTimelines()
                     }
-
-                     */
 
                     if(this.newCreatedTimelineItem) this.scrollToNewestTimelineItem()
 
@@ -475,31 +476,22 @@
                     this.timeline.extraData.loading = false
                 }
             },
-            /* async network_getNewestTimeline() {
-                 try{
+            async network_getNewestTimelines() {
+                if(!this.timeline.pageInfo.last) return
+                 try{ 
                     this.timeline.newestTimeline.loading = true
-                    let url_timeline = api.API_ISSUE_TIMELINE({
-                        repo: this.repo,
-                        owner: this.owner,
-                        number: this.number,
-                        params: {
-                            per_page: this.timeline.perPage,
-                            page: this.timeline.pageInfo.last.page
-                        }
-                    })
+                    let url = this.timeline.pageInfo.last.url
 
                     let config = {
-                        cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_newest_timeline'),
+                        cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_newest_timelines'),
                         headers:{
                             'Accept': 'application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json'
                         }   
                     }
                     
-                    let res_timeline = await authRequiredGet(url_timeline,config)
+                    let res = await authRequiredGet(url,config)
 
-                    this.timeline.newestTimeline.data = res_timeline.data
-
-                    
+                    this.timeline.newestTimeline.data = res.data
 
                     if(this.timeline.newestTimeline.data.length > 0) this.network_getTimelineExtraData(this.timeline.newestTimeline.data)
 
@@ -508,7 +500,7 @@
                 }finally{
                     this.timeline.newestTimeline.loading = false
                 }
-            }, */
+            },
             async network_getNewestTimeline() {
                 let url_pageInfo = api.API_ISSUE_TIMELINE({
                     repo: this.repo,
@@ -805,8 +797,8 @@
 
                 this.scrollToTop()
                 let newestTimeline = await this.network_getNewestTimeline()
-                newestTimeline && this.timeline.newestTimeline.push(newestTimeline)
-
+                newestTimeline && this.timeline.newestTimeline.data.push(newestTimeline)
+                newestTimeline && this.network_getTimelineExtraData([newestTimeline])
             }
         },
         components: {

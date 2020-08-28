@@ -104,7 +104,6 @@
                     data: [],
                     loading: false
                 },
-                dirty: false
             }
         },
         computed: {
@@ -382,16 +381,11 @@
                 this.network_getPendingReview()
             },
             reviewSubmittedHook(payload) {
-                this.dirty = true
+                this.pendingReview.data = {}
+                this.pendingReview.reviewComments = []
+                this.pendingReview.emptyFlag = true
                 this.$router.push(`/${this.owner}/${this.repo}/pull/${this.number}?new_created_timeline_item=${payload.detail.id}`)
             }
-        },
-        async activated() {
-            if(this.dirty) {
-                this.pendingReview.reviewComments = []
-                await this.network_getPendingReview()
-                this.dirty = false
-            }  
         },
       
         components: {

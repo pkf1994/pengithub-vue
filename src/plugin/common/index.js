@@ -1,7 +1,8 @@
-import {mapState} from 'vuex'
+import {mapState, mapMutations} from 'vuex'
 import axios from 'axios'
 import * as api from '@/network/api'
 import {util_throttle} from '@/util'
+import { MUTATION_UPDATE_DIRTY } from '@/store/modules/dirty/mutationTypes'
 export default {
     install: (Vue) => {
         Vue.mixin({
@@ -14,10 +15,17 @@ export default {
             computed: {
                 ...mapState({
                     accessToken: state => state.oauth.accessToken.accessToken,
-                    viewer: state => state.oauth.viewerInfo
+                    viewer: state => state.oauth.viewerInfo,
+                    dirtyPool: state => state.dirty
                 }),
+                dirty() {
+                    return this.dirtyPool[this.$options.name]
+                }
             },
             methods: {
+                ...mapMutations({
+                    mutation_updateDirty: MUTATION_UPDATE_DIRTY 
+                }),
                 handleError(e,config) {
                     config = {
                         handle404: false, 
@@ -106,6 +114,14 @@ export default {
                 getPageScrollTop() {
                     return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
                 },
+                updateDirty(payload) {
+                    payload = {
+                        key: this.$options.name,
+                        value: true,
+                        ...payload
+                    }
+                    this.mutation_updateDirty(payload)
+                }
             },
             created() {
                 if(this.documentTitle) document.title = this.documentTitle

@@ -16,6 +16,7 @@
                             #{{data.source.issue.number}} {{data.source.issue.title}}
                         </router-link>
                     </strong>
+                    <span v-if="data.source.issue.repository.full_name != `${owner}/${repo}`">in {{data.source.issue.repository.full_name}}</span>
                 </Body>
             </AnimatedHeightWrapper>
         </Inner>   
@@ -44,7 +45,12 @@
             }
         },
         computed: {
-           
+           owner() {
+               return this.$route.params.owner
+           },
+           repo() {
+               return this.$route.params.repo
+           },
         },
         methods: {
            
