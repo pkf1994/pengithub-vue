@@ -282,6 +282,12 @@ export const GRAPHQL_PULL_TIMELINE = `
         comment {
           databaseId
           state
+          replyTo {
+            id
+          }
+          pullRequestReview {
+            id
+          }
         }
       }
     }

@@ -44,9 +44,9 @@
             <ReviewComment v-for="item in comments.data.filter(i => !i.in_reply_to_id)" :key="item.id" :reviewComment="item"/>
         </transition-group>
         
-        <HiddenItemLoading v-if="comments.pageInfo.next" style="padding-bottom:0px!important" :loading="comments.loading" :dataGetter="network_getReviewComments">
+        <!-- <HiddenItemLoading v-if="comments.pageInfo.next" style="padding-bottom:0px!important" :loading="comments.loading" :dataGetter="network_getReviewComments">
             {{comments.totalCount - data.length}} {{comments.totalCount - data.length > 1 ? 'comments' : 'comment'}} remained.
-        </HiddenItemLoading>
+        </HiddenItemLoading> -->
       
     </Container>
 </template>
@@ -94,6 +94,7 @@
             ...mapState({
                 newSubmittedReviews: state => state.pullRequestDetail.newSubmittedReviews,
                 deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments,
+                newCreatedReviewComments: state => state.pullRequestDetail.newCreatedReviewComments
             }),
             repo() {
                 return this.$route.params.repo
@@ -132,7 +133,7 @@
         methods: {
             network_getData() {
                 this.network_getReviewComments()
-                this.network_getReviewCommentsCount()
+                //this.network_getReviewCommentsCount()
             },
             async network_getReviewComments() {
                 try{
@@ -230,10 +231,27 @@
         },
         watch: {
             deletedReviewComments: function(newOne, oldOne) {
-                if(newOne.some(i => {
+                let differ = []
+                newOne.forEach(i => {
+                    if(!oldOne.some(i_ => i_.id == i.id)) {
+                        differ.push(i)
+                    }
+                })
+                if(differ.some(i => {
                     return this.comments.data.some(i_ => i_.id == i.id)
                 })) {
-                    this.network_getReviewComments(true)
+                    this.network_getReviewComments()
+                }
+            },
+            newCreatedReviewComments(newOne,oldOne) {
+                let differ = []
+                newOne.forEach(i => {
+                    if(!oldOne.some(i_ => i_.id == i.id)) {
+                        differ.push(i)
+                    }
+                })
+                if(differ.some(i => i.pullRequestReview.id == this.review.node_id)) {
+                    this.network_getReviewComments()
                 }
             }
         },
