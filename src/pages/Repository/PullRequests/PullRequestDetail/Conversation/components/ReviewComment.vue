@@ -151,9 +151,6 @@
             owner() {
                 return this.$route.params.owner
             },
-            pullRequestProvided_() {
-                return this.pullRequestProvided()
-            },
             location() {
                 return location
             },

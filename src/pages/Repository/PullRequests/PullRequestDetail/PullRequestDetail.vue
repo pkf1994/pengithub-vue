@@ -54,6 +54,7 @@
         <keep-alive>
             <router-view></router-view>
         </keep-alive>
+
     </Container>
 </template>
 
@@ -66,6 +67,8 @@
         cancelAndUpdateAxiosCancelTokenSource} from '@/network'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
+    import { mapMutations } from 'vuex'
+    import {MUTATION_PULL_REQUEST_DETAIL_RESET_STATE} from '@/store/modules/pullRequestDetail/mutationTypes'
     export default {
         name: 'pr_detail',
         mixins: [RouteUpdateAwareMixin],
@@ -79,7 +82,10 @@
             return {
                 data: {},
                 loading: false,
-                isDynamicDocumentTitle: true
+                isDynamicDocumentTitle: true,
+                newSubmittedReviews: [],
+                newStartedReviews: [],
+                deletedReviewComments: []
             }
         },
         computed: {
@@ -119,7 +125,11 @@
             this.network_getData()
         },
         methods: {
-             async network_getData() {
+            ...mapMutations({
+                mutation_pullRequestDetailResetState: MUTATION_PULL_REQUEST_DETAIL_RESET_STATE
+            }),
+            async network_getData() {
+                this.mutation_pullRequestDetailResetState()
                 try{
                     //获取基本数据
                     this.loading = true

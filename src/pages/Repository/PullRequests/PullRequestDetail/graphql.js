@@ -70,26 +70,17 @@ export const GRAPHQL_PULL_TIMELINE = `
   }
 `
 
-  export const GRAPHQL_PR_TIMELINE_COUNT = payload => {
-      let graphql = ''
-      payload.timelineTypes.forEach(item => {
-        graphql = `
-          ${graphql}
-          ${item}:timelineItems(itemTypes: ${item}) {
-            totalCount
-          }
-        `
-      })
-      return `
-      {
-        node(id: "${payload.nodeId}") {
-          ... on PullRequest {
-            ${graphql}
+  export const GRAPHQL_PR_TIMELINE_COUNT = 
+      `query($itemTypes:[PullRequestTimelineItemsItemType!],$repo:String!,$owner:String!,$number:Int!){
+        repository(name:$repo,owner:$owner) {
+          pullRequest(number: $number) {
+            timelineItems(itemTypes: $itemTypes) {
+              totalCount
+            }
           }
         }
-      }
-      `
-  }
+      }`
+
 
   export const GRAPHQL_PR_REVIEW_COMMENTS = `
     query($ids:[ID!]!){

@@ -18,9 +18,6 @@ export default {
                     viewer: state => state.oauth.viewerInfo,
                     dirtyPool: state => state.dirty
                 }),
-                dirty() {
-                    return this.dirtyPool[this.$options.name]
-                }
             },
             methods: {
                 ...mapMutations({

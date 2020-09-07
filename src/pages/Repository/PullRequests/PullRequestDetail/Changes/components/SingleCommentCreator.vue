@@ -18,6 +18,8 @@
     import {Popover} from '@/components'
     import {authRequiredGitHubGraphqlApiQuery} from '@/network'
     import * as graphql  from '../../graphql.js'
+    import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW} from '@/store/modules/pullRequestDetail/mutationTypes'
+    import {mapMutations} from 'vuex'
     export default {
         mixins: [ReviewCommentReplyCreator],
         inject: ['commentReviewCreatedHook','pendingReview'],
@@ -27,6 +29,10 @@
             }
         },
         methods: {
+            ...mapMutations({
+                mutation_pushNewCreatedReviewComments: MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT,
+                mutation_pushNewSubmittedReview: MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW
+            }),
             network_addSingleComment() {
                 if(this.pendingReview().emptyFlag) {
                     this.network_createCommentReview()
@@ -38,9 +44,12 @@
                 try {
                     this.loadingAddComment = true
 
-                    await this.network_createReview('COMMENT')
-                    await this.commentReviewCreatedHook()()
+                    let res = await this.network_createReview('COMMENT')
                     
+                    await this.commentReviewCreatedHook()(res.data)
+
+                    this.mutation_pushNewSubmittedReview(res.data)
+
                     this.content = ''
                     this.$emit('cancel')
                 } catch (e) {
@@ -68,6 +77,7 @@
 
                     try {
                         let comment = res.data.data.addPullRequestReviewComment.comment
+                        this.mutation_pushNewCreatedReviewComments(comment)
                         await this.reviewCommentCreatedHook()(comment)
                         this.content = ''
                         this.$emit('cancel')

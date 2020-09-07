@@ -92,7 +92,7 @@
     import * as graphql from '../../graphql.js'
     import * as api from '@/network/api'
     export default {
-        inject: ['reviewCommentsExtraData','repoOwnerType','triggerReplyButtonDisabled','reviewCommentDeletedHook','pendingReviewGetter'],
+        inject: ['pendingReview','reviewCommentsExtraData','repoOwnerType','triggerReplyButtonDisabled','reviewCommentDeletedHook','pendingReviewCommentDeletedHook'],
         data() {
             return {
                 showMinimized: false,
@@ -183,8 +183,17 @@
                             }
                         }
                     )
+
+                    let event = new CustomEvent('review-comment-deleted',{bubbles:true,detail:this.propsData})
+                    this.$el.dispatchEvent(event)
+
+                    if(this.pendingReview().reviewCommets.data.length == 1) {
+                        let event = new CustomEvent('review-deleted',{bubbles:true,detail:this.pendingReview().data})
+                        this.$el.dispatchEvent(event)
+                    }
+
                     if(this.extraData.state == 'PENDING') {
-                        await this.pendingReviewGetter()()
+                        await this.pendingReviewCommentDeletedHook()()
                     }else{
                         await this.reviewCommentDeletedHook()()
                     }

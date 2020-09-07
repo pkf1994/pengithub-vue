@@ -14,8 +14,11 @@
     import {authRequiredPost,authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
     import * as api from '@/network/api'
     import * as graphql  from '../../graphql.js'
+    import {mapMutations} from 'vuex'
+    import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_STARTED_REVIEW} from '@/store/modules/pullRequestDetail/mutationTypes'
+import { MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT } from '../../../../../../store/modules/pullRequestDetail/mutationTypes.js'
     export default {
-        inject: ['pendingReview','pendingReviewGetter','reviewCommentCreatedHook','pullRequestProvided'],
+        inject: ['pendingReview','reviewStartedHook','reviewCommentCreatedHook','pullRequestProvided'],
         props: {
             comment: Object,
             path: String,
@@ -47,6 +50,10 @@
             this.$refs.textarea.focus()
         },
         methods: {
+            ...mapMutations({
+                mutation_pushNewCreatedReviewComments: MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT,
+                mutation_pushNewStartedReview: MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_STARTED_REVIEW,
+            }),
             async network_addReply() {
                 try {
                     this.loadingCreateReply = true
@@ -75,6 +82,7 @@
 
                     await this.network_getReviewTheCommentBelongTo()
 
+                    //使用graphql进行该操作是因为rest api会报错，原因未知
                     let res = await authRequiredGitHubGraphqlApiQuery(
                         graphql.GRAPHQL_ADD_PULL_REQUEST_REVIEW_COMMENT,
                         {
@@ -90,6 +98,7 @@
 
                     try {
                         let comment = res.data.data.addPullRequestReviewComment.comment
+                        this.mutation_pushNewCreatedReviewComments(comment)
                         await this.reviewCommentCreatedHook()(comment)
                         this.content = ''
                         this.$emit('cancel')
@@ -131,11 +140,14 @@
                 let res = await authRequiredGet(url)
                 return res.data
             }, */
+
             async network_startAReview() {
                 try {
                     this.loadingStartReview = true
-                    await this.network_createReview()
-                    await this.pendingReviewGetter()()
+                    let res = await this.network_createReview()
+                    
+                    let pendingReview = await this.reviewStartedHook()()
+                    this.mutation_pushNewStartedReview(pendingReview)
                     this.content = ''
                     this.$emit('cancel')
                 } catch (e) {
@@ -144,6 +156,7 @@
                     this.loadingStartReview = false
                 }
             },
+
             async network_createReview(event) {
                 let url = api.API_CREATE_REVIEW({
                     repo: this.repo,
@@ -164,6 +177,7 @@
                         ]
                     }
                 )
+                return res
             }
         },
         components: {

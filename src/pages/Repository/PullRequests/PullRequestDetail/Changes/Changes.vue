@@ -35,7 +35,7 @@
         <EditorHeader class="editor-header" v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'">
             Submit your review
         </EditorHeader>
-        <ReviewSubmitter v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'" @review-submitted.native.stop="reviewSubmittedHook"></ReviewSubmitter>
+        <ReviewSubmitter v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'"></ReviewSubmitter>
 
         <!-- <Editor v-if="changedFiles.data.length > 0" 
                 class="m-3"
@@ -60,7 +60,9 @@
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
     import * as api from '@/network/api'
     import {util_dateFormat,util_emoji} from '@/util'
+    import {mapState, mapMutations} from 'vuex'
     import * as graphql from '../graphql'
+    import {MUTATION_PULL_REQUEST_DETAIL_RESET_STATE,MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_STARTED_REVIEW} from '@/store/modules/pullRequestDetail/mutationTypes'
     let parse = require("parse-link-header")
     export default {
         mixins: [RouteUpdateAwareMixin],
@@ -72,10 +74,12 @@
                 reviewCommentsExtraData: () => this.reviewCommentsExtraData.data,
                 pendingReviewComments: () => this.pendingReview.reviewComments.data,
                 pendingReview: () => this.pendingReview,
-                commentReviewCreatedHook: () => this.network_getReviewComments,
+                commentReviewCreatedHook: () => this.commentReviewCreatedHook,
                 reviewCommentDeletedHook: () => this.network_getReviewComments,
-                pendingReviewGetter: () => this.network_getPendingReview,
-                reviewCommentCreatedHook: () => this.reviewCommentCreatedHook
+                reviewStartedHook: () => this.reviewStartedHook,
+                reviewSubmittedHook: () => this.reviewSubmittedHook,
+                reviewCommentCreatedHook: () => this.reviewCommentCreatedHook,
+                pendingReviewCommentDeletedHook: () => this.network_getPendingReview
             }
         },
         data() {
@@ -107,6 +111,10 @@
             }
         },
         computed: {
+            ...mapState({
+                deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments,
+                newSubmittedReviews: state => state.pullRequestDetail.newSubmittedReviews
+            }),
             repo() {
                 return this.$route.params.repo
             },
@@ -121,7 +129,11 @@
             this.network_getData()
         },
         methods: {
+            ...mapMutations({
+                mutation_resetState: MUTATION_PULL_REQUEST_DETAIL_RESET_STATE
+            }),
             network_getData() {
+                this.mutation_resetState()
                 this.network_getReviewComments()
                 this.network_getChangedFiles()
                 this.network_getPendingReview()
@@ -177,7 +189,7 @@
                         graphql.GRAPHQL_PR_REVIEW_COMMENTS,
                         {
                             variables: {
-                                ids: comments ? comments.map(i => i.node_id) : this.reviewComments.data.map( i => i.node_id)
+                                ids: comments ? comments.filter(i => i.position).map(i => i.node_id) : this.reviewComments.data.filter(i => i.position).map( i => i.node_id)
                             }
                         }
                     )
@@ -237,7 +249,7 @@
                         this.pendingReview.emptyFlag = false
                         if(!res.data.data.repository.pullRequest.reviews.nodes[0]) this.pendingReview.emptyFlag = true
                         if(this.pendingReview.data.databaseId) {
-                            await this.network_getPendingReviewComments(this.pendingReview.data)
+                            this.network_getPendingReviewComments()
                         }else {
                             this.pendingReview.reviewComments.data = []
                         }
@@ -380,14 +392,47 @@
             pendingReviewCommentDeletedEventHandler(){
                 this.network_getPendingReview()
             },
-            reviewSubmittedHook(payload) {
-                this.pendingReview.data = {}
-                this.pendingReview.reviewComments = []
-                this.pendingReview.emptyFlag = true
-                this.$router.push(`/${this.owner}/${this.repo}/pull/${this.number}?new_created_timeline_item=${payload.detail.id}`)
+            async commentReviewCreatedHook(review) {
+                let url = api.API_REVIEW_COMMENTS_OF_REVIEW({
+                    repo: this.repo,
+                    owner: this.owner,
+                    number: this.number,
+                    reviewId: review.id,
+                })
+
+                let res = await authRequiredGet(url)
+
+                res.data[0] && this.reviewComments.data.push(res.data[0])
+                this.network_getReviewCommentsExtraData(res.data)
+            },
+            async reviewStartedHook() {
+                await this.network_getPendingReview()
+                return this.pendingReview.data
+            },
+            async reviewSubmittedHook(review) {
+                if(this.pendingReview.data.id) {
+                    this.reviewComments.data = this.reviewComments.data.concat(this.pendingReview.reviewComments.data)
+                    this.pendingReview.data = {}
+                    this.pendingReview.reviewComments.data = []
+                } else {
+                    let url = api.API_REVIEW_COMMENTS_OF_REVIEW({
+                        repo: this.repo,
+                        owner: this.owner,
+                        reviewId: review.id,
+                        params: {
+                            per_page:100
+                        }
+                    })
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            cancelToken:this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_review_comments')
+                        }
+                    )
+                    this.reviewComments.data = this.reviewComments.data.concat(res.data)
+                }
             }
         },
-      
         components: {
             CommonLoadingWrapper,
             AnimatedHeightWrapper,

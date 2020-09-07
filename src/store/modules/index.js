@@ -5,6 +5,7 @@ import repositoryStore from './repository'
 import issuesStore from './issues'
 import notificationsStore from './notifications'
 import topNoticeStore from './topNotice'
-import dirty from './dirty'
+import dirtyStore from './dirty'
+import pullRequestDetailStore from './pullRequestDetail'
 
-export {oauthStore,homeStore,searchStore,repositoryStore,issuesStore,notificationsStore,topNoticeStore,dirty}
+export {oauthStore,homeStore,searchStore,repositoryStore,issuesStore,notificationsStore,topNoticeStore,dirtyStore,pullRequestDetailStore}

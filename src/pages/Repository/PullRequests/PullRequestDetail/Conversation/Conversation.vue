@@ -82,20 +82,29 @@
                         class="bg-white" />
 
             <transition-group tag="div" appear name="fade-group">
-                <div v-for="(item,index) in timeline.data.filter(i => !timeline.newestTimeline.data.includes(i))" :key="(item.id || '') + index">
-                    <TimelineItem :data="item" class="border-top" style="background:#fafbfc"/>
+                <div v-for="(item,index) in timeline.data.filter(i => !timeline.newestTimeline.data.some(i_ => i_.node_id == i.node_id))" :key="(item.id || '') + index">
+                    <TimelineItem :data="item" class="border-top"/>
                 </div> 
             </transition-group>
 
-            <HiddenItemLoading v-if="(timeline.pageInfo.next || timeline.loading) && !timeline.data.some(i => timeline.newestTimeline.data[0] && i.node_id == timeline.newestTimeline.data[0].node_id)"
+            <HiddenItemLoading v-if="(timeline.pageInfo.next || timeline.loading) && !noMoreTimelineToLoad"
                                 class="border-top"
                                 :loading="timeline.loading"
                                 :dataGetter="loadingMore">
+                                <p class="timeline-truncation-title" v-if="timelineRemainedCount > 0">
+                                    {{timelineRemainedCount}} items not shown.
+                                </p>
             </HiddenItemLoading>
 
              <transition-group tag="div" appear name="fade-group">
                 <div v-for="(item,index) in timeline.newestTimeline.data" :key="(item.id || '') + index">
-                    <TimelineItem :data="item" class="border-top" style="background:#fafbfc"/>
+                    <TimelineItem :data="item" class="border-top"/>
+                </div> 
+            </transition-group>
+
+             <transition-group tag="div" appear name="fade-group">
+                <div v-for="(item,index) in newCreatedTimelines" :key="(item.id || '') + index">
+                    <TimelineItem :data="item" class="border-top"/>
                 </div> 
             </transition-group>
 
@@ -128,7 +137,6 @@
                     Comment on pull request
                 </Header>
                 <PullRequestCommentCreator 
-                        @create-comment-success="createCommentHandler"
                         class="m-3">
                 </PullRequestCommentCreator>
             </div>
@@ -192,8 +200,8 @@
         authRequiredGitHubGraphqlApiQuery} from '@/network'
     import * as api from '@/network/api'
     import * as graphql from '../graphql'
-    import {mapState,mapActions} from 'vuex'
-    var parse = require('parse-link-header');
+    import {mapState,mapMutations} from 'vuex'
+    import {MUTATION_PULL_REQUEST_DETAIL_RESET_STATE } from '@/store/modules/pullRequestDetail/mutationTypes'
     var parse = require('parse-link-header');
     export default {
         name: 'pullRequest_detail_conversation',
@@ -203,7 +211,10 @@
             return {
                 timelineExtraDataProvided: () => this.timeline.extraData.data,
                 reviewCommentReplies: () => this.reviewCommentReplies.data,
-                pullRequestProvided: () => Object.assign({},this.extraData.data,this.pullRequestProvided().data)
+                pullRequestProvided: () => Object.assign({},this.extraData.data,this.pullRequestProvided().data),
+                commentCreatedHook: () => this.commentCreatedHook,
+                commentDeletedHook: () => this.commentDeletedHook,
+                reviewCommentsReplyHostDeletedHook: () => this.network_getReviewCommentReplies
             }
         },
         data() {
@@ -224,16 +235,26 @@
                         data: [],
                         loading: false
                     },
-                    perPage: 20,
+                    perPage: 5,
                     pageInfo: {},
-                    count: {
+                    graphqlCount: {
+                        data: 0,
+                        loading: false
+                    },
+                    restCount: {
                         data: 0,
                         loading: false
                     },
                     newestTimeline: {
                         data: [],
                         loading: false
-                    }
+                    },
+                    //处理删除timeline产生的副作用
+                    bufferTimeline: {
+                        data: [],
+                        loading: false
+                    },
+                    newCreatedComments: [],
                 },
                 timelineTypes: [
                     {
@@ -331,12 +352,20 @@
                     {
                         graphql:'REVIEW_REQUESTED_EVENT',
                         rest:'review_requested',
+                    },
+                    {
+                        graphql:'BASE_REF_FORCE_PUSHED_EVENT',
+                        rest:'base_ref_force_pushed',
                     }
                 ],
             }
         },
        
         computed: {
+            ...mapState({
+                newStartedReviews: state => state.pullRequestDetail.newStartedReviews,
+                newSubmittedReviews: state => state.pullRequestDetail.newSubmittedReviews
+            }), 
             repo() {
                 return this.$route.params.repo
             },
@@ -372,29 +401,42 @@
                         alreadyCount ++
                     }
                 })
-                return this.timeline.count.data - alreadyCount
+                return this.timeline.graphqlCount.data - alreadyCount
             },
             editHistory() {
                 return `opened this pull request ${this.createdAt} ${this.extraData.data.userContentEdits && this.extraData.data.userContentEdits.totalCount > 0 ? ' • edited ' + util_dateFormat.getDateDiff(this.extraData.data.userContentEdits.nodes[0].editedAt) : ''}`
             },
+            newCreatedTimelines() {
+                let allNewCreatedTimelines = [
+                    ...this.newStartedReviews,
+                    ...this.newSubmittedReviews,
+                    ...this.timeline.newCreatedComments
+                ].sort((a,b) => (a.submitted_at || a.created_at) > (b.submitted_at || b.created_at))
+                return allNewCreatedTimelines
+            },
             newCreatedTimelineItem() {
                 return this.$route.query.new_created_timeline_item
+            },
+            noMoreTimelineToLoad() {
+                if(!this.timeline.pageInfo.next) return true
+                return this.timeline.restCount.data <= (this.timeline.data.length + this.timeline.newestTimeline.data.length)
             }
-
-            /* subscriptionNotice() {
-                return this.viewerSubscription.toLowerCase()
-            } */
         },
         created() {
             this.network_getData()
         },
         methods: {
+            ...mapMutations({
+                mutation_pullRequestDetailResetState: MUTATION_PULL_REQUEST_DETAIL_RESET_STATE
+            }),
             loadingMore() {
                 if(this.timeline.loading) return
                 this.network_getTimeline()
             },
-           
             async network_getData() {
+
+                this.mutation_pullRequestDetailResetState()
+
                 if(this.accessToken) await this.network_getPullRequestExtraData()
 
                 //获取timeline(异步)
@@ -403,7 +445,9 @@
                 //获取review comment replies
                 this.network_getReviewCommentReplies()
 
-                if(this.accessToken) this.network_getTimelineCount()
+                this.network_getTimelineRestCount()
+
+                if(this.accessToken) this.network_getTimelineGraphqlCount()
             },
             async network_getPullRequestExtraData() {
                 try {
@@ -441,8 +485,11 @@
                         url_timeline = api.API_ISSUE_TIMELINE({
                             repo: this.repo,
                             owner: this.owner,
-                            number: this.number
-                        }) + `?per_page=${this.timeline.perPage}`
+                            number: this.number,
+                            params: {
+                                per_page: this.timeline.perPage
+                            }
+                        })
                     }
 
                     let config = {
@@ -457,6 +504,11 @@
 
                     this.timeline.pageInfo = parse(res_timeline.headers.link) || {}
 
+                    if(this.timeline.bufferTimeline.data.length > 0) {
+                        this.timeline.data = this.timeline.data.concat(this.timeline.bufferTimeline.data)
+                        this.timeline.bufferTimeline.data = []
+                    }
+
                     this.timeline.data = this.timeline.data.concat(res_timeline.data)
 
                     this.timeline.loading = false
@@ -468,6 +520,7 @@
                     }
 
                     if(this.newCreatedTimelineItem) this.scrollToNewestTimelineItem()
+
 
                 }catch(e){
                     this.handleError(e)
@@ -501,6 +554,7 @@
                     this.timeline.newestTimeline.loading = false
                 }
             },
+            //deprecated
             async network_getNewestTimeline() {
                 let url_pageInfo = api.API_ISSUE_TIMELINE({
                     repo: this.repo,
@@ -535,7 +589,8 @@
                     }
                 )
 
-                return res.data[0]
+                res.data[0] && this.timeline.newestTimeline.data.push(res.data[0])
+                res.data[0] && this.network_getTimelineExtraData(res.data)
             },
             async network_getTimelineExtraData(timeline) {
                 let ids = timeline && timeline.map(i => i.node_id).filter(i => i)
@@ -562,47 +617,65 @@
                     this.timeline.extraData.loading = false
                 }
             },
-            async network_getTimelineCount() {
-                try{
-                    this.timeline.count.loading = true
+            async network_getTimelineRestCount() {
+                try {
+                    this.timeline.restCount.loading = true
 
-                    let timelineTypes_graphql = []
-                    this.timelineTypes.forEach(item => {
-                        timelineTypes_graphql.push(item.graphql)
-                    })
-                    let graphql_timelineCount = graphql.GRAPHQL_PR_TIMELINE_COUNT(
-                            {
-                                timelineTypes: timelineTypes_graphql,
-                                nodeId: this.pullRequestProvided().data.node_id
-                            }
-                        )
+                    let url = api.API_ISSUE_TIMELINE({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number,
+                        params: {
+                            per_page: 1
+                        }
+                    })  
 
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql_timelineCount,
+                    let res = await authRequiredGet(
+                        url,
                         {
-                            cancelToken:this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + '_timeline_count')
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_timeline_rest_count'),
+                                headers: {
+                                "accept": "application/vnd.github.mockingbird-preview"
+                            }
                         }
                     )
 
-                    let dataHolder
+                    let countHolder = parse(res.headers.link) || {}
+                    this.timeline.restCount.data = countHolder.last ? countHolder.last.page : res.data.length
+                } catch (e) {
+                    console.log(e)
+                } finally {
+                    this.timeline.restCount.loading = false
+                }
+            },
+            async network_getTimelineGraphqlCount() {
+                try{
+                    this.timeline.graphqlCount.loading = true
+
+                    let itemTypes = this.timelineTypes.map(i => i.graphql)
+                    
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_PR_TIMELINE_COUNT,
+                        {
+                            variables: {
+                                itemTypes,
+                                repo: this.repo,
+                                owner: this.owner,
+                                number: parseInt(this.number)
+                            },
+                            cancelToken:this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + '_timeline_graphql_count')
+                        }
+                    )
                     try{
-                        dataHolder = res.data.data.node
+                        this.timeline.graphqlCount.data = res.data.data.repository.pullRequest.timelineItems.totalCount
                     }catch(e) {
                         this.handleGraphqlError(res)
                     }
 
-                    let timelineCount = 0
-
-                    for(let key in dataHolder) {
-                        timelineCount = timelineCount + dataHolder[key].totalCount
-                    }
-
-                    this.timeline.count.data = timelineCount
-
                 }catch(e){
                     console.log(e)
                 }finally{
-                    this.timeline.count.loading = false
+                    this.timeline.graphqlCount.loading = false
                 }
             },
             //此处无法获取state为pending的review comment reply, 即使viewer为该review comment reply的author, 该数据可以在review组件中通过graphql api获取
@@ -651,7 +724,7 @@
                     this.reviewCommentReplies.loading = false
                 }
             },
-            mergedTimelineData(timelineData) {
+            /* mergedTimelineData(timelineData) {
                 let mergedTimelineData = []
                 let lastOne = {}
                 timelineData.forEach(item => {
@@ -758,9 +831,44 @@
                     }
                 })
                 return mergedTimelineData
+            }, */
+            async network_getBufferTimeline() {
+                try {
+                    this.timeline.bufferTimeline.loading = true
+                    let url = api.API_ISSUE_TIMELINE({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number,
+                        params: {
+                            per_page: 1,
+                            page: this.timeline.data.length
+                        }
+                    })
+
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            headers: {
+                                "accept": "application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json"
+                            }
+                        }
+                    )
+
+                    res.data[0] && this.timeline.bufferTimeline.data.push(res.data[0])
+
+                } catch (e) {
+                    console.log(e)
+                } finally {
+                    this.timeline.bufferTimeline.loading = false
+                }
             },
-            createCommentHandler(payload) {
-                this.commentsJustCreated.push(payload)
+            async commentDeletedHook() {
+                //console.log("commentDeletedHook")
+                if(this.noMoreTimelineToLoad) return
+                await this.network_getBufferTimeline()
+            },
+            async commentCreatedHook(payload) {
+                this.timeline.newCreatedComments.push(payload) 
                 this.network_getTimelineExtraData([payload])
             },
             changeLockStatusSuccessPostHandler(payload) {
@@ -796,10 +904,9 @@
                 }catch(e) {}
 
                 this.scrollToTop()
-                let newestTimeline = await this.network_getNewestTimeline()
-                newestTimeline && this.timeline.newestTimeline.data.push(newestTimeline)
-                newestTimeline && this.network_getTimelineExtraData([newestTimeline])
-            }
+                this.network_getNewestTimeline()
+               
+            },
         },
         components: {
             CommonLoadingWrapper,
@@ -983,5 +1090,12 @@
     width: 16px;
     margin-left: -23px;
     text-align: center;
+}
+
+.timeline-truncation-title {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #586069;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <Container class="p-3 relative container" :id="propsData.id">
+    <Container v-if="!isSubmitted && !deleted" class="p-3 relative container" :id="propsData.id">
         <Header class="d-flex position-relative pl-4">
             
             <div class="pr-simple-timeline-icon-wrapper">
@@ -28,18 +28,20 @@
         </Header>
 
         <Body class="bubble mt-3" v-if="bodyHTML">
-            <BodyHTML v-if="!showReviewBodyEditor" v-html="bodyHTML"  class="markdown-body p-3" style="font-size:15px">
+            <BodyHTML v-if="!showReviewBodyEditor" class="markdown-body p-3" style="font-size:15px">
+                <div v-html="bodyHTML">
+
+                </div>
             </BodyHTML>
             <ReviewBodyEditor v-else :review="updatedReview || propsData" @review-updated="reviewUpdatedHook" @cancel="() => triggerShowReivewBodyEditor(false)"></ReviewBodyEditor>
         </Body>
        
-        <LoadingWrapper v-if="comments.loading" class="loading-wrapper pt-3 d-flex flex-justify-center flex-items-center">
+        <!-- <LoadingWrapper v-if="comments.loading" class="loading-wrapper pt-3 d-flex flex-justify-center flex-items-center">
             Loading...
-        </LoadingWrapper>
+        </LoadingWrapper> -->
 
         <transition-group name="fade" appear>
             <ReviewComment v-for="item in comments.data.filter(i => !i.in_reply_to_id)" :key="item.id" :reviewComment="item"/>
-            <ReviewComment v-for="item in commentsOfPendingReview.data.filter(i => !i.replyTo)" :key="item.id" :reviewComment="item"/>
         </transition-group>
         
         <HiddenItemLoading v-if="comments.pageInfo.next" style="padding-bottom:0px!important" :loading="comments.loading" :dataGetter="network_getReviewComments">
@@ -59,7 +61,8 @@
     import * as api from '@/network/api'
     import Comment from './Comment'
     import ReviewBodyEditor from './ReviewBodyEditor'
-    import { authRequiredGet,authRequiredGitHubGraphqlApiQuery  } from '@/network'
+    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
+    import {mapState} from 'vuex'
     let parse = require('parse-link-header')
     export default {
         mixins: [Comment],
@@ -67,6 +70,7 @@
             return {
                 reviewProvided: () => this.propsData,
                 commentsOfPendingReview: () => this.comments.data,
+                pendingReviewCommentRepliesDeletedHook: () => this.pendingReviewCommentRepliesDeletedHook
             }
         },
         data() {
@@ -77,21 +81,20 @@
                     pageInfo: {},
                     totalCount: 0,
                 },
-                commentsOfPendingReview: {
-                    data: [],
-                    loading: false,
-                    pageInfo: {},
-                    totalCount: 0
-                },
                 reactions: {
                     data: {},
                     loading: false
                 },
                 updatedReview: undefined,
-                showReviewBodyEditor: false
+                showReviewBodyEditor: false,
+                deleted: false
             }
         },
         computed: {
+            ...mapState({
+                newSubmittedReviews: state => state.pullRequestDetail.newSubmittedReviews,
+                deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments,
+            }),
             repo() {
                 return this.$route.params.repo
             },
@@ -119,6 +122,9 @@
             bodyHTML() {
                 return util_markdownParse.markdownToHTML(this.updatedReview && this.updatedReview.body || this.propsData.body)
             },
+            isSubmitted() {
+                return this.propsData.state == 'pending' && this.newSubmittedReviews.some(i => i.id == this.propsData.id)
+            }
         },
         created() {
             this.network_getData()
@@ -131,11 +137,11 @@
             async network_getReviewComments() {
                 try{
                     this.comments.loading = true
-                    let url 
-                    if(this.comments.pageInfo.next) {
-                        url = this.comments.pageInfo.next.url
-                    }else{
-                        url = api.API_REVIEW_COMMENTS_OF_REVIEW({
+                    
+                    let pageInfo
+                    let reviewComments = []
+                    while(!pageInfo || pageInfo.next) {
+                        let url = api.API_REVIEW_COMMENTS_OF_REVIEW({
                             repo: this.repo,
                             owner: this.owner,
                             number: this.number,
@@ -143,15 +149,17 @@
                             params: {
                                 sort: 'created',
                                 direction: 'asc',
-                                per_page: this.propsData.state == 'pending' ? 100 : 5
+                                per_page: 100
                             }
                         })
+
+                        let res = await authRequiredGet(url)
+                        pageInfo = parse(res.headers.link) || {}
+
+                        reviewComments = reviewComments.concat(res.data)
                     }
 
-                    let res = await authRequiredGet(url)
-
-                    this.comments.data = this.comments.data.concat(res.data)
-                    this.comments.pageInfo = parse(res.headers.link) || {}
+                    this.comments.data = reviewComments
                 }catch(e) {
                     console.log(e)
                 }finally{
@@ -186,7 +194,10 @@
             reviewUpdatedHook(payload) {
                 this.showReviewBodyEditor = false
                 this.updatedReview = payload
-            }
+            },
+            pendingReviewCommentRepliesDeletedHook(event) {
+                this.network_getReviewComments()
+            },
            /*  async network_getCommentsOfPendingReview() {
                 try{
                     this.commentsOfPendingReview.loading = true
@@ -216,6 +227,15 @@
                     this.commentsOfPendingReview.loading = false
                 }
             } */
+        },
+        watch: {
+            deletedReviewComments: function(newOne, oldOne) {
+                if(newOne.some(i => {
+                    return this.comments.data.some(i_ => i_.id == i.id)
+                })) {
+                    this.network_getReviewComments(true)
+                }
+            }
         },
         components: {
             LoadingIconEx,

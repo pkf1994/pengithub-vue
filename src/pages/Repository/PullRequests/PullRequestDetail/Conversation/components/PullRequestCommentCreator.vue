@@ -30,8 +30,7 @@
     import {authRequiredPost} from '@/network'
     import * as api from '@/network/api'
     export default {
-        inject: ['pullRequestProvided'],
-       
+        inject: ['pullRequestProvided','commentCreatedHook'],
         data() {
             return {
                 commentTextValue: '',
@@ -82,7 +81,10 @@
                         }
                     )
 
-                    this.$emit('create-comment-success',res.data)
+                    this.commentCreatedHook()({
+                        ...res.data,
+                        event: 'commented',
+                    })
                     Object.assign(this.$data,this.$options.data())
                 } catch (e) {
                     this.handleError(e)

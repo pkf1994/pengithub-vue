@@ -83,7 +83,7 @@
     import {authRequiredGet,authRequiredDelete} from '@/network'
     import * as api from '@/network/api'
     export default {
-        inject: ['timelineExtraDataProvided'],
+        inject: ['timelineExtraDataProvided','commentDeletedHook'],
         data() {
             return {
                 deleted: false,
@@ -193,6 +193,8 @@
                             }
                         }
                     )
+
+                    await this.commentDeletedHook()()
 
                     this.deleted = true
                 } catch (e) {

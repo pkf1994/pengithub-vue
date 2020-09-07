@@ -46,8 +46,10 @@
     import ReviewCommentEditor from './ReviewCommentEditor'
     import {authRequiredGet,authRequiredDelete} from '@/network'
     import * as api from '@/network/api'
+    import {MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT} from '@/store/modules/pullRequestDetail/mutationTypes'
+    import {mapState,mapMutations } from 'vuex'
     export default {
-        inject: ['repliesExtraData','repoOwnerType'],
+        inject: ['repliesExtraData','repoOwnerType','reviewProvided','reviewCommentsReplyHostDeletedHook','pendingReviewCommentRepliesDeletedHook'],
         data() {
             return {
                 data: {},
@@ -57,7 +59,6 @@
                 },
                 showReviewCommentEditor: false,
                 loadingDeleteThis: false,
-                deleted: false
             }
         },
         props: {
@@ -67,6 +68,9 @@
             },
         },
         computed: {
+            ...mapState({
+                deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments
+            }),
             repo() {
                 return this.$route.params.repo
             },
@@ -78,6 +82,9 @@
             },
             extraData() {
                 return this.repliesExtraData().filter(i => i.id == this.data.node_id)[0] || {}
+            },
+            deleted() {
+                return this.deletedReviewComments.some(i => i.id == this.reply.id)
             }
         },
         created() {
@@ -85,6 +92,9 @@
             this.network_getData()
         },
         methods: {
+            ...mapMutations({
+                mutation_pushDeletedReviewComment: MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT
+            }),
             network_getData() {
                 this.network_getReactions()
             },
@@ -132,7 +142,13 @@
                         }
                     )
 
-                    this.deleted = true
+                    this.mutation_pushDeletedReviewComment(this.reply)
+                    if(this.reviewProvided().state == 'pending') {
+                        await this.pendingReviewCommentRepliesDeletedHook()()
+                    }else if(!this.reply.in_reply_to_id) {
+                        await this.reviewCommentsReplyHostDeletedHook()()
+                    }
+
                 } catch (e) {
                     this.handleError(e)
                 } finally {

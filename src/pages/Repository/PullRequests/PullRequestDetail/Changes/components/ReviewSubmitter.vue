@@ -34,8 +34,10 @@
     import {authRequiredPost,authRequiredGitHubGraphqlApiQuery} from '@/network'
     import * as api from '@/network/api'
     import * as graphql  from '../../graphql.js'
+    import {mapMutations} from 'vuex'
+    import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW} from '@/store/modules/pullRequestDetail/mutationTypes'
     export default {
-        inject: ['pendingReview','pullRequestProvided'],
+        inject: ['pendingReview','pullRequestProvided','reviewSubmittedHook'],
         props: {
             commentId: [String,Number],
             path: String,
@@ -62,23 +64,29 @@
             }
         },
         methods: {
-            submitReview() {
-                if(this.pendingReview().data.databaseId) {
-                    this.network_submitPendingReview()
-                }else {
-                    this.network_createReviewDirectly()
-                }
-              
-            },
-            async network_submitPendingReview() {
-                  try {
+            ...mapMutations({
+                mutation_pushNewSubmittedReview: MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW
+            }),
+            async network_submitReview() {
+                try {
                     this.loading = true
-                    let url = api.API_SUBMIT_REVIEW({
-                        repo: this.repo,
-                        owner: this.owner,
-                        number: this.number,
-                        reviewId: this.pendingReview().data.databaseId
-                    })
+
+                    let url 
+                    if(this.pendingReview().data.databaseId) {
+                        url = api.API_SUBMIT_REVIEW({
+                            repo: this.repo,
+                            owner: this.owner,
+                            number: this.number,
+                            reviewId: this.pendingReview().data.databaseId
+                        })
+                    }else {
+                        url = api.API_CREATE_REVIEW({
+                            repo: this.repo,
+                            owner: this.owner,
+                            number: this.number,
+                        })
+                    }
+               
                     let res = await authRequiredPost(
                         url,
                         {
@@ -92,8 +100,14 @@
                         }
                     )
 
-                    this.$router.push(`/${this.owner}/${this.repo}/pull/${this.number}?new_created_timeline_item=${res.data.id}`)
-                    
+                    this.mutation_pushNewSubmittedReview(res.data)
+
+                    this.reviewSubmittedHook()(res.data)
+
+                    setTimeout(() => {
+                        this.$router.push(`/${this.owner}/${this.repo}/pull/${this.number}?new_created_timeline_item=${res.data.id}`)
+                    },50)
+
                     
                 } catch (e) {
                     this.handleError(e)
@@ -101,37 +115,6 @@
                     this.loading = false
                 }
             },
-            async network_createReviewDirectly() {
-                  try {
-                    this.loading = true
-                    let url = api.API_CREATE_REVIEW({
-                        repo: this.repo,
-                        owner: this.owner,
-                        number: this.number,
-                    })
-                    let res = await authRequiredPost(
-                        url,
-                        {
-                            body: this.content,
-                            event: this.viewerIsPullRequestOwner ? 'COMMENT' : this.event
-                        },
-                        {
-                            headers: {
-                                "accept": "application/vnd.github.squirrel-girl-preview"
-                            }
-                        }
-                    )
-
-                    let event = new CustomEvent('review-submitted',{bubbles:true,detail:res.data})
-
-                    
-                    
-                } catch (e) {
-                    this.handleError(e)
-                } finally {
-                    this.loading = false
-                }
-            }
         },
         components: {
             Container: styled.div``,
