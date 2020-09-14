@@ -18,7 +18,7 @@
     import {Popover} from '@/components'
     import {authRequiredGitHubGraphqlApiQuery} from '@/network'
     import * as graphql  from '../../graphql.js'
-    import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW} from '@/store/modules/pullRequestDetail/mutationTypes'
+    import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW,MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT} from '@/store/modules/pullRequestDetail/mutationTypes'
     import {mapMutations} from 'vuex'
     export default {
         mixins: [ReviewCommentReplyCreator],
@@ -48,7 +48,10 @@
                     
                     await this.commentReviewCreatedHook()(res.data)
 
-                    this.mutation_pushNewSubmittedReview(res.data)
+                    this.mutation_pushNewSubmittedReview({
+                        ...res.data,
+                        event: "reviewed"
+                    })
 
                     this.content = ''
                     this.$emit('cancel')
@@ -77,7 +80,7 @@
 
                     try {
                         let comment = res.data.data.addPullRequestReviewComment.comment
-                        this.mutation_pushNewCreatedReviewComments(comment)
+                        this.mutation_pushNewCreatedReviewComments({from:'changes',reviewComment:res.data})
                         await this.reviewCommentCreatedHook()(comment)
                         this.content = ''
                         this.$emit('cancel')

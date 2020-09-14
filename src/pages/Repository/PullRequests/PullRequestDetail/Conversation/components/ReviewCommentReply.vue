@@ -69,7 +69,7 @@
         },
         computed: {
             ...mapState({
-                deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments
+                deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments.changes
             }),
             repo() {
                 return this.$route.params.repo
@@ -142,8 +142,12 @@
                         }
                     )
 
-                    this.mutation_pushDeletedReviewComment(this.reply)
-                    if(this.reviewProvided().state == 'pending') {
+                    this.mutation_pushDeletedReviewComment({
+                        from: 'conversation',
+                        reviewComment: this.reply
+                    })
+
+                    if(this.reviewProvided().state.toLowerCase() == 'pending') {
                         await this.pendingReviewCommentRepliesDeletedHook()()
                     }else if(!this.reply.in_reply_to_id) {
                         await this.reviewCommentsReplyHostDeletedHook()()

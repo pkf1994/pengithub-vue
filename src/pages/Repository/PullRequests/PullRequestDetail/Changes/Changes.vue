@@ -1,5 +1,5 @@
 <template>
-    <CommonLoadingWrapper :loading="reviewComments.loading || reviewCommentsExtraData.loading || changedFiles.loading" :position="changedFiles.loading ? 'center' : 'corner'">
+    <CommonLoadingWrapper :loading="reviewComments.loading || reviewCommentsExtraData.loading || changedFiles.loading || pendingReview.loading || pendingReview.reviewComments.loading" :position="changedFiles.loading ? 'center' : 'corner'">
             <Switcher v-if="changedFiles.data.length > 0" class="switcher ">
                 <button class="text-left width-full btn-link text-gray-dark" @click="triggerSwitcherStretch" >
                     <svg data="stretch-icon" v-if="!switcherStretched" class="octicon octicon-chevron-down switcher-icon-open" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 11L0 6l1.5-1.5L5 8.25 8.5 4.5 10 6l-5 5z"></path></svg>
@@ -112,7 +112,7 @@
         },
         computed: {
             ...mapState({
-                deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments,
+                deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments.conversation,
                 newSubmittedReviews: state => state.pullRequestDetail.newSubmittedReviews
             }),
             repo() {
@@ -249,7 +249,7 @@
                         this.pendingReview.emptyFlag = false
                         if(!res.data.data.repository.pullRequest.reviews.nodes[0]) this.pendingReview.emptyFlag = true
                         if(this.pendingReview.data.databaseId) {
-                            this.network_getPendingReviewComments()
+                            await this.network_getPendingReviewComments()
                         }else {
                             this.pendingReview.reviewComments.data = []
                         }
@@ -407,7 +407,6 @@
             },
             async reviewStartedHook() {
                 await this.network_getPendingReview()
-                return this.pendingReview.data
             },
             async reviewSubmittedHook(review) {
                 if(this.pendingReview.data.id) {
@@ -431,6 +430,21 @@
                     )
                     this.reviewComments.data = this.reviewComments.data.concat(res.data)
                 }
+            }
+        },
+        watch: {
+            deletedReviewComments(newOne,oldOne) {
+                if(this.pendingReview.reviewComments.data.length > 0) {
+                    if(newOne.some(i => this.pendingReview.reviewComments.data.some(i_ => i_.id == i.id))) {
+                        if(this.pendingReview.reviewComments.data.length == 1) {
+                            this.network_getPendingReview()
+                        }else{
+                            this.network_getPendingReviewComments()
+                        }
+                        return 
+                    }
+                }
+                this.network_getReviewComments()
             }
         },
         components: {

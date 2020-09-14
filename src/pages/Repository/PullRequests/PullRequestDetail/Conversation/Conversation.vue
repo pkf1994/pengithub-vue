@@ -1,5 +1,5 @@
 <template>
-    <CommonLoadingWrapper :loading="pullRequestProvided().loading || timeline.loading || timeline.extraData.loading || reviewCommentReplies.loading" 
+    <CommonLoadingWrapper :loading="pullRequestProvided().loading || extraData.loading || timeline.loading || timeline.extraData.loading || reviewCommentReplies.loading" 
     :position="pullRequestProvided().loading ? 'center' : 'corner'"
     class="flex-grow-1">
             <Header  class="px-3 pt-3">

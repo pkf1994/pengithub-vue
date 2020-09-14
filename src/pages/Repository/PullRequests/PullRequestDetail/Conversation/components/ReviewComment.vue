@@ -1,7 +1,7 @@
 <template> 
     <Container class="bubble bg-white" style="margin-top:15px">
 
-        <FileHeader class="file-header" :class="{pending:reviewProvided().state == 'pending'}">
+        <FileHeader class="file-header" :class="{pending:reviewProvided().state.toLowerCase() == 'pending'}">
             <button class="btn-link text-gray float-right f6 d-block" v-if="reviewComment.outdated" @click="triggerShowOutdated">
                 <svg class="octicon octicon-fold position-relative mr-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 9l3 3H8v3H6v-3H4l3-3zm3-6H8V0H6v3H4l3 3 3-3zm4 2c0-.55-.45-1-1-1h-2.5l-1 1h3l-2 2h-7l-2-2h3l-1-1H1c-.55 0-1 .45-1 1l2.5 2.5L0 10c0 .55.45 1 1 1h2.5l1-1h-3l2-2h7l2 2h-3l1 1H13c.55 0 1-.45 1-1l-2.5-2.5L14 5z"></path></svg>
                 {{showOutdated ? 'Hide outdated' : 'Show outdated'}}
@@ -111,7 +111,7 @@
     import * as api from '@/network/api'
     import { authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
     export default {
-        inject: ['reviewCommentReplies','commentsOfPendingReview','reviewProvided','pullRequestProvided','repoOwnerType','viewerIsCollaborator'],
+        inject: ['reviewCommentReplies','reviewCommentsOfPendingReview','reviewProvided','pullRequestProvided','repoOwnerType','viewerIsCollaborator'],
         provide() {
             return {
                 repliesExtraData: () => this.repliesExtraData.data,
@@ -145,6 +145,9 @@
             },
         },
         computed: {
+            ...mapState({
+                newCreatedReviewComments: state => state.pullRequestDetail.newCreatedReviewComments.changes
+            }),
             repo() {
                 return this.$route.params.repo
             },
@@ -206,9 +209,9 @@
                 return `...${this.reviewComment.path.match(/(\/(([^\/])+)){3}$/g)[0]}`
             },
             replies() {
-                let replies_ = [...this.reviewCommentReplies(),...this.commentsOfPendingReview(),...this.repliesJustCreated].filter(item => {
+                let replies_ = [...this.reviewCommentReplies(),...this.reviewCommentsOfPendingReview(),...this.repliesJustCreated,...this.newCreatedReviewComments].filter(item => {
                     return item.in_reply_to_id == this.reviewComment.id
-                })
+                }).sort((a,b) => a.created_at > b.created_at)
 
                 let replies = []
                 replies_.forEach(i => {
@@ -313,7 +316,8 @@
             createReplySuccessHandler(payload) {
                 this.showReviewCommentReplyCreator = false
                 this.repliesJustCreated.push(payload)
-            }
+            },
+            
         },
         watch: {
             replies(newValue,oldValue) {

@@ -90,7 +90,9 @@
     import {ReviewCommentEditor} from '../../Conversation/components'
     import {MinimizePane,UnminimizeButton} from '../../../../components'
     import * as graphql from '../../graphql.js'
+    import { mapMutations } from 'vuex'
     import * as api from '@/network/api'
+    import { MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT } from '@/store/modules/pullRequestDetail/mutationTypes'
     export default {
         inject: ['pendingReview','reviewCommentsExtraData','repoOwnerType','triggerReplyButtonDisabled','reviewCommentDeletedHook','pendingReviewCommentDeletedHook'],
         data() {
@@ -140,6 +142,9 @@
             if(this.newCreated) this.network_getExtraDataForNewCreatedComment()
         },
         methods: {
+            ...mapMutations({
+                mutation_pushDeletedReviewComment: MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT
+            }),
             async network_getExtraDataForNewCreatedComment() {
                 try {
                     this.extraDataOfNewCreatedComment.loading = true
@@ -184,10 +189,12 @@
                         }
                     )
 
-                    let event = new CustomEvent('review-comment-deleted',{bubbles:true,detail:this.propsData})
-                    this.$el.dispatchEvent(event)
+                    this.mutation_pushDeletedReviewComment({
+                        from: 'changes',
+                        reviewComment: this.propsData
+                    })
 
-                    if(this.pendingReview().reviewCommets.data.length == 1) {
+                    if(this.pendingReview().reviewComments.data.length == 1) {
                         let event = new CustomEvent('review-deleted',{bubbles:true,detail:this.pendingReview().data})
                         this.$el.dispatchEvent(event)
                     }

@@ -12,14 +12,16 @@ export default {
         state.newSubmittedeReviews.push(payload)
     },
     [MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT] (state,payload) {
-        state.deletedReviewComments.push(payload)
+        state.deletedReviewComments[payload.from].push(payload.reviewComment)
     },
     [MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT] (state,payload) {
-        state.newCreatedReviewComments.push(payload)
+        state.newCreatedReviewComments[payload.from].push(payload.reviewComment)
     },
     [MUTATION_PULL_REQUEST_DETAIL_RESET_STATE] (state) {
         state.newStartedReviews = []
-        state.deletedReviewComments = []
-        state.deletedReviewComments = []
+        state.newCreatedReviewComments.conversation = []
+        state.newCreatedReviewComments.changes = []
+        state.deletedReviewComments.conversation = []
+        state.deletedReviewComments.changes = []
     },
 }

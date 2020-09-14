@@ -100,7 +100,10 @@
                         }
                     )
 
-                    this.mutation_pushNewSubmittedReview(res.data)
+                    this.mutation_pushNewSubmittedReview({
+                        ...res.data,
+                        event: "reviewed"
+                    })
 
                     this.reviewSubmittedHook()(res.data)
 

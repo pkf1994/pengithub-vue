@@ -4,7 +4,7 @@
         <div class="text-right">
             <button class="btn mt-2" @click.stop="() => $emit('cancel')" :disabled="loadingCreateReply || loadingStartReview">Cancel</button>
             <button class="btn mt-2 ml-1" @click.stop="network_addReply" :disabled="loadingCreateReply || loadingStartReview">{{loadingCreateReply ? 'Trying...' : 'Add reply'}}</button>
-            <button class="btn mt-2 ml-1 btn-primary" v-if="!pendingReview().data && !pendingReview.loading" @click.stop="network_createReview" :disabled="loadingCreateReply || loadingStartReview">{{loadingStartReview ? 'Trying...' : 'Start a review'}}</button>
+            <button class="btn mt-2 ml-1 btn-primary" v-if="(!pendingReview().data && !pendingReview.loading) || loadingStartReview" @click.stop="network_createReview" :disabled="loadingCreateReply || loadingStartReview">{{loadingStartReview ? 'Trying...' : 'Start a review'}}</button>
         </div>
     </Container>
 </template>
@@ -15,8 +15,7 @@
     import * as api from '@/network/api'
     import * as graphql  from '../../graphql.js'
     import {mapMutations} from 'vuex'
-    import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_STARTED_REVIEW} from '@/store/modules/pullRequestDetail/mutationTypes'
-import { MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT } from '../../../../../../store/modules/pullRequestDetail/mutationTypes.js'
+    import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_STARTED_REVIEW,MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT} from '@/store/modules/pullRequestDetail/mutationTypes'
     export default {
         inject: ['pendingReview','reviewStartedHook','reviewCommentCreatedHook','pullRequestProvided'],
         props: {
@@ -98,7 +97,7 @@ import { MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT } from '..
 
                     try {
                         let comment = res.data.data.addPullRequestReviewComment.comment
-                        this.mutation_pushNewCreatedReviewComments(comment)
+                        this.mutation_pushNewCreatedReviewComments({from:'changes',reviewComment: comment})
                         await this.reviewCommentCreatedHook()(comment)
                         this.content = ''
                         this.$emit('cancel')
@@ -146,8 +145,11 @@ import { MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT } from '..
                     this.loadingStartReview = true
                     let res = await this.network_createReview()
                     
-                    let pendingReview = await this.reviewStartedHook()()
-                    this.mutation_pushNewStartedReview(pendingReview)
+                    await this.reviewStartedHook()()
+                    this.mutation_pushNewStartedReview({
+                        ...res.data,
+                        event: "reviewed"
+                    })
                     this.content = ''
                     this.$emit('cancel')
                 } catch (e) {

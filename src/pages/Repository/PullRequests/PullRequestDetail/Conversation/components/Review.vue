@@ -36,16 +36,16 @@
             <ReviewBodyEditor v-else :review="updatedReview || propsData" @review-updated="reviewUpdatedHook" @cancel="() => triggerShowReivewBodyEditor(false)"></ReviewBodyEditor>
         </Body>
        
-        <!-- <LoadingWrapper v-if="comments.loading" class="loading-wrapper pt-3 d-flex flex-justify-center flex-items-center">
+        <!-- <LoadingWrapper v-if="reviewComments.loading" class="loading-wrapper pt-3 d-flex flex-justify-center flex-items-center">
             Loading...
         </LoadingWrapper> -->
 
         <transition-group name="fade" appear>
-            <ReviewComment v-for="item in comments.data.filter(i => !i.in_reply_to_id)" :key="item.id" :reviewComment="item"/>
+            <ReviewComment v-for="item in reviewComments.data.filter(i => !i.in_reply_to_id)" :key="item.id" :reviewComment="item"/>
         </transition-group>
         
-        <!-- <HiddenItemLoading v-if="comments.pageInfo.next" style="padding-bottom:0px!important" :loading="comments.loading" :dataGetter="network_getReviewComments">
-            {{comments.totalCount - data.length}} {{comments.totalCount - data.length > 1 ? 'comments' : 'comment'}} remained.
+        <!-- <HiddenItemLoading v-if="reviewComments.pageInfo.next" style="padding-bottom:0px!important" :loading="reviewComments.loading" :dataGetter="network_getReviewComments">
+            {{reviewComments.totalCount - data.length}} {{reviewComments.totalCount - data.length > 1 ? 'reviewComments' : 'comment'}} remained.
         </HiddenItemLoading> -->
       
     </Container>
@@ -69,13 +69,13 @@
         provide() {
             return {
                 reviewProvided: () => this.propsData,
-                commentsOfPendingReview: () => this.comments.data,
+                reviewCommentsOfPendingReview: () => this.reviewComments.data,
                 pendingReviewCommentRepliesDeletedHook: () => this.pendingReviewCommentRepliesDeletedHook
             }
         },
         data() {
             return {
-                comments: {
+                reviewComments: {
                     data: [],
                     loading: false,
                     pageInfo: {},
@@ -93,8 +93,8 @@
         computed: {
             ...mapState({
                 newSubmittedReviews: state => state.pullRequestDetail.newSubmittedReviews,
-                deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments,
-                newCreatedReviewComments: state => state.pullRequestDetail.newCreatedReviewComments
+                deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments.changes,
+                newCreatedReviewComments: state => state.pullRequestDetail.newCreatedReviewComments.changes
             }),
             repo() {
                 return this.$route.params.repo
@@ -107,7 +107,7 @@
             },
             statusAction() {
                 let status = 'approved'
-                switch(this.propsData.state) {
+                switch(this.propsData.state.toLowerCase()) {
                     case 'changes_requested':
                         status = 'request changes'
                         break
@@ -125,6 +125,9 @@
             },
             isSubmitted() {
                 return this.propsData.state == 'pending' && this.newSubmittedReviews.some(i => i.id == this.propsData.id)
+            },
+            rootReviewComments() {
+                return [...this.reviewComments.data,...this.newCreatedReviewComments].filter(i => !i.in_reply_to_id)
             }
         },
         created() {
@@ -137,7 +140,7 @@
             },
             async network_getReviewComments() {
                 try{
-                    this.comments.loading = true
+                    this.reviewComments.loading = true
                     
                     let pageInfo
                     let reviewComments = []
@@ -160,11 +163,11 @@
                         reviewComments = reviewComments.concat(res.data)
                     }
 
-                    this.comments.data = reviewComments
+                    this.reviewComments.data = reviewComments
                 }catch(e) {
                     console.log(e)
                 }finally{
-                    this.comments.loading = false
+                    this.reviewComments.loading = false
                 }
             },
             async network_getReviewCommentsCount() {
@@ -183,7 +186,7 @@
 
                     let pageInfo = parse(res.headers.link) || {}
 
-                    this.comments.count = pageInfo.last ? pageInfo.last.page : res.data.length
+                    this.reviewComments.count = pageInfo.last ? pageInfo.last.page : res.data.length
 
                 }catch(e) {
                     console.log(e)
@@ -197,27 +200,31 @@
                 this.updatedReview = payload
             },
             pendingReviewCommentRepliesDeletedHook(event) {
-                this.network_getReviewComments()
+                if(this.reviewComments.data.length == 1) {
+                    this.deleted = true
+                }else{
+                    this.network_getReviewComments()
+                }
             },
            /*  async network_getCommentsOfPendingReview() {
                 try{
-                    this.commentsOfPendingReview.loading = true
+                    this.reviewCommentsOfPendingReview.loading = true
 
                     let res = await authRequiredGitHubGraphqlApiQuery(
                         graphql.GRAPHQL_PR_REVIEW_COMMENTS,
                         {
                             variables: {
                                 id: this.propsData.node_id,
-                                after: this.commentsOfPendingReview.pageInfo.hasNextPage ? this.commentsOfPendingReview.pageInfo.endCursor : undefined,
+                                after: this.reviewCommentsOfPendingReview.pageInfo.hasNextPage ? this.reviewCommentsOfPendingReview.pageInfo.endCursor : undefined,
                                 first: 100
                             }
                         }
                     )
                    
                     try{
-                        this.commentsOfPendingReview.data = this.commentsOfPendingReview.data.concat(res.data.data.node.comments.nodes)
-                        this.commentsOfPendingReview.pageInfo = res.data.data.node.comments.pageInfo
-                        this.commentsOfPendingReview.totalCount = res.data.data.node.comments.totalCount
+                        this.reviewCommentsOfPendingReview.data = this.reviewCommentsOfPendingReview.data.concat(res.data.data.node.reviewComments.nodes)
+                        this.reviewCommentsOfPendingReview.pageInfo = res.data.data.node.reviewComments.pageInfo
+                        this.reviewCommentsOfPendingReview.totalCount = res.data.data.node.reviewComments.totalCount
                     }catch(e) {
                         this.handleGraphqlError(res)
                     }
@@ -225,35 +232,27 @@
                 }catch(e) {
                     console.log(e)
                 }finally{
-                    this.commentsOfPendingReview.loading = false
+                    this.reviewCommentsOfPendingReview.loading = false
                 }
             } */
         },
         watch: {
-            deletedReviewComments: function(newOne, oldOne) {
-                let differ = []
-                newOne.forEach(i => {
-                    if(!oldOne.some(i_ => i_.id == i.id)) {
-                        differ.push(i)
-                    }
-                })
-                if(differ.some(i => {
-                    return this.comments.data.some(i_ => i_.id == i.id)
+            deletedReviewComments(newOne, oldOne) {
+                if(newOne.some(i => {
+                    return this.reviewComments.data.some(i_ => i_.id == i.id)
                 })) {
-                    this.network_getReviewComments()
-                }
-            },
-            newCreatedReviewComments(newOne,oldOne) {
-                let differ = []
-                newOne.forEach(i => {
-                    if(!oldOne.some(i_ => i_.id == i.id)) {
-                        differ.push(i)
+                    if(this.propsData.state == 'pending' && this.reviewComments.data.length == 1) {
+                        this.deleted = true
+                        return 
                     }
-                })
-                if(differ.some(i => i.pullRequestReview.id == this.review.node_id)) {
                     this.network_getReviewComments()
                 }
             }
+           /*  newCreatedReviewComments(newOne,oldOne) {
+                if(newOne.some(i => i.pullRequestReview.id == this.propsData.node_id)) {
+                    this.network_getReviewComments()
+                }
+            } */
         },
         components: {
             LoadingIconEx,
