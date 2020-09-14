@@ -41,7 +41,7 @@
         </LoadingWrapper> -->
 
         <transition-group name="fade" appear>
-            <ReviewComment v-for="item in reviewComments.data.filter(i => !i.in_reply_to_id)" :key="item.id" :reviewComment="item"/>
+            <ReviewComment v-for="item in rootReviewComments" :key="item.id" :reviewComment="item"/>
         </transition-group>
         
         <!-- <HiddenItemLoading v-if="reviewComments.pageInfo.next" style="padding-bottom:0px!important" :loading="reviewComments.loading" :dataGetter="network_getReviewComments">

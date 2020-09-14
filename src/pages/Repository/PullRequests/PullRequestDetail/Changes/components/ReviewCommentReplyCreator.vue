@@ -97,7 +97,33 @@
 
                     try {
                         let comment = res.data.data.addPullRequestReviewComment.comment
-                        this.mutation_pushNewCreatedReviewComments({from:'changes',reviewComment: comment})
+                        this.mutation_pushNewCreatedReviewComments(
+                                {
+                                    from:'changes',
+                                    reviewComment: {
+                                        ...comment,
+                                        id: comment.databaseId,
+                                        node_id: comment.id,
+                                        created_at: comment.createdAt,
+                                        in_reply_to_id: comment.replyTo.databaseId,
+                                        user: {
+                                            login: comment.author.login,
+                                            avatar_url: comment.author.avatarUrl
+                                        },
+                                        reactions: {
+                                            '+1': comment.THUMBS_UP.totalCount,
+                                            '-1': comment.THUMBS_DOWN.totalCount,
+                                            hooray: comment.HOORAY.totalCount,
+                                            confused: comment.CONFUSED.totalCount,
+                                            eyes: comment.EYES.totalCount,
+                                            heart: comment.HEART.totalCount,
+                                            laugh: comment.LAUGH.totalCount,
+                                            rocket: comment.ROCKET.totalCount,
+                                            total_count: comment.reactions.totalCount
+                                        }
+                                    }
+                                }
+                            )
                         await this.reviewCommentCreatedHook()(comment)
                         this.content = ''
                         this.$emit('cancel')

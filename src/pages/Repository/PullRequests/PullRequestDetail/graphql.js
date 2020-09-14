@@ -280,16 +280,52 @@ export const GRAPHQL_PULL_TIMELINE = `
     mutation($input:AddPullRequestReviewCommentInput!) {
       addPullRequestReviewComment(input:$input) {
         comment {
+          createdAt
+          id
           databaseId
           state
+          diffHunk
+          path
+          position
+          body
+          author {
+            avatarUrl
+            login
+          }
           replyTo {
+            databaseId
             id
           }
           pullRequestReview {
             id
           }
-          diffHunk
-          createdAt
+          reactions {
+            totalCount
+          }
+          EYES: reactions(content: EYES) {
+            totalCount
+          }
+          ROCKET: reactions(content: ROCKET) {
+            totalCount
+          }
+          HEART: reactions(content: HEART) {
+            totalCount
+          }
+          CONFUSED: reactions(content: CONFUSED) {
+            totalCount
+          }
+          LAUGH: reactions(content: LAUGH) {
+            totalCount
+          }
+          HOORAY: reactions(content: HOORAY) {
+            totalCount
+          }
+          THUMBS_DOWN: reactions(content: THUMBS_DOWN) {
+            totalCount
+          }
+          THUMBS_UP: reactions(content: THUMBS_UP) {
+            totalCount
+          }
         }
       }
     }
