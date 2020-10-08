@@ -17,7 +17,7 @@
     import {mapMutations} from 'vuex'
     import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_STARTED_REVIEW,MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT} from '@/store/modules/pullRequestDetail/mutationTypes'
     export default {
-        inject: ['pendingReview','reviewStartedHook','reviewCommentCreatedHook','pullRequestProvided'],
+        inject: ['pendingReview','reviewStartedHook','pullRequestProvided'],
         props: {
             comment: Object,
             path: String,
@@ -81,7 +81,7 @@
 
                     await this.network_getReviewTheCommentBelongTo()
 
-                    //使用graphql进行该操作是因为rest api会报错，原因未知
+                    //使用graphql进行该操作是因为rest api会在review为pending状态时报错，原因未知
                     let res = await authRequiredGitHubGraphqlApiQuery(
                         graphql.GRAPHQL_ADD_PULL_REQUEST_REVIEW_COMMENT,
                         {
@@ -99,32 +99,29 @@
                         let comment = res.data.data.addPullRequestReviewComment.comment
                         this.mutation_pushNewCreatedReviewComments(
                                 {
-                                    from:'changes',
-                                    reviewComment: {
-                                        ...comment,
-                                        id: comment.databaseId,
-                                        node_id: comment.id,
-                                        created_at: comment.createdAt,
-                                        in_reply_to_id: comment.replyTo.databaseId,
-                                        user: {
-                                            login: comment.author.login,
-                                            avatar_url: comment.author.avatarUrl
-                                        },
-                                        reactions: {
-                                            '+1': comment.THUMBS_UP.totalCount,
-                                            '-1': comment.THUMBS_DOWN.totalCount,
-                                            hooray: comment.HOORAY.totalCount,
-                                            confused: comment.CONFUSED.totalCount,
-                                            eyes: comment.EYES.totalCount,
-                                            heart: comment.HEART.totalCount,
-                                            laugh: comment.LAUGH.totalCount,
-                                            rocket: comment.ROCKET.totalCount,
-                                            total_count: comment.reactions.totalCount
-                                        }
+                                    ...comment,
+                                    id: comment.databaseId,
+                                    node_id: comment.id,
+                                    created_at: comment.createdAt,
+                                    in_reply_to_id: comment.replyTo.databaseId,
+                                    pull_request_review_id: comment.pullRequestReview.databaseId,
+                                    user: {
+                                        login: comment.author.login,
+                                        avatar_url: comment.author.avatarUrl
+                                    },
+                                    reactions: {
+                                        '+1': comment.THUMBS_UP.totalCount,
+                                        '-1': comment.THUMBS_DOWN.totalCount,
+                                        hooray: comment.HOORAY.totalCount,
+                                        confused: comment.CONFUSED.totalCount,
+                                        eyes: comment.EYES.totalCount,
+                                        heart: comment.HEART.totalCount,
+                                        laugh: comment.LAUGH.totalCount,
+                                        rocket: comment.ROCKET.totalCount,
+                                        total_count: comment.reactions.totalCount
                                     }
                                 }
                             )
-                        await this.reviewCommentCreatedHook()(comment)
                         this.content = ''
                         this.$emit('cancel')
                     } catch (e) {

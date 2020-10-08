@@ -4,9 +4,9 @@
 
         </BodyHTML>
 
-        <Reactions v-if="extraData.viewerCanReact || reactions.data.total_count > 0" 
+        <Reactions v-if="pullRequestProvided().viewerCanReact || reactions.data.total_count > 0" 
                     :data="reactions.data" 
-                    :disabled="!extraData.viewerCanReact"></Reactions>
+                    :disabled="!pullRequestProvided().viewerCanReact"></Reactions>
         
     </Container>
 </template>
@@ -33,12 +33,6 @@
                     loading: false
                 }
             }
-        },
-        props: {
-            extraData: {
-                type: Object,
-                required: false
-            },
         },
         computed: {
             repo() {

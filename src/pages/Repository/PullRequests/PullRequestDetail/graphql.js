@@ -297,6 +297,7 @@ export const GRAPHQL_PULL_TIMELINE = `
             id
           }
           pullRequestReview {
+            databaseId
             id
           }
           reactions {
@@ -337,6 +338,72 @@ export const GRAPHQL_PULL_TIMELINE = `
       pullRequestReview {
         databaseId
         state
+      }
+    }
+  }
+  `
+
+  export const GRAPHQL_UPDATE_PULL_REVIEW_COMMENT = `
+  mutation($input:UpdatePullRequestReviewCommentInput!) {
+    updatePullRequestReviewComment(input:$input) {
+      pullRequestReviewComment {
+        createdAt
+          id
+          databaseId
+          state
+          diffHunk
+          path
+          position
+          body
+          author {
+            avatarUrl
+            login
+          }
+          replyTo {
+            databaseId
+            id
+          }
+          pullRequestReview {
+            databaseId
+            id
+          }
+          reactions {
+            totalCount
+          }
+          EYES: reactions(content: EYES) {
+            totalCount
+          }
+          ROCKET: reactions(content: ROCKET) {
+            totalCount
+          }
+          HEART: reactions(content: HEART) {
+            totalCount
+          }
+          CONFUSED: reactions(content: CONFUSED) {
+            totalCount
+          }
+          LAUGH: reactions(content: LAUGH) {
+            totalCount
+          }
+          HOORAY: reactions(content: HOORAY) {
+            totalCount
+          }
+          THUMBS_DOWN: reactions(content: THUMBS_DOWN) {
+            totalCount
+          }
+          THUMBS_UP: reactions(content: THUMBS_UP) {
+            totalCount
+          }
+      }
+    }
+  }
+  `
+
+  export const GRAPHQL_DELETE_PULL_REVIEW = `
+  mutation ($input:DeletePullRequestReviewInput!) {
+    deletePullRequestReview(input:$input}) {
+      pullRequestReview {
+        id
       }
     }
   }

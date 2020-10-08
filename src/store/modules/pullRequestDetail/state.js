@@ -1,13 +1,8 @@
 
 export default {
-    deletedReviewComments: {
-        conversation: [],
-        changes: []
-    },
+    deletedReviewComments: [],
     newStartedReviews: [],
     newSubmittedReviews: [],
-    newCreatedReviewComments:  {
-        conversation: [],
-        changes: []
-    },
+    updatedReviewComments: [],
+    newCreatedReviewComments: []
 }

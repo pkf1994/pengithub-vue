@@ -1,5 +1,5 @@
 <template> 
-    <Container v-if="!deleted" class="p-3 position-relative">
+    <Container class="p-3 position-relative">
         <div class="bubble m-0 bg-white">
             <HideAndShowPane v-if="extraData.isMinimized" class="p-3 d-flex flex-justify-between p-3 text-gray text-small border-bottom">
                 <span class="text-italic">
@@ -17,7 +17,7 @@
                         <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
                     </Action>
 
-                    <span v-if="extraData.state == 'PENDING'" class="Label--outline bg-yellow-light float-right mt-1 ml-2" style="border-radius:2em;padding: 2px 7px">Pending</span>
+                    <span v-if="extraData.state && extraData.state.toLowerCase() == 'pending'" class="Label--outline bg-yellow-light float-right mt-1 ml-2" style="border-radius:2em;padding: 2px 7px">Pending</span>
                     
                     <Avatar class="float-left relative">
                         <ImgWrapper>
@@ -35,7 +35,7 @@
 
                 </Header>
 
-                <MinimizePane v-if="showMinimizePane" :comment="propsData" @cancel="() => triggerShowMinimizePane(false)" @minimize-comment="minimizePostHandler"></MinimizePane>
+                <MinimizePane v-if="showMinimizePane" :comment="propsData" @cancel="() => triggerShowMinimizePane(false)"></MinimizePane>
 
                 <Body class="pb-2 p-3" >
                     <BodyHTML v-html="bodyHTML"  class="markdown-body f5 p-0">
@@ -90,23 +90,17 @@
     import {ReviewCommentEditor} from '../../Conversation/components'
     import {MinimizePane,UnminimizeButton} from '../../../../components'
     import * as graphql from '../../graphql.js'
-    import { mapMutations } from 'vuex'
+    import { mapMutations,mapState } from 'vuex'
     import * as api from '@/network/api'
     import { MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT } from '@/store/modules/pullRequestDetail/mutationTypes'
     export default {
-        inject: ['pendingReview','reviewCommentsExtraData','repoOwnerType','triggerReplyButtonDisabled','reviewCommentDeletedHook','pendingReviewCommentDeletedHook'],
+        inject: ['pendingReview','reviewCommentsExtraData','repoOwnerType','triggerReplyButtonDisabled'],
         data() {
             return {
                 showMinimized: false,
                 showMinimizePane: false,
                 loadingDeleteThis: false,
                 loadingUnminimizeComment: false,
-                deleted: false,
-                handledComment: {},
-                extraDataOfNewCreatedComment: {
-                    data: {},
-                    loading: false
-                }
             }
         },
         props: {
@@ -118,7 +112,6 @@
                 type: Object,
                 required: false
             },
-            newCreated: Boolean,
         },
         computed: {
             repo() {
@@ -128,15 +121,11 @@
                 return this.$route.params.owner
             },
             extraData() {
-                if(this.newCreated) return this.extraDataOfNewCreatedComment.data
-                return {
-                    ...this.reviewCommentsExtraData().filter(i => i.id == this.propsData.node_id)[0] || {},
-                    ...this.handledComment
-                }
+                return this.reviewCommentsExtraData().filter(i => i.id == this.propsData.node_id)[0] || {}
             },
             bodyHTML() {
                 return util_markdownParse.markdownToHTML(this.propsData.body)
-            }
+            },
         },
         created() {
             if(this.newCreated) this.network_getExtraDataForNewCreatedComment()
@@ -145,7 +134,7 @@
             ...mapMutations({
                 mutation_pushDeletedReviewComment: MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT
             }),
-            async network_getExtraDataForNewCreatedComment() {
+          /*   async network_getExtraDataForNewCreatedComment() {
                 try {
                     this.extraDataOfNewCreatedComment.loading = true
                     let res = await authRequiredGitHubGraphqlApiQuery(
@@ -166,7 +155,7 @@
                 } finally {
                     this.extraDataOfNewCreatedComment.loading = false
                 }
-            },
+            }, */
              async network_deleteThisComment() {
                 if(this.loadingDeleteThis) return
                 if(!confirm("Are you sure you want to delete this comment?")) return
@@ -189,24 +178,17 @@
                         }
                     )
 
-                    this.mutation_pushDeletedReviewComment({
-                        from: 'changes',
-                        reviewComment: this.propsData
-                    })
+                    this.mutation_pushDeletedReviewComment(this.propsData)
 
-                    if(this.pendingReview().reviewComments.data.length == 1) {
-                        let event = new CustomEvent('review-deleted',{bubbles:true,detail:this.pendingReview().data})
-                        this.$el.dispatchEvent(event)
-                    }
-
-                    if(this.extraData.state == 'PENDING') {
+                    /* if(this.extraData.state == 'PENDING') {
                         await this.pendingReviewCommentDeletedHook()()
                     }else{
                         await this.reviewCommentDeletedHook()()
-                    }
+                    } */
                 } catch (e) {
                     this.handleError(e)
                 } finally {
+                    this.loadingDeleteThis = false
                     this.triggerReplyButtonDisabled()(false)
                 }
             }, 
@@ -217,18 +199,6 @@
                 this.closeModal()
                 this.showMinimizePane = flag
             },
-            minimizePostHandler(payload) {
-                this.triggerShowMinimizePane(false)
-                this.handledComment = payload.info
-            },
-            unminimizePostHandler(payload) {
-                this.closeModal()
-                this.handledComment = payload.info
-            },
-            deletedPostHandler() {
-                this.deleted = true
-                this.$emit('delete-comment')
-            }
         },
         components: {
             LoadingIconEx,

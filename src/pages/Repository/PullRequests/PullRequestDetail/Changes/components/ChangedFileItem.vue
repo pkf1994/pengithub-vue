@@ -66,6 +66,7 @@
     import ReviewCommentGroup from './ReviewCommentGroup'
     import SingleCommentCreator from './SingleCommentCreator'
     import { authRequiredGet } from '@/network'
+    import {mapState} from 'vuex'
     export default {
         inject: ['reviewCommentsProvided','pendingReviewComments'],
         props: {
@@ -80,6 +81,10 @@
             }
         },
         computed: {
+            ...mapState({
+                state_newCreatedReviewComments: state => state.pullRequestDetail.newCreatedReviewComments,
+                state_deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments
+            }),
             diffState() {
                 if(this.file.additions == this.file.deletions) {
                     return ['addition','deletion']
@@ -181,11 +186,17 @@
                 return diffHunkEntries
             },
             rootReviewCommentsHolder() {
-                let commentArr = this.reviewCommentsProvided().filter(item => {
+                let commentArr = [...this.reviewCommentsProvided(),...this.state_newCreatedReviewComments].filter(item => {
                     return item.path == this.file.filename && item.position && !item.in_reply_to_id
                 })
-                let reviewCommentsHolder = {}
+                let deDuplicatedCommentArr = []
                 commentArr.forEach(i => {
+                    if(!deDuplicatedCommentArr.some(i_ => i_.id == i.id)) {
+                        deDuplicatedCommentArr.push(i)
+                    }
+                })
+                let reviewCommentsHolder = {}
+                deDuplicatedCommentArr.forEach(i => {
                     if(!reviewCommentsHolder[i.position]) {
                         reviewCommentsHolder[i.position] = [i]
                     }else{
@@ -194,8 +205,8 @@
                 })
                 return reviewCommentsHolder
             },
-            pendingRootReviewCommentsHolder() {
-                let commentArr = this.pendingReviewComments().filter(item => {
+         /*    pendingRootReviewCommentsHolder() {
+                let commentArr = [...this.pendingReviewComments(),...this.state_newCreatedReviewComments].filter(item => {
                     return item.path == this.file.filename && item.position && !item.in_reply_to_id
                 })
                 let reviewCommentsHolder = {}
@@ -207,15 +218,15 @@
                     }
                 })
                 return reviewCommentsHolder
-            }
+            } */
         },
         methods: {
             getRootReviewComments(index) {
-                return this.rootReviewCommentsHolder[index]
+                return this.rootReviewCommentsHolder[index] && this.rootReviewCommentsHolder[index].sort((a,b) => a.created_at - b.created_at)
             },
-            getPendingRootReviewComments(index) {
+          /*   getPendingRootReviewComments(index) {
                 return this.pendingRootReviewCommentsHolder[index]
-            },
+            }, */
             triggerShowSingleCommentCreator(payload,flag = true) {
                 if(payload == 0) return 
                 let idx = this.showSingleCommentCreatorAt.indexOf(payload)

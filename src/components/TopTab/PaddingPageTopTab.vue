@@ -1,6 +1,6 @@
 <template>
     <nav class="px-3 d-flex">
-        <router-link v-for="item in tabs" :key="item.to" :to='item.to' class="nav-item text-center no-wrap" :class="{'active':item.activeFlag}" :style="tabStyle">{{item.label}}</router-link>
+        <router-link v-for="item in tabs" :key="item.to" :to='item.to' class="subnav-item text-center no-wrap" :class="{'active':item.activeFlag}" :style="tabStyle">{{item.label}}</router-link>
     </nav>
 </template>
 
@@ -19,7 +19,8 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import 'node_modules/@primer/css/navigation/index.scss';
 .nav-item:first-child {
     border-top-left-radius: 3px;
     border-bottom-left-radius: 3px;

@@ -1,5 +1,5 @@
 <template>
-    <Container v-if="!isSubmitted && !deleted" class="p-3 relative container" :id="propsData.id">
+    <Container v-show="!isSubmitted && !deleted" class="p-3 relative container" :id="propsData.id">
         <Header class="d-flex position-relative pl-4">
             
             <div class="pr-simple-timeline-icon-wrapper">
@@ -22,6 +22,7 @@
                 <button v-if="extraData.viewerCanUpdate" @click="triggerShowReivewBodyEditor" :disabled="showReviewBodyEditor" type="button" class="btn-link muted-link js-comment-edit-button float-right">
                     <svg class="octicon octicon-pencil" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"></path></svg>
                 </button>
+
             </WhoDidWhat>
           
             <!-- <Label class="ml-1 no-wrap" :name="propsData.state" :color="propsData.state == 'pending' ? '#fffbdd' : '#ffffff'" style="font-size: 10px;color:#735c0f" ></Label> -->
@@ -40,9 +41,7 @@
             Loading...
         </LoadingWrapper> -->
 
-        <transition-group name="fade" appear>
-            <ReviewComment v-for="item in rootReviewComments" :key="item.id" :reviewComment="item"/>
-        </transition-group>
+        <ReviewCommentGroup v-for="item in rootReviewComments" :key="item.id" :rootReviewComment="item"/>
         
         <!-- <HiddenItemLoading v-if="reviewComments.pageInfo.next" style="padding-bottom:0px!important" :loading="reviewComments.loading" :dataGetter="network_getReviewComments">
             {{reviewComments.totalCount - data.length}} {{reviewComments.totalCount - data.length > 1 ? 'reviewComments' : 'comment'}} remained.
@@ -55,22 +54,24 @@
     import styled from 'vue-styled-components'
     import {LoadingIconEx,AnimatedHeightWrapper,Popover,Label,ImgWrapper} from '@/components'
     import {util_markdownParse} from '@/util'
-    import ReviewComment from './ReviewComment'
+    import ReviewCommentGroup from './ReviewCommentGroup'
     import HiddenItemLoading from './HiddenItemLoading'
     import * as graphql from '../../graphql'
     import * as api from '@/network/api'
     import Comment from './Comment'
     import ReviewBodyEditor from './ReviewBodyEditor'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
-    import {mapState} from 'vuex'
+    import {mapMutations, mapState} from 'vuex'
+    import { MUTATION_PULL_REQUEST_DETAIL_UPDATED_NEW_CREATED_REVIEW_COMMENT } from '@/store/modules/pullRequestDetail/mutationTypes'
     let parse = require('parse-link-header')
     export default {
         mixins: [Comment],
+        inject: ['reviewCommentsProvided'],
         provide() {
             return {
                 reviewProvided: () => this.propsData,
                 reviewCommentsOfPendingReview: () => this.reviewComments.data,
-                pendingReviewCommentRepliesDeletedHook: () => this.pendingReviewCommentRepliesDeletedHook
+                //pendingReviewCommentRepliesDeletedHook: () => this.pendingReviewCommentRepliesDeletedHook
             }
         },
         data() {
@@ -92,9 +93,9 @@
         },
         computed: {
             ...mapState({
-                newSubmittedReviews: state => state.pullRequestDetail.newSubmittedReviews,
-                deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments.changes,
-                newCreatedReviewComments: state => state.pullRequestDetail.newCreatedReviewComments.changes
+                state_newSubmittedReviews: state => state.pullRequestDetail.newSubmittedReviews,
+                state_deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments,
+                state_newCreatedReviewComments: state => state.pullRequestDetail.newCreatedReviewComments
             }),
             repo() {
                 return this.$route.params.repo
@@ -124,18 +125,21 @@
                 return util_markdownParse.markdownToHTML(this.updatedReview && this.updatedReview.body || this.propsData.body)
             },
             isSubmitted() {
-                return this.propsData.state == 'pending' && this.newSubmittedReviews.some(i => i.id == this.propsData.id)
+                return this.propsData.state && this.propsData.state.toLowerCase() == 'pending' && this.state_newSubmittedReviews.some(i => i.id == this.propsData.id)
             },
             rootReviewComments() {
-                return [...this.reviewComments.data,...this.newCreatedReviewComments].filter(i => !i.in_reply_to_id)
+                return [...this.reviewComments.data, ...this.reviewCommentsProvided(),...this.state_newCreatedReviewComments].filter(i => i.pull_request_review_id == this.propsData.id && !i.in_reply_to_id).filter(i => !this.state_deletedReviewComments.some(i_ => i_.id == i.id)).sort((a,b) => a.created_at > b.created_at)
             }
         },
         created() {
             this.network_getData()
         },
         methods: {
+            ...mapMutations({
+                mutation_updateNewCreatedReviewComment: MUTATION_PULL_REQUEST_DETAIL_UPDATED_NEW_CREATED_REVIEW_COMMENT
+            }),
             network_getData() {
-                this.network_getReviewComments()
+                if(this.propsData.state && this.propsData.state.toLowerCase() == 'pending') this.network_getReviewComments()
                 //this.network_getReviewCommentsCount()
             },
             async network_getReviewComments() {
@@ -157,13 +161,22 @@
                             }
                         })
 
-                        let res = await authRequiredGet(url)
+                        let res = await authRequiredGet(
+                            url,
+                            {
+                                headers: {
+                                    "accept" :"application/vnd.github.squirrel-girl-preview+json"
+                                }
+                            }
+                        )
                         pageInfo = parse(res.headers.link) || {}
 
                         reviewComments = reviewComments.concat(res.data)
                     }
 
                     this.reviewComments.data = reviewComments
+
+                    //this.network_getReviewCommentsExtraData(this.reviewComments.data)
                 }catch(e) {
                     console.log(e)
                 }finally{
@@ -199,13 +212,13 @@
                 this.showReviewBodyEditor = false
                 this.updatedReview = payload
             },
-            pendingReviewCommentRepliesDeletedHook(event) {
+            /* pendingReviewCommentRepliesDeletedHook(event) {
                 if(this.reviewComments.data.length == 1) {
                     this.deleted = true
                 }else{
                     this.network_getReviewComments()
                 }
-            },
+            }, */
            /*  async network_getCommentsOfPendingReview() {
                 try{
                     this.reviewCommentsOfPendingReview.loading = true
@@ -237,29 +250,100 @@
             } */
         },
         watch: {
-            deletedReviewComments(newOne, oldOne) {
-                if(newOne.some(i => {
-                    return this.reviewComments.data.some(i_ => i_.id == i.id)
-                })) {
-                    if(this.propsData.state == 'pending' && this.reviewComments.data.length == 1) {
-                        this.deleted = true
-                        return 
+            state_deletedReviewComments(newOne, oldOne) {
+                if(newOne.length == 0) return
+                let deletedReviewComment = newOne[newOne.length - 1]
+                if(deletedReviewComment.in_reply_to_id) return 
+                if(deletedReviewComment.pull_request_review_id != this.propsData.id)  return
+
+                let replies = [
+                    ...this.reviewComments.data,
+                    ...this.state_newCreatedReviewComments,
+                    ...this.reviewCommentsProvided()
+                    ].filter(i => i.in_reply_to_id == deletedReviewComment.id).filter(i => !this.state_deletedReviewComments.some(i_ => i_.id == i.id)).sort((a,b) => a.created_at > b.created_at)
+
+                if(replies.length == 0) return
+
+                this.state_newCreatedReviewComments.forEach(i => {
+                    if(i.id == replies[0].id) {
+                        this.mutation_updateNewCreatedReviewComment({
+                            ...i,
+                            in_reply_to_id: undefined
+                        })
+                    }else if(i.in_reply_to_id == deletedReviewComment.id) {
+                        this.mutation_updateNewCreatedReviewComment({
+                            ...i,
+                            in_reply_to_id: replies[0].id
+                        })
                     }
-                    this.network_getReviewComments()
+                })
+
+                this.reviewCommentsProvided().forEach(i => {
+                    if(i.id == replies[0].id) {
+                         i.in_reply_to_id = undefined
+                    }else if(i.in_reply_to_id == deletedReviewComment.id) {
+                        i.in_reply_to_id = replies[0].id
+                    }
+                })
+
+                this.reviewComments.data.forEach(i => {
+                     if(i.id == replies[0].id) {
+                         i.in_reply_to_id = undefined
+                    }else if(i.in_reply_to_id == deletedReviewComment.id) {
+                        i.in_reply_to_id = replies[0].id
+                    }
+                })
+
+                /* replies.forEach((i,index) => {
+                    if(index > 0) {
+                        i.in_reply_to_id = replies[0].index
+                    }
+                }) */
+
+               /*  this.state_newCreatedReviewComments.forEach((i,index) => {
+                    if(i.id == deletedReviewComment.id && !i.in_reply_to_id) {
+                        let replies = this.state_newCreatedReviewComments.data.filter(i_ => i_.in_reply_to_id == i.id)
+                        if(replies.length == 0) return 
+                        this.mutation_updateNewCreatedReviewComment({
+                            ...replies[0],
+                            in_reply_to_id: undefined
+                        })
+                        replies.forEach(i__ => {
+                             this.mutation_updateNewCreatedReviewComment({
+                                ...i__,
+                                in_reply_to_id: replies[0].id
+                            })
+                        })
+                    }
+                })
+
+                this.reviewComments.data.forEach((i,index) => {
+                    if(i.id == deletedReviewComment.id && !i.in_reply_to_id) {
+                        let replies = this.reviewComments.data.filter(i_ => i_.in_reply_to_id == i.id)
+                        if(replies.length == 0) return 
+                        replies[0].in_reply_to_id = undefined
+                        replies.forEach(i__ => {
+                            if(i__.in_reply_to_id) {
+                                i__.in_reply_to_id = replies[0].id
+                            } 
+                        })
+                    }
+                }) */
+            },
+            rootReviewComments(newOne) {
+                if(this.propsData.state.toLowerCase() == 'pending' && newOne.length == 0) {
+                    let event = new CustomEvent('timeline-item-deleted')
+                    this.$el.dispatchEvent(event)
+                    this.deleted = true
                 }
             }
-           /*  newCreatedReviewComments(newOne,oldOne) {
-                if(newOne.some(i => i.pullRequestReview.id == this.propsData.node_id)) {
-                    this.network_getReviewComments()
-                }
-            } */
-        },
+         },
         components: {
             LoadingIconEx,
             AnimatedHeightWrapper,
             Popover,
             ImgWrapper,
-            ReviewComment,
+            ReviewCommentGroup,
             HiddenItemLoading,
             Label,
             ReviewBodyEditor,

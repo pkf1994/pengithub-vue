@@ -58,7 +58,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoading,AnimatedHeightWrapper,SimpleDiffView} from '@/components'
+    import {CommonLoading,AnimatedHeightWrapper,} from '@/components'
     import {HiddenItemLoading,ChangedFileItem,Editor} from './components'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
     import * as api from '@/network/api'
@@ -228,7 +228,6 @@
         components: {
             CommonLoading,
             AnimatedHeightWrapper,
-            SimpleDiffView,
             ChangedFileItem,
             Editor,
             Container: styled.div``,

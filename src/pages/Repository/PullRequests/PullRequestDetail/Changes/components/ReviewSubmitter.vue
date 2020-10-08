@@ -23,7 +23,7 @@
                 </small>
             </label>
         </EventSelectPane>
-        <button class="btn btn-primary btn-block mt-3" @click.stop="submitReview" :disabled="loading || pendingReview().loading || ( !content && !pendingReview().data.databaseId ) ">
+        <button class="btn btn-primary btn-block mt-3" @click.stop="network_submitReview" :disabled="loading || pendingReview().loading || ( !content && !pendingReview().data.databaseId ) ">
             {{loading ? 'Trying...' : 'Submit review'}}
         </button>
     </Container>
@@ -37,7 +37,7 @@
     import {mapMutations} from 'vuex'
     import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW} from '@/store/modules/pullRequestDetail/mutationTypes'
     export default {
-        inject: ['pendingReview','pullRequestProvided','reviewSubmittedHook'],
+        inject: ['pendingReview','pullRequestProvided'],
         props: {
             commentId: [String,Number],
             path: String,
@@ -105,12 +105,9 @@
                         event: "reviewed"
                     })
 
-                    this.reviewSubmittedHook()(res.data)
+                    //this.reviewSubmittedHook()(res.data)
 
-                    setTimeout(() => {
-                        this.$router.push(`/${this.owner}/${this.repo}/pull/${this.number}?new_created_timeline_item=${res.data.id}`)
-                    },50)
-
+                    this.$router.push(`/${this.owner}/${this.repo}/pull/${this.number}?new_created_timeline_item=${res.data.id}`)
                     
                 } catch (e) {
                     this.handleError(e)

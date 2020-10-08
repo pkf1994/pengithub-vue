@@ -11,7 +11,7 @@ import {
     AnimatedHeightWrapper,
     AnimatedWidthWrapper} from "./AnimatedSizeWrapper";
 import LoadingAndCatchErrorTemplate from './LoadingAndCatchErrorTemplate'
-import {LoadingIcon,CommonLoadingEx,CommonLoading,CommonLoadingWrapper,LoadingIconEx,HiddenItemLoading,TinyLoadingIcon} from './Loading'
+import {LoadingIcon,CommonLoadingEx,CommonLoading,CommonLoadingWrapper,LoadingIconEx,HiddenItemLoading,TinyLoadingIcon,ModalLoadingIcon} from './Loading'
 import {IssuesPageMixin,IssueListItem,IssuesPageTemplate} from './IssuesPage'
 import SelectMenuItem from './SelectMenuItem'
 import Modal from './Modal'
@@ -63,6 +63,7 @@ export {
     AnimatedWidthWrapper,
     LoadingAndCatchErrorTemplate,
     LoadingIconEx,
+    ModalLoadingIcon,
     ComplexBubble,
     IssuesPageMixin,
     IssueListItem,

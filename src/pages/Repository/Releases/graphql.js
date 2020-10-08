@@ -49,6 +49,4 @@ export const GRAPHQL_TAG = payload => `
     }
   }
 }
-
-  
 `

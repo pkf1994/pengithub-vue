@@ -20,13 +20,13 @@
 @import "./base";
 @import "./octicon";
 @import "./layout";
-@import "./github-light.scss";
+@import "./github-light.scss";  
 @import "./truncate.scss"; */
 @import "./transition";
-@import './custom_global.scss';
 @import '../../node_modules/@primer/css/utilities/index.scss';
 @import '../../node_modules/@primer/css/base/index.scss';
 @import '../../node_modules/@primer/css/buttons/index.scss';
+@import './custom_global.scss';
 /* @import '../../node_modules/@primer/css/layout/index.scss';
 @import '../../node_modules/@primer/css/support/index.scss';
 //@import '../../node_modules/@primer/css/box/index.scss';

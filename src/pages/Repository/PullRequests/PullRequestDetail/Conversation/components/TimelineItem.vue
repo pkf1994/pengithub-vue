@@ -145,7 +145,7 @@
             </template>
         </SimpleTimelineItem>
         <!-- closed  -->
-        <SimpleTimelineItem v-else-if="data.event === 'closed'" :data="data" :badgeStyle="{color:'#fff',backgroundColor:'#d73a49'}">
+        <SimpleTimelineItem v-else-if="data.event === 'closed'" :data="data">
             <template v-slot:icon>
                 <svg class="octicon octicon-circle-slash text-red" :class="{'loading-animation':loading}" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm0 1.3c1.3 0 2.5.44 3.47 1.17l-8 8A5.755 5.755 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zm0 11.41c-1.3 0-2.5-.44-3.47-1.17l8-8c.73.97 1.17 2.17 1.17 3.47 0 3.14-2.56 5.7-5.7 5.7z"></path></svg>
             </template>
@@ -155,8 +155,8 @@
             </template>
         </SimpleTimelineItem>
         <!-- reopened  -->
-        <SimpleTimelineItem v-else-if="data.event === 'reopened'" :data="data" :badgeStyle="{color:'#fff',backgroundColor:'#28a745'}">
-            <template v-slot:icon :badgeStyle="{color:'#fff',backgroundColor:'#28a745'}">
+        <SimpleTimelineItem v-else-if="data.event === 'reopened'" :data="data" :badgeStyle="{color:'#28a745'}">
+            <template v-slot:icon>
                 <svg class="octicon octicon-primitive-dot" viewBox="0 0 8 16" version="1.1" width="8" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M0 8c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4z"></path></svg>
             </template>
             <template v-slot:action>
@@ -261,13 +261,12 @@
         <!-- locked  -->
         <SimpleTimelineItem v-else-if="data.event === 'locked'" 
                 :showActor="data.actor.login !== owner && data.actor.login !== 'ghost'" 
-                :data="data" 
-                :badgeStyle="{backgroundColor: '#24292e',color:'#fff'}">
+                :data="data">
             <template v-slot:icon>
                 <svg class="octicon octicon-lock" :class="{'loading-animation':loading}" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 13H3v-1h1v1zm8-6v7c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h1V4c0-2.2 1.8-4 4-4s4 1.8 4 4v2h1c.55 0 1 .45 1 1zM3.8 6h4.41V4c0-1.22-.98-2.2-2.2-2.2-1.22 0-2.2.98-2.2 2.2v2H3.8zM11 7H2v7h9V7zM4 8H3v1h1V8zm0 2H3v1h1v-1z"></path></svg>
             </template>
             <template v-slot:action>
-               {{data.actor.login === owner || data.actor.login === 'ghost' ? "Repository owner" : ''}} locked as <strong>{{lockReason}}</strong> and limited conversation to collaborators
+               {{data.actor.login === owner || data.actor.login === 'ghost' ? "Repository owner" : ''}} locked as <strong>{{data.lock_reason || lockReason.toLowerCase()}}</strong> and limited conversation to collaborators
             </template>
         </SimpleTimelineItem>
         <!-- unlocked  -->
@@ -496,7 +495,7 @@
                             await this.getRelevantProject()
                             break
                         case "locked":
-                            await this.getLockReason()
+                            if(!this.data.lock_reason) await this.getLockReason()
                             break
                         case "referenced":
                         case "closed":

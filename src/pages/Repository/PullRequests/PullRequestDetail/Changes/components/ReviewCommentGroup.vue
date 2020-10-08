@@ -1,11 +1,10 @@
 <template>
     <Container>
-        <ReviewComment style="max-width: 100vw;border-right: 1px solid #d1d5da;" :propsData="rootReviewComment"></ReviewComment>
         
-        <ReviewComment class="border-top" v-for="commentItem in reviewCommentsProvided().filter(i => i.in_reply_to_id == rootReviewComment.id)" style="max-width: 100vw;border-right: 1px solid #d1d5da;" :propsData="commentItem" :key="commentItem.id"></ReviewComment>
+        <ReviewComment class="border-top" v-for="commentItem in reviewCommentGroup" style="max-width: 100vw;border-right: 1px solid #d1d5da;" :propsData="commentItem" :key="commentItem.id"></ReviewComment>
 
         <div class="comment-btn-wrapper" v-if="repoOwnerType() == 'User'" style="border-right: 1px solid #d1d5da;">
-            <div class="px-3 pb-3" v-if="!showReviewCommentCreator">
+            <div class="px-3 pb-3" v-if="!showReviewCommentCreator && reviewCommentGroup.length > 0">
                 <button :disabled="replyButtonDisabled" type="button" class="btn btn-block" @click="triggerShowReviewCommentCreator">
                     Add an additional review comment
                 </button>
@@ -24,6 +23,7 @@
     import styled from 'vue-styled-components'
     import ReviewComment from './ReviewComment'
     import ReviewCommentReplyCreator from './ReviewCommentReplyCreator'
+    import {mapState} from 'vuex'
     export default {
         inject: ['reviewCommentsProvided','repoOwnerType'],
         provide() {
@@ -38,6 +38,30 @@
             return {
                 showReviewCommentCreator: false,
                 replyButtonDisabled: false,
+            }
+        },
+        computed: {
+            ...mapState({
+                state_newCreatedReviewComments: state => state.pullRequestDetail.newCreatedReviewComments,
+                state_deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments,
+            }),
+            reviewCommentGroup() {
+                let ret = [
+                    this.rootReviewComment,
+                    ...[...this.reviewCommentsProvided(),...this.state_newCreatedReviewComments].filter(i => i.in_reply_to_id == this.rootReviewComment.id)
+                ].filter(i => {
+                    return !this.state_deletedReviewComments.some(i_ => i_.id == i.id)
+                })
+
+                let DeduplicateRet = []
+
+                ret.forEach(i => {
+                    if(!DeduplicateRet.some(i_ => i_.id == i.id)) {
+                        DeduplicateRet.push(i)
+                    }
+                })
+                
+                return DeduplicateRet.sort((a,b) => a.created_at > b.created_at)
             }
         },
         methods: {

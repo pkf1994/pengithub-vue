@@ -29,6 +29,7 @@
                     in a repository. They’re great for marking tags points like 
                     <code>v1.0</code>.
                 </p>
+                <router-link class="btn btn-primary my-3" :to="`/${owner}/${repo}/releases/new`">Create a new release</router-link>
             </Blankslate>
         </transition>
     </CommonLoadingWrapper>

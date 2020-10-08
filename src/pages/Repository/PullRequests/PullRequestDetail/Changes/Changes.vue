@@ -54,7 +54,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoadingWrapper,AnimatedHeightWrapper,SimpleDiffView} from '@/components'
+    import {CommonLoadingWrapper,AnimatedHeightWrapper} from '@/components'
     import {HiddenItemLoading} from '../components'
     import {ChangedFileItem,ReviewSubmitter} from './components'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
@@ -75,11 +75,11 @@
                 pendingReviewComments: () => this.pendingReview.reviewComments.data,
                 pendingReview: () => this.pendingReview,
                 commentReviewCreatedHook: () => this.commentReviewCreatedHook,
-                reviewCommentDeletedHook: () => this.network_getReviewComments,
+                //reviewCommentDeletedHook: () => this.network_getReviewComments,
                 reviewStartedHook: () => this.reviewStartedHook,
-                reviewSubmittedHook: () => this.reviewSubmittedHook,
-                reviewCommentCreatedHook: () => this.reviewCommentCreatedHook,
-                pendingReviewCommentDeletedHook: () => this.network_getPendingReview
+                //reviewSubmittedHook: () => this.reviewSubmittedHook,
+                //reviewCommentCreatedHook: () => this.reviewCommentCreatedHook,
+                //pendingReviewCommentDeletedHook: () => this.network_getPendingReview
             }
         },
         data() {
@@ -112,8 +112,10 @@
         },
         computed: {
             ...mapState({
-                deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments.conversation,
-                newSubmittedReviews: state => state.pullRequestDetail.newSubmittedReviews
+                state_deletedReviewComments: state => state.pullRequestDetail.deletedReviewComments,
+                state_newCreatedReviewComments: state => state.pullRequestDetail.newCreatedReviewComments, 
+                state_newSubmittedReviews: state => state.pullRequestDetail.newSubmittedReviews, 
+                state_newStartedReviewComments: state => state.pullRequestDetail.newStartedReviewComments, 
             }),
             repo() {
                 return this.$route.params.repo
@@ -129,11 +131,7 @@
             this.network_getData()
         },
         methods: {
-            ...mapMutations({
-                mutation_resetState: MUTATION_PULL_REQUEST_DETAIL_RESET_STATE
-            }),
             network_getData() {
-                this.mutation_resetState()
                 this.network_getReviewComments()
                 this.network_getChangedFiles()
                 this.network_getPendingReview()
@@ -173,7 +171,7 @@
                         pageInfo = parse(res.headers.link) || {}
                     }
 
-                    this.reviewComments.data = reviewComments.filter(i => i.line)
+                    this.reviewComments.data = reviewComments.filter(i => i.position)
                     if(this.accessToken) await this.network_getReviewCommentsExtraData() 
                 }catch(e) {
                     console.log(e)
@@ -378,7 +376,7 @@
                    return ['deletion','neutral']
                 }
             },
-            async reviewCommentCreatedHook(comment) {
+           /*  async reviewCommentCreatedHook(comment) {
                 let newCreatedComment
                 if(comment.state == 'PENDING') {
                     newCreatedComment = await this.network_getNewCreatedPendingReviewComment()
@@ -388,10 +386,7 @@
                     this.reviewComments.data.push(newCreatedComment)
                 }
                 this.network_getReviewCommentsExtraData([newCreatedComment])
-            },
-            pendingReviewCommentDeletedEventHandler(){
-                this.network_getPendingReview()
-            },
+            }, */
             async commentReviewCreatedHook(review) {
                 let url = api.API_REVIEW_COMMENTS_OF_REVIEW({
                     repo: this.repo,
@@ -408,13 +403,9 @@
             async reviewStartedHook() {
                 await this.network_getPendingReview()
             },
-            async reviewSubmittedHook(review) {
-                if(this.pendingReview.data.id) {
-                    this.reviewComments.data = this.reviewComments.data.concat(this.pendingReview.reviewComments.data)
-                    this.pendingReview.data = {}
-                    this.pendingReview.reviewComments.data = []
-                } else {
-                    let url = api.API_REVIEW_COMMENTS_OF_REVIEW({
+           /*  async reviewSubmittedHook(review) {
+                if(!this.pendingReview.data.id) {
+                     let url = api.API_REVIEW_COMMENTS_OF_REVIEW({
                         repo: this.repo,
                         owner: this.owner,
                         reviewId: review.id,
@@ -425,15 +416,16 @@
                     let res = await authRequiredGet(
                         url,
                         {
-                            cancelToken:this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_review_comments')
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_review_comments')
                         }
                     )
                     this.reviewComments.data = this.reviewComments.data.concat(res.data)
+                    this.network_getReviewCommentsExtraData(res.data)
                 }
-            }
+            } */
         },
         watch: {
-            deletedReviewComments(newOne,oldOne) {
+            state_deletedReviewComments(newOne,oldOne) {
                 if(this.pendingReview.reviewComments.data.length > 0) {
                     if(newOne.some(i => this.pendingReview.reviewComments.data.some(i_ => i_.id == i.id))) {
                         if(this.pendingReview.reviewComments.data.length == 1) {
@@ -445,12 +437,23 @@
                     }
                 }
                 this.network_getReviewComments()
-            }
+            },
+            state_newCreatedReviewComments(newOne) {
+                if(newOne.length == 0) return
+                this.network_getReviewCommentsExtraData([newOne[newOne.length - 1]])
+            },
+            state_newSubmittedReviews(newOne) {
+                if(newOne.length == 0) return
+                if(this.pendingReview.data.id) {
+                    this.reviewComments.data = this.reviewComments.data.concat(this.pendingReview.reviewComments.data)
+                    this.pendingReview.data = {}
+                    this.pendingReview.reviewComments.data = []
+                } 
+            },
         },
         components: {
             CommonLoadingWrapper,
             AnimatedHeightWrapper,
-            SimpleDiffView,
             ChangedFileItem,
             ReviewSubmitter,
             Container: styled.div``,

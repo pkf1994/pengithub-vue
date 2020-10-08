@@ -58,6 +58,7 @@ const RepositoryBranchesActive = () => import('../pages/Repository/Branches/Acti
 const RepositoryFindFile = () => import('../pages/Repository/FindFile/FindFile.vue')
 const RepositoryReleases = () => import('../pages/Repository/Releases/Releases.vue')
 const RepositoryReleaseDetail = () => import('../pages/Repository/Releases/ReleaseDetail.vue')
+const RepositoryReleaseCreator = () => import('../pages/Repository/Releases/ReleaseCreator/ReleaseCreator.vue')
 const RepositoryTags = () => import('../pages/Repository/Tags/Tags.vue')
 const RepositoryInvitations = () => import('../pages/Repository/Invitations/Invitations.vue')
 const RepositoryBlame = () => import('../pages/Repository/Blame/Blame.vue')
@@ -491,6 +492,11 @@ export default [
                 path: 'tags',
                 name: 'repositoryTags',
                 component: RepositoryTags
+            },
+            {
+                path: 'releases/new',
+                name: 'repositoryReleaseCreator',
+                component: RepositoryReleaseCreator
             },
             {
                 path: 'invitations',

@@ -117,7 +117,23 @@
                         },
                     )
                     this.closeModal()
-                    this.$emit('change-lock-status-success',true)
+
+                    let event = new CustomEvent(
+                        'lock-status-changed',
+                        {
+                            bubbles: true,
+                            detail: {
+                                actor: {
+                                    login: this.viewer.login
+                                },
+                                created_at: (new Date()).toISOString(),
+                                event: 'locked',
+                                id: (new Date()).getTime(),
+                                lock_reason: this.lockConversationModal.lockReason
+                            }
+                        }
+                    )
+                    this.$el.dispatchEvent(event)
                 }catch(e) {
                     this.handleError(e)
                 }finally{
@@ -131,7 +147,22 @@
                     let url = api.API_ISSUE_LOCK(this.$route.params)
                     let res = await authRequiredDelete(url)
                     this.closeModal()
-                    this.$emit('change-lock-status-success',false)
+                    let event = new CustomEvent(
+                        'change-lock-status-success',
+                        {
+                            bubbles: true,
+                            detail: {
+                                actor: {
+                                    login: this.viewer.login
+                                },
+                                created_at: (new Date()).toISOString(),
+                                event: 'unlocked',
+                                id: (new Date()).getTime(),
+                                lock_reason: this.lockConversationModal.lockReason
+                            }
+                        }
+                    )
+                    this.$el.dispatchEvent(event)
                 }catch(e) {
                     this.handleError(e)
                 }finally{

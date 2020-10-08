@@ -10,9 +10,13 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {authRequiredPost} from '@/network'
+    import {authRequiredPost,authRequiredGitHubGraphqlApiQuery} from '@/network'
     import  * as api from '@/network/api'
+    import * as graphql from '../../graphql.js'
+import { mapMutations } from 'vuex'
+import { MUTATION_PULL_REQUEST_DETAIL_PUSH_UPDATED_REVIEW_COMMENT } from '../../../../../../store/modules/pullRequestDetail/mutationTypes.js'
     export default {
+        inject: ['reviewProvided'],
         props: {
             comment: Object
         },
@@ -41,7 +45,17 @@
             this.$refs.textarea.focus()
         },
         methods: {
-            async network_updateComment() {
+            ...mapMutations({
+                mutation_pushUpdatedReviewComments: MUTATION_PULL_REQUEST_DETAIL_PUSH_UPDATED_REVIEW_COMMENT
+            }),
+            network_updateComment() {
+                if(this.reviewProvided().state && this.reviewProvided().state.toLowerCase() == 'pending') {
+                    this.network_updateCommentByGraphql()
+                    return
+                }
+                this.network_updateCommentByRest()
+            },
+            async network_updateCommentByRest() {
                 try {
                     this.loading = true
                     let url = api.API_REVIEW_COMMENT_OF_PULL_REQUEST({
@@ -62,7 +76,73 @@
                         }
                     )
 
-                    this.$emit('update-success',res.data)
+                     this.mutation_pushUpdatedReviewComments(res.data)
+
+                      this.$emit('cancel')
+                } catch (e) {
+                    this.handleError(e)
+                } finally {
+                    this.loading = false
+                }
+            },
+            async network_updateCommentByGraphql() {
+                try {
+                    this.loading = true
+                    let url = api.API_REVIEW_COMMENT_OF_PULL_REQUEST({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number,
+                        commentId: this.comment.id
+                    })
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_UPDATE_PULL_REVIEW_COMMENT,
+                        {
+                            variables: {
+                                input: {
+                                    body: this.content,
+                                    pullRequestReviewCommentId: this.comment.node_id
+                                }
+                            }
+                        }
+                    )
+
+                    try{
+                        let graphqlReturnComment = res.data.data.updatePullRequestReviewComment.pullRequestReviewComment
+                    
+                        let updatedComment = {
+                            ...graphqlReturnComment,
+                            id: graphqlReturnComment.databaseId,
+                            node_id: graphqlReturnComment.id,
+                            created_at: graphqlReturnComment.createdAt,
+                            in_reply_to_id: graphqlReturnComment.replyTo.databaseId,
+                            pull_request_review_id: graphqlReturnComment.pullRequestReview.databaseId,
+                            user: {
+                                login: graphqlReturnComment.author.login,
+                                avatar_url: graphqlReturnComment.author.avatarUrl
+                            },
+                            reactions: {
+                                '+1': graphqlReturnComment.THUMBS_UP.totalCount,
+                                '-1': graphqlReturnComment.THUMBS_DOWN.totalCount,
+                                hooray: graphqlReturnComment.HOORAY.totalCount,
+                                confused: graphqlReturnComment.CONFUSED.totalCount,
+                                eyes: graphqlReturnComment.EYES.totalCount,
+                                heart: graphqlReturnComment.HEART.totalCount,
+                                laugh: graphqlReturnComment.LAUGH.totalCount,
+                                rocket: graphqlReturnComment.ROCKET.totalCount,
+                                total_count: graphqlReturnComment.reactions.totalCount
+                            }
+
+                        }
+                        
+                        this.mutation_pushUpdatedReviewComments(updatedComment)
+
+                        this.$emit('cancel')
+                        
+                    }catch(e) {
+                        console.log(e)
+                        this.handleGraphqlError(res)
+                    }
+                    
                 } catch (e) {
                     this.handleError(e)
                 } finally {

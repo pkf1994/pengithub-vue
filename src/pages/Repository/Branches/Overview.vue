@@ -93,18 +93,19 @@
                 }
             },
             parseDefaultBranchFromHTML(HTML) {
-                let defaultBranchHolderPattern = /<h3[^>]*>Default branch<\/h3>((?:.|\n|\r)*?)<\/ul>/g
+                console.log(HTML)
+                let defaultBranchHolderPattern = /<h3[^>]*>Default branch<\/h3>([\s\S]*?)<\/ul>/g
                 let defaultBranchHolder = HTML.match(defaultBranchHolderPattern)[0]
-                let execPattern = /<branch-filter-item-controller branch="(.*?)"[^>]*>(?:.|\n|\r)*?<time-ago datetime="(.*?)"[^>]*>.*<\/time-ago> by (?:<a[^>]*>(.*)<\/a>|(.*))/g
+                let execPattern = /<branch-filter-item branch="(.*?)"[^>]*>(?:.|\n|\r)*?<time-ago datetime="(.*?)"[^>]*>.*<\/time-ago> by (?:<a[^>]*>(.*)<\/a>|(.*))/g
                 let execResult = execPattern.exec(HTML)
                 if(!execResult) return
-                let stateSvg = defaultBranchHolder.match(/<span class=".*" aria-label="(?:.*)">(?:\n|\r)\s*<svg[^>]*>.*<\/svg>(?:\n|\r)\s*<\/span>/g)[0]
+                let stateSvgHolder = defaultBranchHolder.match(/<span class=".*"[^>]*>(?:\n|\r)\s*<svg[^>]*>.*<\/svg>(?:\n|\r)\s*<\/span>/g)
                 return {
                     name: execResult[1],
                     updatedAt: execResult[2],
                     updatedBy: execResult[3] || execResult[4],
                     updatedByIsUser: defaultBranchHolder.indexOf('data-hovercard-type="user"') != -1,
-                    stateSvg
+                    stateSvg: stateSvgHolder && stateSvgHolder[0]
                 }
                 
             },
@@ -112,7 +113,7 @@
                 let branchesHolderMatchPattern = /<span class="Box-title">Active branches<\/span>(?:\r|\n)\s*<\/div>(?:\r|\n)\s*<ul>((?:.|\n|\r)*?)<\/ul>/g
                 let matchResult = HTML.match(branchesHolderMatchPattern)
                 if(!matchResult || matchResult.length == 0) return
-                let execPattern = /<li class="Box-row position-relative">(?:\r|\n)\s*<branch-filter-item-controller branch="(.*)" class="d-flex flex-items-center Details">(?:.|\r|\n)*?<time-ago datetime="(.*)" class="no-wrap">(?:.*)<\/time-ago> by (?:<a[^>]*>(.*)<\/a>|(.*))(?:.|\r|\n)*?<\/li>/g
+                let execPattern = /<li class="Box-row position-relative">(?:\r|\n)\s*<branch-filter-item branch="(.*)" class="d-flex flex-items-center Details">(?:.|\r|\n)*?<time-ago datetime="(.*)" class="no-wrap">(?:.*)<\/time-ago> by (?:<a[^>]*>(.*)<\/a>|(.*))(?:.|\r|\n)*?<\/li>/g
                 let execResult
                 let result = []
                 while((execResult = execPattern.exec(matchResult[0])) != null) {
@@ -131,7 +132,7 @@
                 let branchesHolderMatchPattern = /<span class="Box-title">Stale branches<\/span>(?:\r|\n)\s*<\/div>(?:\r|\n)\s*<ul>((?:.|\n|\r)*?)<\/ul>/g
                 let matchResult = HTML.match(branchesHolderMatchPattern)
                 if(!matchResult || matchResult.length == 0) return
-                let execPattern = /<li class="Box-row position-relative">(?:\r|\n)\s*<branch-filter-item-controller branch="(.*)" class="d-flex flex-items-center Details">(?:.|\r|\n)*?<time-ago datetime="(.*)" class="no-wrap">(?:.*)<\/time-ago> by (?:<a[^>]*>(.*)<\/a>|(.*))(?:.|\r|\n)*?<\/li>/g
+                let execPattern = /<li class="Box-row position-relative">(?:\r|\n)\s*<branch-filter-item branch="(.*)" class="d-flex flex-items-center Details">(?:.|\r|\n)*?<time-ago datetime="(.*)" class="no-wrap">(?:.*)<\/time-ago> by (?:<a[^>]*>(.*)<\/a>|(.*))(?:.|\r|\n)*?<\/li>/g
                 let execResult
                 let result = []
                 while((execResult = execPattern.exec(matchResult[0])) != null) {

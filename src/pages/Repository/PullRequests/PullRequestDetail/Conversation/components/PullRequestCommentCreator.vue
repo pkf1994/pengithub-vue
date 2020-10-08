@@ -4,15 +4,15 @@
             <textarea  rows="6" 
                     :placeholder="placeholder"
                     class="d-block form-control" 
-                    :disabled="locked || loadingCreatePullRequestComment" 
+                    :disabled="locked || loading" 
                     v-model="commentTextValue"></textarea>
         
             <Action class="d-flex flex-justify-end mt-2">
-                <button class="btn" v-if="pullRequestProvided().viewerCanUpdate" :disabled="loadingCreatePullRequestComment">
-                    <svg class="octicon octicon-issue-closed text-red v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 10h2v2H7v-2zm2-6H7v5h2V4zm1.5 1.5l-1 1L12 9l4-4.5-1-1L12 7l-1.5-1.5zM8 13.7A5.71 5.71 0 012.3 8c0-3.14 2.56-5.7 5.7-5.7 1.83 0 3.45.88 4.5 2.2l.92-.92A6.947 6.947 0 008 1C4.14 1 1 4.14 1 8s3.14 7 7 7 7-3.14 7-7l-1.52 1.52c-.66 2.41-2.86 4.19-5.48 4.19v-.01z"></path></svg>
-                    <span>Close pull request</span>
+                <button class="btn" @click="network_changePullRequestState" v-if="pullRequestProvided().viewerCanUpdate" :disabled="loading">
+                    <span v-if="pullRequestProvided().state == 'open'">{{loadingChangePullRequestState ? 'Trying...' : 'Close pull request'}}</span>
+                    <span v-else-if="pullRequestProvided().state == 'closed'">{{loadingChangePullRequestState ? 'Trying...' : 'Reopen pull request'}}</span>
                 </button>
-                <button class="btn btn-primary ml-1" :disabled="commentTextValue === '' || loadingCreatePullRequestComment" @click="network_createPullRequestComment">
+                <button class="btn btn-primary ml-1" :disabled="commentTextValue === '' || loading" @click="network_createPullRequestComment">
                     <span>{{loadingCreatePullRequestComment ? 'Trying...' : 'Comment'}}</span>
                 </button>
             </Action>
@@ -27,14 +27,15 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {authRequiredPost} from '@/network'
+    import {authRequiredPost,authRequiredPatch} from '@/network'
     import * as api from '@/network/api'
     export default {
         inject: ['pullRequestProvided','commentCreatedHook'],
         data() {
             return {
                 commentTextValue: '',
-                loadingCreatePullRequestComment: false
+                loadingCreatePullRequestComment: false,
+                loadingChangePullRequestState: false
             }
         },
         computed:{
@@ -56,8 +57,10 @@
             placeholder() {
                 if(!this.locked) return 'Leave a comment'
                 return `This conversation has been locked ${this.lockedReason} and limited to collaborators.`
+            },
+            loading() {
+                return this.loadingCreatePullRequestComment || this.loadingChangePullRequestState
             }
-
         },
         methods: {
             async network_createPullRequestComment() {
@@ -90,6 +93,52 @@
                     this.handleError(e)
                 } finally {
                     this.loadingCreatePullRequestComment = false
+                }
+            },
+            async network_changePullRequestState() {
+                try {
+                    this.loadingChangePullRequestState = true
+                    let url = api.API_PULLREQUEST({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number
+                    })
+
+                    let res = await authRequiredPatch(
+                        url,
+                        {
+                            state: this.pullRequestProvided().state == 'open' ? 'closed' : 'open'
+                        },
+                        {
+                            headers: {
+                                "accept": "application/vnd.github.v3+json"
+                            }
+                        }
+                    )
+
+                    let pullRequestUpdatedEvent = new CustomEvent('pull-request-updated',{bubbles: true, detail: res.data})
+                    this.$el.dispatchEvent(pullRequestUpdatedEvent)
+
+                    let pullRequestStateChangedEvent = new CustomEvent(
+                        'pull-request-state-changed',
+                        {
+                            bubbles: true, 
+                            detail: {
+                                created_at: (new Date()).toISOString(),
+                                id: (new Date()).getTime(),
+                                event: res.data.state == 'closed' ? 'closed' : 'reopened',
+                                actor: {
+                                    login: this.viewer.login,
+                                    avatar_url: this.viewer.avatarUrl
+                                }
+                            }
+                        }
+                    )
+                    this.$el.dispatchEvent(pullRequestStateChangedEvent)
+                } catch (e) {
+                    this.handleError(e)
+                } finally {
+                    this.loadingChangePullRequestState = false
                 }
             }
         },

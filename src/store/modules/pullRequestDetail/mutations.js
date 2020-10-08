@@ -2,6 +2,8 @@ import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_STARTED_REVIEW,
         MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW,
         MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT,
         MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT,
+        MUTATION_PULL_REQUEST_DETAIL_PUSH_UPDATED_REVIEW_COMMENT,
+        MUTATION_PULL_REQUEST_DETAIL_UPDATED_NEW_CREATED_REVIEW_COMMENT,
         MUTATION_PULL_REQUEST_DETAIL_RESET_STATE} from './mutationTypes'
 
 export default {
@@ -9,19 +11,29 @@ export default {
         state.newStartedReviews.push(payload)
     },
     [MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW] (state,payload) {
-        state.newSubmittedeReviews.push(payload)
+        state.newSubmittedReviews.push(payload)
     },
     [MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT] (state,payload) {
-        state.deletedReviewComments[payload.from].push(payload.reviewComment)
+        state.deletedReviewComments.push(payload)
     },
     [MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT] (state,payload) {
-        state.newCreatedReviewComments[payload.from].push(payload.reviewComment)
+        state.newCreatedReviewComments.push(payload)
+    },
+    [MUTATION_PULL_REQUEST_DETAIL_UPDATED_NEW_CREATED_REVIEW_COMMENT] (state,payload) {
+        state.newCreatedReviewComments.forEach((i,index) => {
+            if(i.id == payload.id) {
+                state.newCreatedReviewComments.splice(index,1)
+            }
+        })
+        state.newCreatedReviewComments.push(payload)
+    },
+    [MUTATION_PULL_REQUEST_DETAIL_PUSH_UPDATED_REVIEW_COMMENT] (state,payload) {
+        state.updatedReviewComments.push(payload)
     },
     [MUTATION_PULL_REQUEST_DETAIL_RESET_STATE] (state) {
         state.newStartedReviews = []
-        state.newCreatedReviewComments.conversation = []
-        state.newCreatedReviewComments.changes = []
-        state.deletedReviewComments.conversation = []
-        state.deletedReviewComments.changes = []
+        state.newCreatedReviewComments = []
+        state.deletedReviewComments = []
+        state.updatedReviewComments = []
     },
 }

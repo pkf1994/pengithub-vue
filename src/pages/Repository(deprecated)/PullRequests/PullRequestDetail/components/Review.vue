@@ -19,7 +19,7 @@
                 <span class="no-wrap">{{createdAt}}</span>
             </WhoDidWhat>
 
-            <Label class="ml-1 no-wrap" :name="propsData.state" :color="propsData.state == 'pending' ? '#fffbdd' : '#ffffff'" style="font-size: 10px;color:#735c0f" ></Label>
+            <Label class="ml-1 no-wrap" :name="propsData.state" :color="propsData.state && propsData.state.toLowerCase() == 'pending' ? '#fffbdd' : '#ffffff'" style="font-size: 10px;color:#735c0f" ></Label>
         </Inner>
 
 
@@ -117,7 +117,7 @@
 
                     let graphql_reviewComments
 
-                    if(this.propsData.state == 'pending') {
+                    if(this.propsData.state && this.propsData.state.toLowerCase() == 'pending') {
                         graphql_reviewComments = graphql.GRAPHQL_PR_REVIEW_COMMENTS({
                             nodeId: this.propsData.node_id,
                             after: this.pageInfo.hasNextPage ? this.pageInfo.endCursor : undefined,

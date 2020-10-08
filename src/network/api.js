@@ -23,6 +23,7 @@ export const API_OAUTH2 = payload => {
     return `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=${SCOPE}&state=${payload.state}`
 }
 
+
 export const API_OAUTH2_ACCESS_TOKEN = code => `${BACK_END_API_BASE}/oauth2server/oauth2/access_token.do?code=${code}`
 
 export const API_OAUTH2_REVOKE_ACCESS_TOKEN = accessToken => `${BACK_END_API_BASE}/oauth2server/oauth2/revoke.do?accessToken=${accessToken}`
@@ -393,3 +394,5 @@ export const API_COMMITS_OF_PULL_REQUEST = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/commits?${query}`
 }
 
+
+export const API_PROXY_TAGS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/tags?q=${payload.query}`

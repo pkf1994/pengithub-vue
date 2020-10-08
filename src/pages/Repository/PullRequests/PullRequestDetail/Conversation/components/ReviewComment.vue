@@ -1,7 +1,7 @@
 <template> 
-    <Container class="bubble bg-white" style="margin-top:15px">
+    <Container class="bg-white" :class="{deleting:loadingDeleteThis}">
 
-        <FileHeader class="file-header" :class="{pending:reviewProvided().state.toLowerCase() == 'pending'}">
+        <FileHeader v-if="isRoot" class="file-header" :class="{pending:reviewProvided().state && reviewProvided().state.toLowerCase() == 'pending'}">
             <button class="btn-link text-gray float-right f6 d-block" v-if="reviewComment.outdated" @click="triggerShowOutdated">
                 <svg class="octicon octicon-fold position-relative mr-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 9l3 3H8v3H6v-3H4l3-3zm3-6H8V0H6v3H4l3 3 3-3zm4 2c0-.55-.45-1-1-1h-2.5l-1 1h3l-2 2h-7l-2-2h3l-1-1H1c-.55 0-1 .45-1 1l2.5 2.5L0 10c0 .55.45 1 1 1h2.5l1-1h-3l2-2h7l2 2h-3l1 1H13c.55 0 1-.45 1-1l-2.5-2.5L14 5z"></path></svg>
                 {{showOutdated ? 'Hide outdated' : 'Show outdated'}}
@@ -16,8 +16,8 @@
             </button>
         </FileHeader>
 
-        <div v-if="!outdated || showOutdated">
-             <DiffView class="diff-view">
+        <div v-if="!outdated || showOutdated ">
+            <DiffView v-if="isRoot" class="diff-view">
                 <div :class="{'d-inline-block':!isProseFileType}" style="min-width: 100%;">
                     <LinesNotShown class="text-shadow-light d-flex width-full" v-if="diffHunkEntries.hidden.length > 0 && !showHiddenDiffHunk" @click="triggerShowHiddenDiffHunk">
                         <BlobNum class="blob-num position-sticky bg-white"  style="left:0px" data-line-number="..."></BlobNum>
@@ -80,18 +80,43 @@
                 </div>
             </DiffView>
 
-            <ReviewCommentReply :reply="reviewComment"></ReviewCommentReply>
+             <CommentContent>
+                <div class="px-3 pt-3 pb-2" v-show="!showReviewCommentEditor">
+                    <WhoDidWhatAt class="d-flex flex-row position-relative">
+                        <div class="flex-auto">
+                            <router-link :to="`/${reviewComment.user.login}`" class="d-inline-block">
+                                <ImgWrapper>   
+                                    <img class="v-align-top" style="margin-top:2px" :src="reviewComment.user.avatar_url" :alt="`@${reviewComment.user.login}`" width="16" height="16">
+                                </ImgWrapper>
+                            </router-link>
+                            <router-link :to="`/${reviewComment.user.login}`" class="f5 text-bold link-gray-dark">{{reviewComment.user.login}}</router-link> 
+                            <span class="text-gray"> • {{reviewComment.created_at | getDateDiff}}</span>
+                        </div>
 
-            <!-- replies -->
-            <Replies>
-                <ReviewCommentReply v-for="item in replies" :reply="item" :key="item.id"></ReviewCommentReply>
-            </Replies>
+                        <button class="ml-2 height-full" :disabled="loadingDeleteThis" @click="triggerShowPopover" v-if="(extraData.viewerCanUpdate || extraData.viewerCanDelete) && repoOwnerType() == 'User'">
+                            <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
+                        </button>
 
-            <button @click="triggerShowReviewCommentReplyCreator" v-if="!(pullRequestProvided().locked && !viewerIsCollaborator().data) && !showReviewCommentReplyCreator && repoOwnerType() == 'User'" class="border-top reply btn-link text-bold text-left muted-link btn-block">
-                Reply...
-            </button>
+                        <Popover ref="popover" :popoverStyle="{top: 'calc(100% + 4px)',right: '-10px',paddingTop: '4px',paddingBottom: '4px'}">
+                            <div v-if="extraData.viewerCanUpdate" class="dropdown-item" @click="triggerShowReviewCommentEditor">
+                                Edit
+                            </div>
+                            <div v-if="extraData.viewerCanUpdate" class="division border-top my-1"></div> 
+                            <div v-if="extraData.viewerCanDelete" class="dropdown-item danger" @click="network_tryToDeleteThis">
+                                Delete
+                            </div>
+                        </Popover>
+                    </WhoDidWhatAt>
 
-            <ReviewCommentReplyCreator v-if="showReviewCommentReplyCreator" class="border-top" :commentId="reviewComment.id" @cancel="() => triggerShowReviewCommentReplyCreator(false)" @reply-success="createReplySuccessHandler"></ReviewCommentReplyCreator>
+                    <CommentBody v-html="markdownToHTML" class="markdown-body p-0 pt-2 f5">
+                    </CommentBody>
+                    
+                    <Reactions class="mt-2" :data="reviewComment.reactions || reactions.data || {}" :disabled="!extraData.viewerCanReact" commentType="reviewComment">
+                    </Reactions>
+                </div>
+
+                <ReviewCommentEditor v-show="showReviewCommentEditor" :comment="reviewComment" @cancel="() => triggerShowReviewCommentEditor(false)"></ReviewCommentEditor>
+            </CommentContent>
         </div> 
        
     </Container>
@@ -100,42 +125,25 @@
 <script>
     import styled from 'vue-styled-components'
     import {util_dateFormat,util_analyseFileType,util_markdownParse} from '@/util'
-    import {LoadingIconEx,AnimatedHeightWrapper,Popover,SimpleDiffView, ImgWrapper} from '@/components'
-    import {HiddenItemLoading} from '../../components'
-    import {mapState} from 'vuex'
-    import ClipboardJS from 'clipboard';
+    import ReviewCommentEditor from './ReviewCommentEditor'
+    import {Popover, ImgWrapper} from '@/components'
+    import {mapState,mapMutations} from 'vuex'
     import {Reactions} from '../../components'
-    import ReviewCommentReply from './ReviewCommentReply'
-    import ReviewCommentReplyCreator from './ReviewCommentReplyCreator'
-    import * as graphql from '../../graphql'
     import * as api from '@/network/api'
-    import { authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
+    import { authRequiredGitHubGraphqlApiQuery,authRequiredGet,authRequiredDelete} from '@/network'
+    import { MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT } from '@/store/modules/pullRequestDetail/mutationTypes'
     export default {
-        inject: ['reviewCommentReplies','reviewCommentsOfPendingReview','reviewProvided','pullRequestProvided','repoOwnerType','viewerIsCollaborator'],
-        provide() {
-            return {
-                repliesExtraData: () => this.repliesExtraData.data,
-            }
-        },
+        inject: ['reviewProvided','pullRequestProvided','repoOwnerType','viewerIsCollaborator','reviewCommentsExtraData'],
         data() {
             return {
                 showHiddenDiffHunk: false,
                 showOutdated: false,
-                repliesExtraData: {
-                    data: [],
-                    loading: false
-                },
                 reactions: {
                     data: {},
                     loading: false
                 },
-                repliesReactions: {
-                    data: [],
-                    loading: false
-                },
-                repliesJustCreated: [],
-                showReviewCommentReplyCreator: false,
-                
+                loadingDeleteThis: false,
+                showReviewCommentEditor: false,
             }
         },
         props: {
@@ -143,10 +151,14 @@
                 type: Object,
                 required: true
             },
+            isRoot: {
+                type: Boolean,
+                default: false
+            }
         },
         computed: {
             ...mapState({
-                newCreatedReviewComments: state => state.pullRequestDetail.newCreatedReviewComments.changes
+                updatedReviewComments: state => state.pullRequestDetail.updatedReviewComments
             }),
             repo() {
                 return this.$route.params.repo
@@ -154,8 +166,8 @@
             owner() {
                 return this.$route.params.owner
             },
-            location() {
-                return location
+            extraData() {
+                return this.reviewCommentsExtraData().filter(i => i.id == this.reviewComment.node_id)[0] || {}
             },
             diffHunkEntries() {
                 let diffHunk = this.reviewComment.diffHunk || this.reviewComment.diff_hunk
@@ -208,37 +220,30 @@
                 if((this.reviewComment.path.match(/\//g) || []).length <= 3) return this.reviewComment.path
                 return `...${this.reviewComment.path.match(/(\/(([^\/])+)){3}$/g)[0]}`
             },
-            replies() {
-                let replies_ = [...this.reviewCommentReplies(),...this.reviewCommentsOfPendingReview(),...this.repliesJustCreated,...this.newCreatedReviewComments].filter(item => {
-                    return item.in_reply_to_id == this.reviewComment.id
-                }).sort((a,b) => a.created_at > b.created_at)
-
-                let replies = []
-                replies_.forEach(i => {
-                    if(!replies.some(i_ => i_.id == i.id)) {
-                        replies.push(i)
-                    }
-                })
-                return replies
-            },
             isProseFileType() {
                 if(!this.reviewComment.path) return 
                 return util_analyseFileType.isProse(this.reviewComment.path)
             },
             outdated() {
-                return this.repliesExtraData.data[0] && this.repliesExtraData.data[0].outdated
+                return this.extraData.outdated
+            },
+            markdownToHTML() {
+                let updatedReviewComment = this.updatedReviewComments.filter(i => i.id == this.reviewComment.id)[0]
+                return util_markdownParse.markdownToHTML(updatedReviewComment ? updatedReviewComment.body : this.reviewComment.body)
             }
         },
         created() {
             this.network_getData()
         },
         methods: {
+            ...mapMutations({
+                mutation_pushDeletedReviewComment: MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT
+            }),
             network_getData() {
-                this.network_getRepliesExtraData(this.replies)
-                this.network_getRepliesExtraData([this.reviewComment])
                 this.network_getReactions()
             },
             async network_getReactions() {
+                if(this.reviewComment.reactions) return 
                 try {
                     this.reactions.loading = true
                     let url = api.API_REVIEW_COMMENT_OF_PULL_REQUEST({
@@ -262,83 +267,60 @@
                     this.reactions.loading = false
                 }
             },
-            async network_getRepliesExtraData(replies) {
-                let nodeIds = []
-                replies.forEach(i => nodeIds.push(i.node_id))
-                if(nodeIds.length == 0) return 
-                try{
-                    this.repliesExtraData.loading = true
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.GRAPHQL_PR_REVIEW_COMMENTS,
+             async network_tryToDeleteThis() {
+                this.closeModal()
+                if(!confirm("Are you sure you want to delete this comment?")) return
+                try {
+                    this.loadingDeleteThis = true
+                    let url = api.API_REVIEW_COMMENT_OF_PULL_REQUEST({
+                        repo: this.repo,
+                        owner: this.owner,
+                        commentId: this.reviewComment.id
+                    })
+                    await authRequiredDelete(
+                        url,
                         {
-                            variables: {
-                                ids:nodeIds
+                            headers: {
+                                "accept":"application/vnd.github.v3+json"
                             }
                         }
                     )
 
-                    try{
-                        this.repliesExtraData.data = this.repliesExtraData.data.concat(res.data.data.nodes)
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-                    
-                }catch(e) {
-                    console.log(e)
-                }finally{
-                    this.repliesExtraData.loading = false
+                    this.mutation_pushDeletedReviewComment(this.reviewComment)
+
+                    /* if(this.reviewProvided().state.toLowerCase() == 'pending') {
+                        await this.pendingReviewCommentRepliesDeletedHook()()
+                    }else if(!this.reply.in_reply_to_id) {
+                        await this.reviewCommentsReplyHostDeletedHook()()
+                    } */
+
+                } catch (e) {
+                    this.handleError(e)
+                } finally {
+                    this.loadingDeleteThis = false
                 }
-            },
-            dateFormat(date) {
-                return util_dateFormat.getDateDiff(date)
-            },
-            markdownToHTML(markdown) {
-                return util_markdownParse.markdownToHTML(markdown)
-            },
-            showActionPopover() {
-                this.$refs.actionPopover.show = true
-            },
-            initClipboard() {
-                let clip = new ClipboardJS('#file-detail-copy-btn');
-                clip.on('success',e => {
-                    this.$toast("Clip OK!")
-                })
             },
             triggerShowHiddenDiffHunk() {
                 this.showHiddenDiffHunk = true
             },
+            triggerShowPopover(flag = true) {
+                this.$refs.popover.show = flag
+            },
             triggerShowOutdated() {
                 this.showOutdated = !this.showOutdated
             },
-            triggerShowReviewCommentReplyCreator(flag = true) {
-                this.showReviewCommentReplyCreator = flag
+            triggerShowReviewCommentEditor(flag = true) {
+                this.closeModal()
+                this.showReviewCommentEditor = flag
             },
-            createReplySuccessHandler(payload) {
-                this.showReviewCommentReplyCreator = false
-                this.repliesJustCreated.push(payload)
-            },
-            
-        },
-        watch: {
-            replies(newValue,oldValue) {
-                let additions = newValue.filter(i => {
-                    return !oldValue.some(i_ => i_.node_id == i.node_id)
-                })
-                if(additions.length > 0) this.network_getRepliesExtraData(additions)
-            }
         },
         components: {
-            LoadingIconEx,
-            AnimatedHeightWrapper,
             Popover,
             Reactions,
-            HiddenItemLoading,
-            SimpleDiffView,
             ImgWrapper,
-            ReviewCommentReply,
-            ReviewCommentReplyCreator,
+            ReviewCommentEditor,
             Container: styled.div``,
-            Main: styled.div``,
+            CommentContent: styled.div``,
             FileHeader: styled.div``,
             DiffView: styled.div``,
             LinesNotShown: styled.div``,
@@ -348,13 +330,21 @@
             Comment: styled.div``,
             WhoDidWhatAt: styled.div``,
             CommentBody: styled.div``,
-            Replies: styled.div``,
             ResolveConversation: styled.div``,
         }
     }
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/dropdown/index.scss';
+.deleting{
+    opacity: .4;
+}
+
+.dropdown-item{
+    min-width: 140px;
+}
+
 .file-header{
     border-top: 0;
     border-radius: 3px 3px 0 0;

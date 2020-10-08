@@ -6,16 +6,23 @@
             <Cover class="cover" id="modal-cover" v-if="show" @click="close"></Cover>
         </transition>
         <transition name="modal-basic">
-            <Main class="main Box d-flex flex-column transition-all" v-if="show" :style="modalStyle" style="width: 640px;">
-                <Title v-if="!noHeader" class="p-3 Box-title Box-header modal-title">
-                    <button @click="close" class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog="">
-                        <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
-                    </button>
-                    <slot name="header">
-                        {{title}}
-                    </slot>
-                </Title>
-                <slot></slot>
+            <Main class="main Box d-flex flex-column transition-all position-relative" v-if="show" :style="modalStyle" style="width: 640px;">
+                <LoadingWrapper class="loading-wrapper" v-if="loading">
+                    <ModalLoadingIcon>
+                    </ModalLoadingIcon>
+                </LoadingWrapper>
+                
+                <div v-else>
+                    <Title v-if="!noHeader" class="p-3 Box-title Box-header modal-title">
+                        <button @click="close" class="Box-btn-octicon btn-octicon float-right" type="button" aria-label="Close dialog" data-close-dialog="">
+                            <svg class="octicon octicon-x" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
+                        </button>
+                        <slot name="header">
+                            {{title}}
+                        </slot>
+                    </Title>
+                    <slot></slot>
+                </div>
             </Main>
         </transition>
     </Container>
@@ -24,6 +31,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {AnimatedHeightWrapper} from './'
+    import {ModalLoadingIcon} from './Loading'
     export default {
         props: {
             title: {
@@ -35,6 +43,10 @@
                  default: () => ({})
             },
             noHeader: {
+                type: Boolean,
+                default: false
+            },
+            loading: {
                 type: Boolean,
                 default: false
             }
@@ -80,12 +92,14 @@
             },
         },
         components: {
+            ModalLoadingIcon,
             AnimatedHeightWrapper,
             Container: styled.div``,
             Cover: styled.div``,
             Title: styled.div``,
             Main: styled.div``,
-            Content: styled.div``
+            Content: styled.div``,
+            LoadingWrapper: styled.div``,
         }
     }
 </script>
@@ -118,26 +132,37 @@
         margin: auto;
         max-height: 80vh;
         max-width: 90vw;
-        border-radius: 6px;
+        border-radius: 12px;
         background-color: #f6f8fa;
         .Box-body{
-            border-radius: 6px;
+            border-radius: 12px;
         }
     }
 
     .Box-header{
-         border-top-left-radius: 6px;
-        border-top-right-radius: 6px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
     }
 
     .modal-basic-enter-active,
     .modal-basic-leave-active {
-        transition: all 0.12s cubic-bezier(0,.1,.1,1);
+        transition: all 0.12s cubic-bezier(0,.1,.1,1)
     }
 
     .modal-basic-enter,
     .modal-basic-leave-to {
         opacity: 0;
         transform: scale(0.9);
+    }
+
+    .loading-wrapper{
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 </style>

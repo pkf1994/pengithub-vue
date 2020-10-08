@@ -1,6 +1,6 @@
 <template>
     <nav class="d-flex overflow-auto">
-        <router-link class="px-2 py-3 mr-3 router-link flex-row-center flex-shrink-0" 
+        <router-link class="px-3 py-2 router-link flex-row-center flex-shrink-0" 
                         :style="tabStyle"
                         :exact="tabItem.exact"
                         :class="{'router-link-active':tabItem.active}"
@@ -40,9 +40,8 @@
 @import 'node_modules/@primer/css/labels/index.scss';
     .router-link {
         padding: 16px 8px;
-        margin-right: 16px;
         font-size: 14px;
-        line-height: 1.5;
+        line-height: 30px;
         color: #586069;
         text-align: center;
         border-bottom: 2px solid transparent;

@@ -1,5 +1,5 @@
 <template>
-    <IssuesBrowser ref="issueBrowser" type="pr" routerPathFragment="pulls">
+    <IssuesBrowser ref="issueBrowser" type="pr" routerPathFragment="pulls" :routerLinkToNew="`/${owner}/${repo}/compare`">
         <template v-slot:emptyNotice>
             <div class="blankslate blankslate-spacious blankslate-large border-0">
                 <div class="container-md">
