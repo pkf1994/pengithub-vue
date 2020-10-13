@@ -120,7 +120,7 @@ export const API_REPOSITORY_COMMITS = payload=> {
 }
 
 export const API_REPOSITORY_BRANCHES = payload => {
-    let query = util_queryParse.querify(payload.API_OAUTH2params)
+    let query = util_queryParse.querify(payload.params)
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/branches?${query}`
 }
 

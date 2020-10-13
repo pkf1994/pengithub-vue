@@ -296,18 +296,16 @@
         </Modal>
 
          <Modal ref="chooseBaseRepoModal" title="Choose a base repostiory" :modalStyle="{height:'80vh'}" @show="network_getAvailableRepos">
-            <div class="select-menu-text-filter p-3">
+            <div class="select-menu-text-filter p-3 position-sticky" style="top:0;z-index:2">
                 <input type="text" v-model="modalReposData.searchQuery" class="form-control" placeholder="Filter repos" autofocus="" autocomplete="off"/>
             </div>
             <div v-if="modalReposData.loading" class="flex-row-center height-full">
                 <ModalLoadingIcon></ModalLoadingIcon>
             </div>
-            <div v-else style="overflow:auto">
-                <transition-group name="fade-group" appear>
-                    <SelectMenuItem @click.native="() => routerWithRefOwner(item,'base')" v-for="item in modalFiltermodalReposData" :key="item" :selected="`${owner}/${repo}` == item">
-                        <span>{{item}}</span>    
-                    </SelectMenuItem>
-                </transition-group>
+            <div v-else>
+                <SelectMenuItem @click.native="() => routerWithRefOwner(item,'base')" v-for="item in modalFiltermodalReposData" :key="item" :selected="`${owner}/${repo}` == item">
+                    <span>{{item}}</span>    
+                </SelectMenuItem>
             </div>
         </Modal>
 

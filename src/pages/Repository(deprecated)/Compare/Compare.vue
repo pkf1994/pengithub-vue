@@ -724,7 +724,6 @@
         display: block;
         width: 100%;
         max-width: 100%;
-        padding: 5px;
         border: 1px solid #dfe2e5;
         border-radius: 3px;
     }
