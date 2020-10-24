@@ -5,6 +5,7 @@ const SCOPE = "user public_repo repo repo_deployment repo:status read:repo_hook 
 const GITHUB_REST_API_BASE = "https://api.github.com"
 const BACK_END_API_BASE = "http://127.0.0.1:8088"
 const PROXY_API_BASE = "http://127.0.0.1:8888"
+const FILE_UPLOAD_PROXY_API_BASE = "http://127.0.0.1:8889"
 
 export const API_GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
 
@@ -127,6 +128,25 @@ export const API_REPOSITORY_BRANCHES = payload => {
 export const API_REPOSITORY_RELEASES = payload => {
     let query = util_queryParse.querify(payload.params)
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/releases?${query}`
+}
+
+export const API_REPOSITORY_CREATE_RELEASE = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/releases`
+
+export const API_REPOSITORY_RELEASE = payload => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/releases/${payload.releaseId}`
+}
+
+export const API_REPOSITORY_RELEASE_ASSETS = payload => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/releases/${payload.releaseId}/assets`
+}
+
+export const API_REPOSITORY_RELEASE_ASSET = payload => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/releases/assets/${payload.assetId}`
+}
+
+export const API_REPOSITORY_RELEASE_UPLOAD_ASSET = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${FILE_UPLOAD_PROXY_API_BASE}/repos/${payload.owner}/${payload.repo}/releases/${payload.releaseId}/assets?${query}`
 }
 
 export const API_REPOSITORY_GIT_TAG = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/refs/tags/${payload.tag}`

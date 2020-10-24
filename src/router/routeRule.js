@@ -499,6 +499,11 @@ export default [
                 component: RepositoryReleaseCreator
             },
             {
+                path: 'releases/edit/:id',
+                name: 'repositoryReleasEditor',
+                component: RepositoryReleaseCreator
+            },
+            {
                 path: 'invitations',
                 name: 'repositoryInvitations',
                 component: RepositoryInvitations,

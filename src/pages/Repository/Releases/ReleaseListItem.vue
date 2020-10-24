@@ -2,26 +2,29 @@
     <Container class="pt-2 pb-2">
         <ReleaseHeader>
             <Name class="f1">
-                <span v-if="release.prerelease" class="flex-shrink-0 ml-2 mt-2 Label Label--outline Label--prerelease float-right px-2" style="border-radius:2em">
+                <span v-if="release.draft" class="flex-shrink-0 ml-2 mt-2 Label Label--outline Label--draft float-right px-2" style="border-radius:2em">
+                    Draft
+                </span>
+                <span v-else-if="release.prerelease" class="flex-shrink-0 ml-2 mt-2 Label Label--outline Label--prerelease float-right px-2" style="border-radius:2em">
                     Pre-release
                 </span>
-                <span v-if="isLatestRelease" class="flex-shrink-0 ml-2 mt-2 Label Label--outline Label--outline-green float-right px-2" style="border-radius:2em">
+                <span v-if="!release.draft && isLatestRelease" class="flex-shrink-0 ml-2 mt-2 Label Label--outline Label--outline-green float-right px-2" style="border-radius:2em">
                     Latest release
                 </span>
                 <router-link :to="to">
-                    {{name}}
+                    {{release.draft ? 'Draft' : name}}
                 </router-link>
             </Name>
-            <AnimatedHeightWrapper>
+            <AnimatedHeightWrapper v-if="!release.draft">
                 <TheMeta class="d-flex flex-items-center flex-justify-between">
                     <div>
                         <router-link class="muted-link mr-1" :to="resourcePath">
-                            <svg class="octicon octicon-tag" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
+                            <svg class="octicon octicon-tag v-align-text-bottom" viewBox="0 0 15 16" version="1.1" width="15" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
                             {{release.tag_name}}
                         </router-link> 
                         <transition appear name="fade"> 
                             <router-link class="muted-link d-inline-block" v-if="commitSha" :to="extraDataHolder.tag.target.commitResourcePath">
-                                <svg class="octicon octicon-git-commit" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z"></path></svg>
+                                <svg class="octicon octicon-git-commit v-align-text-bottom" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10.86 7c-.45-1.72-2-3-3.86-3-1.86 0-3.41 1.28-3.86 3H0v2h3.14c.45 1.72 2 3 3.86 3 1.86 0 3.41-1.28 3.86-3H14V7h-3.14zM7 10.2c-1.22 0-2.2-.98-2.2-2.2 0-1.22.98-2.2 2.2-2.2 1.22 0 2.2.98 2.2 2.2 0 1.22-.98 2.2-2.2 2.2z"></path></svg>
                                 {{commitSha.substring(0,7)}}
                             </router-link> 
                         </transition>
@@ -48,9 +51,14 @@
                     <router-link class="text-bold text-gray" :to="`/${release.author.login}`">
                         {{release.author.login}}
                     </router-link> 
-                    released this on
-                    {{release.published_at | dateFormat('dd zzz yyyy')}}
-                    <span v-if="commitsCountSinceThisRelease > 0">· {{commitsCountSinceThisRelease}} {{commitsCountSinceThisRelease > 1 ? 'commits' : 'commit'}} to {{release.target_commitish}} since this release</span>    
+                    
+                    <span v-if="release.draft">
+                        drafted this {{release.created_at | getDateDiff}}
+                    </span>
+                    <span v-else> 
+                        released this on {{release.published_at | dateFormat('dd zzz yyyy')}}
+                        <span v-if="commitsCountSinceThisRelease > 0">· {{commitsCountSinceThisRelease}} {{commitsCountSinceThisRelease > 1 ? 'commits' : 'commit'}} to {{release.target_commitish}} since this release</span>    
+                    </span>
                 </WhoDidWhatAtWhen>
            </AnimatedHeightWrapper>
            
@@ -62,11 +70,11 @@
         <Assets class="border-top pt-3 mt-4 mb-2">
             <div class="d-flex flex-items-center mb-2" @click="triggerAssetsStretch">
                 <span class="mr-2">
-                    <svg v-if="assetsStretched" class="octicon octicon-triangle-down" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M0 5l6 6 6-6H0z"></path></svg>
-                    <svg v-else class="octicon octicon-triangle-right" viewBox="0 0 6 16" version="1.1" width="6" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M0 14l6-6-6-6v12z"></path></svg>
+                    <svg v-if="assetsStretched" class="octicon octicon-triangle-down v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M4.427 7.427l3.396 3.396a.25.25 0 00.354 0l3.396-3.396A.25.25 0 0011.396 7H4.604a.25.25 0 00-.177.427z"></path></svg>
+                    <svg v-else class="octicon octicon-triangle-right v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M6.427 4.427l3.396 3.396a.25.25 0 010 .354l-3.396 3.396A.25.25 0 016 11.396V4.604a.25.25 0 01.427-.177z"></path></svg>
                 </span>
                 <span class="text-bold">Assets</span>
-                <span class="ml-1 Counter">{{this.release.assets.length + 2}}</span>
+                <span class="ml-1 Counter">{{assetListLength}}</span>
             </div>
             <AnimatedHeightWrapper :stretch="assetsStretched"> 
                 <div class="Box Box--condensed">
@@ -78,14 +86,14 @@
                         <small class="pl-2 text-gray flex-shrink-0">{{item.size | fileSize}}</small>
                     </AssetItem>
 
-                    <AssetItem class="d-flex flex-justify-between flex-items-center py-2 Box-body px-2">
+                    <AssetItem v-if="release.zipball_url" class="d-flex flex-justify-between flex-items-center py-2 Box-body px-2">
                         <a :href="release.zipball_url">
                             <svg class="octicon octicon-file-zip flex-shrink-0 text-gray" width="16" height="16" viewBox="0 0 12 16" version="1.1" aria-hidden="true"><path fill-rule="evenodd" d="M8.5 1H1a1 1 0 00-1 1v12a1 1 0 001 1h10a1 1 0 001-1V4.5L8.5 1zM11 14H1V2h3v1h1V2h3l3 3v9zM5 4V3h1v1H5zM4 4h1v1H4V4zm1 2V5h1v1H5zM4 6h1v1H4V6zm1 2V7h1v1H5zM4 9.28A2 2 0 003 11v1h4v-1a2 2 0 00-2-2V8H4v1.28zM6 10v1H4v-1h2z"></path></svg>
                             <span class="pl-2 flex-auto min-width-0 text-bold">Source code</span>&nbsp;(zip)
                         </a> 
                     </AssetItem>
 
-                    <AssetItem class="d-flex flex-justify-between flex-items-center py-2 Box-body px-2">
+                    <AssetItem v-if="release.tarball_url" class="d-flex flex-justify-between flex-items-center py-2 Box-body px-2">
                         <a :href="release.tarball_url">
                             <svg class="octicon octicon-file-zip flex-shrink-0 text-gray" width="16" height="16" viewBox="0 0 12 16" version="1.1" aria-hidden="true"><path fill-rule="evenodd" d="M8.5 1H1a1 1 0 00-1 1v12a1 1 0 001 1h10a1 1 0 001-1V4.5L8.5 1zM11 14H1V2h3v1h1V2h3l3 3v9zM5 4V3h1v1H5zM4 4h1v1H4V4zm1 2V5h1v1H5zM4 6h1v1H4V6zm1 2V7h1v1H5zM4 9.28A2 2 0 003 11v1h4v-1a2 2 0 00-2-2V8H4v1.28zM6 10v1H4v-1h2z"></path></svg>
                             <span class="pl-2 flex-auto min-width-0 text-bold">Source code</span>&nbsp;(tar.gz)
@@ -180,6 +188,7 @@
                 return this.$route.params.owner
             },
             to() {
+                if(this.release.draft) return `/${this.owner}/${this.repo}/releases/tag/${this.release.id}?draft=true`
                 return `/${this.owner}/${this.repo}/releases/tag/${this.release.tag_name}`
             },
             name() {
@@ -194,18 +203,35 @@
                 return this.extraDataProvided().filter(i => i.id == this.release.node_id)[0]
             },
             commitSha() {
-                return this.extraDataHolder && this.extraDataHolder.tag.target.oid
+                if(!this.extraDataHolder) return
+                try{
+                    return this.extraDataHolder.tag.target.oid
+                }catch(e) {
+                    console.log(e)
+                }
             },
             resourcePath() {
                 return `/${this.owner}/${this.repo}/tree/${this.release.tag_name}`
             },
             commitIsVerified() {
-                return this.extraDataHolder && this.extraDataHolder.tag.target.signature && this.extraDataHolder.tag.target.signature.isValid
+                if(!this.extraDataHolder) return
+                if(!this.extraDataHolder.tag) return
+                try{
+                    return this.extraDataHolder.tag.target.signature.isValid
+                }catch(e) {
+                    console.log(e)
+                }
             },
             filteredTags() {
                 return this.tagsToCompare.data.filter( i => {
                     return i.toLowerCase().indexOf(this.tagsToCompare.searchQuery.toLowerCase()) > -1
                 })
+            },
+            assetListLength() {
+                let ret = this.release.assets.length || 0
+                if(this.release.zipball_url) ret += 1
+                if(this.release.tarball_url) ret += 1
+                return ret
             }
         },
         created() {
@@ -213,6 +239,7 @@
         },
         methods: {
             async network_getData() {
+                if(!this.release.tag_name) return 
                 try{    
                     this.loading = true
                     let url = api.API_COMMITS_COMPARE({
@@ -332,5 +359,10 @@
     content: "";
     border: 4px solid transparent;
     border-top-color: currentcolor;
+}
+
+.Label--draft {
+    color: #cb2431;
+    border-color: #d73a49;
 }
 </style>

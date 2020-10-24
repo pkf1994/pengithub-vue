@@ -151,7 +151,7 @@
             </ul>
         </Languages>
 
-        <Modal ref="switchBranchOrTagModal" title="Switch branches/tags" :modalStyle="{height:'80vh'}" @show="network_getModalAvailableRef">
+        <Modal ref="switchBranchOrTagModal" title="Switch branches/tags" :modalStyle="{height:'80vh'}" @show="network_getModalAvailableRef" :loading="loadingModalData">
             <div class="select-menu-text-filter">
                 <div class="p-3">
                     <input type="text" v-model="selectRefModal.searchQuery" class="form-control" placeholder="Filter branches/tags" autofocus="" autocomplete="off"/>
@@ -161,10 +161,7 @@
                     <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('tags')" :class="{'active-modal-tab':selectRefModal.tab == 'tags'}">Tags</button>
                 </ModalTab>
             </div>
-            <div v-if="(selectRefModal.tab == 'branches' && selectRefModal.branches.loading) || (selectRefModal.tab == 'tags' && selectRefModal.tags.loading)" class="flex-row-center height-full">
-                <LoadingIconEx></LoadingIconEx>
-            </div>
-            <div v-else style="overflow:auto">
+            <div v-if="!loadingModalData" style="overflow:auto">
                 <transition-group v-if="selectRefModal.tab == 'branches'" name="fade-group" appear>
                     <SelectMenuItem :key="repoBasicInfo().default_branch" v-if="repoBasicInfo().default_branch" @click.native="() => routerWithRef(repoBasicInfo().default_branch)" :selected="currentRef == repoBasicInfo().default_branch">
                         <span class="flex-1">{{repoBasicInfo().default_branch}}</span>    
@@ -180,9 +177,12 @@
                     </SelectMenuItem>
                 </transition-group>
             </div>
-            <footer class="modal-footer SelectMenu-footer">
-                <router-link :to="`/${owner}/${repo}/branches`">
+            <footer v-if="!loadingModalData" class="modal-footer SelectMenu-footer">
+                <router-link v-if="selectRefModal.tab == 'branches'" :to="`/${owner}/${repo}/branches`">
                     View all branches
+                </router-link>
+                <router-link v-if="selectRefModal.tab == 'tags'" :to="`/${owner}/${repo}/tags`">
+                    View all tags
                 </router-link>
             </footer>
         </Modal>
@@ -320,6 +320,9 @@
                     return this.$route.path.replace(regExp,`${match[1]}dir`)
                 }
             },
+            loadingModalData() {
+                return (this.selectRefModal.tab == 'branches' && this.selectRefModal.branches.loading) || (this.selectRefModal.tab == 'tags' && this.selectRefModal.tags.loading)
+            }
         },
         created() {
             this.network_getData()

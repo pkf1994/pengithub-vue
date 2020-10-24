@@ -84,7 +84,7 @@
                 return `Releases · ${this.owner}/${this.repo}`
             }
         },
-        created() {
+        async created() {
             this.network_getData()
         },
         methods: {
@@ -124,6 +124,7 @@
                 }
             },
              async network_getExtraData() {
+                if(this.data.length == 0) return 
                 try{
                     this.extraData.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data')

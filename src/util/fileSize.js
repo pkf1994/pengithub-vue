@@ -1,9 +1,9 @@
 export default {
     getFileSize(fileByte) {
-        var fileSizeByte = fileByte;
+        var fileSizeByte = parseInt(fileByte);
         var fileSizeMsg = "";
-        if (fileSizeByte < 1048576) fileSizeMsg = (fileSizeByte / 1024).toFixed(0) + "KB";
-        if (fileSizeByte < 1024) fileSizeMsg = fileSizeByte + "Bytes";
+        if (fileSizeByte < 1048576) return  (fileSizeByte / 1024).toFixed(0) + "KB";
+        if (fileSizeByte < 1024)  return fileSizeByte + "Bytes" 
         else if (fileSizeByte == 1048576) fileSizeMsg = "1MB";
         else if (fileSizeByte > 1048576 && fileSizeByte < 1073741824) fileSizeMsg = (fileSizeByte / (1024 * 1024)).toFixed(2) + "MB";
         else if (fileSizeByte == 1073741824) fileSizeMsg = "1GB";
