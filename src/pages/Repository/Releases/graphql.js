@@ -4,27 +4,21 @@ export const GRAPHQL_RELEASES = payload => {
         graphql = `
             ${graphql}
             release${index}:node(id: "${item.node_id}") {
-                ... on Release {
-                id
-                tag {
-                        target {
-                            commitResourcePath
-                            oid
-                            ... on Commit {
-                                id
-                                abbreviatedOid
-                                signature {
-                                    isValid
-                                    state
-                                    wasSignedByGitHub
-                                    ... on GpgSignature {
-                                      keyId
-                                    }
-                                }
-                            }
+              ... on Release {
+              id
+              tag {
+                target {
+                    ... on Tag {
+                      target {
+                        ... on Commit {
+                          abbreviatedOid
+                          resourcePath
                         }
+                      }
                     }
+                  }
                 }
+              }
             }
         `.trim()
     })

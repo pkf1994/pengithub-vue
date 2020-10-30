@@ -1,5 +1,5 @@
 <template>
-    <span class="d-inline-block label css-truncate" :style="{color:fontColor,background:color}">
+    <span class="d-inline-block label css-truncate" :style="{color:fontColor,background:`${color}!important`}">
         <span class="css-truncate-target" style="max-width: 100%">{{emojiHandledName}}</span>
     </span>
 </template>

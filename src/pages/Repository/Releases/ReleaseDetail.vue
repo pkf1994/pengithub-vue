@@ -3,7 +3,7 @@
         <transition name="fade" appear>
             <PaddingPageTopTab class="subnav" style="margin-right:-16px;margin-left:-16px;" :style="{marginBottom: data.draft ? '0px' :'16px'}" :tabs="tabs"></PaddingPageTopTab>
         </transition>  
-        <div v-if="viewerPermission().data == 'ADMIN'" class="text-right mb-3">
+        <div v-if="viewerPermission().data == 'ADMIN' && data.id" class="text-right mb-3">
             <span class="BtnGroup">
                 <router-link :to="`/${owner}/${repo}/releases/edit/${data.id}`" class="btn BtnGroup-item">Edit</router-link>
                 <button @click="() => showModal('deleteDraftModal')" class="btn btn-danger BtnGroup-item">
@@ -124,7 +124,7 @@
             </div>
             <div class="Box-body overflow-auto">
                 <button :disabled="loadingDeleteDraft" class="btn btn-danger btn-block" @click="network_deleteDraft">
-                    {{loadingDeleteDraft ? 'Trying...' : 'Delete this draft'}}
+                    {{loadingDeleteDraft ? 'Trying...' : `Delete this ${data.draft ? 'draft' : 'release'}`}}
                 </button>
             </div>
         </Modal>
@@ -438,6 +438,10 @@
                     )
 
                     this.closeModal()
+
+                    if(this.data.draft) this.topNoticeShow('repository', `The draft was discarded`,'normal',true)
+                    
+                    if(!this.data.draft) this.topNoticeShow('repository', `Your release was removed`,'normal',true)
 
                     this.$router.push(`/${this.owner}/${this.repo}/releases?deleted=${this.data.id}`)
 

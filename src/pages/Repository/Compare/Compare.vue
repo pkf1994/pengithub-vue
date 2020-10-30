@@ -217,7 +217,7 @@
             </p>
         </EmptyNotice>
 
-         <Modal ref="chooseBaseRefModal" title="Choose a base ref" :modalStyle="{height:'80vh'}" @show="() => network_getAvailableRefs('base')">
+         <Modal :loading="modalRefsData.base[modalRefsData.base.currentTab].loading" ref="chooseBaseRefModal" title="Choose a base ref" :modalStyle="{height:'80vh'}" @show="() => network_getAvailableRefs('base')">
             <div class="select-menu-text-filter">
                 <div class="p-3">
                     <input type="text" v-model="modalRefsData.base.searchQuery" class="form-control" placeholder="Find a branch" autofocus="" autocomplete="off"/>
@@ -227,18 +227,12 @@
                     <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('base','tags')" :class="{'active-modal-tab':modalRefsData.base.currentTab == 'tags'}">Tags</button>
                 </ModalTab>
             </div>
-            <div v-if="modalRefsData.base[modalRefsData.base.currentTab].loading" class="flex-row-center height-full">
-                <ModalLoadingIcon></ModalLoadingIcon>
-            </div>
-            <EmptyNotice v-else-if="modalRefsData.base.currentTab == 'tags' && modalRefsData.base.tags.data.length == 0">
+            <EmptyNotice v-if="modalRefsData.base.currentTab == 'tags' && modalRefsData.base.tags.isEmpty">
                 <div  class="text-center SelectMenu-message">
                     Nothing to show
                 </div> 
-                <footer class="SelectMenu-footer">
-                    <router-link :to="`/${owner}/${repo}/tags`">View all tags</router-link>
-                </footer>
             </EmptyNotice>
-            <div v-else style="overflow:auto">
+            <div v-else-if="!modalRefsData.base[modalRefsData.base.currentTab].loading" style="overflow:auto">
                 <transition-group v-if="modalRefsData.base.currentTab == 'branches'" name="fade-group" appear>
                     <SelectMenuItem :key="defaultBranch" v-if="defaultBranch" @click.native="() => routerWithRef(defaultBranch,'base')" :selected="baseRef == defaultBranch">
                         <span class="flex-1">{{defaultBranch}}</span>    
@@ -252,11 +246,15 @@
                     <SelectMenuItem @click.native="() => routerWithRef(item,'base')" v-for="item in modalFilteredAvailableBaseTags" :key="item" :selected="baseRef == item">
                         <span>{{item}}</span>    
                     </SelectMenuItem>
+                    <footer key="footer" class="SelectMenu-footer">
+                        <router-link :to="`/${owner}/${repo}/tags`">View all tags</router-link>
+                    </footer>
                 </transition-group>
             </div>
+           
         </Modal>
 
-         <Modal ref="chooseHeadRefModal" title="Choose a head ref" :modalStyle="{height:'80vh'}" @show="() => network_getAvailableRefs('head')">
+         <Modal ref="chooseHeadRefModal" title="Choose a head ref" :loading="modalRefsData.head[modalRefsData.head.currentTab].loading" :modalStyle="{height:'80vh'}" @show="() => network_getAvailableRefs('head')">
             <div class="select-menu-text-filter">
                 <div class="p-3">
                     <input type="text" v-model="modalRefsData.head.searchQuery" class="form-control" placeholder="Find a branch" autofocus="" autocomplete="off"/>
@@ -266,18 +264,12 @@
                     <button class="SelectMenu-tab py-2" style="font-size:14px" @click="() => switchModalTab('head','tags')" :class="{'active-modal-tab':modalRefsData.head.currentTab == 'tags'}">Tags</button>
                 </ModalTab>
             </div>
-            <div v-if="modalRefsData.head[modalRefsData.head.currentTab].loading" class="flex-row-center height-full">
-                <ModalLoadingIcon></ModalLoadingIcon>
-            </div>
-            <EmptyNotice v-else-if="modalRefsData.head.currentTab == 'tags' && modalRefsData.head.tags.data.length == 0">
-                <div  class="text-center SelectMenu-message">
+            <EmptyNotice v-if="modalRefsData.head.currentTab == 'tags' && modalRefsData.head.tags.isEmpty">
+                <div class="text-center SelectMenu-message">
                     Nothing to show
                 </div> 
-                <footer class="SelectMenu-footer">
-                    <router-link :to="`/${owner}/${repo}/tags`">View all tags</router-link>
-                </footer>
             </EmptyNotice>
-            <div v-else style="overflow:auto">
+            <div v-else-if="!modalRefsData.head[modalRefsData.head.currentTab].loading" style="overflow:auto">
                 <transition-group v-if="modalRefsData.head.currentTab == 'branches'" name="fade-group" appear>
                     <SelectMenuItem :key="defaultBranch" v-if="defaultBranch" @click.native="() => routerWithRef(defaultBranch,'head')" :selected="headRef == defaultBranch">
                         <span class="flex-1">{{defaultBranch}}</span>    
@@ -291,32 +283,30 @@
                     <SelectMenuItem @click.native="() => routerWithRef(item,'head')" v-for="item in modalFilteredAvailableHeadTags" :key="item" :selected="headRef == item">
                         <span>{{item}}</span>    
                     </SelectMenuItem>
+                    <footer key="footer" class="SelectMenu-footer">
+                        <router-link :to="`/${owner}/${repo}/tags`">View all tags</router-link>
+                    </footer>
                 </transition-group>
             </div>
+             
         </Modal>
 
-         <Modal ref="chooseBaseRepoModal" title="Choose a base repostiory" :modalStyle="{height:'80vh'}" @show="network_getAvailableRepos">
+         <Modal ref="chooseBaseRepoModal" title="Choose a base repostiory" :loading="modalReposData.loading" :modalStyle="{height:'80vh'}" @show="network_getAvailableRepos">
             <div class="select-menu-text-filter p-3 position-sticky" style="top:0;z-index:2">
                 <input type="text" v-model="modalReposData.searchQuery" class="form-control" placeholder="Filter repos" autofocus="" autocomplete="off"/>
             </div>
-            <div v-if="modalReposData.loading" class="flex-row-center height-full">
-                <ModalLoadingIcon></ModalLoadingIcon>
-            </div>
-            <div v-else>
+            <div v-if="modalFiltermodalReposData.length > 0">
                 <SelectMenuItem @click.native="() => routerWithRefOwner(item,'base')" v-for="item in modalFiltermodalReposData" :key="item" :selected="`${owner}/${repo}` == item">
                     <span>{{item}}</span>    
                 </SelectMenuItem>
             </div>
         </Modal>
 
-         <Modal ref="chooseHeadRepoModal" title="Choose a head repostiory" :modalStyle="{height:'80vh'}" @show="network_getAvailableRepos">
+         <Modal ref="chooseHeadRepoModal" title="Choose a head repostiory" :loading="modalReposData.loading" :modalStyle="{height:'80vh'}" @show="network_getAvailableRepos">
             <div class="select-menu-text-filter p-3">
                 <input type="text" v-model="modalReposData.searchQuery" class="form-control" placeholder="Filter repos" autofocus="" autocomplete="off"/>
             </div>
-            <div v-if="modalReposData.loading" class="flex-row-center height-full">
-                <ModalLoadingIcon></ModalLoadingIcon>
-            </div>
-            <div v-else style="overflow:auto">
+            <div v-if="modalFiltermodalReposData.length" style="overflow:auto">
                 <transition-group name="fade-group" appear>
                     <SelectMenuItem @click.native="() => routerWithRefOwner(item,'head')" v-for="item in modalFiltermodalReposData" :key="item" :selected="`${headRefOwner}/${repo}` == item">
                         <span>{{item}}</span>    
@@ -600,6 +590,7 @@
                         }
                     )
                     this.modalRefsData[meta].tags.data = this.parseTagsFromHTML(res.data)
+                    if(this.modalRefsData[meta].tags.data.length == 0) this.modalRefsData[meta].tags.isEmpty = true
                 }catch(e) {
                     console.log(e)
                 }finally{

@@ -27,6 +27,7 @@
                         :countByState="processedCountByState"
                         :baseQuery="`repo:${owner}/${repo} is:open is:${type}`"
                         :resetRouterLink="`/${owner}/${repo}/${routerPathFragment}`"
+                        :isEmpty="isEmpty"
                         :query="query">
             <template v-slot:searchInput>
                 <ButtonLeftSearchInput v-model="searchQuery" 
@@ -48,9 +49,9 @@
             </template>
 
             
-            <template v-if="emptyFlag && !noResultMatchedFlag" v-slot:emptyNotice>
+            <template v-if="isEmpty && !noResultMatchedFlag" v-slot:emptyNotice>
                 <slot name="emptyNotice">
-                    <div  class="blankslate blankslate-spacious blankslate-large border-0">
+                    <div  class="blankslate blankslate-spacious blankslate-large">
                         <div class="container-md">
                             <svg height="40" class="octicon octicon-issue-opened blankslate-icon" viewBox="0 0 24 24" version="1.1" width="40" aria-hidden="true"><path d="M12 7a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0112 7zm1 9a1 1 0 11-2 0 1 1 0 012 0z"></path><path fill-rule="evenodd" d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zM2.5 12a9.5 9.5 0 1119 0 9.5 9.5 0 01-19 0z"></path></svg>
                             <h3>Welcome to issues!</h3>
@@ -62,7 +63,7 @@
 
             <template v-if="noResultMatchedFlag" v-slot:noResultMatchedNotice>
                 <slot name="noResultMatchedNotice">
-                    <div  class="blankslate blankslate-spacious blankslate-large border-0">
+                    <div  class="blankslate blankslate-spacious blankslate-large">
                         <div class="container-md">
                             <svg height="40" class="octicon octicon-issue-opened blankslate-icon" viewBox="0 0 24 24" version="1.1" width="40" aria-hidden="true"><path d="M12 7a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0112 7zm1 9a1 1 0 11-2 0 1 1 0 012 0z"></path><path fill-rule="evenodd" d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zM2.5 12a9.5 9.5 0 1119 0 9.5 9.5 0 01-19 0z"></path></svg>
                             <h3>No results matched your search.</h3>
@@ -270,7 +271,7 @@
                 assigneeModalSearchQuery: '',
                 data: [],
                 loading: false,
-                emptyFlag: false,
+                isEmpty: false,
                 noResultMatchedFlag: false,
                 extraData: {
                     data: [],
@@ -514,12 +515,12 @@
                     this.pageInfo = parse(res.headers.link) || {}
                     this.noResultMatchedFlag = false
                     if(res.data.total_count == 0) {
-                        this.emptyFlag = true
+                        this.isEmpty = true
                         if(this.searchQuery != `is:open is:${this.type}` && this.searchQuery != `is:${this.type} is:open`) {
                             this.noResultMatchedFlag = true
                         }
                     } else {
-                        this.emptyFlag = false
+                        this.isEmpty = false
                     }
                     //获取其他数据
                     if(this.accessToken && this.type == 'pr') this.network_getExtraData(res.data.items)

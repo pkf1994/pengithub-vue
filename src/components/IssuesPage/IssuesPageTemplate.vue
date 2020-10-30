@@ -35,7 +35,7 @@
        
 
         <Entries class="flex-grow-1">
-            <EntriesFilterRow class="entries-filter-row Box-header mx-0 d-flex flex-justify-between">
+            <EntriesFilterRow v-if="!isEmpty" class="entries-filter-row Box-header mx-0 d-flex flex-justify-between">
                 <slot name="entriesFilterRow">
                     <EntriesFilterItem class="px-3">Visibility</EntriesFilterItem>
                     <EntriesFilterItem class="px-3">Organization</EntriesFilterItem>
@@ -118,6 +118,10 @@
             perPage: {
                 type: Number,
                 default: 8
+            },
+            isEmpty: {
+                type: Boolean,
+                default: false
             }
             
         },

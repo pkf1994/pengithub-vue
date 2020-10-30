@@ -136,6 +136,10 @@ export const API_REPOSITORY_RELEASE = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/releases/${payload.releaseId}`
 }
 
+export const API_REPOSITORY_LATESTRELEASE = payload => {
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/releases/latest`
+}
+
 export const API_REPOSITORY_RELEASE_ASSETS = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/releases/${payload.releaseId}/assets`
 }

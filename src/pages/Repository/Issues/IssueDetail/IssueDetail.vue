@@ -1,74 +1,11 @@
+
+
+
 <template>
     <CommonLoadingWrapper :loading="loading || timeline.loading || timeline.extraData.loading" :position="loading ? 'center' : 'corner'" class="px-3 bg-white flex-grow-1">
         
-        <Header>
-            <HeaderActions v-if="!titleEditPane.show" class="d-flex flex-justify-between flex-items-center mb-3">
-                <span>
-                    <AnimatedWidthWrapper class="v-align-bottom">
-                        <button v-if="extraData.data.viewerCanUpdate" @click="triggerShowTitleEditPane" class="btn btn-sm d-inline-block float-none mr-2">
-                            Edit
-                        </button>
-                    </AnimatedWidthWrapper>
-                    <router-link to="/" class="btn btn-primary d-inline-block btn-sm">
-                        New issue
-                    </router-link>
-                </span>
-                
 
-                <button class="btn-link" @click="scrollToBottom">Jump to bottom</button>
-            </HeaderActions>
-
-            <HeaderTitle v-if="!titleEditPane.show" class="title f1">
-                <transition-group name="fade-group">
-                    <Skeleton key="1" v-if="!data.id && loading">
-                        <SkeletonRectangle :height="20" style="width:100%"></SkeletonRectangle>
-                        <SkeletonRectangle :height="20" style="width:80%" class="mt-3"></SkeletonRectangle>
-                    </Skeleton>
-                    <div key="2" v-else> 
-                        {{data.title}}
-                        <span class="number">#{{data.number}}</span>
-                    </div> 
-                </transition-group>
-                
-            </HeaderTitle>
-
-            <TitleEditPane v-if="titleEditPane.show" class="mb-3">
-                <input :disabled="titleEditPane.loading" v-model="titleEditPane.title" ref="titleEditInput" class="form-control flex-auto input-lg input-contrast mr-0 width-full" autofocus="autofocus" autocomplete="off" type="text">
-                <div style="margin-top:12px">
-                    <button class="btn btn-sm mr-2" :disabled="titleEditPane.loading || !titleEditPane.title" @click="network_updateIssueTitle">{{titleEditPane.loading ? 'Saving' : 'Save'}}</button>
-                    <button class="btn btn-link" style="background:white" :disabled="titleEditPane.loading || !titleEditPane.title" @click="() => triggerShowTitleEditPane(false)">Cancel</button>
-                </div> 
-            </TitleEditPane>
-
-            <HeaderMeta class="d-flex mt-2 mb-3 flex-items-center header-meta">
-                <State v-if="!data.state"  class="State State--green mr-2 d-inline-flex flex-items-center"
-                        :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" 
-                        style="text-transform:capitalize;border-radius: 2em">
-                    <IssueIcon class="flex-shrink-0 mr-1" color="#fff" :issue="data"></IssueIcon>
-                    &nbsp;
-                    &nbsp;
-                    &nbsp;
-                    &nbsp;
-                </State>   
-                <State v-else  class="State State--green mr-2 d-inline-flex flex-items-center"
-                        :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" 
-                        style="text-transform:capitalize;border-radius: 2em">
-                    <IssueIcon class="flex-shrink-0 mr-1" color="#fff" :issue="data"></IssueIcon>
-                    {{data.state}}
-                </State>   
-
-                <Skeleton v-if="!data.id && loading" class="flex-grow-1">
-                    <SkeletonRectangle :height="16" style="width:100%"></SkeletonRectangle>   
-                </Skeleton>   
-
-                <MetaContent v-else class="meta-content">
-                    <router-link to="/" class="text-bold link-gray">{{data.user && data.user.login}}</router-link>
-                    {{data.state == 'open' ? 'opened' : data.state}} this issue
-                    <span class="no-wrap">on {{data.created_at | dateFormat('dd zzz yyyy')}}</span>
-                    · {{data.comments}} {{data.comments > 1 ? 'comments' : 'comment'}} 
-                </MetaContent>
-            </HeaderMeta>
-        </Header>
+        <IssueHeader :data="data" :viewerCanUpdate="extraData.data.viewerCanUpdate" :issueUpdateFunc="network_updateIssue"></IssueHeader>
         
 
         <Info  class="border-bottom border-top pt-3 mt-3" 
@@ -452,7 +389,7 @@
             SkeletonRectangle,
             HiddenItemLoading} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
-    import {TimelineItem,Comment,IssueBody,ProjectCard,CommentCreatePane,LoadMore} from './components'
+    import {TimelineItem,Comment,IssueBody,ProjectCard,CommentCreatePane,LoadMore,IssueHeader} from './components'
     import {IssueNotificationSettingPane,LockIssueButton} from '../../components'
     import {util_dateFormat} from '@/util'
     import {
@@ -648,12 +585,6 @@
                 createdComments: [],
                 deletedComments: [],
                 isDynamicDocumentTitle: true,
-                titleEditPane: {
-                    show: false,
-                    loading: false,
-                    title: ''
-                },
-            
             }
         },
        
@@ -1213,17 +1144,6 @@
                     throw(e)
                 }
             },
-            async network_updateIssueTitle() {
-                try {
-                    this.titleEditPane.loading = true
-                    await this.network_updateIssue({title: this.titleEditPane.title})
-                    this.titleEditPane.show = false
-                } catch (e) {
-                    
-                }finally{
-                    this.titleEditPane.loading = false
-                }
-            },
             triggerSubscription() {
                 if(this.extraData.data.viewerSubscription == 'SUBSCRIBED') {
                     this.network_setSubscription('UNSUBSCRIBED')
@@ -1271,14 +1191,6 @@
                     Object.assign(theComment,payload)
                 }
             },
-            triggerShowTitleEditPane(payload = true) {
-                this.titleEditPane.show = payload
-                if(payload) {
-                    this.$nextTick(() => {
-                        this.$refs.titleEditInput.focus()
-                    })
-                }
-            },
             changeLockStatusSuccessPostHandler(payload) {
                 this.data.locked = payload
             }
@@ -1292,6 +1204,7 @@
             },
         },
         components: {
+            IssueHeader,
             CommonLoadingWrapper,
             Label,
             Comment,

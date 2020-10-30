@@ -4,7 +4,7 @@
             <PaddingPageTopTab class="subnav" style="margin-right:-16px;margin-left:-16px;" :tabs="tabs"></PaddingPageTopTab>
         </transition>  
         <transition-group name="fade-group" appear>
-            <ReleaseListItem v-for="(item,index) in data" :key="item.node_id" :release="item" :isLatestRelease="(!pageInfo.prev) && index == 0" class="border-top"></ReleaseListItem>
+            <ReleaseListItem v-for="item in data" :key="item.node_id" :release="item" class="border-top" :isLatest="latestRelease.data.id == item.id"></ReleaseListItem>
         </transition-group>
         <SimplePaginationRest v-if="firstLoadedFlag && (pageInfo.prev || pageInfo.next)" :loading="loading" :pageInfo="pageInfo"></SimplePaginationRest>
 
@@ -40,7 +40,7 @@
         mixins: [RouteUpdateAwareMixin],
         provide() {
             return {
-                extraDataProvided: () => this.extraData.data
+                extraDataProvided: () => this.extraData.data,
             }
         },
         data() {
@@ -53,6 +53,10 @@
                 firstLoadedFlag:false,
                 extraData: {
                     data: [],
+                    loading: false
+                },
+                latestRelease: {
+                    data: {},
                     loading: false
                 }
             }
@@ -82,9 +86,13 @@
             },
             documentTitle() {
                 return `Releases · ${this.owner}/${this.repo}`
+            },
+            repoFullName() {
+                return `${this.owner}/${this.repo}`
             }
         },
         async created() {
+            this.network_getLatestRelease()
             this.network_getData()
         },
         methods: {
@@ -147,9 +155,37 @@
                     this.extraData.loading = false
                 }
             },
+            async network_getLatestRelease() {
+                try {
+                    this.latestRelease.loading = true
+                    let url = api.API_REPOSITORY_LATESTRELEASE({
+                        repo: this.repo,
+                        owner: this.owner
+                    })
+
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_latest_release')
+                        }
+                    )
+
+                    this.latestRelease.data = res.data || {}
+                } catch (e) {
+                    this.handleError()
+                } finally {
+                    this.latestRelease.loading = false
+                }
+            },
            /*  scrollToTop() {
                 if(window) window.scrollTo(0,0)
             } */
+            
+        },
+        watch: {
+            repoFullName() {
+                this.network_getLatestRelease()
+            }
         },
        
         components: {

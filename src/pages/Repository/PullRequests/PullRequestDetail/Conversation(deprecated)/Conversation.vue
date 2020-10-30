@@ -1,9 +1,20 @@
 <template>
-    <CommonLoadingWrapper :loading="pullRequestProvided().loading || timeline.loading || timeline.extraData.loading || reviewComments.loading" 
+    <CommonLoadingWrapper :loading="pullRequestProvided().loading || extraData.loading || timeline.loading || timeline.extraData.loading || reviewComments.loading" 
     :position="pullRequestProvided().loading ? 'center' : 'corner'"
     class="flex-grow-1">
             <Header  class="px-3 pt-3">
-                <Skeleton v-if="!pullRequestProvided().title">
+               <!--  <HeaderActions class="d-flex flex-justify-between flex-items-center">
+                   <State class="State mr-2 d-inline-flex flex-items-center" 
+                        :class="{'State--green':pullRequestProvided().data.state === 'open' && !pullRequestProvided().data.draft || !pullRequestProvided().data.node_id,'State--red':pullRequestProvided().data.state === 'closed'}" 
+                        style="text-transform:capitalize;border-radius:2em;padding: 5px 12px;min-width: 70px">
+                        <IssueIcon color="#fff" :issue="pullRequestProvided().data"></IssueIcon>
+                        &nbsp;{{pullRequestProvided().data.draft ? 'Draft' : pullRequestProvided().data.state}}
+                    </State>   
+
+                    <a href="javascript:return false" @click="scrollToBottom">Jump to bottom</a>
+                </HeaderActions>
+ -->
+                <Skeleton v-if="!pullRequestProvided().data.title">
                     <div class="d-flex flex-items-center mt-3 pb-3 border-bottom">
                         <SkeletonCircle :diameter="32" class="mr-2"></SkeletonCircle>
                         <SkeletonRectangle :height="14" class="flex-grow-1"></SkeletonRectangle>
@@ -14,21 +25,33 @@
                 </Skeleton>
 
                 <div v-else>
+                    <!-- <HeaderTitle class="title" style="font-weight: bold; margin-top:10px">
+                        {{pullRequestProvided().data.title}}
+                        <span class="text-normal text-gray">#{{pullRequestProvided().data.number}}</span>
+                    </HeaderTitle>
+
+                    <Branch class="branch">
+                        <span class="inner">
+                            <svg class="octicon octicon-git-branch" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 5c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v.3c-.02.52-.23.98-.63 1.38-.4.4-.86.61-1.38.63-.83.02-1.48.16-2 .45V4.72a1.993 1.993 0 00-1-3.72C.88 1 0 1.89 0 3a2 2 0 001 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-.53-.2-1-.53-1.36.09-.06.48-.41.59-.47.25-.11.56-.17.94-.17 1.05-.05 1.95-.45 2.75-1.25S8.95 7.77 9 6.73h-.02C9.59 6.37 10 5.73 10 5zM2 1.8c.66 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2C1.35 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2zm0 12.41c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm6-8c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
+                            {{pullRequestProvided().data.head && pullRequestProvided().data.head.label}}
+                        </span>    
+                    </Branch> -->
+
                     <AuthorAndLastEdit class="author-and-last-edit d-flex position-relative">
                         <div class="flex-auto">
                             <div class="avatar-parent-child float-left">
                                 <ImgWrapper>
-                                    <img class="avatar" :src="pullRequestProvided().user && pullRequestProvided().user.avatar_url" width="32" height="32" :alt="`@${pullRequestProvided().user && pullRequestProvided().user.login}`">
+                                    <img class="avatar" :src="pullRequestProvided().data.user && pullRequestProvided().data.user.avatar_url" width="32" height="32" :alt="`@${pullRequestProvided().data.user && pullRequestProvided().data.user.login}`">
                                 </ImgWrapper>
                             </div>
 
                             <div style="margin-left:42px;">
-                                <router-link :to="`/${pullRequestProvided().user && pullRequestProvided().user.login}`">
-                                    <strong>{{pullRequestProvided().user && pullRequestProvided().user.login}}</strong>
+                                <router-link :to="`/${pullRequestProvided().data.user && pullRequestProvided().data.user.login}`">
+                                    <strong>{{pullRequestProvided().data.user && pullRequestProvided().data.user.login}}</strong>
                                 </router-link>  
                                 opened this pull request
                                 <br>
-                                {{pullRequestProvided().created_at | getDateDiff}}
+                                {{pullRequestProvided().data.created_at | getDateDiff}}
                             </div>
                         </div> 
 
@@ -44,19 +67,20 @@
                         </Popover>
                     </AuthorAndLastEdit>
 
+                   
                 </div> 
 
             </Header>
         
-        <div v-if="pullRequestProvided().node_id">
+        <div v-if="pullRequestProvided().data.node_id">
 
             <Info  class="pt-3 px-3 bg-white " 
-                v-if="pullRequestProvided().labels && pullRequestProvided().labels.length !== 0"
+                v-if="pullRequestProvided().data.labels && pullRequestProvided().data.labels.length !== 0"
                     >
                 <!-- label --> 
-                <div class="pb-3" v-if="pullRequestProvided().labels && pullRequestProvided().labels.length !== 0">
+                <div class="pb-3" v-if="pullRequestProvided().data.labels && pullRequestProvided().data.labels.length !== 0">
                     <div class="my-1 f6">Labels</div>    
-                    <router-link to="/" v-for="item in pullRequestProvided().labels" :key="item.name">
+                    <router-link to="/" v-for="item in pullRequestProvided().data.labels" :key="item.name">
                         <Label  class="mr-1 mt-1"
                                 :style="{height:'18px',fontSize:'10px'}"
                                 :name="item.name"
@@ -101,22 +125,22 @@
             </transition-group>
 
 
-            <MergePull v-if="extraData.data.viewerCanUpdate && pullRequestProvided().merged == false && pullRequestProvided().state == 'open'" >
+            <MergePull v-if="extraData.data.viewerCanUpdate && pullRequestProvided().data.merged == false && pullRequestProvided().data.state == 'open'" >
                 <Header class="header" v-if="extraData.data.id">
                     Merge this pull request
                 </Header>
-                <div v-if="pullRequestProvided().mergeable_state == 'clean'" class="branch-action branch-action-with-icon">
+                <div v-if="pullRequestProvided().data.mergeable_state == 'clean'" class="branch-action branch-action-with-icon">
                     <svg class="octicon octicon-check branch-action-icon text-green mt-1" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
                     <h3 class="branch-action-heading">This branch has no conflicts with the base branch.</h3>
                         Merging can be performed automatically.
                 </div>
-                <div v-else-if="pullRequestProvided().mergeable_state == 'dirty'" class="branch-action branch-action-with-icon">
+                <div v-else-if="pullRequestProvided().data.mergeable_state == 'dirty'" class="branch-action branch-action-with-icon">
                     <svg class="octicon octicon-x branch-action-icon mt-1" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
                     <h3 class="branch-action-heading">This branch has conflicts that must be resolved.</h3>
                     Use the command line to resolve conflicts before continuing.
                 </div>
                 <div class="p-3 branch-action">
-                    <button :disabled="pullRequestProvided().mergeable_state != 'clean' || !pullRequestProvided().mergeable" class="btn btn-block js-mergeable-state-check">
+                    <button :disabled="pullRequestProvided().data.mergeable_state != 'clean' || !pullRequestProvided().data.mergeable" class="btn btn-block js-mergeable-state-check">
                         <svg class="octicon octicon-git-merge" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 3.254V3.25v.005a.75.75 0 110-.005v.004zm.45 1.9a2.25 2.25 0 10-1.95.218v5.256a2.25 2.25 0 101.5 0V7.123A5.735 5.735 0 009.25 9h1.378a2.251 2.251 0 100-1.5H9.25a4.25 4.25 0 01-3.8-2.346zM12.75 9a.75.75 0 100-1.5.75.75 0 000 1.5zm-8.5 4.5a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg>
                         <span class="mergeable-state-loading"></span>
                         <span>Merge pull request</span>
@@ -145,7 +169,7 @@
                 @lock-status-changed.native="lockStatusChangedHook"
                 class="p-3 border-top"
                 v-if="extraData.data.viewerCanUpdate" 
-                :issue="pullRequestProvided()" 
+                :issue="pullRequestProvided().data" 
                 @lock-status-changed="changeLockStatusSuccessPostHandler"></LockIssueButton>
 
         </div>
@@ -153,24 +177,24 @@
         <transition name="fade" appear>
             <StickyTop v-if="scrollTop > 300 && !newCreatedTimelineItem" class="sticky-top px-3 py-2">
                 <StickyTopContent class="d-flex flex-items-center flex-justify-between">
-                    <State class="State mr-2 d-inline-flex flex-items-center flex-shrink-0" :class="{'State--green':pullRequestProvided().state === 'open','State--red':pullRequestProvided().state === 'closed'}" style="text-transform:capitalize; border-radius:2em">
-                        <IssueIcon color="#fff" :issue="pullRequestProvided()" class="mr-1"></IssueIcon>
+                    <State class="State mr-2 d-inline-flex flex-items-center flex-shrink-0" :class="{'State--green':pullRequestProvided().data.state === 'open','State--red':pullRequestProvided().data.state === 'closed'}" style="text-transform:capitalize; border-radius:2em">
+                        <IssueIcon color="#fff" :issue="pullRequestProvided().data" class="mr-1"></IssueIcon>
                         <span style="line-height:auto">
-                            {{pullRequestProvided().state}}
+                            {{pullRequestProvided().data.state}}
                         </span>    
                     </State>   
 
                     <div class="min-width-0">
                         <h1 class="d-flex text-bold f5">
                             <router-link to="/" class="css-truncate css-truncate-target link-gray-dark width-fit">
-                                {{pullRequestProvided().title}}
+                                {{pullRequestProvided().data.title}}
                             </router-link>
-                            <span class="text-gray-light pl-1 no-wrap text-normal">#{{pullRequestProvided().number}}</span>
+                            <span class="text-gray-light pl-1 no-wrap text-normal">#{{pullRequestProvided().data.number}}</span>
                         </h1>
                         <div class="meta text-gray-light css-truncate css-truncate-target d-block width-fit f6">
-                            <router-link to="/" class="text-bold link-gray">{{pullRequestProvided().user && pullRequestProvided().user.login}}</router-link>  opened this pull request
+                            <router-link to="/" class="text-bold link-gray">{{pullRequestProvided().data.user && pullRequestProvided().data.user.login}}</router-link>  opened this pull request
                             <span class="no-wrap">{{createdAt}}</span>
-                            · {{pullRequestProvided().comments}} {{pullRequestProvided().comments > 1 ? 'comments' : 'comment'}}
+                            · {{pullRequestProvided().data.comments}} {{pullRequestProvided().data.comments > 1 ? 'comments' : 'comment'}}
                         </div>
                     </div> 
 
@@ -197,7 +221,6 @@
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
     import {TimelineItem,Comment,HiddenItemLoading,PullRequestCommentCreator,ProjectCard,PullRequestBody,PullRequestBodyEditor} from './components'
     import {IssueNotificationSettingPane,LockIssueButton} from '../../../components'
-    
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
@@ -215,6 +238,7 @@
             return {
                 timelineExtraDataProvided: () => this.timeline.extraData.data,
                 reviewCommentsProvided: () => this.reviewComments.data,
+                pullRequestProvided: () => Object.assign({},this.extraData.data,this.pullRequestProvided().data),
                 commentCreatedHook: () => this.commentCreatedHook,
                 timelineItemDeletedHook: () => this.timelineItemDeletedHook,
                 reviewCommentsReplyHostDeletedHook: () => this.network_getReviewCommentReplies
@@ -382,14 +406,14 @@
                 return this.$route.params.number
             },
             createdAt() {
-                let dateStr = util_dateFormat.getDateDiffOrDateFormatDependOnGap('on dd zzz yyyy', new Date(this.pullRequestProvided().created_at), 1000 * 60 * 60 * 24 * 365)
+                let dateStr = util_dateFormat.getDateDiffOrDateFormatDependOnGap('on dd zzz yyyy', new Date(this.pullRequestProvided().data.created_at), 1000 * 60 * 60 * 24 * 365)
                 return dateStr
             },
             updatedAt() {
-                return util_dateFormat.dateFormat('dd zzz yyyy', new Date(this.pullRequestProvided().updated_at))
+                return util_dateFormat.dateFormat('dd zzz yyyy', new Date(this.pullRequestProvided().data.updated_at))
             },
             viewerCannotComment() {
-                return this.pullRequestProvided().locked && !this.pullRequestProvided().viewerCanUpdate
+                return this.pullRequestProvided().data.locked && !this.extraData.data.viewerCanUpdate
             },
             timelineRemainedCount() {
                 let alreadyCount = 0
@@ -410,7 +434,7 @@
                 return this.timeline.graphqlCount.data - alreadyCount
             },
             editHistory() {
-                return `opened this pull request ${this.createdAt} ${this.pullRequestProvided().userContentEdits && this.pullRequestProvided().userContentEdits.totalCount > 0 ? ' • edited ' + util_dateFormat.getDateDiff(this.pullRequestProvided().userContentEdits.nodes[0].editedAt) : ''}`
+                return `opened this pull request ${this.createdAt} ${this.extraData.data.userContentEdits && this.extraData.data.userContentEdits.totalCount > 0 ? ' • edited ' + util_dateFormat.getDateDiff(this.extraData.data.userContentEdits.nodes[0].editedAt) : ''}`
             },
             newCreatedTimelines() {
                 let allNewCreatedTimelines = [
@@ -452,7 +476,7 @@
 
                 //this.mutation_pullRequestDetailResetState()
 
-                //if(this.accessToken) await this.network_getPullRequestExtraData()
+                if(this.accessToken) await this.network_getPullRequestExtraData()
 
                 //获取timeline(异步)
                 this.network_getTimeline()
@@ -464,7 +488,7 @@
 
                 if(this.accessToken) this.network_getTimelineGraphqlCount()
             },
-           /*  async network_getPullRequestExtraData() {
+            async network_getPullRequestExtraData() {
                 try {
                     this.extraData.loading = true
                     let res = await authRequiredGitHubGraphqlApiQuery(
@@ -480,7 +504,7 @@
                     )
 
                     try{
-                        this.pullRequestProvided() = res.data.data.repository.pullRequest
+                        this.extraData.data = res.data.data.repository.pullRequest
                     }catch(e) {
                         this.handleGraphqlError(res)
                     }
@@ -489,7 +513,7 @@
                 }finally{
                     this.extraData.loading = false
                 }
-            }, */
+            },
             async network_getTimeline() {
                 try{
                     this.timeline.loading = true
@@ -893,7 +917,7 @@
                 this.network_getTimelineExtraData([payload])
             },
             changeLockStatusSuccessPostHandler(payload) {
-                this.pullRequestProvided().locked = payload
+                this.pullRequestProvided().data.locked = payload
             },
             generateRouterMeta() {
                 return this.$route.path

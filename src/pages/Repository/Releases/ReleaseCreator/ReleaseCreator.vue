@@ -25,8 +25,8 @@
                         @input="tagNameInputInputHandler" 
                         :disabled="inputDisabled"
                         type="text" placeholder="Tag version" autocomplete="off" v-model="releaseData.tag_name" class="form-control width-full mr-0">
-                <div v-if="tagIsExisted.loading || tagNameIsInvalid.loading || tagNameAutoCompleteResults.loading" class="position-absolute input-loading-icon-wrapper d-flex flex-justify-end flex-items-center">
-                    <LoadingIcon :size="22" class="mr-1"/>
+                <div v-if="tagNameIsInvalid.loading || tagNameAutoCompleteResults.loading" class="position-absolute input-loading-icon-wrapper d-flex flex-justify-end flex-items-center">
+                    <LoadingIcon :size="21" class="mr-1"/>
                 </div>
                 <div v-if="tagNameAutoCompleteResults.data.length > 0" class="position-absolute autocomplete-results">
                     <AutoCompleteItem @click="() => chooseTheAutoCompleteItem(item)" class="autocomplete-item" v-for="item in tagNameAutoCompleteResults.data" :key="item">{{item}}</AutoCompleteItem>
@@ -35,7 +35,13 @@
 
             <div v-if="!tagIsExisted.data">
                 <button :disabled="!releaseData.target_commitish || tagIsExisted.loading || loading" class="btn mt-2 width-full" @click="() => showModal('PickBranchOrRecentCommitModal')">
-                    <div class="d-flex flex-items-center">
+                    <div v-if="tagIsExisted.loading" class="text-normal text-gray f6 d-flex flex-items-center flex-justify-between" style="margin-right:-16px;margin-left:-4px">
+                        <span class="d-block">
+                            Checking if the tag exists
+                        </span>    
+                         <LoadingIcon :size="21" class="mr-1 d-block"/>
+                    </div>
+                    <div v-else class="d-flex flex-items-center">
                         <svg class="octicon octicon-git-branch mr-1" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122V6A2.5 2.5 0 0110 8.5H6a1 1 0 00-1 1v1.128a2.251 2.251 0 11-1.5 0V5.372a2.25 2.25 0 111.5 0v1.836A2.492 2.492 0 016 7h4a1 1 0 001-1v-.628A2.25 2.25 0 019.5 3.25zM4.25 12a.75.75 0 100 1.5.75.75 0 000-1.5zM3.5 3.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0z"></path></svg>
                         <i>Target:</i>
                         <span class="flex-auto ml-1 text-left">{{releaseData.target_commitish}}</span>
@@ -64,7 +70,7 @@
 
             <textarea v-if="editorTab == 'Write'" 
                         rows="6" 
-                        :disabled="loading"
+                        :disabled="inputDisabled"
                         placeholder="Describe this release"
                         class="mt-3 d-block width-full form-control input-contrast" 
                         v-model="releaseData.body"
@@ -79,8 +85,8 @@
                 <ul v-if="assets.length > 0" class="uploaded-files">
                     <UploadFileItem v-for="item in assets.filter(i => !i.deleted)" :key="item.id" class="border-bottom p-2">
                         <div class="d-flex flex-items-center">
-                            <input :disabled="loadingDeleteAssets.some(i => i.id == item.id)" @change="(e) => network_updateReleaseAsset(item)" v-model="item.name" type="text" class="col-8 text-mono mr-2 form-control bg-white">
-                            <span class="col-2 f6 text-gray flex-shrink-0">
+                            <input :disabled="loadingDeleteAssets.some(i => i.id == item.id)" @change="(e) => network_updateReleaseAsset(item)" v-model="item.name" type="text" class="text-mono mr-2 form-control bg-white" style="width: 66.6%!important;">
+                            <span class="col-2 f6 text-gray flex-shrink-0 no-wrap">
                                 ({{item.size | fileSize}})
                             </span>
                             <div class="col-2 text-right pr-2 flex-shrink-0">
@@ -119,15 +125,21 @@
                 </span>
             </div>
 
-            <div>
-                <button @click="() => network_updateRelease(false)" :disabled="!publishable" class="btn btn-primary">
+            <div v-if="releaseData.draft || !releaseData.id">
+                <button @click="() => network_updateRelease(false)" :disabled="!publishable" class="btn btn-primary mb-2">
                     {{loadingCreatePublishedRelease ? 'Trying...' : 'Publish release'}}
                 </button>
-                <button :disabled="!draftCanBeSaved" @click="() => network_updateRelease(true)" class="btn js-save-draft" type="submit">
+                <button :disabled="!draftCanBeSaved" @click="() => network_updateRelease(true)" class="btn js-save-draft mb-2" type="submit">
                     <span class="js-save-draft-button-state" data-state="default">
                         <LoadingIcon class="v-align-text-bottom" v-if="loadingSaveDraft" :size="16"></LoadingIcon>
                         {{(loadingSaveDraft || loadingUpdateAsset || loadingUpdateAsset) ? 'Saving release...' : (saved ? 'Saved!' : 'Save draft')}}
                     </span>
+                </button>
+            </div>
+
+            <div v-else>
+                <button @click="() => network_updateRelease(false)" :disabled="!publishable" class="btn btn-primary">
+                    {{loadingCreatePublishedRelease ? 'Trying...' : 'Update release'}}
                 </button>
             </div>
 
@@ -338,6 +350,8 @@
 
                     this.releaseData = Object.assign(this.releaseData,res.data)
 
+                    this.network_checkIfTagNameIsExisted()
+
                     await this.network_getDraftReleaseAssets()
                 } catch (e) {
                     this.handleError(e)
@@ -542,6 +556,14 @@
                     )
                     this.releaseData = res.data
                     if(isDraft) this.saved = true
+                    //if(isDraft && !this.$route.params.id) this.$router.replace(`/${this.owner}/${this.repo}/releases/edit/${res.data.id}`)
+                    if(isDraft && !this.$route.params.id){
+                        window.addEventListener(
+                            'beforeunload', 
+                            this.windowBeforeUnloadHandler,
+                            false
+                        );
+                    }
 
                 } catch (error) {
                     this.handleError(e)
@@ -669,7 +691,7 @@
                     if(draft) this.loadingSaveDraft = false
                     if(!draft) {
                         this.loadingCreatePublishedRelease = false
-                        this.$router.push(`/${this.owner}/${this.repo}/releases?new=${this.releaseData.id}`)
+                        location.href = `${location.protocol}//${location.host}/${this.owner}/${this.repo}/releases?new=${this.releaseData.id}`
                     }
                 }
             },
@@ -713,14 +735,26 @@
                 this.$refs.fileInput.value = ""
                 this.$refs.fileInput.type = "file"
             },
+            windowBeforeUnloadHandler(e) {
+                e.returnValue = ' '
+            },
+        },
+        beforeRouteLeave(to,from,next) {
+            if(this.releaseData.id && !this.$route.params.id) {
+                if(confirm('正在编辑，你确定要离开吗?')) {
+                    window.removeEventListener('beforeunload',this.windowBeforeUnloadHandler)
+                    next()
+                }
+                return
+            }
+            window.removeEventListener('beforeunload',this.windowBeforeUnloadHandler)
+            next()
         },
         watch: {
             defaultBranch(newOne) {
                 if(newOne && !this.releaseData.target_commitish) this.releaseData.target_commitish = newOne
             },
-            "releaseData.tag_name": function() {
-                this.network_checkIfTagNameIsExisted()
-            }
+
         },
         components: {
             PaddingPageTopTab,
@@ -798,7 +832,6 @@
 
 .select-menu-text-filter{
     background-color: #f6f8fa;
-    border-bottom: 1px solid #dfe2e5;
     input {
         display: block;
         width: 100%;
