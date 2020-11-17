@@ -1,5 +1,5 @@
 <template>
-    <span class="d-inline-block label css-truncate" :style="{color:fontColor,background:`${color}!important`}">
+    <span class="d-inline-block css-truncate IssueLabel" :style="{color:fontColor,background:`${color}!important`}">
         <span class="css-truncate-target" style="max-width: 100%">{{emojiHandledName}}</span>
     </span>
 </template>
@@ -44,15 +44,6 @@
 
 <style scoped lang="scss">
 @import 'node_modules/@primer/css/truncate/index.scss';
-.label{
-    padding-right: 7px!important;
-    padding-left: 7px!important;
-    padding-top: 0px!important;
-    padding-bottom: 0px!important;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 18px!important;
-    border-radius: 2em!important;
-    box-shadow: inset 0 -1px 0 rgba(27,31,35,.12);
-}
+@import 'node_modules/@primer/css/labels/index.scss';
+
 </style>

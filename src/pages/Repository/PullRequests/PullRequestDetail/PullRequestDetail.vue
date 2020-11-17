@@ -4,14 +4,9 @@
         <IssueHeader :data="data" 
                     class="px-3"
                     :viewerCanUpdate="extraData.data.viewerCanUpdate" 
-                    :issueUpdateFunc="network_updateIssue" 
+                    :issueUpdateFunc="network_updatePullRequest" 
                     type="pullRequest">
-                <State class="flex-shrink-0 mr-2 State pt-1 transition-all" :class="{'State--green':data.state == 'open' && !data.draft || loading,'State--red':data.state == 'closed' && !data.merged,'State--purple':data.merged}" style="text-transform: capitalize; border-radius: 2em; padding: 5px 12px; min-width: 70px;min-height:30px">
-                <IssueIcon v-if="data.number" class="v-align-middle" color="white" :issue="data" issueType="pullRequest"/>
-                <span class="v-align-middle">
-                    {{(data.merged && 'merged') || (data.draft && 'draft') || data.state || '   '}}
-                </span> 
-            </State>
+            <IssueStateBadge :data="data" class="mr-2"></IssueStateBadge>
 
             <Skeleton key="0" v-if="!data.number && loading" class="flex-grow-1">
                 <SkeletonRectangle :height="14" style="width:100%"></SkeletonRectangle>   
@@ -54,7 +49,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {PageTopTab,IssueIcon,SkeletonRectangle,SkeletonCircle,AnimatedHeightWrapper} from '@/components'
-    import {IssueHeader} from '../../Issues/IssueDetail/components'
+    import {IssueHeader,IssueStateBadge} from '../../Issues/IssueDetail/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {
         authRequiredGet,
@@ -72,6 +67,8 @@
             return {
                 number:() => this.number,
                 pullRequestProvided: () => Object.assign({},this.extraData.data,this.data),
+                issue: () => Object.assign({},this.extraData.data,this.data),
+                updatePullRequestFunc: () => this.network_updatePullRequest,
             }
         },
         data() {
@@ -189,7 +186,7 @@
                     this.extraData.loading = false
                 }
             },
-            async network_updateIssue(data) {
+            async network_updatePullRequest(data) {
                 try {
                     let url = api.API_ISSUE({
                         repo: this.repo,
@@ -225,6 +222,7 @@
             IssueHeader,
             PageTopTab,
             IssueIcon,
+            IssueStateBadge,
             SkeletonRectangle,
             SkeletonCircle,
             AnimatedHeightWrapper,

@@ -1,7 +1,7 @@
 <template>
     <Container>
         <div v-if="stretch">
-          <Comment v-for="(item,index) in data.comments" :key="index" :data="item"></Comment>
+            <Comment v-for="(item,index) in data.comments" :key="index" :data="item"></Comment>
         </div>
     
         <SimilarCommentNotice v-else class="similar-notice text-center mt-2 mb-3" :style="{backgroundImage:`url(${bg})`}">
@@ -55,5 +55,4 @@
     background-position: 0;
     background-size: 32px;
 }
-
 </style>

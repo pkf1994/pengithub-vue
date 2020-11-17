@@ -97,7 +97,7 @@
             <PullRequestBodyEditor class="m-3" v-else @cancel="() => triggerShowPullRequestBodyEditor(false)"></PullRequestBodyEditor>
 
             <transition-group tag="div" appear name="fade-group">
-                <div v-for="(item,index) in timeline.data.filter(i => !timeline.newestTimeline.data.some(i_ => i_.node_id == i.node_id))" :key="(item.id || '') + index">
+                <div v-for="(item,index) in handledTimeline" :key="(item.id || '') + index">
                     <TimelineItem @timeline-item-deleted.native.stop="timelineItemDeletedHook" :data="item" class="border-top"/>
                 </div> 
             </transition-group>
@@ -462,7 +462,8 @@
             noMoreTimelineToLoad() {
                 if(!this.timeline.pageInfo.next) return true
                 return this.timeline.restCount.data <= (this.timeline.data.length + this.timeline.newestTimeline.data.length)
-            }
+            },
+           
         },
         created() {
             this.network_getData()

@@ -365,6 +365,15 @@ export const API_ISSUE_REACTIONS = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/reactions?${query}`
 }
 
+export const API_ISSUE_REACTION = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/reactions/${payload.reactionId}`
+
+export const API_ISSUE_COMMENT_REACTION = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.commentId}/reactions/${payload.reactionId}`
+
+export const API_REVIEW_COMMENT_REACTION = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/comments/${payload.commentId}/reactions/${payload.reactionId}`
+
+export const API_COMMIT_COMMENT_REACTION = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/comments/${payload.commentId}/reactions/${payload.reactionId}`
+
+
 export const API_ISSUE_COMMENT_REACTIONS = payload => {
     let query = util_queryParse.querify(payload.params)
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/comments/${payload.commentId}/reactions?${query}`
@@ -373,6 +382,11 @@ export const API_ISSUE_COMMENT_REACTIONS = payload => {
 export const API_PULL_REVIEW_COMMENT_REACTIONS = payload => {
     let query = util_queryParse.querify(payload.params)
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/comments/${payload.comment}/reactions?${query}`
+}
+
+export const API_COMMIT_COMMENT_REACTIONS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/comments/${payload.commentId}/reactions?${query}`
 }
 
 export const API_PROXY_ISSUE_COMMENT_EDIT_HISTORIES = payload => `${PROXY_API_BASE}/_render_node/${payload}/comments/comment_edit_history_log`

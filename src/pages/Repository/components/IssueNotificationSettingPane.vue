@@ -22,7 +22,7 @@
                     But you can still receive notification because you’re watching this repository.     
                 </span>    
                 <span v-if="repoOwnerType == 'Organization'">
-                    And you can't update subscription it at Pengithub. 
+                    And you can't update it at Pengithub. 
                     <HyperlinkWrapper>
                         <a href="https://docs.github.com/en/github/setting-up-and-managing-organizations-and-teams/restricting-access-to-your-organizations-data">
                             Why?

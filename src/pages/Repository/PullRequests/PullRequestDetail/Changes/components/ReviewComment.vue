@@ -87,7 +87,7 @@
     import {authRequiredGitHubGraphqlApiQuery,authRequiredDelete } from '@/network'
     import ClipboardJS from 'clipboard';
     import {Reactions} from '../../components'
-    import {ReviewCommentEditor} from '../../Conversation/components'
+    import {ReviewCommentEditor} from '../../Conversation/components/TimelineItem/components/Review/components'
     import {MinimizePane,UnminimizeButton} from '../../../../components'
     import * as graphql from '../../graphql.js'
     import { mapMutations,mapState } from 'vuex'

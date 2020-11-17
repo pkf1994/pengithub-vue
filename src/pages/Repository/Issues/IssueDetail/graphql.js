@@ -26,7 +26,7 @@ export const GRAPHQL_ISSUE = `
       }  
     `
 
-  export const GRAPHQL_ISSUE_COMMENTS = `
+  export const GRAPHQL_ISSUE_TIMELINE = `
       query($ids:[ID!]!){
         nodes(ids: $ids) {
           ... on IssueComment {
@@ -44,6 +44,12 @@ export const GRAPHQL_ISSUE = `
             }
             authorAssociation
           }
+          ... on CommentDeletedEvent {
+            id
+            deletedCommentAuthor {
+              login
+            }
+          } 
         }
       }
   `
@@ -67,26 +73,6 @@ export const GRAPHQL_ISSUE = `
     `
   }
 
-  export const GRAPHQL_ISSUE_TIMELINE_COUNT = payload => {
-      let graphql = ''
-      payload.timelineTypes.forEach(item => {
-        graphql = `
-          ${graphql}
-          ${item}:timelineItems(itemTypes: ${item}) {
-            totalCount
-          }
-        `
-      })
-      return `
-      {
-        node(id: "${payload.nodeId}") {
-          ... on Issue {
-            ${graphql}
-          }
-        }
-      }
-      `
-  }
 
   export const GRAPHQL_ASSIGNABLE_USERS = `
   query($name:String!,$owner:String!,$after:String){
@@ -210,3 +196,13 @@ mutation ($subjectId:ID!) {
   }
 }
 `
+export const GRAPHQL_ISSUE_TIMELINE_COUNT = 
+`query($itemTypes:[IssueTimelineItemsItemType!],$repo:String!,$owner:String!,$number:Int!){
+  repository(name:$repo,owner:$owner) {
+    issue(number: $number) {
+      timelineItems(itemTypes: $itemTypes) {
+        totalCount
+      }
+    }
+  }
+}`

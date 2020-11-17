@@ -32,6 +32,10 @@
                 type: Object,
                 required: true
             },
+            commentType: {
+                type: String,
+                default: 'issueComment'
+            },
             updateHook: Function
         },
         data() {
@@ -54,7 +58,7 @@
                     if(this.updateHook) {
                         await this.updateHook(this.markdownRaw)
                     } else {
-                         let url = api.API_ISSUE_COMMENT({
+                        let url = api.API_ISSUE_COMMENT({
                             ...this.$route.params,
                             commentId: this.comment.id
                         })

@@ -23,7 +23,7 @@
                         <img :src="item.committer.avatar_url" width="20" height="20" :alt="item.committer.login" class="avatar avatar-user">
                     </ImgWrapper>
                     <Title class="title">
-                        <router-link :to="`/${owner}/${repo}/commits/${item.sha}`">
+                        <router-link :to="`/${owner}/${repo}/commit/${item.sha}`">
                             {{item.commit.message.split('\n\n')[0]}}
                         </router-link>
                     </Title>

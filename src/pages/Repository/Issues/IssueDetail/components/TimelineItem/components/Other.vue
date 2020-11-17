@@ -9,17 +9,23 @@
             <Body class="body">
                 <WhoDidWhat>
                     <router-link v-if="showActor && showActorAvatar" to="/" class="d-inline-block">
-                        <ImgWrapper>
-                            <img :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" class="avatar" height="20" width="20">
+                        <ImgWrapper class="avatar avatar-user">
+                            <img v-if="data.actor" :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" class="avatar" height="20" width="20">
+                            <img v-if="data.author" :src="data.author.avatar_url" :alt="`@${data.author.login}`" class="avatar" height="20" width="20">
                         </ImgWrapper>
                     </router-link>
-                    <router-link v-if="showActor" to="/" class="text-bold link-gray-dark">
+                    <router-link v-if="showActor && data.actor" to="/" class="text-bold link-gray-dark">
                         {{data.actor.login}}
                     </router-link>
+                    <router-link v-else-if="showActor && data.author" to="/" class="text-bold link-gray-dark flex-shrink-0">
+                        {{data.author.login || data.author.name}}
+                    </router-link>
+                    <router-link v-else-if="showActor && data.user" to="/" class="text-bold link-gray-dark flex-shrink-0">
+                        {{data.user.login || data.user.name}}
+                    </router-link>
                     <slot name="action"></slot>
-                    <span class="no-wrap">{{dateStampGap > dataStampGapThreshold ? 'on' : ''}} {{createdAtFormat}}</span>
                 </WhoDidWhat>
-                <slot name="additional">
+                 <slot name="additional">
                 </slot>
             </Body>
         </Inner>
@@ -55,9 +61,6 @@
             }
         },
         computed: {
-            createdAtFormat() {
-                return util_dateFormat.getDateDiffOrDateFormatDependOnGap('dd zzz yyyy', new Date(this.data.created_at), this.dataStampGapThreshold)
-            },
             dateStampGap() {
                 return Date.parse(new Date()) - Date.parse(this.data.created_at)
             }

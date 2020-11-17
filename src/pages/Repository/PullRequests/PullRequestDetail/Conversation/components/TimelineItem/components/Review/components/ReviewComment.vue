@@ -10,18 +10,17 @@
                 {{path}}
             </router-link> 
 
-            <button v-if="outdated" @click="triggerShowOutdated" type="button" class="btn-link text-gray float-right f6 outdated-comment-label show-outdated-button">
-                <svg class="octicon octicon-unfold position-relative mr-1" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.177.677l2.896 2.896a.25.25 0 01-.177.427H8.75v1.25a.75.75 0 01-1.5 0V4H5.104a.25.25 0 01-.177-.427L7.823.677a.25.25 0 01.354 0zM7.25 10.75a.75.75 0 011.5 0V12h2.146a.25.25 0 01.177.427l-2.896 2.896a.25.25 0 01-.354 0l-2.896-2.896A.25.25 0 015.104 12H7.25v-1.25zm-5-2a.75.75 0 000-1.5h-.5a.75.75 0 000 1.5h.5zM6 8a.75.75 0 01-.75.75h-.5a.75.75 0 010-1.5h.5A.75.75 0 016 8zm2.25.75a.75.75 0 000-1.5h-.5a.75.75 0 000 1.5h.5zM12 8a.75.75 0 01-.75.75h-.5a.75.75 0 010-1.5h.5A.75.75 0 0112 8zm2.25.75a.75.75 0 000-1.5h-.5a.75.75 0 000 1.5h.5z"></path></svg>
-                {{showOutdated ? 'Hide' : 'Show'}} outdated
-            </button>
+            <span v-if="outdated" title="Label: Outdated" class="Label Label--yellow ">
+                Outdated
+            </span>
         </FileHeader>
 
-        <div v-if="!outdated || showOutdated ">
-            <DiffView v-if="isRoot" class="diff-view">
+        <div>
+            <DiffView v-if="isRoot" class="diff-view" style="font-size: 0px;">
                 <div :class="{'d-inline-block':!isProseFileType}" style="min-width: 100%;">
                     <LinesNotShown class="text-shadow-light d-flex width-full" v-if="diffHunkEntries.hidden.length > 0 && !showHiddenDiffHunk" @click="triggerShowHiddenDiffHunk">
                         <BlobNum class="blob-num position-sticky bg-white"  style="left:0px" data-line-number="..."></BlobNum>
-                        <BlobNum class="blob-num position-sticky bg-white" style="left:26px" data-line-number="..."></BlobNum>
+                        <BlobNum class="blob-num position-sticky bg-white" style="left:50px" data-line-number="..."></BlobNum>
                         <BlobCode class="blob-code" :class="{'prose': isProseFileType}">{{diffHunkEntries.hidden.length}} lines not shown</BlobCode>
                     </LinesNotShown>
                     <CodeLine v-for="(item,index) in showHiddenDiffHunk ? diffHunkEntries.hidden : []" :key="index + 'hidden'" class="d-flex width-full">
@@ -35,7 +34,7 @@
                                         'blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}"></BlobNum>
 
                         <BlobNum    class="blob-num position-sticky" 
-                                    style="left:26px" 
+                                    style="left:50px" 
                                     :data-line-number="item.additionLineIndex == 0 ? '...' : item.additionLineIndex" 
                                     :class="{'blob-num-addition':item.type === 'addition',
                                             'blob-num-deletion':item.type === 'deletion',
@@ -48,12 +47,12 @@
                                         'blob-code-addition':item.type === 'addition',
                                         'blob-code-deletion':item.type === 'deletion',
                                         'blob-code-context':item.type === 'context',
-                                        'blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}">{{item.code}}</BlobCode>
+                                        'blob-code-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}">{{item.code}}</BlobCode>
                     </CodeLine>
                     <CodeLine v-for="(item,index) in diffHunkEntries.showDefault" :key="index + 'showDefault'" class="d-flex width-full">
                         <BlobNum    class="blob-num position-sticky" 
                                     style="left:0px" 
-                                    :data-line-number="item.deletionLineIndex == 0 ? '...' : item.deletionLineIndex" 
+                                    :data-line-number="index == 0 ? '...' : item.deletionLineIndex" 
                                     :class="{
                                         'blob-num-addition':item.type === 'addition',
                                         'blob-num-deletion':item.type === 'deletion',
@@ -61,8 +60,8 @@
                                         'blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}"></BlobNum>
 
                         <BlobNum    class="blob-num position-sticky" 
-                                    style="left:26px" 
-                                    :data-line-number="item.additionLineIndex == 0 ? '...' : item.additionLineIndex" 
+                                    style="left:50px" 
+                                    :data-line-number="index == 0 ? '...' : item.additionLineIndex" 
                                     :class="{
                                         'blob-num-addition':item.type === 'addition',
                                         'blob-num-deletion':item.type === 'deletion',
@@ -75,7 +74,7 @@
                                         'blob-code-addition':item.type === 'addition',
                                         'blob-code-deletion':item.type === 'deletion',
                                         'blob-code-context':item.type === 'context',
-                                        'blob-num-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}">{{item.code}}</BlobCode>
+                                        'blob-code-hunk':index === 0 && diffHunkEntries.hidden.length === 0 || (diffHunkEntries.deletionStartLineIndex === item.deletionLineIndex && diffHunkEntries.additionStartLineIndex === item.additionLineIndex)}">{{item.code}}</BlobCode>
                     </CodeLine>
                 </div>
             </DiffView>
@@ -85,12 +84,18 @@
                     <WhoDidWhatAt class="d-flex flex-row position-relative">
                         <div class="flex-auto">
                             <router-link :to="`/${reviewComment.user.login}`" class="d-inline-block">
-                                <ImgWrapper>   
-                                    <img class="v-align-top" style="margin-top:2px" :src="reviewComment.user.avatar_url" :alt="`@${reviewComment.user.login}`" width="16" height="16">
+                                <ImgWrapper class="avatar avatar-user mr-2" style="margin-top:2px">   
+                                    <img class="avatar avatar-user v-align-top" style="margin-top:2px" :src="reviewComment.user.avatar_url" :alt="`@${reviewComment.user.login}`" width="28" height="28">
                                 </ImgWrapper>
                             </router-link>
                             <router-link :to="`/${reviewComment.user.login}`" class="f5 text-bold link-gray-dark">{{reviewComment.user.login}}</router-link> 
                             <span class="text-gray"> • {{reviewComment.created_at | getDateDiff}}</span>
+                            <span v-if="pullRequestProvided().user && pullRequestProvided().user.login == reviewComment.user.login" style="font-weight: 500" class="ml-1 timeline-comment-label">
+                                Author
+                            </span>
+                            <span v-if="reviewComment.author_association" style="font-weight: 500" class="ml-1 timeline-comment-label">
+                                {{reviewComment.author_association | capitalize}}
+                            </span>
                         </div>
 
                         <button class="ml-2 height-full" :disabled="loadingDeleteThis" @click="triggerShowPopover" v-if="(extraData.viewerCanUpdate || extraData.viewerCanDelete) && repoOwnerType() == 'User'">
@@ -111,7 +116,17 @@
                     <CommentBody v-html="markdownToHTML" class="markdown-body p-0 pt-2 f5">
                     </CommentBody>
                     
-                    <Reactions class="mt-2" :data="reviewComment.reactions || reactions.data || {}" :disabled="!extraData.viewerCanReact" commentType="reviewComment">
+                    <Reactions  class="mt-3"
+                                style="border:none!important"
+                                :reactionItemStyle="{padding: '0 8px',
+                                                    marginRight: '8px',
+                                                    fontSize: '12px',
+                                                    lineHeight: '26px',
+                                                    border: '1px solid #d2dff0',
+                                                    borderRadius: '6px'}" 
+                                :reactionsHost="reviewComment" 
+                                :viewerCanReact="extraData.viewerCanReact"
+                                reactionsHostType="reviewComment">
                     </Reactions>
                 </div>
 
@@ -128,7 +143,7 @@
     import ReviewCommentEditor from './ReviewCommentEditor'
     import {Popover, ImgWrapper} from '@/components'
     import {mapState,mapMutations} from 'vuex'
-    import {Reactions} from '../../components'
+    import {Reactions} from '../../../../../../../../Issues/IssueDetail/components'
     import * as api from '@/network/api'
     import { authRequiredGitHubGraphqlApiQuery,authRequiredGet,authRequiredDelete} from '@/network'
     import { MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT } from '@/store/modules/pullRequestDetail/mutationTypes'
@@ -182,7 +197,7 @@
                         case '+':
                             diffHunkEntries.push({
                                 type: 'addition',
-                                code: item.substring(1,item.length),
+                                code: '+' + item.substring(1,item.length),
                                 additionLineIndex: addititonLineIndex
                             })
                             addititonLineIndex += 1
@@ -190,7 +205,7 @@
                         case '-':
                             diffHunkEntries.push({
                                 type: 'deletion',
-                                code: item.substring(1,item.length),
+                                code: '-' + item.substring(1,item.length),
                                 deletionLineIndex: deletionLineIndex
                             })
                             deletionLineIndex += 1
@@ -336,6 +351,7 @@
 </script>
 
 <style scoped lang="scss">
+@import 'node_modules/@primer/css/labels/index.scss';
 @import 'node_modules/@primer/css/dropdown/index.scss';
 .deleting{
     opacity: .4;
@@ -365,16 +381,16 @@
 }
 
 .blob-num{
-    min-width: 26px;
-    padding: 2px 3px;
-    font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
     font-size: 12px;
-    line-height: 18px;
+    min-width: 50px;
+    padding: 0px 10px;
+    font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+    line-height: 22px;
     color: rgba(27,31,35,.3);
     text-align: right;
     white-space: nowrap;
     vertical-align: top;
-    flex-shrink: 0
+    flex-shrink: 0;
 }
 
 .blob-num:before {
@@ -382,6 +398,7 @@
 }
 
 .blob-code{
+    font-size: 12px;
     font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
     color: #24292e;
     width: 100%;
@@ -389,8 +406,7 @@
     padding-right: 10px;
     padding-left: 10px;
     word-wrap: normal;
-    font-size: 12px;
-    line-height: 20px;
+    line-height: 22px;
     flex: auto;
     padding-right: 10px;
     padding-left: 10px;
@@ -403,7 +419,10 @@
     background-color: #ffeef0;
 }
 .blob-code-hunk {
-    background-color: #f8f5ff;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    background-color: rgb(241, 248, 255);
+    color: rgba(27, 31, 35, 0.7);
 }
 .blob-num-addition {
     background-color: #cdffd8;
@@ -417,7 +436,10 @@
     background-color: white;
 }
 .blob-num-hunk {
-    background-color: #f8f5ff;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    background-color: rgb(219, 237, 255);
+    
 }
 .reply{
     padding: 10px 15px;
@@ -433,5 +455,16 @@
 
 .prose{
     white-space: pre-wrap;
+}
+
+.timeline-comment-label {
+    display: inline-block;
+    padding: 0 7px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    border-radius: 2em;
+    border: 1px solid transparent;
+    border-color: rgb(225, 228, 232);
 }
 </style>

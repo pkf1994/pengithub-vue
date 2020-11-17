@@ -1,16 +1,16 @@
 <template>
-    <CommonLoadingWrapper :loading="loadingCreateReaction" position="corner" class="position-relative timeline-item transition-all" style="padding-top:16px;padding-bottom:16px">
+    <Container class="position-relative timeline-item transition-all" style="padding-top:16px;padding-bottom:16px">
         <Inner v-if="!commentExtraDataHolder.isMinimized" class="inner bg-white">
-            <Header class="px-3 header text-normal f5" :style="headerStyle">
+            <Header class="px-3 header text-normal f5" :class="{'current-user':viewer.login == data.user.login}" :style="headerStyle">
                 <Action class="action py-2 px-1 ml-2 position-relative" style="align-self:start" @click="showActionPopover">
-                    <svg class="octicon" viewBox="0 0 13 16" version="1.1" width="13" height="16" role="img"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
+                    <svg aria-label="Show options" class="octicon octicon-kebab-horizontal v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" height="16" role="img"><path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
                     <Popover ref="actionPopover" :popoverStyle="popoverStyle">
                         <slot name="actions">
                             <button class="popover-item btn-link dropdown-item" @click.stop="e => e.preventDefault()" v-clipboard:copy="location.href" v-clipboard:success="copyLinkSuccessHook">
                                 Copy link
                             </button>
                             <div  v-if="accessToken">
-                                <button class="popover-item btn-link dropdown-item" @click.stop="quoteReply" v-if="!issueGetter().locked || viewerIsCollaborator().data">
+                                <button class="popover-item btn-link dropdown-item" @click.stop="quoteReply" v-if="!issue().locked || viewerIsCollaborator().data">
                                     Quote reply
                                 </button>
                                 <button class="popover-item btn-link dropdown-item">
@@ -62,7 +62,7 @@
                         </router-link>
                         
                         commented
-                        <span class="no-wrap">{{data.created_at | getDateDiff}}</span>
+                        <span class="no-wrap">{{(data.created_at || data.submitted_at) | getDateDiff}}</span>
 
                         <span v-if="!accessToken || (commentExtraDataHolder.userContentEdits && commentExtraDataHolder.userContentEdits.totalCount > 0)" class="d-inline-block text-gray btn-link" @click="() => showModal('editHistoriesModal')">
                             <span class="d-inline-block text-gray-light">•</span> 
@@ -80,6 +80,7 @@
 
             <CommentEditPane class="comment-create-edit-pane" 
                             @update-comment="updateCommentPostHook"
+                            :commentType="commentType"
                             v-if="editing" 
                             ref="commentEditPane" 
                             :comment="data"
@@ -110,38 +111,8 @@
                     <LoadingIconEx/>
                 </LoadingWrapper> -->
 
-                <Reaction v-if="reactions.data && (commentExtraDataHolder.viewerCanReact || reactions.data.total_count > 0)" class="reactions border-top">
-                    <button class="reaction-item btn-link" :disabled="!commentExtraDataHolder.viewerCanReact" v-if="reactions.data['+1'] || reactions.data['+1'] > 0">
-                        <span class="emoj mr-1 v-align-top">👍</span>        
-                        {{reactions.data['+1'] || reactions.data['+1']}}
-                    </button><button class="reaction-item btn-link" :disabled="!commentExtraDataHolder.viewerCanReact" v-if="reactions.data['-1'] || reactions.data['-1'] > 0">
-                        <span class="emoj mr-1 v-align-top">👎</span>        
-                        {{reactions.data['-1'] || reactions.data['-1']}}
-                    </button><button class="reaction-item btn-link" :disabled="!commentExtraDataHolder.viewerCanReact" v-if="reactions.data['laugh'] > 0">
-                        <span class="emoj mr-1 v-align-top">😄</span>        
-                        {{reactions.data['laugh']}}
-                    </button><button class="reaction-item btn-link" :disabled="!commentExtraDataHolder.viewerCanReact" v-if="reactions.data['hooray'] > 0">
-                        <span class="emoj mr-1 v-align-top">🎉</span>        
-                        {{reactions.data['hooray']}}
-                    </button><button class="reaction-item btn-link" :disabled="!commentExtraDataHolder.viewerCanReact" v-if="reactions.data['confused'] > 0">
-                        <span class="emoj mr-1 v-align-top">😕</span>        
-                        {{reactions.data['confused']}}
-                    </button><button class="reaction-item btn-link" :disabled="!commentExtraDataHolder.viewerCanReact" v-if="reactions.data['heart'] > 0">
-                        <span class="emoj mr-1 v-align-top">❤️</span>        
-                        {{reactions.data['heart']}}
-                    </button><button class="reaction-item btn-link" :disabled="!commentExtraDataHolder.viewerCanReact" v-if="reactions.data['rocket'] > 0">
-                        <span class="emoj mr-1 v-align-top">🚀</span>        
-                        {{reactions.data['rocket']}}
-                    </button><button class="reaction-item btn-link" :disabled="!commentExtraDataHolder.viewerCanReact" v-if="reactions.data['eyes'] > 0">
-                        <span class="emoj mr-1 v-align-top">👀</span>        
-                        {{reactions.data['eyes']}}
-                    </button>
-                    <button class="reaction-item btn-link" :class="{'float-right':reactions.data.total_count > 0}" v-if="commentExtraDataHolder.viewerCanReact" @click="() => showModal('pickReactionModal')">
-                        <svg class="octicon octicon-smiley" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm4.81 12.81a6.72 6.72 0 01-2.17 1.45c-.83.36-1.72.53-2.64.53-.92 0-1.81-.17-2.64-.53-.81-.34-1.55-.83-2.17-1.45a6.773 6.773 0 01-1.45-2.17A6.59 6.59 0 011.21 8c0-.92.17-1.81.53-2.64.34-.81.83-1.55 1.45-2.17.62-.62 1.36-1.11 2.17-1.45A6.59 6.59 0 018 1.21c.92 0 1.81.17 2.64.53.81.34 1.55.83 2.17 1.45.62.62 1.11 1.36 1.45 2.17.36.83.53 1.72.53 2.64 0 .92-.17 1.81-.53 2.64-.34.81-.83 1.55-1.45 2.17zM4 6.8v-.59c0-.66.53-1.19 1.2-1.19h.59c.66 0 1.19.53 1.19 1.19v.59c0 .67-.53 1.2-1.19 1.2H5.2C4.53 8 4 7.47 4 6.8zm5 0v-.59c0-.66.53-1.19 1.2-1.19h.59c.66 0 1.19.53 1.19 1.19v.59c0 .67-.53 1.2-1.19 1.2h-.59C9.53 8 9 7.47 9 6.8zm4 3.2c-.72 1.88-2.91 3-5 3s-4.28-1.13-5-3c-.14-.39.23-1 .66-1h8.59c.41 0 .89.61.75 1z"></path></svg>
-                    </button>
-                </Reaction>
+                <Reactions :reactionsHost="data" :viewerCanReact="commentExtraDataHolder.viewerCanReact" :reactionsHostType="commentType"></Reactions>
 
-                
             </div>
         </Inner>
 
@@ -165,7 +136,7 @@
                                     Copy link
                                 </button>
                                 <div  v-if="accessToken">
-                                    <button class="popover-item btn-link dropdown-item" @click.stop="quoteReply" v-if="!issueGetter().locked || viewerIsCollaborator().data">
+                                    <button class="popover-item btn-link dropdown-item" @click.stop="quoteReply" v-if="!issue().locked || viewerIsCollaborator().data">
                                         Quote reply
                                     </button>
                                     <button class="popover-item btn-link dropdown-item">
@@ -201,8 +172,8 @@
 
             <Main class="p-3" v-else-if="showMinimized ">
                 <router-link class="d-inline-block float-left mt-1" to="/">
-                    <ImgWrapper>
-                            <img    class="avatar" 
+                    <ImgWrapper class="avatar avatar-user">
+                            <img    class="avatar avatar-user" 
                                 :src="data.user && data.user.avatar_url"
                                 height="28" 
                                 width="28" 
@@ -232,13 +203,7 @@
             </Main>
         </Inner>
 
-        <Modal ref="pickReactionModal" :title="reactionPickModalTitle">
-            <div class="d-flex flex-wrap mx-2">
-                <button :disabled="loadingCreateReaction" @mouseenter="reactionPickItemmouseenterHandler" @mouseleave="reactionPickItemmouseleaveHandler" :value="item.content" v-for="item in availableReaction" @click="network_createReaction(item.content)" :key="item.label" class="btn-link col-3 d-flex flex-justify-center flex-items-center no-underline add-reactions-options-item">
-                    {{item.label}}
-                </button>
-            </div>
-        </Modal>
+        <LoadingCover v-if="loadingDeleteThis" class="position-absolute" style="top:0;bottom:0;left:0;right:0;pointer-event:none;background:white;opacity:0.4"></LoadingCover>
 
         <Modal ref="editHistoriesModal" :title="editHistories.loading ? 'Loading edit history...' : `Edited ${editHistories.data.length} ${editHistories.data.length > 1 ? 'times' : 'time'}`" :modalStyle="{maxHeight:'80vh'}" @show="network_getEditHistories">
             <div class="overflow-y-auto position-relative" style="min-height:240px">
@@ -260,23 +225,21 @@
                
             </div> 
         </Modal>
-    </CommonLoadingWrapper>
+    </Container>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_dateFormat} from '@/util'
-    import {CommonLoadingWrapper,LoadingIconEx,AnimatedHeightWrapper,Popover,ImgWrapper,HyperlinkWrapper,SkeletonRectangle,SkeletonCircle,Modal} from '@/components'
     import {util_markdownParse} from '@/util'
-    import {mapState} from 'vuex'
-    import ClipboardJS from 'clipboard';
+    import {LoadingIconEx,AnimatedHeightWrapper,Popover,ImgWrapper,HyperlinkWrapper,SkeletonRectangle,SkeletonCircle,Modal} from '@/components'
     import * as api from '@/network/api'
     import {authRequiredAjax,authRequiredGitHubGraphqlApiQuery,commonGet,authRequiredPost,cancelAndUpdateAxiosCancelTokenSource  } from '@/network'
-    import * as graphql from '../graphql'
+    import * as graphql from './graphql'
     import CommentEditPane from './CommentEditPane'
-    import {MinimizePane} from '../../../components'
+    import Reactions from '../../Reactions'
+    import {MinimizePane} from '../../../../../components'
     export default {
-        inject: ['commentExtraDataProvided','issueGetter','viewerIsCollaborator','graphqlWritePermission'],
+        inject: ['commentExtraDataProvided','issue','viewerIsCollaborator','graphqlWritePermission','timelineItemDeletedHook'],
         data() {
             return {
                 showMinimized: false,
@@ -288,7 +251,7 @@
                     paddingTop: '8px',
                     paddingBottom: '8px',
                 },
-                deleteThisCommentLoading: false,
+                loadingDeleteThis: false,
                 showMinimizePane: false,
                 unminimizeLoading: false,
                 editing: false,
@@ -296,50 +259,6 @@
                     data: [],
                     loading: false
                 },
-                reactions:{
-                    data: undefined,
-                    loading: false
-                },
-                availableReaction: [
-                    {
-                        label: "👍",
-                        content: "+1"
-                    },
-                    {
-                        label: "👎",
-                        content: "-1"
-                    },
-                    {
-                        label: "😄",
-                        content: "laugh"
-                    },
-                    {
-                        label: "🎉",
-                        content: "hooray"
-                    },
-                    {
-                        label: "😕",
-                        content: "confused"
-                    },
-                    {
-                        label: "❤️",
-                        content: "heart"
-                    },
-                    {
-                        label: "🚀",
-                        content: "rocket"
-                    },
-                    {
-                        label: "👀",
-                        content: "eyes"
-                    },
-                ],
-                loadingCreateReaction: false,
-                reactionPickModalTitle: 'Pick your reaction',
-                editHistoryDetailModal: {
-                    data: {},
-                    loading: false
-                }
             }
         },
         props: {
@@ -359,7 +278,10 @@
                 type: Object,
                 required: false
             },
-
+            commentType: {
+                type: String,
+                default: 'issueComment'
+            }
         },
         computed: {
             repo() {
@@ -386,7 +308,7 @@
                 if(this.commentExtraDataHolder.authorAssociation && this.commentExtraDataHolder.authorAssociation !== "NONE"){
                     return this.commentExtraDataHolder.authorAssociation.toLowerCase()
                 }
-                if((this.issueGetter().user && this.issueGetter().user.login) == (this.data.user && this.data.user.login)) return 'author'
+                if((this.issue().user && this.issue().user.login) == (this.data.user && this.data.user.login)) return 'author'
                 return undefined
             },
             dateStampGap() {
@@ -400,21 +322,12 @@
                 return util_markdownParse.markdownToHTML(this.data.body)
             },
         },
-        created() {
-            this.network_getReactions()
-        },
         methods: {
             triggerShowMinimized() {
                 this.showMinimized = !this.showMinimized
             },
             showActionPopover() {
                 this.$refs.actionPopover.show = true
-            },
-            initClipboard() {
-                let clip = new ClipboardJS('#file-detail-copy-btn');
-                clip.on('success',e => {
-                    this.$toast("Clip OK!")
-                })
             },
             quoteReply() {
                 if(!this.data.body) return
@@ -431,34 +344,13 @@
                 this.$emit('quote',(matchResult || '\n') + '>' + quotedMarkdownRaw)
                 
             },
-            async network_getReactions() {
-                try{
-                    this.reactions.loading = true
-                    let url = this.data.url
-                    let res = await authRequiredAjax(
-                        url,
-                        {
-                            headers: {
-                                "Accept":"application/vnd.github.squirrel-girl-preview"
-                            }
-                        },
-                        'get'
-                    )
-
-                    this. reactions.data = res.data.reactions
-                }catch(e) {
-                    console.log(e)
-                }finally{
-                    this.reactions.loading = false
-                }
-            },
             async network_deleteThisComment() {
-                if(this.deleteThisCommentLoading) return
+                if(this.loadingDeleteThis) return
                 let confirmFlag = confirm("Are you sure you want to delete this?")
                 if(confirmFlag) {
                     this.closeModal()
                     try{
-                        this.deleteThisCommentLoading = true
+                        this.loadingDeleteThis = true
                         let url = api.API_ISSUE_COMMENT({
                             ...this.$route.params,
                             commentId: this.data.id
@@ -469,6 +361,8 @@
                             {},
                             'delete'
                         )
+
+                        await this.timelineItemDeletedHook()()
                         
                         this.$el.style.height = getComputedStyle(this.$el).height
                         this.$el.style.overflow = 'hidden'
@@ -477,10 +371,12 @@
                             this.$el.style.paddingTop = '0px'
                             this.$el.style.paddingBottom = '0px'
                         })
+
+                        //let commentDeletedEvent = new CustomEvent('comment-deleted',{bubbles:true,detail:this.data})
                     }catch(e){
                         this.handleError(e)
                     }finally{   
-                        this.deleteThisCommentLoading = false
+                        this.loadingDeleteThis = false
                     }
                 }
             },
@@ -496,38 +392,6 @@
                     this.handleError(e)
                 }finally{
                     this.editHistories.loading = false
-                }
-            },
-            async network_createReaction(content) {
-                this.closeModal()
-                try{
-                    this.loadingCreateReaction = true
-                    let url = api.API_ISSUE_COMMENT_REACTIONS({
-                        repo: this.repo,
-                        owner: this.owner,
-                        commentId: this.data.id
-                    })
-
-                    this.reactions.data[content] += 1
-
-                    await authRequiredPost(
-                        url,
-                        {
-                            content
-                        },
-                        {
-                            headers: {
-                                "accept": "application/vnd.github.squirrel-girl-preview+json"
-                            }
-                        }
-                    )
-                    
-
-                }catch(e) {
-                    this.handleError(e)
-                    this.reactions.data[content] -= 1
-                }finally{
-                    this.loadingCreateReaction = false
                 }
             },
             async network_unminimizeThisComment() {
@@ -575,7 +439,6 @@
             },
             updateCommentPostHook(payload) {
                 this.editing = false
-                console.log(this.editing)
                 this.$emit('update-comment',payload)
             },
             confirmCancel(payload) {
@@ -586,12 +449,6 @@
                         this.triggerEdit(false)
                     }
                 }
-            },
-            reactionPickItemmouseenterHandler(e) {
-                this.reactionPickModalTitle = e.target.value
-            },
-            reactionPickItemmouseleaveHandler(e) {
-                this.reactionPickModalTitle = 'Pick your reaction'
             },
             parseEditHistories(HTML) {
                 let editHistories = []
@@ -633,7 +490,6 @@
             }
         },
         components: {
-            CommonLoadingWrapper,
             LoadingIconEx,
             ImgWrapper,
             AnimatedHeightWrapper,
@@ -644,6 +500,7 @@
             SkeletonCircle,
             Modal,
             MinimizePane,
+            Reactions,
             Container: styled.div``,
             Inner: styled.div``,
             Header: styled.div``,
@@ -657,6 +514,7 @@
             StretchCommentBtn: styled.div``,
             EditHistoryItem: styled.div``,
             Skeleton: styled.div``,
+            LoadingCover: styled.div``,
         }
     }
 </script>
@@ -728,21 +586,6 @@
         height: 120px;
     }
 
-    .reactions{
-        .reaction-item{
-            padding: 9px 15px 7px;
-            line-height: 18px;
-            border-right: 1px solid #e1e4e8;
-        }
-        .emoj{
-            font-family: Apple Color Emoji,Segoe UI,Segoe UI Emoji,Segoe UI Symbol;
-            font-size: 1em;
-            font-style: normal!important;
-            font-weight: 400;
-            line-height: 20px;
-            vertical-align: middle;
-        }
-    }
 }
 
 
@@ -803,17 +646,9 @@ button{
     overflow-y: auto
 }
 
-.add-reactions-options-item {
-    height: 20vw;
-    margin-top: -1px;
-    margin-right: -1px;
-    line-height: 29px;
-    font-size: 16px;
-    border: 1px solid transparent;
-}
-
-.add-reactions-options-item:hover{
-    transform:scale(1.2)
+.current-user {
+    background-color: rgb(241, 248, 255)!important;
+    border-bottom-color: rgba(3, 102, 214, 0.2)!important;
 }
 
 </style>

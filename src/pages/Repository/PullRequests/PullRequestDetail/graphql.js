@@ -66,6 +66,24 @@ export const GRAPHQL_PULL_TIMELINE = `
         }
         authorAssociation
       }
+      ... on CommitComment {
+        id
+        isMinimized
+        minimizedReason
+        viewerCanDelete
+        viewerCanMinimize
+        viewerCanReact
+        viewerCanUpdate
+        viewerCannotUpdateReasons
+        viewerDidAuthor
+        userContentEdits(first:1) {
+          totalCount
+          nodes {
+            editedAt
+          }
+        }
+        authorAssociation
+      }
     }
   }
 `
@@ -408,3 +426,4 @@ export const GRAPHQL_PULL_TIMELINE = `
     }
   }
   `
+

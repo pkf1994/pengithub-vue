@@ -51,10 +51,8 @@
       
         <IssueBody  :data="data"
                     style="padding-top:0px!important;margin-top:16px;"
-                    :headerStyle="{
-                        backgroundColor:'#f1f8ff',
-                        borderBottomColor:'#c0d3eb'}"
                     :extraData="extraData.data" 
+                    :issueUpdateFunc="network_updateIssue"
                     @quote="quoteReply"
                     :loading="extraData.loading"/>
                 
@@ -62,34 +60,31 @@
             <LoadingIconEx/>
         </LoadingTimeline>
 
-        <div v-if="data.id">
-            <transition-group tag="div" appear name="fade">
-                <TimelineItem v-for="(item,index) in handleSimilarCommentTimeline" 
+        <transition-group tag="div" appear name="fade">
+            <TimelineItem v-for="(item,index) in handledTimelines" 
+                    :data="item" :key="(item.id || '') + index"
+                    @comment-deleted.native="commentDeletedHook"
+                    @quote="quoteReply" 
+                    @unminimize-comment="unminimizeCommentPostHook"
+                    @update-comment="updateCommentPostHook"
+                    @minimize-comment="minimizeCommentPostHook"/>
+        </transition-group>
+
+        <LoadMore v-if="timeline.pageInfo.next" :loading="timeline.loading" :dataGetter="network_getTimeline" :hiddenItemCount="timelineRemainedCount"></LoadMore>
+
+        <transition-group tag="div" appear name="fade">
+            <TimelineItem v-for="(item,index) in newCreatedTimelines" 
                         :data="item" :key="(item.id || '') + index"
                         @quote="quoteReply" 
                         @unminimize-comment="unminimizeCommentPostHook"
                         @update-comment="updateCommentPostHook"
                         @minimize-comment="minimizeCommentPostHook"/>
-            </transition-group>
-
-            <LoadMore v-if="timeline.pageInfo.next" :loading="timeline.loading" :dataGetter="network_getTimeline"></LoadMore>
-        </div>  
-
-       
-
-        <transition-group tag="div" appear name="fade">
-            <Comment   v-for="item in createdComments" 
-                        @delete-comment="deleteCommentPostHook"
-                        @minimize-comment="minimizeCommentPostHook"
-                        :data="item" 
-                        :key="item.id" 
-                        @quote="quoteReply"/>
         </transition-group>
 
         <CommentCreatePane class="mb-5 comment-create-edit-pane" 
                         ref="commentEditor"
-                        @create-comment="createIssuePostHook"
-                        @close-issue="closeIssuePostHook"
+                        @comment-created="createCommentPostHook"
+                        @issue-closed="closeIssuePostHook"
                         v-if="data.id"
                         :locked="this.data.locked"
                         :viewerDidAuthor="extraData.data.viewerDidAuthor" 
@@ -182,35 +177,13 @@
                 <svg class="octicon octicon-trashcan" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6z"></path></svg>
                 <strong>Delete issue</strong>
             </div> 
+           <!--  <div class="text-bold link-gray-dark pt-3" @click="() => showModal('deleteIssueModal')" >
+                <svg class="octicon octicon-pin" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4.456.734a1.75 1.75 0 012.826.504l.613 1.327a3.081 3.081 0 002.084 1.707l2.454.584c1.332.317 1.8 1.972.832 2.94L11.06 10l3.72 3.72a.75.75 0 11-1.061 1.06L10 11.06l-2.204 2.205c-.968.968-2.623.5-2.94-.832l-.584-2.454a3.081 3.081 0 00-1.707-2.084l-1.327-.613a1.75 1.75 0 01-.504-2.826L4.456.734zM5.92 1.866a.25.25 0 00-.404-.072L1.794 5.516a.25.25 0 00.072.404l1.328.613A4.582 4.582 0 015.73 9.63l.584 2.454a.25.25 0 00.42.12l5.47-5.47a.25.25 0 00-.12-.42L9.63 5.73a4.581 4.581 0 01-3.098-2.537L5.92 1.866z"></path></svg>
+                <strong>Pin issue</strong>
+            </div>  -->
         </IssueHandle>
 
-        <transition name="fade" appear>
-            <StickyTop v-if="scrollTop > 300 && data.id" class="sticky-top px-3 py-2">
-                <StickyTopContent class="d-flex flex-items-center flex-justify-between">
-                    <State class="State State--green mr-2 d-inline-flex flex-items-center"
-                            :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" 
-                            style="text-transform:capitalize;border-radius: 2em">
-                        <IssueIcon class="flex-shrink-0 mr-1" color="#fff" :issue="data"></IssueIcon>
-                        {{data.state}}
-                    </State>     
-
-                    <div class="min-width-0">
-                        <h1 class="d-flex text-bold f5">
-                            <router-link to="/" class="css-truncate css-truncate-target link-gray-dark width-fit">
-                                {{data.title}}
-                            </router-link>
-                            <span class="text-gray-light pl-1 no-wrap text-normal">#{{data.number}}</span>
-                        </h1>
-                        <div class="meta text-gray-light css-truncate css-truncate-target d-block width-fit f6">
-                            <router-link to="/" class="text-bold link-gray">{{data.user && data.user.login}}</router-link>  opened this issue
-                            <span class="no-wrap">{{data.created_at | dateFormat('dd zzz yyyy')}}</span>
-                            · {{data.comments}} {{data.comments > 1 ? 'comments' : 'comment'}}
-                        </div>
-                    </div> 
-
-                </StickyTopContent>
-            </StickyTop>
-        </transition> 
+        <StickyTop :data="data"></StickyTop>    
         
         <Modal title="Assign up to 10 people to this issue" ref="chooseAssigneesModal" :modalStyle="{height:'80vh'}" @show="network_getAssignableUsers"> 
              <div v-if="chooseAssigneesModal.assignableUsers.loading" class="flex-row-center height-full">
@@ -388,8 +361,9 @@
             SkeletonCircle,
             SkeletonRectangle,
             HiddenItemLoading} from '@/components'
-    import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
-    import {TimelineItem,Comment,IssueBody,ProjectCard,CommentCreatePane,LoadMore,IssueHeader} from './components'
+    import {RouteUpdateAwareMixin} from '@/mixins'
+    import {TimelineItem,IssueBody,ProjectCard,CommentCreatePane,LoadMore,IssueHeader,StickyTop} from './components'
+    import {Comment} from './components/TimelineItem/components'
     import {IssueNotificationSettingPane,LockIssueButton} from '../../components'
     import {util_dateFormat} from '@/util'
     import {
@@ -405,13 +379,14 @@
     export default {
         name: 'issueDetail',
         inject: ['repoBasicInfo','viewerIsCollaborator','repoSubscription'],
-        mixins: [ScrollTopListenerMixin,RouteUpdateAwareMixin],
+        mixins: [RouteUpdateAwareMixin],
         provide() {
             return {
                 deletedCommentsProvided: () => this.deletedComments,
                 commentExtraDataProvided: () => this.timeline.extraData.data,
-                issueGetter: () => Object.assign({},this.data,this.extraData.data),
-                network_updateIssue: () => this.network_updateIssue
+                timelineExtraDataProvided: () => this.timeline.extraData.data,
+                timelineItemDeletedHook: () => this.timelineItemDeletedHook,
+                issue: () => Object.assign({},this.data,this.extraData.data),
             }
         },
         data() {
@@ -431,7 +406,23 @@
                         loading: false
                     },
                     perPage: 20,
-                    pageInfo: {}
+                    pageInfo: {},
+                    newestTimelines: {
+                        data: [],
+                        loading: false
+                    },
+                    restCount: {
+                        data: 0,
+                        loading: false
+                    },
+                    graphqlCount: {
+                        data: 0,
+                        loading: false
+                    },
+                    bufferTimeline: {
+                        data: [],
+                        loading: false
+                    },
                 },
                 timelineTypes: [
                     {
@@ -636,6 +627,86 @@
                     return i.hasIssuesEnabled && i.name != this.$route.params.repo && (i.name.toLowerCase().indexOf(searchQuery) != -1 || (i.description && i.description.toLowerCase().indexOf(searchQuery) != -1))
                 })
             },
+            timelineRemainedCount() {
+                let alreadyCount = 0
+                this.timeline.data.forEach(item => {
+                    if(this.timelineTypes.some(_item => {
+                        return _item.rest == item.event
+                    })){
+                        alreadyCount ++
+                    }
+                })
+                this.timeline.newestTimelines.data.forEach(item => {
+                    if(this.timelineTypes.some(_item => {
+                        return _item.rest == item.event
+                    })){
+                        alreadyCount ++
+                    }
+                })
+                return this.timeline.graphqlCount.data - alreadyCount
+            },
+            handledTimelines() {
+                try{
+                    let timeline = this.timeline.data.filter(i => !this.timeline.newestTimelines.data.some(i_ => i_.created_at == i.created_at))
+
+                    return timeline
+                    /* let handledTimeline = []
+                    let prev
+                    timeline.forEach((i,index) => {
+                        if(prev && prev.event == 'committed' && i.event == 'committed') {
+                           if(handledTimeline[handledTimeline.length - 1] 
+                                    && handledTimeline[handledTimeline.length - 1].event == 'committed-group' ) {
+                                    handledTimeline[handledTimeline.length - 1].commits.push(i)
+                                }else{
+                                     handledTimeline[handledTimeline.length - 1] = {
+                                        ...prev,
+                                        event: 'committed-group',
+                                        commits: [prev,i]
+                                    }
+                                }   
+                                if(handledTimeline[handledTimeline.length - 1].author.name != i.author.name) {
+                                    handledTimeline[handledTimeline.length - 1].moreThanOneAuthor = true
+                                }
+                        }else if(prev 
+                                    && prev.event == 'review_requested' 
+                                    && i.event == 'review_requested'
+                                    && prev.review_requester.login == i.review_requester.login) {
+                            if(handledTimeline[handledTimeline.length - 1] 
+                                && handledTimeline[handledTimeline.length - 1].event == 'review_requested_group' ) {
+                                    handledTimeline[handledTimeline.length - 1].requested_reviewers.push(i.requested_reviewer || i.requested_team)
+                                }else{
+                                     handledTimeline[handledTimeline.length - 1] = {
+                                        ...prev,
+                                        event: 'review_requested_group',
+                                        requested_reviewers: [prev.requested_reviewer || prev.requested_team,i.requested_reviewer || i.requested_team]
+                                    }
+                                }   
+                        }else if(prev 
+                                    && prev.event == 'commented' 
+                                    && i.event == 'commented'
+                                    && prev.user.login == i.user.login
+                                    && prev.body == i.body) {
+                            if(handledTimeline[handledTimeline.length - 1] 
+                                && handledTimeline[handledTimeline.length - 1].event == 'similar_comment' ) {
+                                    handledTimeline[handledTimeline.length - 1].comments.push(i)
+                                }else{
+                                     handledTimeline[handledTimeline.length - 1] = {
+                                        ...prev,
+                                        event: 'similar_comment',
+                                        comments: [prev,i]
+                                    }
+                                }   
+                        }else{
+                            handledTimeline.push(i)
+                        }
+                        prev = i
+                    })
+                    return handledTimeline */
+                }catch(e) {
+                    console.log(e)
+                }
+                
+            },
             handleSimilarCommentTimeline() {
                 let mergedTimelineData = []
                 let lastOne = {}
@@ -665,6 +736,24 @@
                 })
                 return mergedTimelineData
             },
+            newCreatedTimelines() {
+
+                let deDuplicatedAllNewCreatedTimelines = []
+
+                let magicArray = [
+                    ...this.timeline.newestTimelines.data,
+                ]
+                magicArray.forEach(i => {
+                    if(!deDuplicatedAllNewCreatedTimelines.some(i_ => i_.created_at == i.created_at)) {
+                        deDuplicatedAllNewCreatedTimelines.push(i)
+                    }
+                })
+                return deDuplicatedAllNewCreatedTimelines
+            },
+            noMoreTimelineToLoad() {
+                if(!this.timeline.pageInfo.next) return true
+                return this.timeline.restCount.data <= (this.timeline.data.length + this.timeline.newestTimelines.data.length)
+            },
             repoOwnerType() {
                 return this.repoBasicInfo().owner && this.repoBasicInfo().owner.type
             }
@@ -676,6 +765,8 @@
             network_getData() {
                 this.network_getIssueRest()
                 this.network_getTimeline()
+                this.network_getTimelineRestCount()
+                if(this.accessToken) this.network_getTimelineGraphqlCount()
             },
             async network_getIssueRest() {
                 try{
@@ -700,7 +791,6 @@
                     this.data = res_issue.data
                     this.loading = false
                     if(this.accessToken) this.network_getIssueExtraData()
-                    this.titleEditPane.title = res_issue.data.title
                 }catch(e){
                     this.handleError(e)
                     if(e.response && e.response.status == 404) {
@@ -762,9 +852,22 @@
 
                     this.timeline.pageInfo = parse(res_timeline.headers.link) || {}
 
+                    if(this.timeline.bufferTimeline.data.length > 0) {
+                        this.timeline.data = this.timeline.data.concat(this.timeline.bufferTimeline.data)
+                        this.timeline.bufferTimeline.data = []
+                    }
+
                     this.timeline.data = this.timeline.data.concat(res_timeline.data)
 
                     if(this.accessToken) this.network_getTimelineExtraData(res_timeline.data)
+
+                    if(this.timeline.pageInfo.next && this.timeline.pageInfo.next.page == 2) {
+                        await this.network_getNewestTimelines()
+                    }
+
+                    
+
+
 
                 }catch(e){
                     console.log(e)
@@ -777,34 +880,125 @@
                     this.timeline.extraData.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_timeline_extra_data')
 
-                    let comments = []
+                    let timelineIds = []
                     timeline.forEach(item => {
-                        if(item.event === 'commented') {
-                            comments.push(item.node_id)
+                        if(item.event === 'commented' || item.event == 'comment_deleted') {
+                            timelineIds.push(item.node_id)
                         }
                     })
 
-                    let res_issueCommentBodyAndReactions = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.GRAPHQL_ISSUE_COMMENTS,
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_ISSUE_TIMELINE,
                         {
                             cancelToken,
                             variables: {
-                                ids: comments
+                                ids: timelineIds
                             }
                         }
                     )
                   
                     try{
-                        this.timeline.extraData.data = this.timeline.extraData.data.concat(res_issueCommentBodyAndReactions.data.data.nodes)
+                        this.timeline.extraData.data = this.timeline.extraData.data.concat(res.data.data.nodes)
                     }catch(e) {
-                        this.handleGraphqlError(res_issueCommentBodyAndReactions)
+                        this.handleGraphqlError(res)
                     }
 
-                    return res_issueCommentBodyAndReactions.data.data.nodes
+                    return res.data.data.nodes
                 }catch(e) {
                     console.log(e)
                 }finally{   
                     this.timeline.extraData.loading = false
+                }
+            },
+             async network_getNewestTimelines() {
+                if(!this.timeline.pageInfo.last) return
+                 try{ 
+                    this.timeline.newestTimelines.loading = true
+                    let url = this.timeline.pageInfo.last.url
+
+                    let config = {
+                        cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_newest_timelines'),
+                        headers:{
+                            'Accept': 'application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json'
+                        }   
+                    }
+                    
+                    let res = await authRequiredGet(url,config)
+
+                    this.timeline.newestTimelines.data = res.data
+
+                    this.$nextTick(() => {
+                        this.scrollToNewestTimelineItem()
+                    })
+
+                    if(this.timeline.newestTimelines.data.length > 0) this.network_getTimelineExtraData(this.timeline.newestTimelines.data)
+
+                  
+                }catch(e){
+                    this.handleError(e)
+                }finally{
+                    this.timeline.newestTimelines.loading = false
+                }
+            },
+            async network_getTimelineRestCount() {
+                try {
+                    this.timeline.restCount.loading = true
+
+                    let url = api.API_ISSUE_TIMELINE({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number,
+                        params: {
+                            per_page: 1
+                        }
+                    })  
+
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_timeline_rest_count'),
+                                headers: {
+                                "accept": "application/vnd.github.mockingbird-preview"
+                            }
+                        }
+                    )
+
+                    let countHolder = parse(res.headers.link) || {}
+                    this.timeline.restCount.data = countHolder.last ? countHolder.last.page : res.data.length
+                } catch (e) {
+                    console.log(e)
+                } finally {
+                    this.timeline.restCount.loading = false
+                }
+            },
+            async network_getTimelineGraphqlCount() {
+                try{
+                    this.timeline.graphqlCount.loading = true
+
+                    let itemTypes = this.timelineTypes.map(i => i.graphql)
+                    
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_ISSUE_TIMELINE_COUNT,
+                        {
+                            variables: {
+                                itemTypes,
+                                repo: this.repo,
+                                owner: this.owner,
+                                number: parseInt(this.number)
+                            },
+                            cancelToken:this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + '_timeline_graphql_count')
+                        }
+                    )
+                    try{
+                        this.timeline.graphqlCount.data = res.data.data.repository.issue.timelineItems.totalCount
+                    }catch(e) {
+                        this.handleGraphqlError(res)
+                    }
+
+                }catch(e){
+                    console.log(e)
+                }finally{
+                    this.timeline.graphqlCount.loading = false
                 }
             },
             async network_getAssignableUsers() {
@@ -1144,6 +1338,49 @@
                     throw(e)
                 }
             },
+             async network_getBufferTimeline() {
+                try {
+                    this.timeline.bufferTimeline.loading = true
+                    let url = api.API_ISSUE_TIMELINE({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number,
+                        params: {
+                            per_page: 1,
+                            page: this.timeline.data.length
+                        }
+                    })
+
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            headers: {
+                                "accept": "application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json"
+                            }
+                        }
+                    )
+
+                    res.data[0] && this.timeline.bufferTimeline.data.push(res.data[0])
+
+                } catch (e) {
+                    console.log(e)
+                } finally {
+                    this.timeline.bufferTimeline.loading = false
+                }
+            },
+            async timelineItemDeletedHook() {
+                //console.log("commentDeletedHook")
+                if(this.noMoreTimelineToLoad) return
+                await this.network_getBufferTimeline()
+            },
+            scrollToNewestTimelineItem() {
+                if(this.newCreatedTimelineItem) {
+                    setTimeout(() => {
+                        let theEl = document.getElementById(this.newCreatedTimelineItem)
+                        theEl && theEl.scrollIntoView()
+                    },0)
+                }
+            },
             triggerSubscription() {
                 if(this.extraData.data.viewerSubscription == 'SUBSCRIBED') {
                     this.network_setSubscription('UNSUBSCRIBED')
@@ -1163,7 +1400,7 @@
                 commentCreateOrEditPaneTextarea.value = commentCreateOrEditPaneTextarea.value + e
                 commentCreateOrEditPaneTextarea.dispatchEvent(new Event('input'))
             },
-            createIssuePostHook(payload) {
+            createCommentPostHook(payload) {
                 this.createdComments.push(payload)
                 this.network_getTimelineExtraData([{...payload,event:'commented'}])
             },
@@ -1230,6 +1467,7 @@
             SkeletonRectangle,
             IssueNotificationSettingPane,
             LockIssueButton,
+            StickyTop,
             Container: styled.div``,
             TitleEditPane: styled.div``,
             Header: styled.div``,
@@ -1324,17 +1562,6 @@
     
 }
 
-.sticky-top{
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 109;
-    display: block;
-    background-color: #fff;
-    border-bottom: 1px solid rgba(0,0,0,.15);
-}
-
 .label-badge{
     display: inline-block;
     width: 1em;
@@ -1388,6 +1615,5 @@
     position: sticky;
     top: 100%;
 }
-
 
 </style>

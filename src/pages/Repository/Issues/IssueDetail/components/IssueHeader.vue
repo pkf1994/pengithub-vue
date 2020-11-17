@@ -39,20 +39,7 @@
 
         <HeaderMeta class="d-flex mt-2 mb-3 flex-items-center header-meta">
             <slot>
-                <State v-if="!data.state"  class="State State--green mr-2 d-inline-flex flex-items-center"
-                        style="text-transform:capitalize;border-radius: 2em">
-                    <IssueIcon class="flex-shrink-0 mr-1" color="#fff" :issue="data"></IssueIcon>
-                    &nbsp;
-                    &nbsp;
-                    &nbsp;
-                    &nbsp;
-                </State>   
-                <State v-else  class="State State--green mr-2 d-inline-flex flex-items-center"
-                        :class="{'State--green':data.state === 'open','State--red':data.state === 'closed'}" 
-                        style="text-transform:capitalize;border-radius: 2em">
-                    <IssueIcon class="flex-shrink-0 mr-1" color="#fff" :issue="data"></IssueIcon>
-                    {{data.state}}
-                </State>   
+                <IssueStateBadge class="mr-2" :data="data"></IssueStateBadge>  
 
                 <Skeleton v-if="!data.id" class="flex-grow-1">
                     <SkeletonRectangle :height="16" style="width:100%"></SkeletonRectangle>   
@@ -60,7 +47,7 @@
 
                 <MetaContent v-else class="meta-content">
                         <router-link :to="`/${data.user && data.user.login}`" class="text-bold link-gray">{{data.user && data.user.login}}</router-link>
-                        {{data.state == 'open' ? 'opened' : data.state}} this issue
+                        opened this issue
                         <span class="no-wrap">on {{data.created_at | dateFormat('dd zzz yyyy')}}</span>
                         · {{data.comments}} {{data.comments > 1 ? 'comments' : 'comment'}} 
                 </MetaContent>
@@ -70,10 +57,11 @@
 </template>
 <script>
 import styled from 'vue-styled-components'
- import {AnimatedWidthWrapper,
+import {AnimatedWidthWrapper,
         SkeletonCircle,
         IssueIcon,
         SkeletonRectangle} from '@/components'
+import IssueStateBadge from './IssueStateBadge'
 export default {
     props: {
         data: {
@@ -127,6 +115,7 @@ export default {
             SkeletonRectangle,
             IssueIcon,
             AnimatedWidthWrapper,
+            IssueStateBadge,
             Container: styled.div``,
             TitleEditPane: styled.div``,
             Header: styled.div``,

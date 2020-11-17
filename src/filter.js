@@ -3,7 +3,7 @@ import {util_numberFormat,util_dateFormat,util_fileSize,util_markdownParse} from
 Vue.filter('capitalize', function (value) {
     if (!value) return ''
     value = value.toString()
-    return value.charAt(0).toUpperCase() + value.slice(1)
+    return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
 })
 
 Vue.filter('thousands', function (number) {

@@ -1,0 +1,53 @@
+.prose-diff .rich-diff-level-zero.changed {
+    box-shadow: inset 4px 0 0 #f9c513;
+}
+
+.prose-diff .markdown-body>ins {
+    box-shadow: inset 4px 0 0 #2cbe4e;
+}
+
+.prose-diff .rich-diff-level-zero.added>.rich-diff-level-one, .prose-diff .rich-diff-level-zero.changed>.rich-diff-level-one, .prose-diff .rich-diff-level-zero.removed>.rich-diff-level-one {
+    margin-left: 15px;
+}
+
+.prose-diff .markdown-body>del>.rich-diff-level-one, .prose-diff .markdown-body>del>.rich-diff-level-zero, .prose-diff .markdown-body>ins>.rich-diff-level-one, .prose-diff .markdown-body>ins>.rich-diff-level-zero {
+    margin-left: 15px;
+}
+
+.prose-diff .changed .added, .prose-diff .changed ins, .prose-diff .changed ins code, .prose-diff .changed ins pre {
+    background: #e6ffed;
+    border-bottom: 1px solid #2cbe4e;
+}
+
+.prose-diff .changed .removed, .prose-diff .changed .removed>div, .prose-diff .changed .removed code, .prose-diff .changed .removed pre, .prose-diff .changed del, .prose-diff .changed del>div, .prose-diff .changed del code, .prose-diff .changed del pre {
+    color: #cb2431;
+    text-decoration: line-through;
+    background: #ffeef0;
+}
+
+.prose-diff>.markdown-body .added:not(.github-user-del):not(.github-user-ins), .prose-diff>.markdown-body ins+.added:not(.github-user-del):not(.github-user-ins), .prose-diff>.markdown-body ins:not(.github-user-del):not(.github-user-ins) {
+    text-decoration: none;
+}
+
+.prose-diff>.markdown-body .added, .prose-diff>.markdown-body ins, .prose-diff>.markdown-body ins+.added {
+    border-top: 0;
+    border-bottom: 0;
+}
+
+.prose-diff .markdown-body>del, .prose-diff .markdown-body>ins {
+    display: block;
+    border-radius: 0;
+}
+
+.prose-diff .markdown-body>del:first-child *, .prose-diff .markdown-body>ins:first-child * {
+    margin-top: 0;
+}
+
+.prose-diff .rich-diff-level-zero.unchanged, .prose-diff .rich-diff-level-zero.vicinity {
+    margin-left: 15px;
+}
+
+.prose-diff .markdown-body>del {
+    text-decoration: none;
+    box-shadow: inset 4px 0 0 #cb2431;
+}

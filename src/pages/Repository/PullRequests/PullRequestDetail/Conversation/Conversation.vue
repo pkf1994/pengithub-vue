@@ -1,108 +1,34 @@
 <template>
     <CommonLoadingWrapper :loading="pullRequestProvided().loading || timeline.loading || timeline.extraData.loading || reviewComments.loading" 
     :position="pullRequestProvided().loading ? 'center' : 'corner'"
-    class="flex-grow-1">
-            <Header  class="px-3 pt-3">
-                <Skeleton v-if="!pullRequestProvided().title">
-                    <div class="d-flex flex-items-center mt-3 pb-3 border-bottom">
-                        <SkeletonCircle :diameter="32" class="mr-2"></SkeletonCircle>
-                        <SkeletonRectangle :height="14" class="flex-grow-1"></SkeletonRectangle>
-                    </div>
-                    <SkeletonRectangle :height="16" class="ml-6 mt-3"></SkeletonRectangle>
-                    <SkeletonRectangle :height="16" class="mt-3"></SkeletonRectangle>
-                    <SkeletonRectangle :height="16" class="mr-6 my-3"></SkeletonRectangle>
-                </Skeleton>
+    class="flex-grow-1 px-3">
 
-                <div v-else>
-                    <AuthorAndLastEdit class="author-and-last-edit d-flex position-relative">
-                        <div class="flex-auto">
-                            <div class="avatar-parent-child float-left">
-                                <ImgWrapper>
-                                    <img class="avatar" :src="pullRequestProvided().user && pullRequestProvided().user.avatar_url" width="32" height="32" :alt="`@${pullRequestProvided().user && pullRequestProvided().user.login}`">
-                                </ImgWrapper>
-                            </div>
-
-                            <div style="margin-left:42px;">
-                                <router-link :to="`/${pullRequestProvided().user && pullRequestProvided().user.login}`">
-                                    <strong>{{pullRequestProvided().user && pullRequestProvided().user.login}}</strong>
-                                </router-link>  
-                                opened this pull request
-                                <br>
-                                {{pullRequestProvided().created_at | getDateDiff}}
-                            </div>
-                        </div> 
-
-                         <button class="ml-2 height-full" @click="() => showModal('popover')" v-if="extraData.data.viewerCanUpdate && repoOwnerType() == 'User'">
-                            <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
-                        </button>
-
-                        <Popover ref="popover" :popoverStyle="{top: 'calc(100% - 16px)',right: '-4px',paddingTop: '4px',paddingBottom: '4px',width:'120px'}">
-                            <div v-if="extraData.data.viewerCanUpdate" class="dropdown-item" style="font-size:14px" @click="triggerShowPullRequestBodyEditor">
-                                <svg class="octicon octicon-pencil mr-1" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"></path></svg>
-                                Edit
-                            </div>
-                        </Popover>
-                    </AuthorAndLastEdit>
-
-                </div> 
-
-            </Header>
-        
-        <div v-if="pullRequestProvided().node_id">
-
-            <Info  class="pt-3 px-3 bg-white " 
-                v-if="pullRequestProvided().labels && pullRequestProvided().labels.length !== 0"
-                    >
-                <!-- label --> 
-                <div class="pb-3" v-if="pullRequestProvided().labels && pullRequestProvided().labels.length !== 0">
-                    <div class="my-1 f6">Labels</div>    
-                    <router-link to="/" v-for="item in pullRequestProvided().labels" :key="item.name">
-                        <Label  class="mr-1 mt-1"
-                                :style="{height:'18px',fontSize:'10px'}"
-                                :name="item.name"
-                                :color="`#${item.color}`"></Label> 
-                    </router-link>
-                </div> 
-            </Info>
-
-            <PullRequestBody   
-                        v-if="!showPullRequestBodyEditor"
-                        class="bg-white" />
-
-
-            <PullRequestBodyEditor class="m-3" v-else @cancel="() => triggerShowPullRequestBodyEditor(false)"></PullRequestBodyEditor>
+            <IssueBody :data="{...pullRequestProvided(),...pullRequestReactions.data}"
+                    style="padding-top:0px!important;margin-top:16px;"
+                    :extraData="pullRequestProvided()" 
+                    :issueUpdateFunc="updatePullRequestFunc()"
+                    @quote="quoteReply"
+                    :loading="extraData.loading"></IssueBody>
 
             <transition-group tag="div" appear name="fade-group">
-                <div v-for="(item,index) in timeline.data.filter(i => !timeline.newestTimeline.data.some(i_ => i_.node_id == i.node_id))" :key="(item.id || '') + index">
-                    <TimelineItem @timeline-item-deleted.native.stop="timelineItemDeletedHook" :data="item" class="border-top"/>
+                <div v-for="(item,index) in handledTimeline" :key="(item.id || '') + index">
+                    <TimelineItem @timeline-item-deleted.native.stop="timelineItemDeletedHook" :data="item" class=""/>
                 </div> 
             </transition-group>
 
-            <HiddenItemLoading v-if="(timeline.pageInfo.next || timeline.loading) && !noMoreTimelineToLoad"
-                                class="border-top"
-                                :loading="timeline.loading"
-                                :disabled="timeline.bufferTimeline.loading"
-                                :dataGetter="loadingMore">
-                                <p class="timeline-truncation-title" v-if="timelineRemainedCount > 0">
-                                    {{timelineRemainedCount}} items not shown.
-                                </p>
-            </HiddenItemLoading>
-
-           <!--   <transition-group tag="div" appear name="fade-group">
-                <div v-for="(item,index) in timeline.newestTimeline.data" :key="(item.id || '') + index">
-                    <TimelineItem :data="item" class="border-top"/>
-                </div> 
-            </transition-group> -->
+            <LoadMore v-if="(timeline.pageInfo.next || timeline.loading) && !noMoreTimelineToLoad" :disabled="timeline.bufferTimeline.loading" :loading="timeline.loading" :dataGetter="loadingMore" :hiddenItemCount="timelineRemainedCount"></LoadMore>
 
              <transition-group tag="div" appear name="fade-group">
                 <div v-for="(item,index) in newCreatedTimelines" :key="(item.id || '') + index">
-                    <TimelineItem :data="item" class="border-top"/>
+                    <TimelineItem :data="item" />
                 </div> 
             </transition-group>
 
+            <PullMerger v-if="!pullRequestProvided().merged" style="border-top: 2px solid rgb(225, 228, 232)"></PullMerger>
 
-            <MergePull v-if="extraData.data.viewerCanUpdate && pullRequestProvided().merged == false && pullRequestProvided().state == 'open'" >
-                <Header class="header" v-if="extraData.data.id">
+
+            <!-- <MergePull v-if="pullRequestProvided().viewerCanUpdate && pullRequestProvided().merged == false && pullRequestProvided().state == 'open'" >
+                <Header class="header" v-if="pullRequestProvided().id">
                     Merge this pull request
                 </Header>
                 <div v-if="pullRequestProvided().mergeable_state == 'clean'" class="branch-action branch-action-with-icon">
@@ -122,61 +48,33 @@
                         <span>Merge pull request</span>
                     </button>
                 </div> 
-            </MergePull>
+            </MergePull> -->
 
-            <div>
-                <Header class="header">
-                    Comment on pull request
-                </Header>
-                <PullRequestCommentCreator @pull-request-state-changed.native="pullRequestStateChangedHook"
-                        class="m-3">
-                </PullRequestCommentCreator>
-            </div>
+            <CommentCreatePane class="mb-5 comment-create-edit-pane" 
+                    ref="commentEditor"
+                    @comment-created.native.stop="createCommentPostHook"
+                    v-if="pullRequestProvided().id"
+                    :locked="pullRequestProvided().locked"
+                    :viewerDidAuthor="pullRequestProvided().viewerDidAuthor" 
+                    :lockedReason="pullRequestProvided().activeLockReason" ></CommentCreatePane>
 
-            <div v-if="extraData.data.viewerSubscription">
+            <div v-if="pullRequestProvided().viewerSubscription">
                 <Header class="header" >
                     Notifications for this thread
                 </Header>
 
-                <IssueNotificationSettingPane class="p-3" :viewerSubscriptionInfo="extraData.data"></IssueNotificationSettingPane>
+                <IssueNotificationSettingPane class="p-3" :viewerSubscriptionInfo="pullRequestProvided()"></IssueNotificationSettingPane>
             </div> 
 
             <LockIssueButton 
                 @lock-status-changed.native="lockStatusChangedHook"
                 class="p-3 border-top"
-                v-if="extraData.data.viewerCanUpdate" 
+                v-if="pullRequestProvided().viewerCanUpdate" 
                 :issue="pullRequestProvided()" 
                 @lock-status-changed="changeLockStatusSuccessPostHandler"></LockIssueButton>
 
-        </div>
 
-        <transition name="fade" appear>
-            <StickyTop v-if="scrollTop > 300 && !newCreatedTimelineItem" class="sticky-top px-3 py-2">
-                <StickyTopContent class="d-flex flex-items-center flex-justify-between">
-                    <State class="State mr-2 d-inline-flex flex-items-center flex-shrink-0" :class="{'State--green':pullRequestProvided().state === 'open','State--red':pullRequestProvided().state === 'closed'}" style="text-transform:capitalize; border-radius:2em">
-                        <IssueIcon color="#fff" :issue="pullRequestProvided()" class="mr-1"></IssueIcon>
-                        <span style="line-height:auto">
-                            {{pullRequestProvided().state}}
-                        </span>    
-                    </State>   
-
-                    <div class="min-width-0">
-                        <h1 class="d-flex text-bold f5">
-                            <router-link to="/" class="css-truncate css-truncate-target link-gray-dark width-fit">
-                                {{pullRequestProvided().title}}
-                            </router-link>
-                            <span class="text-gray-light pl-1 no-wrap text-normal">#{{pullRequestProvided().number}}</span>
-                        </h1>
-                        <div class="meta text-gray-light css-truncate css-truncate-target d-block width-fit f6">
-                            <router-link to="/" class="text-bold link-gray">{{pullRequestProvided().user && pullRequestProvided().user.login}}</router-link>  opened this pull request
-                            <span class="no-wrap">{{createdAt}}</span>
-                            · {{pullRequestProvided().comments}} {{pullRequestProvided().comments > 1 ? 'comments' : 'comment'}}
-                        </div>
-                    </div> 
-
-                </StickyTopContent>
-            </StickyTop>
-        </transition>     
+        <StickyTop :data="pullRequestProvided()"></StickyTop>     
         
     </CommonLoadingWrapper>
 </template>
@@ -195,9 +93,10 @@
             SkeletonRectangle,
             Popover} from '@/components'
     import {ScrollTopListenerMixin,RouteUpdateAwareMixin} from '@/mixins'
-    import {TimelineItem,Comment,HiddenItemLoading,PullRequestCommentCreator,ProjectCard,PullRequestBody,PullRequestBodyEditor} from './components'
+    import {Comment,HiddenItemLoading,PullRequestCommentCreator,ProjectCard,PullRequestBody,PullMerger} from './components'
+    import TimelineItem from './components/TimelineItem/TimelineItem.vue'
     import {IssueNotificationSettingPane,LockIssueButton} from '../../../components'
-    
+    import {IssueBody,LoadMore,CommentCreatePane,StickyTop} from '../../../Issues/IssueDetail/components'
     import {util_dateFormat} from '@/util'
     import {
         authRequiredGet,
@@ -209,19 +108,23 @@
     var parse = require('parse-link-header');
     export default {
         name: 'pullRequest_detail_conversation',
-        inject: ['pullRequestProvided','repoOwnerType'],
+        inject: ['pullRequestProvided','repoOwnerType','updatePullRequestFunc'],
         mixins: [ScrollTopListenerMixin,RouteUpdateAwareMixin],
         provide() {
             return {
                 timelineExtraDataProvided: () => this.timeline.extraData.data,
+                commentExtraDataProvided: () => this.timeline.extraData.data,
                 reviewCommentsProvided: () => this.reviewComments.data,
-                commentCreatedHook: () => this.commentCreatedHook,
                 timelineItemDeletedHook: () => this.timelineItemDeletedHook,
                 reviewCommentsReplyHostDeletedHook: () => this.network_getReviewCommentReplies
             }
         },
         data() {
             return {
+                pullRequestReactions: {
+                    data: {},
+                    loading: false
+                },
                 extraData: {
                     data: {},
                     loading: false
@@ -248,7 +151,7 @@
                         data: 0,
                         loading: false
                     },
-                    newestTimeline: {
+                    newestTimelines: {
                         data: [],
                         loading: false
                     },
@@ -357,12 +260,19 @@
                         rest:'review_requested',
                     },
                     {
+                        graphql:'HEAD_REF_FORCE_PUSHED_EVENT',
+                        rest:'head_ref_force_pushed',
+                    },
+                    {
                         graphql:'BASE_REF_FORCE_PUSHED_EVENT',
                         rest:'base_ref_force_pushed',
+                    },
+                    {
+                        graphql:'PULL_REQUEST_COMMIT',
+                        rest:'committed',
                     }
                 ],
                 loadingUpdatePullRequestBody: false,
-                showPullRequestBodyEditor: false
             }
         },
        
@@ -395,14 +305,14 @@
                 let alreadyCount = 0
                 this.timeline.data.forEach(item => {
                     if(this.timelineTypes.some(_item => {
-                        return _item.rest === item.event
+                        return _item.rest == item.event
                     })){
                         alreadyCount ++
                     }
                 })
-                this.timeline.newestTimeline.data.forEach(item => {
+                this.timeline.newestTimelines.data.forEach(item => {
                     if(this.timelineTypes.some(_item => {
-                        return _item.rest === item.event
+                        return _item.rest == item.event
                     })){
                         alreadyCount ++
                     }
@@ -422,7 +332,7 @@
                 let deDuplicatedAllNewCreatedTimelines = []
 
                 let magicArray = [
-                    ...this.timeline.newestTimeline.data,
+                    ...this.timeline.newestTimelines.data,
                     ...allNewCreatedTimelines
                 ]
                 magicArray.forEach(i => {
@@ -437,7 +347,69 @@
             },
             noMoreTimelineToLoad() {
                 if(!this.timeline.pageInfo.next) return true
-                return this.timeline.restCount.data <= (this.timeline.data.length + this.timeline.newestTimeline.data.length)
+                return this.timeline.restCount.data <= (this.timeline.data.length + this.timeline.newestTimelines.data.length)
+            },
+            handledTimeline() {
+                try{
+                    let timeline = this.timeline.data.filter(i => !this.timeline.newestTimelines.data.some(i_ => i_.created_at == i.created_at))
+
+                    return timeline
+                    /* let handledTimeline = []
+                    let prev
+                    timeline.forEach((i,index) => {
+                        if(prev && prev.event == 'committed' && i.event == 'committed') {
+                           if(handledTimeline[handledTimeline.length - 1] 
+                                    && handledTimeline[handledTimeline.length - 1].event == 'committed-group' ) {
+                                    handledTimeline[handledTimeline.length - 1].commits.push(i)
+                                }else{
+                                     handledTimeline[handledTimeline.length - 1] = {
+                                        ...prev,
+                                        event: 'committed-group',
+                                        commits: [prev,i]
+                                    }
+                                }   
+                                if(handledTimeline[handledTimeline.length - 1].author.name != i.author.name) {
+                                    handledTimeline[handledTimeline.length - 1].moreThanOneAuthor = true
+                                }
+                        }else if(prev 
+                                    && prev.event == 'review_requested' 
+                                    && i.event == 'review_requested'
+                                    && prev.review_requester.login == i.review_requester.login) {
+                            if(handledTimeline[handledTimeline.length - 1] 
+                                && handledTimeline[handledTimeline.length - 1].event == 'review_requested_group' ) {
+                                    handledTimeline[handledTimeline.length - 1].requested_reviewers.push(i.requested_reviewer || i.requested_team)
+                                }else{
+                                     handledTimeline[handledTimeline.length - 1] = {
+                                        ...prev,
+                                        event: 'review_requested_group',
+                                        requested_reviewers: [prev.requested_reviewer || prev.requested_team,i.requested_reviewer || i.requested_team]
+                                    }
+                                }   
+                        }else if(prev 
+                                    && prev.event == 'commented' 
+                                    && i.event == 'commented'
+                                    && prev.user.login == i.user.login
+                                    && prev.body == i.body) {
+                            if(handledTimeline[handledTimeline.length - 1] 
+                                && handledTimeline[handledTimeline.length - 1].event == 'similar_comment' ) {
+                                    handledTimeline[handledTimeline.length - 1].comments.push(i)
+                                }else{
+                                     handledTimeline[handledTimeline.length - 1] = {
+                                        ...prev,
+                                        event: 'similar_comment',
+                                        comments: [prev,i]
+                                    }
+                                }   
+                        }else{
+                            handledTimeline.push(i)
+                        }
+                        prev = i
+                    })
+                    return handledTimeline */
+                }catch(e) {
+                    console.log(e)
+                }
+                
             }
         },
         created() {
@@ -453,6 +425,8 @@
                 //this.mutation_pullRequestDetailResetState()
 
                 //if(this.accessToken) await this.network_getPullRequestExtraData()
+
+                this.network_getPullRequestReactions()
 
                 //获取timeline(异步)
                 this.network_getTimeline()
@@ -490,6 +464,31 @@
                     this.extraData.loading = false
                 }
             }, */
+            async network_getPullRequestReactions() {
+                try{
+                    //获取基本数据
+                    this.pullRequestReactions.loading = true
+                    let url = api.API_PULLREQUEST({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number
+                    })
+                    let res = await authRequiredGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name),
+                            headers: {
+                                "accept": 'application/vnd.github.squirrel-girl-preview'
+                            }
+                        }
+                    )
+                    this.pullRequestReactions.data = res.data
+                }catch(e){
+                   this.handleError(e)
+                }finally{
+                    this.pullRequestReactions.loading = false
+                }
+            },
             async network_getTimeline() {
                 try{
                     this.timeline.loading = true
@@ -547,7 +546,7 @@
             async network_getNewestTimelines() {
                 if(!this.timeline.pageInfo.last) return
                  try{ 
-                    this.timeline.newestTimeline.loading = true
+                    this.timeline.newestTimelines.loading = true
                     let url = this.timeline.pageInfo.last.url
 
                     let config = {
@@ -559,18 +558,18 @@
                     
                     let res = await authRequiredGet(url,config)
 
-                    this.timeline.newestTimeline.data = res.data
+                    this.timeline.newestTimelines.data = res.data
 
                     this.$nextTick(() => {
                         this.scrollToNewestTimelineItem()
                     })
 
-                    if(this.timeline.newestTimeline.data.length > 0) this.network_getTimelineExtraData(this.timeline.newestTimeline.data)
+                    if(this.timeline.newestTimelines.data.length > 0) this.network_getTimelineExtraData(this.timeline.newestTimelines.data)
 
                 }catch(e){
                     this.handleError(e)
                 }finally{
-                    this.timeline.newestTimeline.loading = false
+                    this.timeline.newestTimelines.loading = false
                 }
             },
             //deprecated
@@ -588,7 +587,7 @@
                     url_pageInfo,
                     {
                         headers: {
-                            "accept": "application/vnd.github.mockingbird-preview"
+                            "accept": "application/vnd.github.mockingbird-preview,application/vnd.github.starfox-preview+json"
                         }
                     }
                 )
@@ -608,11 +607,23 @@
                     }
                 )
 
-                res.data[0] && this.timeline.newestTimeline.data.push(res.data[0])
+                res.data[0] && this.timeline.newestTimelines.data.push(res.data[0])
                 res.data[0] && this.network_getTimelineExtraData(res.data)
             },
             async network_getTimelineExtraData(timeline) {
-                let ids = timeline && timeline.map(i => i.node_id).filter(i => i)
+                let ids = []
+                if(timeline) {
+                    timeline.forEach(i => {
+                        if(i.event == 'commit-commented') {
+                            i.comments && i.comments.forEach(i_ => {
+                                ids.push(i_.node_id)
+                            })
+                        }else{
+                            ids.push(i.node_id)
+                        }
+                    })
+                }
+                ids = ids.filter(i => i)
                 try {
                     this.timeline.extraData.loading = true
                     let res = await authRequiredGitHubGraphqlApiQuery(
@@ -888,9 +899,10 @@
                 if(this.noMoreTimelineToLoad) return
                 await this.network_getBufferTimeline()
             },
-            async commentCreatedHook(payload) {
-                this.timeline.newCreatedTimelinesCreatedAtConversations.push(payload) 
-                this.network_getTimelineExtraData([payload])
+            async createCommentPostHook(e) {
+                console.log(e)
+                this.timeline.newCreatedTimelinesCreatedAtConversations.push(e.detail) 
+                this.network_getTimelineExtraData([e.detail])
             },
             changeLockStatusSuccessPostHandler(payload) {
                 this.pullRequestProvided().locked = payload
@@ -912,16 +924,18 @@
                     },0)
                 }
             },
-            triggerShowPullRequestBodyEditor(flag = true) {
-                this.showPullRequestBodyEditor = flag
-                this.closeModal()
-            },
             lockStatusChangedHook(payload) {
                 this.timeline.newCreatedTimelinesCreatedAtConversations.push(payload.detail)
             },
             pullRequestStateChangedHook(payload) {
                 this.timeline.newCreatedTimelinesCreatedAtConversations.push(payload.detail)
-            }
+            },
+            quoteReply(e) {
+                let commentCreateOrEditPaneTextarea = document.querySelector('textarea')
+                commentCreateOrEditPaneTextarea.focus()
+                commentCreateOrEditPaneTextarea.value = commentCreateOrEditPaneTextarea.value + e
+                commentCreateOrEditPaneTextarea.dispatchEvent(new Event('input'))
+            },
         },
         watch: {
           /*   state_deletedReviewComments(newOne, oldOne) {
@@ -963,7 +977,11 @@
             IssueNotificationSettingPane,
             LockIssueButton,
             Popover,
-            PullRequestBodyEditor,
+            IssueBody,
+            LoadMore,
+            CommentCreatePane,
+            PullMerger,
+            StickyTop,
             Container: styled.div``,
             Header: styled.div``,
             HeaderActions: styled.div``,
@@ -977,7 +995,6 @@
             InfoBottom: styled.div``,
             InfoBottomItem: styled.div``,
             InfoBottomItemTitle: styled.div``,
-            StickyTop: styled.div``,
             StickyTopContent: styled.div``,
             Body: styled.div``,
             Skeleton: styled.div``,
@@ -1137,4 +1154,6 @@
     font-weight: 600;
     color: #586069;
 }
+
+    
 </style>

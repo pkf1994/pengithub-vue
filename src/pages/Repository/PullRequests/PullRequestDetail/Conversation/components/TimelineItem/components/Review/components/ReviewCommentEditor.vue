@@ -12,9 +12,9 @@
     import styled from 'vue-styled-components'
     import {authRequiredPost,authRequiredGitHubGraphqlApiQuery} from '@/network'
     import  * as api from '@/network/api'
-    import * as graphql from '../../graphql.js'
-import { mapMutations } from 'vuex'
-import { MUTATION_PULL_REQUEST_DETAIL_PUSH_UPDATED_REVIEW_COMMENT } from '../../../../../../store/modules/pullRequestDetail/mutationTypes.js'
+    import * as graphql from './graphql.js'
+    import { mapMutations } from 'vuex'
+    import { MUTATION_PULL_REQUEST_DETAIL_PUSH_UPDATED_REVIEW_COMMENT } from '@/store/modules/pullRequestDetail/mutationTypes.js'
     export default {
         inject: ['reviewProvided'],
         props: {

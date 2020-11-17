@@ -1,7 +1,7 @@
 <template> 
     <Container v-show="reviewCommentGroup.length > 0" class="bubble bg-white" style="margin-top:15px" :class="{pending:reviewProvided().state && reviewProvided().state.toLowerCase() == 'pending'}">
         
-        <ReviewComment v-for="(item,index) in reviewCommentGroup" :isRoot="index == 0" :reviewComment="item" :key="item.id"></ReviewComment>
+        <ReviewComment :class="{'border-top':index > 0}" v-for="(item,index) in reviewCommentGroup" :isRoot="index == 0" :reviewComment="item" :key="item.id"></ReviewComment>
 
         <button @click="triggerShowReviewCommentCreator" v-if="!(pullRequestProvided().locked && !viewerIsCollaborator().data) && !showReviewCommentCreator && repoOwnerType() == 'User'" class="border-top reply btn-link text-bold text-left muted-link btn-block">
             Reply...
@@ -16,7 +16,7 @@
     import {mapState} from 'vuex'
     import ReviewComment from './ReviewComment'
     import ReviewCommentCreator from './ReviewCommentCreator'
-    import * as graphql from '../../graphql'
+    import * as graphql from './graphql'
     import { authRequiredGitHubGraphqlApiQuery } from '@/network'
     export default {
         inject: ['reviewCommentsProvided','reviewCommentsOfPendingReview','pullRequestProvided','repoOwnerType','viewerIsCollaborator','reviewProvided'],

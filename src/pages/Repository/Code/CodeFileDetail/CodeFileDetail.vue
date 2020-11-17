@@ -75,6 +75,7 @@
                         <span v-if="contributionMessage.latestCommitStatus !== undefined" class="ml-2">
                             <svg v-if="contributionMessage.latestCommitStatus == 'SUCCESS'" class="octicon octicon-check text-green" viewBox="0 0 16 16" version="1.1" width="16" height="16" role="img"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
                             <svg v-else-if="contributionMessage.latestCommitStatus == 'FAILURE'" class="octicon octicon-x v-align-middle text-red" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
+                            <CommitStatusIcon :sha="contributionMessage.latestCommit.data.sha"></CommitStatusIcon>
                         </span>     
 
                         <router-link :to="`/${owner}/${repo}/commits/${currentRef}/${path}`" class="d-block ml-3 d-flex flex-shrink-0 flex-items-center flex-justify-end text-gray no-wrap">
@@ -212,14 +213,14 @@
     import {Breadcrumb,Modal,SelectMenuItem,LoadingIconEx,CommonLoadingWrapper,AnimatedHeightWrapper,ImgWrapper,Popover,SkeletonCircle,SkeletonRectangle} from '@/components'
     import {Content} from './components'
     import {cancelAndUpdateAxiosCancelTokenSource,authRequiredGitHubGraphqlApiQuery,authRequiredGet,commonGet} from '@/network'
-    import {RouteUpdateAwareMixin,ComponentActiveAwareMixin} from '@/mixins'
-    import {WithRefDistinguishMixin} from '../../components'
+    import {RouteUpdateAwareMixin} from '@/mixins'
+    import {WithRefDistinguishMixin,CommitStatusIcon} from '../../components'
     import * as graphql from '../graphql'
     import * as api from '@/network/api'
     let parse = require('parse-link-header')
     export default {
         name: 'repository_code_file_detail_page',
-        mixins: [RouteUpdateAwareMixin,WithRefDistinguishMixin,ComponentActiveAwareMixin],
+        mixins: [RouteUpdateAwareMixin,WithRefDistinguishMixin],
         inject: ['repoBasicInfo'],
         data() {
             return {
@@ -341,7 +342,6 @@
                     )
 
                     this.contributionMessage.latestCommit.data = res.data[0]
-                    this.network_getLatestCommitStatus()
                 }catch(e) {
                     console.log(e)
                 }finally{
@@ -365,27 +365,6 @@
                     console.log(e)
                 }finally{
                     this.contributionMessage.loading = false
-                }
-            },
-            async network_getLatestCommitStatus() {
-                try{
-                    let url = api.API_PROXY_COMMIT_STATUS({
-                        repo: this.repo,
-                        owner: this.owner,
-                        sha: this.contributionMessage.latestCommit.data.sha
-                    })
-
-                    let res = await commonGet(
-                        url,
-                        {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_latest_commit_status')
-                        }
-                    )
-
-                    if(res.data) this.parseLatestCommitStatus(res.data)
-                   
-                }catch(e) {
-                    console.log(e)
                 }
             },
             async network_tryToGetContentHTML() {
@@ -539,15 +518,6 @@
                 }
                 this.modalContributors.data = contributors
             },
-            parseLatestCommitStatus(HTML) {
-                let failurePattern = /octicon-x/g
-                let successPattern = /octicon-check/g
-                if(HTML.match(failurePattern) != null) {
-                    this.contributionMessage.latestCommitStatus = 'FAILURE'
-                }else if(HTML.match(successPattern) != null) {
-                    this.contributionMessage.latestCommitStatus = 'SUCCESS'
-                }
-            },
             switchModalTab(payload) {
                 this.switchBranchOrTagModalTab = payload
                 this.network_getAvailableRefs()
@@ -685,6 +655,7 @@
             ImgWrapper,
             Popover,
             SkeletonCircle,
+            CommitStatusIcon,
             SkeletonRectangle,
             Container: styled.div``,
             FileNavigation: styled.div``,

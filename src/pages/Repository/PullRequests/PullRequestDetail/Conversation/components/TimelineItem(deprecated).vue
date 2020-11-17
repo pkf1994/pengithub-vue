@@ -1,39 +1,237 @@
 <template>
-        <Comment :propsData="data" v-if="data.event === 'commented'" class="p-3"></Comment>
+        <Comment  v-if="data.event === 'commented'"
+                :data="data"
+                @quote="(payload) => $emit('quote',payload)"
+                @update-comment="payload => $emit('update-comment',payload)"
+                @minimize-comment="(payload) => $emit('minimize-comment',payload)"
+                @unminimize-comment="(payload) => $emit('unminimize-comment',payload)"></Comment>
+
+        
         <!-- review -->
-        <Review v-else-if="data.event === 'reviewed'" :propsData="data"></Review>
-        <!-- committed  -->
-        <SimpleTimelineItem v-else-if="data.event === 'committed'" :data="data" :date="data.committer.date">
+        <Review v-else-if="data.event === 'reviewed'" :reviewTimeline="data"></Review>
+
+        <!-- committed-group  -->
+        <div v-else-if="data.event == 'committed-group'">
+            <Other :data="data" style="padding-bottom: 0!important;">
+                <template v-slot:icon>
+                    <svg class="octicon octicon-repo-push" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1 2.5A2.5 2.5 0 013.5 0h8.75a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V1.5h-8a1 1 0 00-1 1v6.708A2.492 2.492 0 013.5 9h3.25a.75.75 0 010 1.5H3.5a1 1 0 100 2h5.75a.75.75 0 010 1.5H3.5A2.5 2.5 0 011 11.5v-9zm13.23 7.79a.75.75 0 001.06-1.06l-2.505-2.505a.75.75 0 00-1.06 0L9.22 9.229a.75.75 0 001.06 1.061l1.225-1.224v6.184a.75.75 0 001.5 0V9.066l1.224 1.224z"></path></svg>
+                </template>
+                <template v-slot:action>
+                    <span>
+                        <span v-if="data.moreThanOneAuthor">and others&nbsp;</span>    
+                        added sevaral commits
+                        <span class="no-wrap">on {{data.author.date | dateFormat('d zzz yyyy')}}</span> 
+                    </span>    
+                </template>
+            </Other>
+            <Other v-for="item in data.commits" :key="item.id" :data="item" :showActor="false" :badgeStyle="{backgroundColor:'transparent',border:'none'}" style="padding-top:4px!important;padding-bottom:0!important;">
+                <template v-slot:icon>
+                    <svg class="octicon octicon-git-commit bg-white" style="color: #959da5;margin-left: 2px" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10.5 7.75a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm1.43.75a4.002 4.002 0 01-7.86 0H.75a.75.75 0 110-1.5h3.32a4.001 4.001 0 017.86 0h3.32a.75.75 0 110 1.5h-3.32z"></path></svg>
+                </template>
+                <template v-slot:action>
+                    <div class="d-flex flex-auto">
+                        <!-- commit user avatars -->
+                        <CommitAuthorAvatar :url="item.url.replace('/git','')"></CommitAuthorAvatar>
+
+                        <!-- commit message -->
+                        <div class="pr-1 flex-auto min-width-0">
+                            <code>
+                                <router-link :to="`/${owner}/${repo}/${item.sha}`" class="link-gray">{{item.message.split('\n\n')[0]}}</router-link>
+                            </code>
+                            <details v-if="item.message.split('\n\n')[1]">
+                                <summary class="ellipsis-expander ml-1">
+                                    ...
+                                </summary>
+                                <div>
+                                    <code>
+                                        {{item.message.split('\n\n')[1]}}
+                                    </code> 
+                                </div> 
+                            </details> 
+                            
+                        </div> 
+
+                        <!-- commit status -->
+                        <CommitStatusIcon class="flex-shrink-0 mt-1" :sha="item.sha"></CommitStatusIcon>
+
+                        <!-- commit sha -->
+
+                        <div class="text-right no-wrap">
+                            <code>
+                                <router-link class="link-gray" :to="`/${owner}/${repo}/${item.sha}`">{{item.sha.substring(0,7)}}</router-link>
+                            </code>    
+
+                        </div> 
+                    </div> 
+                </template>
+            </Other>
+        </div>
+        
+
+        <!-- committed -->
+        <div v-else-if="data.event == 'committed'" class="TimelineItem TimelineItem--condensed">
+            <div class="TimelineItem-badge">
+                <svg class="octicon octicon-git-commit" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10.5 7.75a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm1.43.75a4.002 4.002 0 01-7.86 0H.75a.75.75 0 110-1.5h3.32a4.001 4.001 0 017.86 0h3.32a.75.75 0 110 1.5h-3.32z"></path></svg>
+            </div> 
+            <div class="TimelineItem-body">
+                <div class="d-flex flex-auto">
+                    <!-- commit user avatars -->
+                    <div class="AvatarStack flex-self-start">
+                        <div class="AvatarStack-body">
+                            <router-link v-if="commit.author && commit.author.avatar_url" :to="`/${commit.author.login}`">
+                                <img height="20" width="20" class="avatar avatar-url" :src="commit.author.avatar_url" :alt="`${commit.author.login}`">
+                            </router-link>
+                            <router-link v-if="commit.committer && commit.committer.avatar_url && commit.author && commit.author.avatar_url && (commit.author.avatar_url != commit.committer.avatar_url)" :to="`/${commit.committer.login}`">
+                                <img height="20" width="20" class="avatar avatar-url" :src="commit.committer.avatar_url" :alt="`${commit.committer.login}`">
+                            </router-link>
+                        </div> 
+                    </div> 
+
+                    <!-- commit message -->
+                    <div class="pr-1 flex-auto min-width-0">
+                        <code>
+                            <router-link :to="`/${owner}/${repo}/${data.sha}`" class="link-gray">{{data.message.split('\n\n')[0]}}</router-link>
+                        </code>
+                        <details v-if="data.message.split('\n\n')[1]">
+                            <summary class="ellipsis-expander ml-1">
+                                ...
+                            </summary>
+                            <div>
+                                <code>
+                                    {{data.message.split('\n\n')[1]}}
+                                </code> 
+                            </div> 
+                        </details> 
+                        
+                    </div> 
+
+                    <!-- commit status -->
+                    <CommitStatusIcon class="flex-shrink-0 mt-1" :sha="data.sha"></CommitStatusIcon>
+
+                    <!-- commit sha -->
+
+                    <div class="text-right no-wrap">
+                        <code>
+                            <router-link class="link-gray" :to="`/${owner}/${repo}/${data.sha}`">{{data.sha.substring(0,7)}}</router-link>
+                        </code>    
+
+                    </div> 
+                </div> 
+            </div> 
+        </div>    
+        
+        <!-- review_requested -->
+        <Other v-else-if="data.event == 'review_requested'" :data="data">
             <template v-slot:icon>
-                <svg class="octicon octicon-repo-push" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 3H3V2h1v1zM3 5h1V4H3v1zm4 0L4 9h2v7h2V9h2L7 5zm4-5H1C.45 0 0 .45 0 1v12c0 .55.45 1 1 1h4v-1H1v-2h4v-1H2V1h9.02L11 10H9v1h2v2H9v1h2c.55 0 1-.45 1-1V1c0-.55-.45-1-1-1z"></path></svg>
+                <svg class="octicon octicon-eye" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.679 7.932c.412-.621 1.242-1.75 2.366-2.717C5.175 4.242 6.527 3.5 8 3.5c1.473 0 2.824.742 3.955 1.715 1.124.967 1.954 2.096 2.366 2.717a.119.119 0 010 .136c-.412.621-1.242 1.75-2.366 2.717C10.825 11.758 9.473 12.5 8 12.5c-1.473 0-2.824-.742-3.955-1.715C2.92 9.818 2.09 8.69 1.679 8.068a.119.119 0 010-.136zM8 2c-1.981 0-3.67.992-4.933 2.078C1.797 5.169.88 6.423.43 7.1a1.619 1.619 0 000 1.798c.45.678 1.367 1.932 2.637 3.024C4.329 13.008 6.019 14 8 14c1.981 0 3.67-.992 4.933-2.078 1.27-1.091 2.187-2.345 2.637-3.023a1.619 1.619 0 000-1.798c-.45-.678-1.367-1.932-2.637-3.023C11.671 2.992 9.981 2 8 2zm0 8a2 2 0 100-4 2 2 0 000 4z"></path></svg>
             </template>
             <template v-slot:action>
-                added a commit
+                requested review from 
+                <strong>{{(data.requested_reviewer && data.requested_reviewer.login) || (data.requested_team && data.requested_team.login)}}</strong>
+                <span class="no-wrap">on {{data.created_at | dateFormat('dd zzz yyyy')}}</span>    
+            </template>
+        </Other>
+
+        <!-- review_requested_group -->
+        <Other v-else-if="data.event == 'review_requested_group'" :data="data">
+            <template v-slot:icon>
+                <svg class="octicon octicon-eye" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.679 7.932c.412-.621 1.242-1.75 2.366-2.717C5.175 4.242 6.527 3.5 8 3.5c1.473 0 2.824.742 3.955 1.715 1.124.967 1.954 2.096 2.366 2.717a.119.119 0 010 .136c-.412.621-1.242 1.75-2.366 2.717C10.825 11.758 9.473 12.5 8 12.5c-1.473 0-2.824-.742-3.955-1.715C2.92 9.818 2.09 8.69 1.679 8.068a.119.119 0 010-.136zM8 2c-1.981 0-3.67.992-4.933 2.078C1.797 5.169.88 6.423.43 7.1a1.619 1.619 0 000 1.798c.45.678 1.367 1.932 2.637 3.024C4.329 13.008 6.019 14 8 14c1.981 0 3.67-.992 4.933-2.078 1.27-1.091 2.187-2.345 2.637-3.023a1.619 1.619 0 000-1.798c-.45-.678-1.367-1.932-2.637-3.023C11.671 2.992 9.981 2 8 2zm0 8a2 2 0 100-4 2 2 0 000 4z"></path></svg>
+            </template>
+            <template v-slot:action>
+                requested review from 
+                <span v-for="(item,index) in data.requested_reviewers" :key="item.login || item.id || item.login">
+                    <strong>{{item.login || item.name}}</strong><span v-if="index < data.requested_reviewers.length - 2">,&nbsp;</span><span v-if="index == data.requested_reviewers.length - 2">&nbsp;and&nbsp;</span> 
+                </span>   
+                <span class="no-wrap">on {{data.created_at | dateFormat('dd zzz yyyy')}}</span>  
+            </template>
+        </Other>
+
+          <!-- cross-referenced (by issue) -->
+        <Other v-else-if="data.event === 'cross-referenced' && (!data.source.issue.pull_request)" :data="data">
+            <template v-slot:icon>
+                <svg class="octicon" :class="{'loading-animation':loading}" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 14.002a.998.998 0 01-.998.998H1.001A1 1 0 010 13.999V13c0-2.633 4-4 4-4s.229-.409 0-1c-.841-.62-.944-1.59-1-4 .173-2.413 1.867-3 3-3s2.827.586 3 3c-.056 2.41-.159 3.38-1 4-.229.59 0 1 0 1s4 1.367 4 4v1.002z"></path></svg>
+            </template>
+            <template v-slot:action>
+                mentioned this pull request
+                <span class="no-wrap">on {{data.created_at | dateFormat('d zzz yyyy')}}</span> 
             </template>
             <template v-slot:additional>
-                <Commit class="py-1 d-flex" style="margin-top:7.5px">
-                    <div class="d-flex">
-                        <AnimatedWidthWrapper class="flex-shrink-0">
-                             <router-link v-if="commit.author && commit.author.avatar_url" :to="`/${commit.author && commit.author.login}`" class="pr-2 d-inline-block">
-                                <ImgWrapper>
-                                    <img class="avatar v-align-top" style="margin-top:2px" width="16" height="16" :src="commit.author && commit.author.avatar_url" :alt="`@${commit.author && commit.author.login}`">
-                                </ImgWrapper>
-                            </router-link>
-                        </AnimatedWidthWrapper>
-                       
-                        <router-link :to="`/${owner()}/${repo()}/commit/${commit.sha}`" class="link-gray" style="word-break: break-word;">
-                            <code>
-                            {{data.message && parseEmoji(data.message.replace(/[\n\r]{2}[\S\s]*/g,''))}}
-                            </code>
-                        </router-link> 
-                    </div> 
-                    
-                    <CommitMeta class="commit-meta flex-grow-1 flex-shrink-0 text-right" >
-                        <CommitStatusIcon :sha="data.sha"></CommitStatusIcon>
-                    </CommitMeta>
-                </Commit>
+                <SourceIssue class="mt-2 d-flex flex-justify-between">
+                    <IssueTitle>
+                        <router-link to="/" class="text-bold f4 link-gray-dark">
+                            {{data.source.issue.title}}
+                            <span class="text-normal text-gray">#{{data.source.issue.number}}</span>
+                        </router-link>
+                    </IssueTitle>
+
+                    <IssueState class="flex-shrink-0 ml-3">
+                        <span class="issue-state State--small  State" :class="{'State--green':data.source.issue.state === 'open','State--red':data.source.issue.state === 'closed'}">
+                            <svg v-if="data.source.issue.state === 'open'" height="14" class="octicon" viewBox="0 0 14 16" version="1.1" width="12" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
+                            <svg v-else height="14" class="octicon octicon-issue-closed" viewBox="0 0 16 16" version="1.1" width="14" aria-hidden="true"><path fill-rule="evenodd" d="M7 10h2v2H7v-2zm2-6H7v5h2V4zm1.5 1.5l-1 1L12 9l4-4.5-1-1L12 7l-1.5-1.5zM8 13.7A5.71 5.71 0 012.3 8c0-3.14 2.56-5.7 5.7-5.7 1.83 0 3.45.88 4.5 2.2l.92-.92A6.947 6.947 0 008 1C4.14 1 1 4.14 1 8s3.14 7 7 7 7-3.14 7-7l-1.52 1.52c-.66 2.41-2.86 4.19-5.48 4.19v-.01z"></path></svg>
+                            {{data.source.issue.state}}
+                        </span>
+                    </IssueState>
+                </SourceIssue>
             </template>
-        </SimpleTimelineItem>
+        </Other>
+
+        <!-- cross-referenced (by pullRequest) -->
+        <Other v-else-if="data.event === 'cross-referenced' && data.source.issue.pull_request" :data="data">
+            <template v-slot:icon>
+                <svg class="octicon" :class="{'loading-animation':loading}" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 14.002a.998.998 0 01-.998.998H1.001A1 1 0 010 13.999V13c0-2.633 4-4 4-4s.229-.409 0-1c-.841-.62-.944-1.59-1-4 .173-2.413 1.867-3 3-3s2.827.586 3 3c-.056 2.41-.159 3.38-1 4-.229.59 0 1 0 1s4 1.367 4 4v1.002z"></path></svg>
+            </template>
+            <template v-slot:action>
+                mentioned this pull request
+                <span class="no-wrap">on {{data.created_at | dateFormat('d zzz yyyy')}}</span> 
+            </template>
+            <template v-slot:additional>
+                <AnimatedHeightWrapper class="mt-2" :stretch="pullRequest.id !== undefined">
+                     <SourceIssue class="d-flex flex-justify-between">
+                        <IssueTitle>
+                            <router-link to="/" class="text-bold f4 link-gray-dark">
+                                {{data.source.issue.title}}
+                                <span class="text-normal text-gray">#{{data.source.issue.number}}</span>
+                            </router-link>
+                        </IssueTitle>
+
+                        <IssueState class="flex-shrink-0 ml-3">
+                            <span class="issue-state State--small  State" :class="{'State--green':pullRequest.state === 'OPEN','State--purple':pullRequest.merged === true,'State--red':(pullRequest.merged === false && pullRequest.state === 'CLOSED')}">
+                                <svg v-if="pullRequest.merged" height="14" class="octicon octicon-git-merge" viewBox="0 0 12 16" version="1.1" width="10" aria-hidden="true"><path fill-rule="evenodd" d="M10 7c-.73 0-1.38.41-1.73 1.02V8C7.22 7.98 6 7.64 5.14 6.98c-.75-.58-1.5-1.61-1.89-2.44A1.993 1.993 0 002 .99C.89.99 0 1.89 0 3a2 2 0 001 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2a1.993 1.993 0 001-3.72V7.67c.67.7 1.44 1.27 2.3 1.69.86.42 2.03.63 2.97.64v-.02c.36.61 1 1.02 1.73 1.02 1.11 0 2-.89 2-2 0-1.11-.89-2-2-2zm-6.8 6c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm8 6c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
+                                <svg v-else height="14" class="octicon octicon-git-pull-request" viewBox="0 0 12 16" version="1.1" width="10" aria-hidden="true"><path fill-rule="evenodd" d="M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0010 15a1.993 1.993 0 001-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v6.56A1.993 1.993 0 002 15a1.993 1.993 0 001-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
+                                {{pullRequest.merged ? 'merged' : pullRequest.state}}
+                            </span>
+                        </IssueState>
+                    </SourceIssue>
+                    
+                    <TaskProgress class="task-progress" v-if="pullRequestTaskProgress">
+                        <svg class="octicon octicon-checklist" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M16 8.5l-6 6-3-3L8.5 10l1.5 1.5L14.5 7 16 8.5zM5.7 12.2l.8.8H2c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h7c.55 0 1 .45 1 1v6.5l-.8-.8c-.39-.39-1.03-.39-1.42 0L5.7 10.8a.996.996 0 000 1.41v-.01zM4 4h5V3H4v1zm0 2h5V5H4v1zm0 2h3V7H4v1zM3 9H2v1h1V9zm0-2H2v1h1V7zm0-2H2v1h1V5zm0-2H2v1h1V3z"></path></svg>
+                        <span class="task-progress-counts">{{pullRequestTaskProgress.checked}} of {{pullRequestTaskProgress.all}} tasks complete</span>
+                        <ProgressBar class="progress-bar v-align-middle">
+                            <span class="progress" :style="{width: pullRequestTaskProgress.checked/pullRequestTaskProgress.all}"></span>
+                        </ProgressBar>
+                    </TaskProgress>
+
+                </AnimatedHeightWrapper>
+            </template>
+        </Other>
+
+        <!-- head_ref_force_pushed -->
+        <Other v-else-if="data.event == 'head_ref_force_pushed'" :data="data">
+            <template v-slot:icon>
+                <svg class="octicon octicon-repo-push" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1 2.5A2.5 2.5 0 013.5 0h8.75a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V1.5h-8a1 1 0 00-1 1v6.708A2.492 2.492 0 013.5 9h3.25a.75.75 0 010 1.5H3.5a1 1 0 100 2h5.75a.75.75 0 010 1.5H3.5A2.5 2.5 0 011 11.5v-9zm13.23 7.79a.75.75 0 001.06-1.06l-2.505-2.505a.75.75 0 00-1.06 0L9.22 9.229a.75.75 0 001.06 1.061l1.225-1.224v6.184a.75.75 0 001.5 0V9.066l1.224 1.224z"></path></svg>
+            </template>
+            <template v-slot:action>
+                force-pushed the 
+                <span class="commit-ref user-select-contain">
+                    <span class="css-truncate-target">
+                        nickmessing:feat-5976
+                    </span>
+                </span>
+                <strong>{{(data.requested_reviewer && data.requested_reviewer.login) || (data.requested_team && data.requested_team.login)}}</strong>
+                <span class="no-wrap">on {{data.created_at | dateFormat('dd zzz yyyy')}}</span>    
+            </template>
+        </Other>
+        
         <!-- commit-commented -->
         <CommitComment v-else-if="data.event === 'commit-commented'" :commitComment="data"></CommitComment>
         <!-- head_ref_deleted  -->
@@ -45,15 +243,6 @@
                 deleted the 
                 <code class="css-truncate css-truncate-target text-bold v-align-middle" style="max-width:165px;font-size:13px">{{headRefName}}</code>
                 branch
-            </template>
-        </SimpleTimelineItem>
-        <!-- head_ref_force_pushed  -->
-        <SimpleTimelineItem v-else-if="data.event === 'head_ref_force_pushed'" :data="data">
-            <template v-slot:icon>
-                <svg class="octicon octicon-repo-push" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 3H3V2h1v1zM3 5h1V4H3v1zm4 0L4 9h2v7h2V9h2L7 5zm4-5H1C.45 0 0 .45 0 1v12c0 .55.45 1 1 1h4v-1H1v-2h4v-1H2V1h9.02L11 10H9v1h2v2H9v1h2c.55 0 1-.45 1-1V1c0-.55-.45-1-1-1z"></path></svg>
-            </template>
-            <template v-slot:action>
-                force pushed changes to this branch
             </template>
         </SimpleTimelineItem>
         <!-- pinned  -->
@@ -163,9 +352,6 @@
                 reopened this
             </template>
         </SimpleTimelineItem>
-        <!-- cross-referenced -->
-        <Referenced v-else-if="data.event === 'cross-referenced'" :data="data">
-        </Referenced>
         <!-- referenced  -->
         <SimpleTimelineItem v-else-if="data.event === 'referenced'" :data="data" :showActorAvatar="false">
             <template v-slot:icon>
@@ -341,16 +527,7 @@
         </SimpleTimelineItem>
         
 
-        <!-- review_requested  -->
-        <SimpleTimelineItem v-else-if="data.event === 'review_requested'" :data="data">
-            <template v-slot:icon>
-                <svg class="octicon octicon-eye" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"></path></svg>
-            </template>
-            <template v-slot:action>
-                requested review from 
-                <strong>{{data.requested_reviewer ? data.requested_reviewer.login : data.requested_team.login}}</strong>
-            </template>
-        </SimpleTimelineItem>
+    
 
         <!-- base_ref_force_pushed  -->
         <SimpleTimelineItem v-else-if="data.event === 'base_ref_force_pushed'" :data="data">
@@ -407,14 +584,14 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import Comment from './Comment'
+    import {Comment,Other} from '../../../../Issues/IssueDetail/components'
     import SimpleTimelineItem from './SimpleTimelineItem'
-    import Referenced from './Referenced'
     import Review from './Review'
     import {util_emoji} from '@/util'
     import {Label,AnimatedHeightWrapper,AnimatedWidthWrapper,ImgWrapper} from '@/components'
     import {CommitStatusIcon} from '../../../../components'
     import CommitComment from './CommitComment.vue'
+    import CommitAuthorAvatar from './CommitAuthorAvatar.vue'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
     export default {
         inject: ['owner','repo','pullRequestProvided'],
@@ -432,14 +609,22 @@
                 loading: false,
                 project: {}, //adde_to_proj
                 lockReason: '', //locked
-                commit: {}, // referenced closed committed
+                commit: {}, // referenced closed committed 
+                commits: {}, // committed-group
                 transferredFrom: '', //transferred
                 blockedUser: {}, //user blocked
                 commitStatus: undefined, //committed
                 headRefName: '', //HeadRefDeletedEvent
+                showCommitMessageBody: false
             }
         },
         computed: {
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
             issueNumber() {
                 return this.$route.params.number
             },
@@ -501,7 +686,6 @@
                         case "closed":
                         case "committed":
                             await this.getRelevantCommit()
-                           
                             break
                         case "transferred":
                             await this.getTransferredFrom()
@@ -525,8 +709,8 @@
                     this.loading = false
                 }
             },
-            async getRelevantCommit() {
-                let url = this.data.commit_url || this.data.url
+            async getRelevantCommit(urlField) {
+                let url = urlField || this.data.commit_url || this.data.url
                 if(!url) return
                 this.loading = true
                 let res = await authRequiredGet(
@@ -534,6 +718,9 @@
                 )
                 this.commit = res.data
                 this.loading = false
+            },
+            async getCommitForcePushTo() {
+
             },
             /* async getRelevantPullRequest() {
                 this.loading = true
@@ -661,22 +848,25 @@
                     console.log(e)
                 }
             },
-           
+            triggerShowCommitMessageBody() {
+                this.showCommitMessageBody = !this.showCommitMessageBody
+            },
             parseEmoji(raw) {
                 return util_emoji.parse(raw)
             }
         },
         components: {
             Comment,
+            Other,
             SimpleTimelineItem,
             Label,
             AnimatedHeightWrapper,
             ImgWrapper,
-            Referenced,
             Review,
             CommitComment,
             AnimatedWidthWrapper,
             CommitStatusIcon,
+            CommitAuthorAvatar,
             CommentWrapper: styled.div``,
             SourceIssue: styled.div``,
             IssueTitle: styled.div``,
@@ -692,6 +882,12 @@
 
 <style scoped lang='scss'>
 @import 'node_modules/@primer/css/avatars/index.scss';
+@import 'node_modules/@primer/css/timeline/index.scss';
+@import 'node_modules/@primer/css/truncate/index.scss';
+.avatar{
+    border-radius: 50%!important;
+}
+
 .issue-state{
     text-transform: Capitalize
 }
@@ -746,6 +942,21 @@
     100%{
         opacity: 0;
     }
+}
+
+summary::-webkit-details-marker {
+    display: none;
+}
+
+.commit-ref {
+    position: relative;
+    display: inline-block;
+    padding: 0 5px;
+    font: .75em/2 SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+    color:rgba(27, 31, 35, 0.6);
+    white-space: nowrap;
+    background-color: #eff7ff;
+    border-radius: 6px;
 }
 
 </style>

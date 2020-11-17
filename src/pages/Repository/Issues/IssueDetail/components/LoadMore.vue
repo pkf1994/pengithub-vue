@@ -1,7 +1,11 @@
 <template>
     <Container class="text-center container my-4">
         <Main class="d-inline-flex flex-column Box">
+            <button v-if="hiddenItemCount && hiddenItemCount > 0" :disabled="disabled" @click="dataGetter" class="text-gray pt-2 pb-0 px-4 bg-white border-0">
+                {{hiddenItemCount}} hidden items
+            </button>
             <button class="ajax-pagination-btn no-underline py-1 px-4 my-1 bg-white border-0"
+                    :disabled="disabled"
                     :class="{'loading-animation':loading}"
                     @click="dataGetter">
                 {{loading ? 'Loading...' : 'Load more'}}
@@ -14,7 +18,15 @@
     import styled from 'vue-styled-components'
     export default {
         props: {
+            hiddenItemCount: {
+                type: Number,
+                required: false
+            },
             loading: {
+                type: Boolean,
+                default: false
+            },
+            disabled: {
                 type: Boolean,
                 default: false
             },

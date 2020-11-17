@@ -200,10 +200,6 @@
                     data: [],
                     loading: false
                 },
-                status: {
-                    data: undefined,
-                    loading: false
-                },
                 extraData: {
                     data: {},
                     loading: false
@@ -294,9 +290,8 @@
             this.network_getData()
         },
         methods: {
-            network_getData() {
+            async network_getData() {
                 this.network_getBasicData()
-                this.network_getCommitStatus()
                 this.network_getAssociatedBranchAndTags()
             },
             async network_getBasicData() {
@@ -325,29 +320,6 @@
                     this.handleError(e)
                 }finally{
                     this.loading = false
-                }
-            },
-            async network_getCommitStatus() {
-                try {
-                    this.status.loading = true
-                    let url = api.API_PROXY_COMMIT_STATUS({
-                        repo: this.repo,
-                        owner: this.owner,
-                        sha: this.sha
-                    })
-
-                    let res = await commonGet(
-                        url,
-                        {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_commit_status')
-                        }
-                    )
-
-                    this.parseCommitStatus(res.data)
-                } catch (e) {
-                    console.log(e)
-                }finally{
-                    this.status.loading = false
                 }
             },
             async network_getAssociatedBranchAndTags() {
@@ -452,15 +424,6 @@
                     console.log(e)
                 }finally{
                     this.comments.loading = false
-                }
-            },
-            parseCommitStatus(HTML) {
-                let failurePattern = /octicon-x/g
-                let successPattern = /octicon-check/g
-                if(HTML.match(failurePattern) != null) {
-                    this.status.data = 'FAILURE'
-                }else if(HTML.match(successPattern) != null) {
-                    this.status.data = 'SUCCESS'
                 }
             },
             parseAssociatedRefs(HTML) {

@@ -6,6 +6,7 @@ import Diff from './Diff.vue'
 import IssueNotificationSettingPane from './IssueNotificationSettingPane.vue'
 import LockIssueButton from './LockIssueButton.vue'
 import CommitStatusIcon from './CommitStatusIcon.vue'
+import CommitAuthorAvatar from './CommitAuthorAvatar.vue'
 import MinimizePane from './MinimizePane.vue'
 import UnminimizeButton from './UnminimizeButton.vue'
 import CommentDeleteButton from './CommentDeleteButton.vue'
@@ -18,6 +19,7 @@ export {RepositoryTabViewMixin,
         IssueNotificationSettingPane,
         LockIssueButton,
         CommitStatusIcon,
+        CommitAuthorAvatar,
         MinimizePane,
         UnminimizeButton,
         CommentDeleteButton}

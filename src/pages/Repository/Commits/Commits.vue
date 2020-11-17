@@ -161,7 +161,7 @@
                     this.data = res.data
                     this.pageInfo = parse(res.headers.link) || {}
 
-                    if(this.accessToken) this.network_getGraphqlData(this.data)
+                    //if(this.accessToken) this.network_getGraphqlData(this.data)
                     
                     this.firstLoadedFlag = true
                 }catch(e) {
