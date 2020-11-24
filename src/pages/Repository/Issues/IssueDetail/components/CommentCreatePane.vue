@@ -65,7 +65,7 @@
 
                     this.markdownRaw = ''
 
-                    let event = new CustomEvent('comment-created',{bubbles:true,detail:res.data})
+                    let event = new CustomEvent('comment-created',{bubbles:true,detail:{...res.data,event:'commented'}})
                     this.$el.dispatchEvent(event)
 
                 }catch(e) {

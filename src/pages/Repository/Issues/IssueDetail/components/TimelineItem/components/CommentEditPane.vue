@@ -26,7 +26,6 @@
     import * as api from '@/network/api'
     export default {
         name: 'repository_issue_comment_edit_pane',
-        inject: ['issueGetter'],
         props: {
             comment: {
                 type: Object,

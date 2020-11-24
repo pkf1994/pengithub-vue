@@ -58,6 +58,7 @@ export const API_ISSUE = (payload) => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}`
 }
 
-export const API_ISSUE_TIMELINE = (payload) => {
-    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/timeline`
+export const API_ISSUE_TIMELINES = (payload) => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/timeline?${query}`
 }

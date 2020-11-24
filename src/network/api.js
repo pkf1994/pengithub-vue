@@ -189,11 +189,16 @@ export const API_GIT_MATCHING_REFS = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/matching-refs/${payload.ref}?${query}`
 }
 
+export const API_REPOSITORY_ISSUES = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues?${query}`
+}
+
 export const API_ISSUE = (payload) => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}`
 }
 
-export const API_ISSUE_TIMELINE = (payload) => {
+export const API_ISSUE_TIMELINES = (payload) => {
     let query = util_queryParse.querify(payload.params)
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/timeline?${query}`
 }
@@ -407,7 +412,7 @@ export const API_PROXY_PULSE_DIFF_STATUS_SUMMARY = payload => {
 }
 
 
-export const API_STAR_OR_NOT_REPOSITORY = payload => `${GITHUB_REST_API_BASE}/user/starred/${payload.owner}/${payload.repo}`
+export const API_STAR_OR_NOT_REPOSITORY = payload => `${GITHUB_REST_API_BASE}/user/starred/${payload.owner}   ${payload.repo}`
 
 export const API_BLOCK_USER_OR_NOT = payload => `${GITHUB_REST_API_BASE}/user/blocks/${payload}`
 
@@ -434,3 +439,10 @@ export const API_COMMITS_OF_PULL_REQUEST = payload => {
 
 
 export const API_PROXY_TAGS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/tags?q=${payload.query}`
+
+export const API_ISSUE_AVAILABLE_ASSIGNEES = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/assignees?${query}`
+}
+
+export const API_ISSUE_ASSIGNEES_ACTION = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/assignees`

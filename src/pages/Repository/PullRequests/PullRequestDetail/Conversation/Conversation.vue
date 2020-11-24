@@ -24,7 +24,7 @@
                 </div> 
             </transition-group>
 
-            <PullMerger v-if="!pullRequestProvided().merged" style="border-top: 2px solid rgb(225, 228, 232)"></PullMerger>
+            <PullMerger v-if="pullRequestProvided().id && !pullRequestProvided().merged" style="border-top: 2px solid rgb(225, 228, 232)"></PullMerger>
 
 
             <!-- <MergePull v-if="pullRequestProvided().viewerCanUpdate && pullRequestProvided().merged == false && pullRequestProvided().state == 'open'" >
@@ -291,16 +291,6 @@
             number() {
                 return this.$route.params.number
             },
-            createdAt() {
-                let dateStr = util_dateFormat.getDateDiffOrDateFormatDependOnGap('on dd zzz yyyy', new Date(this.pullRequestProvided().created_at), 1000 * 60 * 60 * 24 * 365)
-                return dateStr
-            },
-            updatedAt() {
-                return util_dateFormat.dateFormat('dd zzz yyyy', new Date(this.pullRequestProvided().updated_at))
-            },
-            viewerCannotComment() {
-                return this.pullRequestProvided().locked && !this.pullRequestProvided().viewerCanUpdate
-            },
             timelineRemainedCount() {
                 let alreadyCount = 0
                 this.timeline.data.forEach(item => {
@@ -318,9 +308,6 @@
                     }
                 })
                 return this.timeline.graphqlCount.data - alreadyCount
-            },
-            editHistory() {
-                return `opened this pull request ${this.createdAt} ${this.pullRequestProvided().userContentEdits && this.pullRequestProvided().userContentEdits.totalCount > 0 ? ' • edited ' + util_dateFormat.getDateDiff(this.pullRequestProvided().userContentEdits.nodes[0].editedAt) : ''}`
             },
             newCreatedTimelines() {
                 let allNewCreatedTimelines = [
@@ -352,60 +339,7 @@
             handledTimeline() {
                 try{
                     let timeline = this.timeline.data.filter(i => !this.timeline.newestTimelines.data.some(i_ => i_.created_at == i.created_at))
-
                     return timeline
-                    /* let handledTimeline = []
-                    let prev
-                    timeline.forEach((i,index) => {
-                        if(prev && prev.event == 'committed' && i.event == 'committed') {
-                           if(handledTimeline[handledTimeline.length - 1] 
-                                    && handledTimeline[handledTimeline.length - 1].event == 'committed-group' ) {
-                                    handledTimeline[handledTimeline.length - 1].commits.push(i)
-                                }else{
-                                     handledTimeline[handledTimeline.length - 1] = {
-                                        ...prev,
-                                        event: 'committed-group',
-                                        commits: [prev,i]
-                                    }
-                                }   
-                                if(handledTimeline[handledTimeline.length - 1].author.name != i.author.name) {
-                                    handledTimeline[handledTimeline.length - 1].moreThanOneAuthor = true
-                                }
-                        }else if(prev 
-                                    && prev.event == 'review_requested' 
-                                    && i.event == 'review_requested'
-                                    && prev.review_requester.login == i.review_requester.login) {
-                            if(handledTimeline[handledTimeline.length - 1] 
-                                && handledTimeline[handledTimeline.length - 1].event == 'review_requested_group' ) {
-                                    handledTimeline[handledTimeline.length - 1].requested_reviewers.push(i.requested_reviewer || i.requested_team)
-                                }else{
-                                     handledTimeline[handledTimeline.length - 1] = {
-                                        ...prev,
-                                        event: 'review_requested_group',
-                                        requested_reviewers: [prev.requested_reviewer || prev.requested_team,i.requested_reviewer || i.requested_team]
-                                    }
-                                }   
-                        }else if(prev 
-                                    && prev.event == 'commented' 
-                                    && i.event == 'commented'
-                                    && prev.user.login == i.user.login
-                                    && prev.body == i.body) {
-                            if(handledTimeline[handledTimeline.length - 1] 
-                                && handledTimeline[handledTimeline.length - 1].event == 'similar_comment' ) {
-                                    handledTimeline[handledTimeline.length - 1].comments.push(i)
-                                }else{
-                                     handledTimeline[handledTimeline.length - 1] = {
-                                        ...prev,
-                                        event: 'similar_comment',
-                                        comments: [prev,i]
-                                    }
-                                }   
-                        }else{
-                            handledTimeline.push(i)
-                        }
-                        prev = i
-                    })
-                    return handledTimeline */
                 }catch(e) {
                     console.log(e)
                 }
@@ -421,73 +355,11 @@
                 this.network_getTimeline()
             },
             async network_getData() {
-
-                //this.mutation_pullRequestDetailResetState()
-
-                //if(this.accessToken) await this.network_getPullRequestExtraData()
-
                 this.network_getPullRequestReactions()
-
-                //获取timeline(异步)
                 this.network_getTimeline()
-
-                //获取review comment replies
                 this.network_getReviewComments()
-
                 this.network_getTimelineRestCount()
-
                 if(this.accessToken) this.network_getTimelineGraphqlCount()
-            },
-           /*  async network_getPullRequestExtraData() {
-                try {
-                    this.extraData.loading = true
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.GRAPHQL_PR,
-                        {   
-                            variables: {
-                                name: this.repo,
-                                owner: this.owner,
-                                number: parseInt(this.number),
-                            },
-                            cancelToken:this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_pull_request_extra_data')
-                        }
-                    )
-
-                    try{
-                        this.pullRequestProvided() = res.data.data.repository.pullRequest
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-                } catch(e){
-                    this.handleError(e)
-                }finally{
-                    this.extraData.loading = false
-                }
-            }, */
-            async network_getPullRequestReactions() {
-                try{
-                    //获取基本数据
-                    this.pullRequestReactions.loading = true
-                    let url = api.API_PULLREQUEST({
-                        repo: this.repo,
-                        owner: this.owner,
-                        number: this.number
-                    })
-                    let res = await authRequiredGet(
-                        url,
-                        {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name),
-                            headers: {
-                                "accept": 'application/vnd.github.squirrel-girl-preview'
-                            }
-                        }
-                    )
-                    this.pullRequestReactions.data = res.data
-                }catch(e){
-                   this.handleError(e)
-                }finally{
-                    this.pullRequestReactions.loading = false
-                }
             },
             async network_getTimeline() {
                 try{
@@ -496,7 +368,7 @@
                     if(this.timeline.pageInfo.next) {
                         url_timeline = this.timeline.pageInfo.next.url
                     } else {
-                        url_timeline = api.API_ISSUE_TIMELINE({
+                        url_timeline = api.API_ISSUE_TIMELINES({
                             repo: this.repo,
                             owner: this.owner,
                             number: this.number,
@@ -574,7 +446,7 @@
             },
             //deprecated
             async network_getNewestTimeline() {
-                let url_pageInfo = api.API_ISSUE_TIMELINE({
+                let url_pageInfo = api.API_ISSUE_TIMELINES({
                     repo: this.repo,
                     owner: this.owner,
                     number: this.number,
@@ -655,7 +527,7 @@
                 try {
                     this.timeline.restCount.loading = true
 
-                    let url = api.API_ISSUE_TIMELINE({
+                    let url = api.API_ISSUE_TIMELINES({
                         repo: this.repo,
                         owner: this.owner,
                         number: this.number,
@@ -867,7 +739,7 @@
             async network_getBufferTimeline() {
                 try {
                     this.timeline.bufferTimeline.loading = true
-                    let url = api.API_ISSUE_TIMELINE({
+                    let url = api.API_ISSUE_TIMELINES({
                         repo: this.repo,
                         owner: this.owner,
                         number: this.number,
@@ -900,7 +772,6 @@
                 await this.network_getBufferTimeline()
             },
             async createCommentPostHook(e) {
-                console.log(e)
                 this.timeline.newCreatedTimelinesCreatedAtConversations.push(e.detail) 
                 this.network_getTimelineExtraData([e.detail])
             },

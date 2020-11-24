@@ -1,5 +1,5 @@
 <template>
-    <Container v-if="!issueIsEmpty" class="d-flex relative container Box-row p-0">
+    <Container class="d-flex relative container Box-row p-0">
       
         <Icon class="flex-shrink-0 pt-2 pl-3">
             <span class="relative">
@@ -31,7 +31,7 @@
              <AnimatedHeightWrapper>
                 <Byline v-if="issue.state.toLowerCase() === 'open'" class="byline">
                     #{{issue.number}} opened {{issue.created_at | getDateDiff}} by 
-                    <router-link class="muted-link" :to="`/${issue.user.login}`">{{iissue.user.login}}</router-link>
+                    <router-link class="muted-link" :to="`/${issue.user.login}`">{{issue.user.login}}</router-link>
                 </Byline>
                 <Byline v-else class="byline">
                     #{{issue.number}} closed {{issue.closed_at | getDateDiff}} by 
@@ -79,9 +79,6 @@
             },
             formatClosedDate:function () {
                 return util_dateFormat.getDateDiff(this.issue.closed_at)
-            },
-            issueIsEmpty() {
-                return JSON.stringify(this.issue) === JSON.stringify(new Object())
             },
             repoFullName() {
                 return this.issue.repository_url.replace('https://api.github.com/repos/','');

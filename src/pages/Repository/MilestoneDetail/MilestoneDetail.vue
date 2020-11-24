@@ -2,17 +2,17 @@
     <CommonLoadingWrapper :loading="loading || issues.loading" class="px-3">
         <SubNav class="pt-4 pb-3 d-flex flex-justify-between border-bottom">
             <nav class="d-flex">
-                <router-link class="subnav-item" :to="`/${owner()}/${repo()}/labels`">
+                <router-link class="subnav-item" :to="`/${owner}/${repo}/labels`">
                     <svg class="octicon octicon-tag" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
                     Labels
                 </router-link>
-                <router-link class="subnav-item active-link"  :to="`/${owner()}/${repo()}/milestones`">
+                <router-link class="subnav-item active-link"  :to="`/${owner}/${repo}/milestones`">
                     <svg class="octicon octicon-milestone" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2H6V0h2v2zm4 5H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h10l2 2-2 2zM8 4H6v2h2V4zM6 16h2V8H6v8z"></path></svg>
                     Milestones
                 </router-link>
             </nav> 
 
-            <router-link :to="`/${owner()}/${repo()}/issue/new`" class="btn btn-primary">
+            <router-link :to="`/${owner}/${repo}/issue/new`" class="btn btn-primary">
                 New
             </router-link>  
         </SubNav>
@@ -72,10 +72,10 @@
                         <h3 class="h2 mb-2">This milestone is closed.</h3>
                         <p class="lead mb-4 text-center">
                             No {{state}} issues remain. View
-                            <router-link :to="`/${this.owner()}/${this.repo()}/milestone/${number}${state == 'open' ? '?closed=1' : ''}`" title="Closed issues">{{state == 'open' ? 'closed' : 'open'}} issues</router-link>
+                            <router-link :to="`/${owner}/${repo}/milestone/${number}${state == 'open' ? '?closed=1' : ''}`" title="Closed issues">{{state == 'open' ? 'closed' : 'open'}} issues</router-link>
                             or
                             see 
-                            <router-link :to="`/${this.owner()}/${this.repo()}/milestones`">open milestones</router-link> in this repository.
+                            <router-link :to="`/${owner}/${repo}/milestones`">open milestones</router-link> in this repository.
                         </p>
                     </div>
                 </EmptyNotice>
@@ -90,7 +90,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {CommonLoadingWrapper,AnimatedHeightWrapper,ComplexBubble,SimplePaginationRest} from '@/components'
-    import IssueListItem from './IssueListItem'
+    import IssueListItem from './IssueListItem.vue'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {authRequiredGet} from '@/network'
     import * as api from '@/network/api'
@@ -98,7 +98,6 @@
     export default {
         name: 'repository_milestone_detail_page',
         mixins: [RouteUpdateAwareMixin],
-        inject: ['owner','repo'],
         data() {
             return {
                 data: {},
@@ -127,10 +126,10 @@
                 return isClosed == 1 ? 'closed' : 'open'
             },
             filterOpenStateRouterLink() {
-                return `/${this.owner()}/${this.repo()}/milestone/${this.number}`
+                return `/${this.owner}/${this.repo}/milestone/${this.number}`
             },
             filterClosedStateRouterLink() {
-                return `/${this.owner()}/${this.repo()}/milestone/${this.number}?closed=1`
+                return `/${this.owner}/${this.repo}/milestone/${this.number}?closed=1`
             },
             documentTitle() {
                 if(!this.data.title) return location.href
@@ -146,8 +145,8 @@
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
                     let url = api.API_REPOSITORY_MILESTONE({
-                        repo: this.repo(),
-                        owner: this.owner(),
+                        repo: this.repo,
+                        owner: this.owner,
                         number: this.number
                     })
                     let res = await authRequiredGet(url,{cancelToken})
@@ -164,19 +163,19 @@
                 try{
                     this.issues.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_issues')
-                    let url = api.API_SEARCH(
+                    let url = api.API_REPOSITORY_ISSUES(
                         {
-                            type: 'issues',
+                            repo: this.repo,
+                            owner: this.owner,
                             params: {
-                                 ...this.$route.query,
-                                q: `repo:${this.owner()}/${this.repo()} is:issue milestone:${this.data.title} state:${this.state}`,
-                                per_page: 10,
+                                per_page: 100,
+                                milestone: this.data.number
                             }
                         }
                     )
                     let res = await authRequiredGet(url,{cancelToken})
-                    window.scrollTo(0,0)
-                    this.issues.data = res.data.items
+                    window.scrollTo(0,0)    
+                    this.issues.data = res.data
                     this.issues.pageInfo = parse(res.headers.link) || {}
                 }catch(e) {
                     this.handleError(e)

@@ -1,7 +1,7 @@
 <template>
     <Container class="py-4 border-bottom">
         <Star class="float-right mt-1 ml-1">
-           <StarBtn :repo="repository.name" :owner="repository.owner.login" :viewerHasStarred="comprehensiveRepository.viewerHasStarred"></StarBtn>
+           <StarBtn :repoProp="repository.name" :ownerProp="repository.owner.login" :viewerHasStarred="comprehensiveRepository.viewerHasStarred"></StarBtn>
         </Star>
         
         <Name class="mb-1 wb-break-all">

@@ -18,8 +18,8 @@
 import styled from 'vue-styled-components'
 export default {
     props: {
-        owner: String,
-        repo: String,
+        ownerProp: String,
+        repoProp: String,
         viewerHasStarred: Boolean
     },
     data() {
@@ -40,7 +40,7 @@ export default {
             }
             try {
                 this.loading = true
-                await this.github_changeStarStatus(this.owner, this.repo, this.localViewerHasStarred)
+                await this.github_changeStarStatus(this.ownerProp, this.repoProp, this.localViewerHasStarred)
                 this.localViewerHasStarred = !this.localViewerHasStarred
             } catch (e) {
                 this.handleError(e)

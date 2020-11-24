@@ -54,7 +54,7 @@
                     )
 
                     try {
-                        this.commit = res.data.data.node.afterCommit
+                        this.commit = res.data.data.node.afterCommit || {}
                     } catch (e) {
                         console.log(e)
                     }

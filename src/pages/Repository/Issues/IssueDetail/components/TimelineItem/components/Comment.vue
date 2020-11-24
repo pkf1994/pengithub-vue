@@ -362,7 +362,7 @@
                             'delete'
                         )
 
-                        await this.timelineItemDeletedHook()()
+                        await this.timelineItemDeletedHook()(this.data)
                         
                         this.$el.style.height = getComputedStyle(this.$el).height
                         this.$el.style.overflow = 'hidden'

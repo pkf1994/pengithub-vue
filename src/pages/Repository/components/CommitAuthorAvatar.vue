@@ -1,10 +1,10 @@
 <template>
-    <div class="AvatarStack flex-self-start">
-        <div class="AvatarStack-body">
+    <div class="AvatarStack flex-self-start" :style="{marginRight: !committedByAuthor ? '8px' : 'auto'}">
+       <div class="AvatarStack-body">
             <router-link v-if="commit.author && commit.author.avatar_url" :to="`/${commit.author.login}`">
                 <img height="20" width="20" class="avatar avatar-url" :src="commit.author.avatar_url" :alt="`${commit.author.login}`">
             </router-link>
-            <router-link v-if="commit.committer && commit.committer.avatar_url && commit.author && commit.author.avatar_url && (commit.author.avatar_url != commit.committer.avatar_url)" :to="`/${commit.committer.login}`">
+            <router-link v-if="!committedByAuthor" :to="`/${commit.committer.login}`">
                 <img height="20" width="20" class="avatar avatar-url" :src="commit.committer.avatar_url" :alt="`${commit.committer.login}`">
             </router-link>
         </div> 
@@ -29,6 +29,11 @@ export default {
     data() {
         return {
             commit: {},
+        }
+    },
+    computed: {
+        committedByAuthor() {
+            return ! (this.commit.committer && this.commit.committer.avatar_url && this.commit.author && this.commit.author.avatar_url && (this.commit.author.avatar_url != this.commit.committer.avatar_url))
         }
     },
     created() {

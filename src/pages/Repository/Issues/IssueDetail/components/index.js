@@ -7,5 +7,8 @@ import Reactions from './Reactions'
 import StickyTop from './StickyTop'
 import IssueStateBadge from './IssueStateBadge'
 import TimelineItem from './TimelineItem/TimelineItem.vue'
+import BottomInfoRows from './BottomInfoRows.vue'
+import TopInfoRows from './TopInfoRows.vue'
+import IssueNotificationSettingPane from './IssueNotificationSettingPane.vue'
 
-export {IssueBody,ProjectCard,CommentCreatePane,LoadMore,IssueHeader,Reactions,StickyTop,TimelineItem,IssueStateBadge}
+export {IssueBody,ProjectCard,CommentCreatePane,LoadMore,IssueHeader,Reactions,StickyTop,TimelineItem,IssueStateBadge,IssueNotificationSettingPane,BottomInfoRows,TopInfoRows}

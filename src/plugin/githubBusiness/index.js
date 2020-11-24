@@ -11,8 +11,13 @@ export default {
                 ...mapState({
                     accessToken: state => state.oauth.accessToken.accessToken
                 }),
-               
-            },
+                repo() {
+                    return this.$route.params.repo
+                },
+                owner() {
+                    return this.$route.params.owner
+                }
+            }, 
             methods: {
                 ...mapActions({
                     action_signOut: ACTION_SIGN_OUT

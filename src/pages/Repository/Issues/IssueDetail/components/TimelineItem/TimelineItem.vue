@@ -35,7 +35,7 @@
             </template>
             <template v-slot:action>
                 added the
-                <Label :name="data.label.name" :color="`#${data.label.color}`"/>
+                <router-link :to="`/${owner}/${repo}/issues?q=repo:${owner}/${repo} is:open label:${data.label.name}`"><Label :name="data.label.name" :color="`#${data.label.color}`"/></router-link>
                 label
                 <span class="no-wrap">on {{data.created_at | dateFormat('dd zzz yyyy')}}</span>  
             </template>
@@ -51,7 +51,7 @@
             </template>
             <template v-slot:action>
                 removed the
-                <Label :name="data.label.name" :color="`#${data.label.color}`"/>
+                <router-link :to="`/${owner}/${repo}/issues?q=repo:${owner}/${repo} is:open label:${data.label.name}`"><Label :name="data.label.name" :color="`#${data.label.color}`"/></router-link>
                 label
                 <span class="no-wrap">on {{data.created_at | dateFormat('dd zzz yyyy')}}</span>  
             </template>
@@ -230,7 +230,7 @@
             </template>
         </Other>
        
-        
+        <slot></slot>    
     </Container>
 </template>
 
@@ -239,12 +239,19 @@
     import {Comment, Other, CrossReferenced,CommentDeletedEvent,ReferencedEvent,TransferredEvent,UserBlockedEvent,ClosedEvent,ProjectEvent} from './components'
     import {Label} from '@/components'
     export default {
-        inject: ['owner','repo'],
         props: {
             data: {
                 type: Object,
                 required: true,
             }
+        },
+        computed: {
+            owner() {
+                return this.$route.params.owner
+            },
+            repo() {
+                return this.$route.params.repo
+            },
         },
         components: {
             Comment,

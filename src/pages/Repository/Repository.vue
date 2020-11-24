@@ -85,7 +85,7 @@
                     </RepoMeta>
 
                     <StarOrWatch class="d-flex px-3 pb-1" v-if="data.id">
-                        <StarBtn  class="btn btn-sm btn-block flex-1 mr-2" :repo="repo" :owner="owner" :viewerHasStarred="viewerHasStarred.data"></StarBtn>
+                        <StarBtn  class="btn btn-sm btn-block flex-1 mr-2" :repoProp="repo" :ownerProp="owner" :viewerHasStarred="viewerHasStarred.data"></StarBtn>
                         <button class="btn btn-sm btn-block flex-1" :disabled="subscription.loading" @click="() => showModal('notificationsModal')">        
                             <span v-if="!subscription.loading">
                                 <svg v-if="subscription.data.ignored && !subscription.data.subscribed" height="16" class="octicon octicon-mute mr-1" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2.75a.75.75 0 00-1.238-.57L3.472 5H1.75A1.75 1.75 0 000 6.75v2.5C0 10.216.784 11 1.75 11h1.723l3.289 2.82A.75.75 0 008 13.25V2.75zM4.238 6.32L6.5 4.38v7.24L4.238 9.68a.75.75 0 00-.488-.18h-2a.25.25 0 01-.25-.25v-2.5a.25.25 0 01.25-.25h2a.75.75 0 00.488-.18zm7.042-1.1a.75.75 0 10-1.06 1.06L11.94 8l-1.72 1.72a.75.75 0 101.06 1.06L13 9.06l1.72 1.72a.75.75 0 101.06-1.06L14.06 8l1.72-1.72a.75.75 0 00-1.06-1.06L13 6.94l-1.72-1.72z"></path></svg>

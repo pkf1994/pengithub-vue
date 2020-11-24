@@ -1,6 +1,6 @@
 <template>
     <Container class="Box-row">
-        <StarBtn class="btn btn-sm float-right" :repo="repository.name" :owner="repository.author" :viewerHasStarred="viewerHasStarred"></StarBtn>
+        <StarBtn class="btn btn-sm float-right" :repoProp="repository.name" :ownerProp="repository.author" :viewerHasStarred="viewerHasStarred"></StarBtn>
 
         <h1 class="h3 text-gray text-normal lh-condensed">
             <span>
