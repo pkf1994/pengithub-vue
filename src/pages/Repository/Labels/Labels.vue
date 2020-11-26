@@ -3,25 +3,35 @@
         
         <nav class="d-flex flex-justify-between">
             <div>
-                <router-link class="subnav-item" :to="`/${owner()}/${repo()}/labels`">
-                    <svg class="octicon octicon-tag" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 000-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"></path></svg>
-                    Labels
+                 <router-link class="subnav-item" :to="`/${owner}/${repo}/labels`">
+                    <svg class="octicon octicon-tag v-align-middle" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M2.5 7.775V2.75a.25.25 0 01.25-.25h5.025a.25.25 0 01.177.073l6.25 6.25a.25.25 0 010 .354l-5.025 5.025a.25.25 0 01-.354 0l-6.25-6.25a.25.25 0 01-.073-.177zm-1.5 0V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 010 2.474l-5.026 5.026a1.75 1.75 0 01-2.474 0l-6.25-6.25A1.75 1.75 0 011 7.775zM6 5a1 1 0 100 2 1 1 0 000-2z"></path></svg>
+                    <span class="v-align-middle">
+                        Labels  
+                    </span>    
                 </router-link>
-                <router-link class="subnav-item" :to="`/${owner()}/${repo()}/milestones`">
-                    <svg class="octicon octicon-milestone" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2H6V0h2v2zm4 5H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h10l2 2-2 2zM8 4H6v2h2V4zM6 16h2V8H6v8z"></path></svg>
-                    Milestones
+                <router-link class="subnav-item" :to="`/${owner}/${repo}/milestones`">
+                    <svg class="octicon octicon-milestone v-align-middle" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.75 0a.75.75 0 01.75.75V3h3.634c.414 0 .814.147 1.13.414l2.07 1.75a1.75 1.75 0 010 2.672l-2.07 1.75a1.75 1.75 0 01-1.13.414H8.5v5.25a.75.75 0 11-1.5 0V10H2.75A1.75 1.75 0 011 8.25v-3.5C1 3.784 1.784 3 2.75 3H7V.75A.75.75 0 017.75 0zm0 8.5h4.384a.25.25 0 00.161-.06l2.07-1.75a.25.25 0 000-.38l-2.07-1.75a.25.25 0 00-.161-.06H2.75a.25.25 0 00-.25.25v3.5c0 .138.112.25.25.25h5z"></path></svg>
+                    <span class="v-align-middle">
+                        Milestones  
+                    </span>    
                 </router-link>
             </div>
             
-            <button v-if="viewerIsCollaborator().data && accessToken" class="btn btn-primary" type="button" aria-expanded="true" @click="() => triggerCreateLabelPane(true)">New</button>
+            <button v-if="viewerIsCollaborator().data && accessToken" class="btn btn-primary" type="button" aria-expanded="true" @click="() => triggerCreateLabelPane(true)">New label</button>
         </nav> 
+
+       
 
         <AnimatedHeightWrapper :stretch="showCreateLabelPane">
             <div class="py-1 pt-3">
-                <LabelEditor  ref="labelEditor" @submitable="() => {createdLabelSubmitable = true}" @unsubmitable="() => {createdLabelSubmitable = false}">
-                    <button :disabled="submittingCreatedLabel" class="btn" type="button"  @click="() => triggerCreateLabelPane(false)">Cancel</button>
-                    <button @click="network_createLabel" class="btn btn-primary" type="submit" :disabled="!createdLabelSubmitable || submittingCreatedLabel">
-                        {{submittingCreatedLabel ? 'Saving...' : 'Create label'}}
+                <LabelEditor    v-model="createLabelData" 
+                                @label-edited.native="labelEditedHook" 
+                                :labelNameError="labelNameError"
+                                ref="createLabelData"
+                                class="bg-gray border border-gray-dark rounded-1">
+                    <button :disabled="loadingCreateLabel" class="btn" type="button"  @click="() => triggerCreateLabelPane(false)">Cancel</button>
+                    <button @click="network_createLabel" class="btn btn-primary" type="submit" :disabled="!createdLabelSubmitable || loadingCreateLabel || labelNameError">
+                        {{loadingCreateLabel ? 'Saving...' : 'Create label'}}
                     </button>
                 </LabelEditor>
             </div>
@@ -46,7 +56,7 @@
 
                 <div v-else>
                     <transition-group name="fade-group" appear>
-                        <LabelItem v-for="item in data" :key="item.name" :label="item" @label-deleted="labelDeletedHandler" @label-updated="labelUpdatedHandler"/>
+                        <LabelItem v-for="item in data" :key="item.name" :label="item" @label-deleted="labelDeletedHandler" @label-updated.native="labelUpdatedHandler"/>
                     </transition-group>
                 </div>
                
@@ -72,15 +82,15 @@
     import {CommonLoadingWrapper,ComplexBubble,AnimatedHeightWrapper,Label,Modal,SelectMenuItem,SimplePaginationRest,Popover} from '@/components'
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {authRequiredGitHubGraphqlApiQuery,authRequiredGet,authRequiredAjax} from '@/network'
-    import {util_color} from '@/util'
+    import {authRequiredGitHubGraphqlApiQuery,authRequiredGet,authRequiredPost} from '@/network'
+    import {util_throttle} from '@/util'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
     import {LabelItem,LabelEditor,LabelSkeleton} from './components'
     let parse = require("parse-link-header")
     export default {
         name: 'repository_labels_page',
-        inject: ['owner','repo','viewerIsCollaborator'],
+        inject: ['viewerIsCollaborator'],
         provide() {
             return {
                 extraDataProvided: () => this.extraData.data
@@ -104,16 +114,34 @@
                 },
 
                 showCreateLabelPane: false,
-                submittingCreatedLabel: false,
-                createdLabelSubmitable: false
+                createLabelData: {
+                    name: '',
+                    color: '',
+                    description: ''
+                },
+                loadingCreateLabel: false,
+                labelNameError: false
             }
         },
         computed: {
+            repo() {
+                return this.$route.params.repo
+            },
+            owner() {
+                return this.$route.params.owner
+            },
             emptyFlag() {
                 return this.data.length == 0 && this.loading == false && !this.pageInfo.prev
             },
             documentTitle() {
-                return `Labels · ${this.owner()}/${this.repo()}`
+                return `Labels · ${this.owner}/${this.repo}`
+            },
+            createdLabelSubmitable() {
+                if(!this.createLabelData.name) return
+                if(!this.createLabelData.color) return
+                let colorNumber = parseInt(this.createLabelData.color.replace('#',''),16)
+                if(colorNumber > 16777215 || colorNumber < 0) return
+                return true
             },
         },
         created() {
@@ -126,8 +154,8 @@
                     this.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
                     let url = api.API_REPOSITORY_LABELS({
-                        repo: this.repo(),
-                        owner: this.owner(),
+                        repo: this.repo,
+                        owner: this.owner,
                         params: {
                             per_page: this.perPage,
                             ...this.$route.query
@@ -149,8 +177,8 @@
                     this.totalCount.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_labels_count')
                     let url = api.API_REPOSITORY_LABELS({
-                        repo: this.repo(),
-                        owner: this.owner(),
+                        repo: this.repo,
+                        owner: this.owner,
                         params: {
                             per_page: 1
                         }
@@ -187,22 +215,21 @@
                 }
             },
             async network_createLabel() {
-                if(this.submittingCreatedLabel) return 
+                if(this.loadingCreateLabel) return 
                 if(!this.viewerIsCollaborator().data) return 
                 if(!this.accessToken) return
                 try{
-                    this.submittingCreatedLabel = true
+                    this.loadingCreateLabel = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' create_label')
                     let url = api.API_REPOSITORY_LABELS(this.$route.params)
-                    let res = await authRequiredAjax(
+                    let res = await authRequiredPost(
                         url,
                         {
                             cancelToken,
-                            name: this.$refs.labelEditor.name,
-                            color: this.$refs.labelEditor.color.replace('#',''),
-                            description: this.$refs.labelEditor.description,
+                            name: this.createLabelData.name,
+                            color: this.createLabelData.color.replace('#',''),
+                            description: this.createLabelData.description,
                         },
-                        'post'
                     )
 
                     this.data.unshift(res.data)
@@ -212,8 +239,30 @@
                 }catch(e) {
                     handleError(e)
                 }finally{
-                    this.submittingCreatedLabel = false
+                    this.loadingCreateLabel = false
                 }
+            },
+            async network_checkIfLabelNameHasBeenTaken() {
+                try {
+                    
+                    let u = api.API_HANDLE_LABEL({
+                        repo: this.repo,
+                        owner: this.owner,
+                        label: this.createLabelData.name
+                    })
+
+                    await authRequiredGet(
+                        u,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' check_if_label_name_has_been_taken')
+                        }
+                    )
+
+                    this.labelNameError = true
+                } catch (e) {
+                    console.log(e) 
+                    this.labelNameError = false
+                } 
             },
             getOpenIssuesAndPullRequestsCount(id) {
                 let dataHolder = this.extraData.data.filter(i => i.id == id)[0]
@@ -228,11 +277,11 @@
                 this.$refs.popover.show = true
             },
             labelUpdatedHandler(e) {
-                let updatedLabel = this.data.filter(i => i.name == e.prev.name)[0]
+                let updatedLabel = this.data.filter(i => i.name == e.detail.prev.name)[0]
                 if(updatedLabel) {
-                    updatedLabel.name = e.name
-                    updatedLabel.color = e.color,
-                    updatedLabel.description = e.description
+                    updatedLabel.name = e.detail.name
+                    updatedLabel.color = e.detail.color,
+                    updatedLabel.description = e.detail.description
                 }
             },
             labelDeletedHandler(e) {
@@ -243,7 +292,17 @@
                     }
                 })
                 this.data.splice(idx,1)
+            },
+            labelEditedHook(e) {
+                this.createLabelData.name = e.detail.name
+                this.createLabelData.color = e.detail.color
             }
+        },
+        watch:{
+            'createLabelData.name': function(newOne,oldOne) {
+                this.labelNameError = false
+                util_throttle.throttleByDelay(this.network_checkIfLabelNameHasBeenTaken,500,this)
+            }  
         },
         components: {
             CommonLoadingWrapper,

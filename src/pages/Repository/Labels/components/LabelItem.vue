@@ -28,14 +28,13 @@
     <LabelEditor v-else 
                 ref="labelEditor"
                 style="background-color:white!important" 
-                :defaultColor="`#${label.color}`" 
-                :defaultName="label.name" 
-                :defaultDescription="label.description" 
-                @submitable="() => {editedLabelSubmitable = true}" 
-                @unsubmitable="() => {editedLabelSubmitable = false}">
-        <button :disabled="submittingEditedLabel" class="btn" type="button"  @click="triggerEdit">Cancel</button>
-        <button @click="network_updateLabel" class="btn btn-primary" type="submit" :disabled="!editedLabelSubmitable || submittingEditedLabel">
-            {{submittingEditedLabel ? 'Saving...' : 'Update label'}}
+                class="bg-gray border border-gray-dark rounded-1"
+                :labelNameError="labelNameError"
+                v-model="editLabelData"
+                >
+        <button :disabled="loadingEditLabel" class="btn" type="button"  @click="triggerEdit">Cancel</button>
+        <button @click="network_updateLabel" class="btn btn-primary" type="submit" :disabled="!editedLabelSubmitable || loadingEditLabel || labelNameError">
+            {{loadingEditLabel ? 'Saving...' : 'Update label'}}
         </button>
 
     </LabelEditor>
@@ -46,7 +45,8 @@
     import LabelEditor from './LabelEditor'
     import styled from 'vue-styled-components'
     import * as api from '@/network/api'
-    import {authRequiredAjax} from '@/network'
+    import {authRequiredGet,authRequiredPatch,authRequiredDelete,cancelAndUpdateAxiosCancelTokenSource} from '@/network'
+    import {util_throttle} from '@/util'
     export default {
         name: 'repository_label_item',
         inject: ['viewerIsCollaborator','extraDataProvided'],
@@ -55,10 +55,26 @@
         },
         data() {
             return {
+                editLabelData: {},
                 showLabelEditor: false,
-                submittingEditedLabel: false,
+                loadingEditLabel: false,
                 deletingLabel: false,
-                editedLabelSubmitable: false,
+                labelNameError: false,
+            }
+        },
+        computed: {
+            editedLabelSubmitable() {
+                if(!this.editLabelData.name) return
+                if(!this.editLabelData.color) return
+                let colorNumber = parseInt(this.editLabelData.color.replace('#',''),16)
+                if(colorNumber > 16777215 || colorNumber < 0) return
+                return true
+            },
+        },
+        created() {
+            this.editLabelData = {
+                ...this.label,
+                color: `#${this.label.color}`
             }
         },
         methods: {
@@ -75,36 +91,33 @@
                 this.showLabelEditor = !this.showLabelEditor
             },
             async network_updateLabel() {
-                if(!this.acessToken) return 
-                if(!this.viewerIsCollaborator().data) return 
+                if(!this.accessToken) return 
+                //if(!this.viewerIsCollaborator().data) return 
                 try{
-                    this.submittingEditedLabel = true
+                    this.loadingEditLabel = true
                     let url = api.API_HANDLE_LABEL({
                         ...this.$route.params,
                         label: this.label.name
                     })
 
-                    let res = await authRequiredAjax(
+                    let res = await authRequiredPatch(
                         url,
                         {
-                            new_name: this.$refs.labelEditor.name,
-                            color: this.$refs.labelEditor.color.replace('#',''),
-                            description: this.$refs.labelEditor.description,
+                            new_name: this.editLabelData.name,
+                            color: this.editLabelData.color.replace('#',''),
+                            description: this.editLabelData.description,
                         },
-                        'patch'
                     )
 
-                    this.$emit('label-updated',{
-                        ...res.data,
-                        prev: this.label
-                    })
+
+                    this.$el.dispatchEvent(new CustomEvent('label-updated',{bubbles:true,detail:{...res.data,prev:this.label}}))
 
                     this.showLabelEditor = false
 
                 }catch(e) {
                     this.handleError(e)
                 }finally{
-                    this.submittingEditedLabel = false
+                    this.loadingEditLabel = false
                 }
             },
             async network_deleteLabel() {
@@ -118,7 +131,7 @@
                         label: this.label.name
                     })
 
-                    let res = await authRequiredAjax(url, {}, 'delete')
+                    let res = await authRequiredDelete(url)
 
                     this.$emit('label-deleted',this.label)
 
@@ -127,7 +140,39 @@
                 }finally{
                     this.deletingLabel = false
                 }
-            }
+            },
+            async network_checkIfLabelNameHasBeenTaken() {
+                try {
+                    let u = api.API_HANDLE_LABEL({
+                        repo: this.repo,
+                        owner: this.owner,
+                        label: this.editLabelData.name
+                    })
+
+                    await authRequiredGet(
+                        u,
+                        {
+                            cancelToken: cancelAndUpdateAxiosCancelTokenSource(this.label.name + ' check_if_label_name_has_been_taken').cancelToken
+                        }
+                    )
+
+                    if(this.editLabelData.name != this.label.name) {
+                        this.labelNameError = true
+                    }else{
+                        this.labelNameError = false
+                    }
+
+                } catch (e) {
+                    console.log(e) 
+                    this.labelNameError = false
+                } 
+            },
+        },
+         watch:{
+            'editLabelData.name': function(newOne,oldOne) {
+                this.labelNameError = false
+                util_throttle.throttleByDelay(this.network_checkIfLabelNameHasBeenTaken,500,this)
+            }  
         },
         components: {
             AnimatedHeightWrapper,

@@ -82,18 +82,19 @@
                                 v-model="chooseAssigneesModal.searchQuery"/>
           
             <transition-group name="fade-group" appear> 
-                <button v-if="data.assignees && data.assignees.length > 0" :disabled="chooseAssigneesModal.loadingClearAssignees || chooseAssigneesModal.loading.length > 0" class="width-full d-flex clear-assignees-btn flex-items-center border-bottom" key="clear assignees button" @click="network_clearAssignees">
+                <button v-if="data.assignees && data.assignees.length > 0" :disabled="chooseAssigneesModal.loadingClearAssignees || chooseAssigneesModal.loading.length > 0" class="width-full d-flex clear-assignees-btn flex-items-center" key="clear assignees button" @click="network_clearAssignees">
                     <TinyLoadingIcon class="loading-icon" v-if="chooseAssigneesModal.loadingClearAssignees"></TinyLoadingIcon>
                     <svg v-else class="octicon octicon-x" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
                     <div class="select-menu-item-text">{{chooseAssigneesModal.loadingClearAssignees ? 'Trying...' : 'Clear assignees'}}</div>
                 </button>
-                <button v-for="item in filteredAssignableUsers" :key="item.login" @click.native="() => network_selectTheAssigneeOrNot(item)" :disabled="chooseAssigneesModal.loading.indexOf(item.login) != -1">
+                <button v-for="item in filteredAssignableUsers" class="d-block width-full px-0" :key="item.login" @click="() => network_selectTheAssigneeOrNot(item)" :disabled="chooseAssigneesModal.loading.indexOf(item.login) != -1">
                     <SelectMenuItem :selected="data.assignees.some(i => i.id == item.id)">
                         <ImgWrapper class="mr-2 avatar avatar-user">
-                            <img class="avatar avatar-user" width="20" height="20" :src="item.avatar_url">
+                            <img class="avatar avatar-user" width="20" height="20" :src="item.avatar">
                         </ImgWrapper>
                         <strong class='mr-1'>{{item.login}}</strong>
                         <span>{{item.name}}</span>    
+                        
 
                         <template v-slot:icon v-if="chooseAssigneesModal.loading.indexOf(item.login) != -1">
                             <TinyLoadingIcon class="mr-2"></TinyLoadingIcon>
@@ -106,17 +107,22 @@
 
         <Modal title="Apply labels to this issue" ref="applyLabelsModal" :modalStyle="{height:'80vh'}" @show="network_getAvailableLabels" :loading="applyLabelsModal.labels.loading">
             <SimpleSearchInput  v-if="!applyLabelsModal.labels.loading" 
-                                 class="p-3 modal-search-input" 
+                                 class="p-3 modal-search-input border-bottom" 
                                 placeholder="Filter labels" 
                                 v-model="applyLabelsModal.searchQuery"/>
             <div v-if="!applyLabelsModal.labels.loading && applyLabelsModal.labels.data.length === 0" class="p-3" style="color: #586069;">
                 No available labels found. Sorry about that.
             </div>  
 
-            <transition-group name="fade-group" appear style="overflowY:auto">
-                <SelectMenuItem v-for="item in filteredAvailableLabels" :iconStyle="{alignSelf:'flex-start'}" :key="item.name" :selected="data.labels.some(i => i.name == item.name)"  @click.native="() => network_applyTheLabelOrNot(item.name)">
+            <transition-group name="fade-group" class="flex-grow-1" appear style="overflowY:auto">
+                <SelectMenuItem v-for="item in filteredAvailableLabels" 
+                                class="border-bottom"
+                                :iconStyle="{alignSelf:'flex-start'}" 
+                                :key="item.name" 
+                                :selected="data.labels.some(i => i.name == item.name)"  
+                                @click.native="() => network_applyTheLabelOrNot(item.name)">
                     <div class="d-flex flex-items-start" >
-                        <LabelBadge class="avatar mt-1 mr-2 label-badge flex-shrink-0" :style="{background: `#${item.color}`}" />
+                        <LabelBadge class="avatar avatar-user mt-1 mr-2 label-badge flex-shrink-0" :style="{background: `#${item.color}`}" />
                         <LabelContent style="min-width:0">
                             <LabelName class="text-bold">{{item.name}}</LabelName>    
                             <LabelDescription v-if="item.description && item.description !== ''" class="label-description">{{item.description}}</LabelDescription>    
@@ -129,13 +135,24 @@
                 </SelectMenuItem>
             </transition-group>
 
-                
-            <router-link v-if="!applyLabelsModal.labels.loading" :to="`/${owner}/${repo}/labels`" class="py-3 d-block text-gray border-top labels-page-link bg-white">
+            <button v-if="filteredAvailableLabels.length == 0 && applyLabelsModal.searchQuery" class="create-label-btn text-left" @click="() => showModal('createNewLabelModal')"> 
+                Create new label "{{applyLabelsModal.searchQuery}}"
+            </button>
+            <router-link v-if="!applyLabelsModal.labels.loading" :to="`/${owner}/${repo}/labels`" class="py-3 d-block text-gray border-top labels-page-link bg-white" >
                 <span>
                     <svg class="octicon octicon-pencil mr-1 label-options-icon" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"></path></svg>
                 </span>  
                 <span class="select-menu-item-text f6">Edit labels</span>
             </router-link>
+
+            <Modal title="Create new label" ref="createNewLabelModal" :modalStyle="{maxWidth: '85vw'}">
+                <div class="px-3 pt-3" style="margin-bottom:-8px;font-size:12px;font-weight:600" >
+                    Preview
+                </div>
+                <LabelEditor style="font-size:12px;">
+                    
+                </LabelEditor>
+            </Modal>   
         </Modal>
 
         <Modal title="Set milestone" ref="setMilestoneModal" :modalStyle="{height:'80vh'}" @show="network_getAvailableMilestones" :loading="setMilestoneModal.milestones.loading"> 
@@ -148,11 +165,11 @@
                 <button type="button" class="set-milestone-modal-tabs-btn" :class="{'tab-active':setMilestoneModal.state == 'closed'}" @click="() => triggerSetMilestoneModalTab('closed')">Closed</button>
             </div>
             <transition-group name="fade-group" appear>
-                <SelectMenuItem v-for="item in filteredAvailableMilestones" :selected="data.milestone && (data.milestone.number == item.number)" :key="item.number" @click.native="() => network_setMilestone(item.number)">
-                    <router-link :to="`/${owner}/${repo}/milestone/${item.number}`" class="d-block">
+                <SelectMenuItem v-for="item in filteredAvailableMilestones" :iconStyle="{alignSelf:'flex-start'}" :selected="data.milestone && (data.milestone.number == item.number)" :key="item.number" @click.native="() => network_setMilestone(item.number)">
+                    <div>
                         <span class="milestone-title">{{item.title}}</span>
                         <span class="milestone-description">{{item.description}}</span>
-                    </router-link> 
+                    </div> 
 
                     <template v-slot:icon v-if="setMilestoneModal.loading && setMilestoneModal.settingMilestoneNumber == item.number">
                         <TinyLoadingIcon class="mr-2"></TinyLoadingIcon>
@@ -196,11 +213,13 @@
             SelectMenuItem,
             HyperlinkWrapper
         } from '@/components'
+    import {LabelEditor} from '../../../Labels/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import ProjectCard from './ProjectCard.vue'
     import IssueNotificationSettingPane from './IssueNotificationSettingPane.vue'
     import {util_dateFormat} from '@/util'
     import {
+        commonGet,
         authRequiredGet,
         authRequiredDelete, 
         authRequiredPost, 
@@ -313,39 +332,28 @@
             },
            
         },
+       
         methods: {
             async network_getAssignableUsers() {
                 if(this.chooseAssigneesModal.assignableUsers.data.length > 0 || this.chooseAssigneesModal.assignableUsers.loading) return
                 try{
                     this.chooseAssigneesModal.assignableUsers.loading = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_assignable_users')
 
-                    let pageInfo = undefined
-                    let assignableUsers = []
+                    let url = api.API_REPOSITORY_ISSUES_AVAILABLE_ASSIGNEES({
+                            repo: this.repo,
+                            owner: this.owner,
+                            number: this.number,
+                        })
+                    let res = await commonGet(
+                        url,
+                        {
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_assignable_users'),
+                            headers: {
+                            'accept': 'application/json'
+                        }}
+                    )
 
-                    while(!pageInfo || (pageInfo && pageInfo.next)) {
-                        let url 
-                        if(pageInfo) {
-                            url = pageInfo.next.url
-                        }else{
-                            url = api.API_ISSUE_AVAILABLE_ASSIGNEES({
-                                repo: this.repo,
-                                owner: this.owner,
-                                params: {
-                                    per_page: 100
-                                }
-                            })
-                        }
-                        let res = await authRequiredGet(
-                            url,
-                            {cancelToken}
-                        )
-
-                        assignableUsers = assignableUsers.concat(res.data)
-                        pageInfo = parse(res.headers.link) || {}
-                    }
-
-                    this.chooseAssigneesModal.assignableUsers.data = assignableUsers
+                    this.chooseAssigneesModal.assignableUsers.data = res.data.users
 
                 }catch(e) { 
                     this.handleError(e)
@@ -437,12 +445,11 @@
                             label: labelName
                         })
 
-                        res = await authRequiredAjax(
+                        res = await authRequiredDelete(
                             url,
                             {
-                                labels: [labelName]
+                                data: {labels: [labelName]}
                             },
-                            'delete'
                         )
                     }else{
 
@@ -451,12 +458,11 @@
                             number: this.data.number
                         })
 
-                        res = await authRequiredAjax(
+                        res = await authRequiredPost(
                             url,
                             {
                                 labels: [labelName]
                             },
-                            'post'
                         )
                     }
 
@@ -550,7 +556,7 @@
                         },
                     )
                     
-                    this.$el.dispatchEvent(new CustomEvent('milestone-updated',{bubbles:true,detail:res.milesone}))
+                    this.$el.dispatchEvent(new CustomEvent('milestone-updated',{bubbles:true,detail:res.data.milestone}))
                 }catch(e) {
                     console.log(e)
                 }finally{
@@ -608,6 +614,7 @@
             HyperlinkWrapper,
             Label,
             IssueNotificationSettingPane,
+            LabelEditor,
             State: styled.div``,
             InfoBottom: styled.div``,
             InfoBottomItem: styled.div``,
@@ -737,5 +744,12 @@
         margin-left: -30px;
         margin-right: 8px;
     }
+}
+
+.create-label-btn{
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 40px;
+    font-size: 12px;
 }
 </style>

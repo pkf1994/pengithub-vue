@@ -393,6 +393,7 @@
                 this.data.labels = event.detail
             },
             milestoneUpdatedHook(event) {
+                console.log(event)
                 this.data.milestone = event.detail
             },
             assigneesChangedHook(event) {

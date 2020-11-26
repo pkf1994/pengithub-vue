@@ -40,7 +40,6 @@
     cursor: pointer;
     background-color: #fff;
     border: 0;
-    border-bottom: 1px solid #eaecef;
     svg{
         
         width: 16px;

@@ -254,15 +254,15 @@ export const API_TREE_LIST = payload => {
 }
 
 export const API_REPOSITORY_ISSUES_AVAILABLE_AUTHORS = payload => {
-    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/issues/show_menu_content?partial=issues%2Ffilters%2Fauthors_content&q=${payload.query}`
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/issues/show_menu_content?partial=issues/filters/authors_content&q=${payload.query}`
 }
 
 export const API_REPOSITORY_ISSUES_AVAILABLE_ASSIGNEES = payload => {
-    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/issues/show_menu_content?partial=issues%2Ffilters%2Fassigns_content&q=${payload.query}`
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/issues/${payload.number}/show_partial?partial=issues/sidebar/assignees_menu_content`
 }
 
 export const API_REPOSITORY_ISSUES_AVAILABLE_LABELS = payload => {
-    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/issues/show_menu_content?partial=issues%2Ffilters%2Flabels_content&q=${payload.query}`
+    return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/issues/show_menu_content?partial=issues/filters/labels_content&q=${payload.query}`
 }
 
 export const API_REPOSITORY_AVAILABLE_BRANCHES = payload => {
@@ -440,9 +440,5 @@ export const API_COMMITS_OF_PULL_REQUEST = payload => {
 
 export const API_PROXY_TAGS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/tags?q=${payload.query}`
 
-export const API_ISSUE_AVAILABLE_ASSIGNEES = payload => {
-    let query = util_queryParse.querify(payload.params)
-    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/assignees?${query}`
-}
-
 export const API_ISSUE_ASSIGNEES_ACTION = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/assignees`
+
