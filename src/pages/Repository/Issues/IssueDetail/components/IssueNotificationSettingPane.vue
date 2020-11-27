@@ -38,6 +38,7 @@
             <transition-group name="fade-group" appear>
                 <SelectMenuItem v-for="item in notificationSettingsModal.availableSubscriptionSettings" 
                                 :key="item.title" 
+                                class="border-bottom"
                                 :iconStyle="{alignSelf:'flex-start'}" 
                                 :selected="viewerSubscriptionInfo.viewerSubscription == item.value"
                                 @click.native="() => network_setSubscription(viewerSubscriptionInfo.id,item.value)">
@@ -157,4 +158,18 @@
     color: #586069;
 }
 
+.milestone-title{
+    display: block;
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.milestone-description{
+    display: block;
+    max-width: 265px;
+    font-size: 12px;
+    color: #586069;
+}
 </style>

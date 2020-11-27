@@ -2,7 +2,7 @@
     <transition name="fade" appear>
         <StickyTop v-if="scrollTop > 300 && data.id" class="sticky-top px-3 py-2">
             <StickyTopContent class="d-flex flex-items-center flex-justify-between">
-                <IssueStateBadge :data="data"></IssueStateBadge>    
+                <IssueStateBadge :data="data" class="mr-2"></IssueStateBadge>    
 
                 <div class="min-width-0">
                     <h1 class="d-flex text-bold f5">

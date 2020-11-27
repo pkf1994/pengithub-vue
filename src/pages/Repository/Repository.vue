@@ -167,6 +167,7 @@
                 repoOwnerType: () => this.data.owner && this.data.owner.type,
                 viewerIsCollaborator: () => this.viewerIsCollaborator,
                 viewerPermission: () => this.viewerPermission,
+                viewerCanManageIssue: () => this.viewerCanManageIssue,
                 viewerIsCollaboratorGetter: () => this.network_ifViewerACollaborator,
                 topNoticeShow: () => this.topNoticeShow,
                 repoSubscription: () => this.subscription.data,
@@ -281,6 +282,9 @@
                 if(this.subscription.data.ignored && !this.subscription.data.subscribed) return 'Stop ignoring'
                 return 'Watch'
             },
+            viewerCanManageIssue() {
+                return this.viewerPermission.data == 'ADMIN' || this.viewerPermission.data == 'READ' || this.viewerPermission.data == 'TRIAGE'  || this.viewerPermission.data == 'WRITE'
+            }
         },
         created() {
             this.network_getData()

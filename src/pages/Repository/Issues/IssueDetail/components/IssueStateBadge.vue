@@ -3,7 +3,7 @@
         :class="{'State--green':data.state == 'open' && !data.draft || !data.id,'State--red':data.state == 'closed' && !data.merged,'State--purple':data.merged}"
         style="text-transform:capitalize;border-radius: 2em">
         <IssueIcon class="flex-shrink-0 mr-1 v-align-middle" :class="{'State--green':data.state == 'open' && !data.draft || !data.id,'State--red':data.state == 'closed' && !data.merged,'State--purple':data.merged}" color="#fff" :issue="data"></IssueIcon>
-        <span class="v-align-text-top" style="margin-bottom:1px;min-width:20px">{{(data.merged && 'merged') || (data.draft && 'draft') || data.state || '     '}}</span>    
+        <span class="v-align-middle" style="min-width:20px">{{(data.merged && 'merged') || (data.draft && 'draft') || data.state || '     '}}</span>    
     </div>
 </template>
 <script>

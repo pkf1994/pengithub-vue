@@ -60,7 +60,7 @@
         <IssueHandle class="my-4 border-top" v-if="data.id && viewerIsCollaborator().data">
             <LockIssueButton class="mt-3" 
             v-if="extraData.data.viewerCanUpdate" 
-            @change-lock-status-success="changeLockStatusSuccessPostHandler"
+            @lock-status-changed.native="lockStatusChangedHook"
             :disabled="loading || extraData.loading" 
             :issue="data"></LockIssueButton>
             <div v-if="!data.locked" class="text-bold link-gray-dark pt-3" @click="() => showModal('transferIssueModal')">
@@ -383,8 +383,10 @@
                     this.deleteIssueModal.loading = false
                 }
             },
-            changeLockStatusSuccessPostHandler(payload) {
-                this.data.locked = payload
+            lockStatusChangedHook(event) {
+                if(event.detail.event == 'locked') this.data.locked = true
+                if(event.detail.event == 'unlocked') this.data.locked = false
+                this.timeline.newestTimelines.data.push(event.detail)
             },
             subscriptionUpdatedHook(event) {
                 this.extraData.data.viewerSubscription = event.detail
@@ -393,12 +395,9 @@
                 this.data.labels = event.detail
             },
             milestoneUpdatedHook(event) {
-                console.log(event)
                 this.data.milestone = event.detail
             },
             assigneesChangedHook(event) {
-                console.log('assignees-changed')
-                console.log(event)
                 this.data.assignees = event.detail.assignees
             }
         },

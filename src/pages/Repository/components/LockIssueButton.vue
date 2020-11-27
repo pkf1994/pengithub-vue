@@ -148,7 +148,7 @@
                     let res = await authRequiredDelete(url)
                     this.closeModal()
                     let event = new CustomEvent(
-                        'change-lock-status-success',
+                        'lock-status-changed',
                         {
                             bubbles: true,
                             detail: {

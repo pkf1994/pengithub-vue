@@ -1,5 +1,5 @@
 <template>
-    <LabelItem v-if="!showLabelEditor" class="p-3 Box-row position-relative">
+    <LabelItem v-if="!showLabelEditor" class="p-3 Box-row position-relative" :class="{'loading-delete':loadingDeleteLabel}">
         <button v-if="accessToken && viewerIsCollaborator().data" class="btn-link link-gray float-right" @click="triggerPopover">
             <svg aria-label="Show options" class="octicon octicon-kebab-horizontal" viewBox="0 0 16 16" version="1.1" width="16" height="16" role="img"><path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
         </button>
@@ -19,16 +19,11 @@
             {{label.description}}
         </Description>
 
-        <transition name="fade" appear>
-            <div class="loading-wrapper" v-if="deletingLabel">
-                <CommonLoading size="small"></CommonLoading>
-            </div>
-        </transition>
     </LabelItem>
     <LabelEditor v-else 
                 ref="labelEditor"
                 style="background-color:white!important" 
-                class="bg-gray border border-gray-dark rounded-1"
+                class="bg-gray"
                 :labelNameError="labelNameError"
                 v-model="editLabelData"
                 >
@@ -49,7 +44,7 @@
     import {util_throttle} from '@/util'
     export default {
         name: 'repository_label_item',
-        inject: ['viewerIsCollaborator','extraDataProvided'],
+        inject: ['viewerIsCollaborator','extraDataProvided','viewerCanManageIssue'],
         props: {
             label: Object
         },
@@ -58,7 +53,7 @@
                 editLabelData: {},
                 showLabelEditor: false,
                 loadingEditLabel: false,
-                deletingLabel: false,
+                loadingDeleteLabel: false,
                 labelNameError: false,
             }
         },
@@ -122,10 +117,10 @@
             },
             async network_deleteLabel() {
                 this.$refs.popover.show = false
-                if(!this.acessToken) return 
-                if(!this.viewerIsCollaborator().data) return 
+                if(!this.accessToken) return 
+                if(!this.viewerCanManageIssue()) return 
                 try{
-                    this.deletingLabel = true
+                    this.loadingDeleteLabel = true
                     let url = api.API_HANDLE_LABEL({
                         ...this.$route.params,
                         label: this.label.name
@@ -133,12 +128,12 @@
 
                     let res = await authRequiredDelete(url)
 
-                    this.$emit('label-deleted',this.label)
+                    this.$el.dispatchEvent(new CustomEvent('label-deleted',{bubbles:true,detail:this.label}))
 
                 }catch(e) {
                     this.handleError(e)
                 }finally{
-                    this.deletingLabel = false
+                    this.loadingDeleteLabel = false
                 }
             },
             async network_checkIfLabelNameHasBeenTaken() {
@@ -201,5 +196,8 @@
     left: 0;
     bottom: 0;
     transform: translate(0)
+}
+.loading-delete{
+    opacity: .4;
 }
 </style>

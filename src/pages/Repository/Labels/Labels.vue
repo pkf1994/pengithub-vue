@@ -56,7 +56,7 @@
 
                 <div v-else>
                     <transition-group name="fade-group" appear>
-                        <LabelItem v-for="item in data" :key="item.name" :label="item" @label-deleted="labelDeletedHandler" @label-updated.native="labelUpdatedHandler"/>
+                        <LabelItem v-for="item in data" :key="item.name" :label="item" @label-deleted.native="labelDeletedHandler" @label-updated.native="labelUpdatedHandler"/>
                     </transition-group>
                 </div>
                
@@ -287,7 +287,7 @@
             labelDeletedHandler(e) {
                 let idx
                 this.data.forEach((i,index) => {
-                    if(i.name == e.name) {
+                    if(i.name == e.detail.name) {
                         idx = index
                     }
                 })
