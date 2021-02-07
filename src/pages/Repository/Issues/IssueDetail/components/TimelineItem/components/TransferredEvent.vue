@@ -5,6 +5,10 @@
         </template>
         <template v-slot:action>
                 transferred this issue from {{transferredFrom}}<!-- {{transferredEvent.fromRepository.owner}}/{{transferredEvent.fromRepository.repo}} -->
+                <span class="no-wrap">
+                    on
+                    {{data.created_at | getDateDiff}}
+                </span>
         </template>
     </Other>
 </template>
@@ -12,6 +16,7 @@
 <script>
     import styled from 'vue-styled-components'
     import Other from './Other'
+    import {authRequiredGitHubGraphqlApiQuery} from '@/network'
     export default {
         props: {
             data: {

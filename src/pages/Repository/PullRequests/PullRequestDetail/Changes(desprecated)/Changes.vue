@@ -1,17 +1,31 @@
 <template>
-    <CommonLoadingWrapper class="px-3" :loading="reviewComments.loading || reviewCommentsExtraData.loading || changedFiles.loading || pendingReview.loading || pendingReview.reviewComments.loading" :position="changedFiles.loading ? 'center' : 'corner'">
-        <div ref="actionRow" class="d-flex flex-justify-between py-3 action-row" @scroll="scrollEventListener">
-            <button class="btn-link muted-link select-menu-button" @click="triggerSwitcherStretch" >
-                <strong style="font-size:13px;" class="mr-1">Jump to...</strong>
-            </button>
+    <CommonLoadingWrapper :loading="reviewComments.loading || reviewCommentsExtraData.loading || changedFiles.loading || pendingReview.loading || pendingReview.reviewComments.loading" :position="changedFiles.loading ? 'center' : 'corner'">
+            <Switcher v-if="changedFiles.data.length > 0" class="switcher ">
+                <button class="text-left width-full btn-link text-gray-dark" @click="triggerSwitcherStretch" >
+                    <svg data="stretch-icon" v-if="!switcherStretched" class="octicon octicon-chevron-down switcher-icon-open" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 11L0 6l1.5-1.5L5 8.25 8.5 4.5 10 6l-5 5z"></path></svg>
+                    <svg data="stretch-icon" v-else class="octicon octicon-chevron-up switcher-icon-close" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 10l-1.5 1.5L5 7.75 1.5 11.5 0 10l5-5 5 5z"></path></svg>
 
-            <button class="btn btn-sm btn-primary">
-                Review
-                <span class="dropdown-caret"></span>
-            </button>  
-        </div>
+                    <svg class="octicon octicon-diff switcher-icon" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6 7h2v1H6v2H5V8H3V7h2V5h1v2zm-3 6h5v-1H3v1zM7.5 2L11 5.5V15c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h6.5zM10 6L7 3H1v12h9V6zM8.5 0H3v1h5l4 4v8h1V4.5L8.5 0z"></path></svg>
 
-        <div v-show="actionRowStuck" class="toolbar-shadow"></div>
+                    {{pullRequestProvided().changed_files}} changed {{pullRequestProvided().changed_files > 1 ? 'files' : 'file'}}
+                    <span class="meta text-gray">
+                        <span class="text-green">
+                            {{pullRequestProvided().additions}} {{pullRequestProvided().additions > 1 ? 'additions' : 'addition'}}
+                        </span>
+                        and
+                        <span class="text-red">
+                            {{pullRequestProvided().deletions}} {{pullRequestProvided().deletions > 1 ? 'deletions' : 'deletion'}}
+                        </span>
+                    </span>    
+                </button>
+
+                <SwitcherOptions class="switcher-options" v-show="switcherStretched">
+                    <a :href="`#diff-${item.sha}`" v-for="item in changedFiles.data" :key="item.sha">
+                        <svg :class="{modified:item.status == 'modified',added:item.status == 'added',deleted:item.status == 'deleted'}" class="octicon octicon-diff-modified" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm0 13H1V2h12v12zM4 8c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z"></path></svg>
+                        {{item.filename}}
+                    </a>
+                </SwitcherOptions>
+            </Switcher>
         
 
         <transition-group name="fade-group" appear>
@@ -94,7 +108,6 @@
                     data: [],
                     loading: false
                 },
-                actionRowStuck: false
             }
         },
         computed: {
@@ -115,28 +128,9 @@
             },
         },
         created() {
-            this.initScrollEventListener()
             this.network_getData()
         },
         methods: {
-            scrollEventListener(e) {
-                /* console.log(getComputedStyle(this.$refs.actionRow).position)
-                console.log(getComputedStyle(this.$refs.actionRow).top)
-                console.log(this.$refs.actionRow.offsetTop)
-                console.log(this.$refs.actionRow.scrollTop) */
-                if(!this.preOffSetTop || this.preOffSetTop == this.$refs.actionRow.offsetTop) {
-                    this.actionRowStuck = false
-                } else {
-                    this.actionRowStuck = true
-                }
-                this.preOffSetTop = this.$refs.actionRow.offsetTop
-            },
-            initScrollEventListener() {
-                window.addEventListener('scroll',this.scrollEventListener)
-            },
-            unbindScrollEventListener() {
-                window.removeEventListener('scroll',this.scrollEventListener)
-            },
             network_getData() {
                 this.network_getReviewComments()
                 this.network_getChangedFiles()
@@ -429,9 +423,6 @@
                     this.network_getReviewCommentsExtraData(res.data)
                 }
             } */
-          /*   scrollEventListener(e) {
-                console.log(e.target.style)
-            } */
         },
         watch: {
             state_deletedReviewComments(newOne,oldOne) {
@@ -460,7 +451,6 @@
                 } 
             },
         },
-       
         components: {
             CommonLoadingWrapper,
             AnimatedHeightWrapper,
@@ -478,12 +468,47 @@
 </script>
 
 <style scoped lang="scss">
-@import 'node_modules/@primer/css/dropdown/index.scss';
-.action-row{
-    position: sticky;
-    top: 0;
-    background: white;
-    z-index: 1;
+.switcher{
+    padding: 15px;
+    background-color: #fff;
+    position: relative;
+    button{
+        padding-left: 20px;
+        font-weight: 600;
+        svg[data=stretch-icon]{
+            position: relative;
+            top: 1px;
+            float: right;
+            color: #586069;
+        }
+        svg{
+            float: left;
+            margin-top: 1px;
+            margin-left: -20px;
+            color: #586069;
+        }
+        .meta{
+            display: block;
+            font-size: 85%;
+            font-weight: 400;
+        }
+    }
+}   
+
+.switcher-options{
+    padding-left: 20px; 
+    position: relative;
+    padding-top: 6px;
+    a{
+        font-size: 85%;
+        font-weight: 400;
+        display: block;
+        padding: 6px 0;
+        svg{
+            float: left;
+            margin-left: -20px;
+        }
+    }
 }
 
 .diff{
@@ -550,7 +575,7 @@
     border-bottom: 1px solid #dfe2e5;
 }
 
-/* .btn {
+.btn {
     display: inline-block;
     padding: 9px 15px;
     margin: 0;
@@ -565,7 +590,7 @@
     border: 1px solid rgba(27,31,35,.2);
     border-radius: .25em;
     appearance: none;
-} */
+}
 
 .modified{
     color: #e3ce79;
@@ -575,26 +600,5 @@
 }
 .deleted{
     color: #cb2431;
-}
-
-.select-menu-button:after {
-    display: inline-block;
-    width: 0;
-    height: 0;
-    vertical-align: -2px;
-    content: "";
-    border: 4px solid transparent;
-    border-top-color: currentcolor;
-}
-
-.toolbar-shadow {
-    position: fixed;
-    top: 60px;
-    right: 0;
-    left: 0;
-    z-index: 28;
-    height: 5px;
-    background: linear-gradient(rgba(0,0,0,.075),rgba(0,0,0,.001)) repeat-x 0 0;
-    border-top: 1px solid rgba(0,0,0,.15);
 }
 </style>

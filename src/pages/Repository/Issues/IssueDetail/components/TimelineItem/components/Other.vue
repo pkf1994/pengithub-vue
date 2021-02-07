@@ -10,8 +10,7 @@
                 <WhoDidWhat>
                     <router-link v-if="showActor && showActorAvatar" to="/" class="d-inline-block">
                         <ImgWrapper class="avatar avatar-user">
-                            <img v-if="data.actor" :src="data.actor.avatar_url" :alt="`@${data.actor.login}`" class="avatar" height="20" width="20">
-                            <img v-if="data.author" :src="data.author.avatar_url" :alt="`@${data.author.login}`" class="avatar" height="20" width="20">
+                            <img v-if="actorAvatarUrl" :src="actorAvatarUrl" class="avatar" height="20" width="20">
                         </ImgWrapper>
                     </router-link>
                     <router-link v-if="showActor && data.actor" to="/" class="text-bold link-gray-dark">
@@ -63,6 +62,10 @@
         computed: {
             dateStampGap() {
                 return Date.parse(new Date()) - Date.parse(this.data.created_at)
+            },
+            actorAvatarUrl() {
+                if(this.data.actor) return this.data.actor.avatar_url || this.data.actor.avatarUrl
+                if(this.data.author) return this.data.author.avatar_url
             }
         },
         components: {

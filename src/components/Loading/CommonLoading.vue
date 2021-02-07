@@ -41,7 +41,7 @@
         bottom: 0;
         left: 0;
         right: 0;
-
+        z-index: 9;
     }
     .small{
         bottom: calc(50% - 17.5px);

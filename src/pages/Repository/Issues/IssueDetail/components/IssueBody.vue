@@ -10,7 +10,7 @@
                                 Copy link
                             </button>
                             <div  v-if="accessToken">
-                                <button class="popover-item btn-link dropdown-item" @click.stop="quoteReply" v-if="!data.locked || viewerIsCollaborator().data">
+                                <button class="popover-item btn-link dropdown-item" @click.stop="quoteReply" v-if="viewerCanComment()">
                                     Quote reply
                                 </button>
                                 <button class="popover-item btn-link dropdown-item">
@@ -139,7 +139,7 @@
     import Vue from 'vue'
     import Reactions from './Reactions'
     export default {
-        inject: ['viewerIsCollaborator','issue'],
+        inject: ['viewerIsCollaborator','issue','viewerCanComment'],
         data() {
             return {
                 showMinimized: false,

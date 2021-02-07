@@ -4,6 +4,7 @@ import HiddenItemLoading from './HiddenItemLoading.vue'
 import PullRequestCommentCreator from './PullRequestCommentCreator.vue'
 import PullRequestBodyEditor from './PullRequestBodyEditor.vue'
 import PullMerger from './PullMerger.vue'
+import BottomInfoRows from './BottomInfoRows.vue'
 
 export {
         Comment,
@@ -11,4 +12,5 @@ export {
         PullRequestCommentCreator,
         PullRequestBodyEditor,
         PullMerger,
+        BottomInfoRows,
         PullRequestBody}

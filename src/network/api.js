@@ -209,6 +209,11 @@ export const API_PULLREQUEST = (payload) => {
 
 export const API_REVIEW = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/reviews/${payload.reviewId}`
 
+export const API_REVIEWS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/reviews?${query}`
+}
+
 export const API_CREATE_REVIEW = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/reviews`
 
 export const API_SUBMIT_REVIEW = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/pulls/${payload.number}/reviews/${payload.reviewId}/events`

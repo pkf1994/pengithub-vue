@@ -272,6 +272,7 @@
                 })
             },
             async network_getViewHasReactedInfo() {
+                if(!this.reactionsHost.node_id) return 
                 try {
                     let res = await authRequiredGitHubGraphqlApiQuery(
                         graphql.GRAPHQL_VIEWER_HAS_REACTED_INFO,

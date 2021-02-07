@@ -12,3 +12,29 @@ query($id:ID!){
   }
   
 `
+
+export const GRAPHQL_PULL_REVIEWS = `
+query($id:ID!,$after:String){
+  node(id: $id) {
+    ... on PullRequest {
+      reviews(first: 100, after: $after) {
+        nodes {
+          author {
+            avatarUrl
+            login
+          }
+          state
+          commit {
+            oid
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+}
+
+`

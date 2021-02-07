@@ -22,16 +22,15 @@
                     <Weeks class="main" style="min-width:0px">
                         <div class="d-flex pt-3 pr-1">
                             <WeekItem class="d-flex flex-column" v-for="(weekItem,weekIndex) in contributionIllustration.weeks" :key="weekIndex">
-                                <Day class="contribution-week-item" 
-                                :class="{'not-selected':selectedDate && (selectedDate != day.date)}" 
+                                <Day class="contribution-week-item data-count"    
+                                :class="[{'not-selected':selectedDate && (selectedDate != day.date),'data-count-most':day.dataCount > 3},`data-count-${day.dataCount}`]" 
                                 @click="() => routerWithSpecificDate(day.date)" 
                                 :date="day.date" 
                                 v-for="(day,dayIndex) in weekItem" 
                                 :day="dayIndex == 0 && generateDateDay(day.date)" 
                                 :month="dayIndex == 0 && generateDateDay(day.date) < 8 && generateMonth(day.date)"
                                 :key="day.date" 
-                                :dataCount="day.dataCount"
-                                :style="{backgroundColor:day.fill}">
+                                :dataCount="day.dataCount">
                                 </Day>
                             </WeekItem>
                         </div>
@@ -552,10 +551,10 @@
 
 .contribution-week-item{
     position: relative;
-    width: 12px;
-    height: 12px;
-    margin-right:3px;
-    margin-bottom:3px;
+    width: 11px;
+    height: 11px;
+    margin-right:4px;
+    margin-bottom:4px;
     overflow: visible;
     span{
         position: absolute;
@@ -601,6 +600,8 @@
         display: inline-block;
         width: 10px;
         height: 10px;
+        border: 1px solid rgba(27,31,35,0.06);
+        border-radius: 2px;
     }
 }
 
@@ -654,4 +655,24 @@
         height: 30px !important;
         width: 30px !important;
     }
+.data-count{
+    border: 1px solid rgba(27,31,35,0.06);
+    border-radius: 2px;
+}
+
+.data-count-0{
+    background: #ebedf0;
+}
+.data-count-1{
+    background: #9be9a8;
+}
+.data-count-2{
+    background: #40c463;
+}
+.data-count-3{
+    background: #30a14e;
+}
+.data-count-most{
+    background: #216e39;
+}
 </style>

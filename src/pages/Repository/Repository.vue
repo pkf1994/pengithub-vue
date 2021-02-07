@@ -1,5 +1,5 @@
 <template>
-    <WithTopNoticeWrapper theKey="repository">
+    <WithTopNoticeWrapper theKey="repository" @viewer-blocked.native="() => {viewerBlocked = true}">
         <AnimatedHeightWrapper>
             <OrganizationDataAccessRestrictNotice v-if="showOrganizationDataAccessRestrictNotice" class="p-3 flash flash-full">
                  <button @click="() => {showOrganizationDataAccessRestrictNotice = false}" class="flash-close" type="button">
@@ -156,7 +156,8 @@
                     loading: false
                 },
                 resetBeforeUpdate: true,
-                showOrganizationDataAccessRestrictNotice: false
+                showOrganizationDataAccessRestrictNotice: false,
+                viewerBlocked: false
             }
         },
         provide() {
@@ -172,6 +173,7 @@
                 topNoticeShow: () => this.topNoticeShow,
                 repoSubscription: () => this.subscription.data,
                 graphqlWritePermission: () => this.graphqlWritePermission,
+                viewerBlocked: () => this.viewerBlocked,
             }
         },
         computed: {
@@ -283,7 +285,7 @@
                 return 'Watch'
             },
             viewerCanManageIssue() {
-                return this.viewerPermission.data == 'ADMIN' || this.viewerPermission.data == 'READ' || this.viewerPermission.data == 'TRIAGE'  || this.viewerPermission.data == 'WRITE'
+                return this.viewerPermission.data == 'ADMIN' || this.viewerPermission.data == 'TRIAGE'  || this.viewerPermission.data == 'WRITE'
             }
         },
         created() {

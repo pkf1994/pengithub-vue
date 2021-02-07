@@ -3,8 +3,9 @@
 
 <template>
     <div>
-
         <InfoBottom v-if="data.id">
+            <slot></slot> 
+
             <!-- assignee -->
             <InfoBottomItem class="info-bottom-item">
                 <span v-if="viewerCanManageIssue()" @click="() => showModal('chooseAssigneesModal')" class="float-right">
@@ -213,6 +214,7 @@
             </transition-group>
         </Modal>
 
+        
     </div>
 </template>
 
@@ -230,8 +232,6 @@
             HyperlinkWrapper
         } from '@/components'
     import {LabelEditor} from '../../../Labels/components'
-    import {RouteUpdateAwareMixin} from '@/mixins'
-    import ProjectCard from './ProjectCard.vue'
     import IssueNotificationSettingPane from './IssueNotificationSettingPane.vue'
     import {util_throttle} from '@/util'
     import {
@@ -246,9 +246,7 @@
     import * as graphql from './graphql'
     var parse = require('parse-link-header');
     export default {
-        inject: ['repoBasicInfo','viewerIsCollaborator','viewerCanManageIssue'],
-        mixins: [RouteUpdateAwareMixin],
-
+        inject: ['repoBasicInfo','viewerCanManageIssue'],
         props: {
             data: {
                 type: Object,
@@ -377,7 +375,7 @@
                     let res = await commonGet(
                         url,
                         {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_assignable_users'),
+                            cancelToken: cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_assignable_users').cancelToken,
                             headers: {
                             'accept': 'application/json'
                         }}
@@ -429,7 +427,14 @@
                         )
                     }
                     
-                    this.$el.dispatchEvent(new CustomEvent('assignees-changed',{bubbles:true,detail:res.data}))
+                    this.$el.dispatchEvent(new CustomEvent('issue-updated',{bubbles:true,detail:res.data}))
+
+                    this.$el.dispatchEvent(new CustomEvent('new-timeline-item-created',{bubbles:true,detail:{
+                        event: 'assigned',
+                        actor: this.viewer,
+                        assignee,
+                        id: (new Date()).getTime()
+                    }}))
                 }catch(e) {
                     console.log(e)
                 }finally{
@@ -454,7 +459,7 @@
                         }
                     )
                     
-                    this.$el.dispatchEvent(new CustomEvent('assignees-changed',{bubbles:true,detail:res.data}))
+                    this.$el.dispatchEvent(new CustomEvent('issue-updated',{bubbles:true,detail:res.data}))
                 }catch(e) {
                     console.log(e)
                 }finally{
@@ -481,6 +486,20 @@
                                 data: {labels: [labelName]}
                             },
                         )
+
+                        this.$el.dispatchEvent(new CustomEvent('issue-updated',{bubbles:true,detail:{
+                            ...this.data,
+                            labels: res.data
+                        }}))
+
+                        this.$el.dispatchEvent(new CustomEvent('new-timeline-item-created',{bubbles:true,detail:{
+                            event: 'unlabeled',
+                            created_at: (new Date()).toISOString(),
+                            label: this.applyLabelsModal.labels.data.filter(i => i.name == labelName)[0],
+                            id: (new Date()).getTime(),
+                            issueLabels: res.data,
+                            actor: this.viewer
+                        }}))
                     }else{
 
                         let url = api.API_ADD_LABELS_TO_ISSUE({
@@ -494,9 +513,23 @@
                                 labels: [labelName]
                             },
                         )
+
+                        this.$el.dispatchEvent(new CustomEvent('issue-updated',{bubbles:true,detail:{
+                            ...this.data,
+                            labels: res.data
+                        }}))
+
+                        this.$el.dispatchEvent(new CustomEvent('new-timeline-item-created',{bubbles:true,detail:{
+                            event: 'labeled',
+                            created_at: (new Date()).toISOString(),
+                            label: this.applyLabelsModal.labels.data.filter(i => i.name == labelName)[0],
+                            id: (new Date()).getTime(),
+                            issueLabels: res.data,
+                            actor: this.viewer
+                        }}))
                     }
 
-                    this.$el.dispatchEvent(new CustomEvent('labels-updated',{bubbles:true,detail:res.data}))
+                    //this.$el.dispatchEvent(new CustomEvent('labels-updated',{bubbles:true,detail:res.data}))
 
                     //this.data.labels = res.data
 
@@ -513,7 +546,7 @@
                 if(this.applyLabelsModal.labels.loading) return 
                 try{
                     this.applyLabelsModal.labels.loading = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_available_labels')
+                    let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_available_labels').cancelToken
                     let url = api.API_REPOSITORY_LABELS({
                         ...this.$route.params,
                         params: {
@@ -572,11 +605,12 @@
             async network_setMilestone(number) {
                 if(this.setMilestoneModal.loading) return 
                 if(!this.accessToken) return 
+                if(number == this.data.milestone.number) return
                 try{
                     this.setMilestoneModal.loading = true
                     this.setMilestoneModal.settingMilestoneNumber = number
 
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' set_milestone')
+                    let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' set_milestone').cancelToken
                     let url = api.API_ISSUE(this.$route.params)
 
                     let res = await authRequiredPatch(
@@ -585,8 +619,28 @@
                             milestone: number
                         },
                     )
+
+                    if(this.data.milestone) {
+                        this.$el.dispatchEvent(new CustomEvent('new-timeline-item-created',{bubbles:true,detail:{
+                            event: 'demilestoned',
+                            created_at: (new Date()).toISOString(),
+                            id: (new Date()).getTime(),
+                            milestone: this.data.milestone,
+                            actor: this.viewer
+                        }}))
+                    }
                     
-                    this.$el.dispatchEvent(new CustomEvent('milestone-updated',{bubbles:true,detail:res.data.milestone}))
+                    this.$el.dispatchEvent(new CustomEvent('issue-updated',{bubbles:true,detail:{
+                        milestone: res.data.milestone,
+                    }}))
+
+                    this.$el.dispatchEvent(new CustomEvent('new-timeline-item-created',{bubbles:true,detail:{
+                        event: 'milestoned',
+                        created_at: (new Date()).toISOString(),
+                        id: (new Date()).getTime() + 1,
+                        milestone: res.data.milestone,
+                        actor: this.viewer
+                    }}))
                 }catch(e) {
                     console.log(e)
                 }finally{
@@ -604,7 +658,7 @@
 
                     //this.data.viewerSubscription = result
 
-                    this.$el.dispatchEvent(new CustomEvent('subscription-updated',{bubbles:true,detail: result}))
+                    this.$el.dispatchEvent(new CustomEvent('issue-extra-updated',{bubbles:true,detail: {viewerSubscription:result}}))
 
                 }catch(e) {
                     this.handleError(e)
@@ -617,7 +671,7 @@
                 if(!this.accessToken) return
                 try{
                     this.applyLabelsModal.loadingCreateLabel = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' create_label')
+                    let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' create_label').cancelToken
                     let url = api.API_REPOSITORY_LABELS(this.$route.params)
                     let res = await authRequiredPost(
                         url,
@@ -653,7 +707,7 @@
                     await authRequiredGet(
                         u,
                         {
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' check_if_label_name_has_been_taken')
+                            cancelToken: cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' check_if_label_name_has_been_taken').cancelToken
                         }
                     )
 
@@ -669,7 +723,7 @@
                 try{
                     this.setMilestoneModal.loadingClearMilestone = true
 
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' clear_milestone')
+                    let cancelToken = cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' clear_milestone').cancelToken
                     let url = api.API_ISSUE(this.$route.params)
 
                     let res = await authRequiredPatch(
@@ -679,7 +733,15 @@
                         },
                     )
                     
-                    this.$el.dispatchEvent(new CustomEvent('milestone-updated',{bubbles:true,detail:res.data.milestone}))
+                    this.$el.dispatchEvent(new CustomEvent('issue-updated',{bubbles:true,detail:{milestone: undefined}}))
+
+                    this.$el.dispatchEvent(new CustomEvent('new-timeline-item-created',{bubbles:true,detail:{
+                        event: 'demilestoned',
+                        created_at: (new Date()).toISOString(),
+                        id: (new Date()).getTime(),
+                        milestone: this.data.milestone,
+                        actor: this.viewer
+                    }}))
                 }catch(e) {
                     console.log(e)
                 }finally{
@@ -717,7 +779,6 @@
             LoadingIconEx,
             ImgWrapper,
             Progress,
-            ProjectCard,
             Modal,
             SimpleSearchInput,
             TinyLoadingIcon,

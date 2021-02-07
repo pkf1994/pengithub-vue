@@ -118,8 +118,8 @@
                     )
                     this.closeModal()
 
-                    let event = new CustomEvent(
-                        'lock-status-changed',
+                    this.$el.dispatchEvent( new CustomEvent(
+                        'new-timeline-item-created',
                         {
                             bubbles: true,
                             detail: {
@@ -132,11 +132,14 @@
                                 lock_reason: this.lockConversationModal.lockReason
                             }
                         }
-                    )
-                    this.$el.dispatchEvent(event)
+                    ))
+
+                    this.$el.dispatchEvent(new CustomEvent('issue-updated',{bubbles:true,detail:{locked:true}}))
+
+                    this.$el.dispatchEvent(new CustomEvent('issue-extra-updated',{bubbles:true,detail:{activeLockReason:this.lockConversationModal.lockReason}}))
                 }catch(e) {
                     this.handleError(e)
-                }finally{
+                }finally{  
                     this.lockConversationModal.loading = false
                 }
             },
@@ -147,8 +150,9 @@
                     let url = api.API_ISSUE_LOCK(this.$route.params)
                     let res = await authRequiredDelete(url)
                     this.closeModal()
-                    let event = new CustomEvent(
-                        'lock-status-changed',
+
+                    this.$el.dispatchEvent(new CustomEvent(
+                        'new-timeline-item-created',
                         {
                             bubbles: true,
                             detail: {
@@ -161,8 +165,8 @@
                                 lock_reason: this.lockConversationModal.lockReason
                             }
                         }
-                    )
-                    this.$el.dispatchEvent(event)
+                    ))
+                    this.$el.dispatchEvent(new CustomEvent('issue-updated',{bubbles:true,detail:{...this.issue,locked:false}}))
                 }catch(e) {
                     this.handleError(e)
                 }finally{

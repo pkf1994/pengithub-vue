@@ -1,5 +1,5 @@
 <template>
-    <Container>
+    <Container :id="data.id">
         <Comment v-if="data.event === 'commented'" 
                 :data="data" 
                 @quote="(payload) => $emit('quote',payload)"
@@ -183,7 +183,7 @@
                 <svg class="octicon octicon-lock" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 13H3v-1h1v1zm8-6v7c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h1V4c0-2.2 1.8-4 4-4s4 1.8 4 4v2h1c.55 0 1 .45 1 1zM3.8 6h4.41V4c0-1.22-.98-2.2-2.2-2.2-1.22 0-2.2.98-2.2 2.2v2H3.8zM11 7H2v7h9V7zM4 8H3v1h1V8zm0 2H3v1h1v-1z"></path></svg>
             </template>
             <template v-slot:action>
-               {{data.actor.login === owner || data.actor.login === 'ghost' ? "Repository owner" : ''}} locked <strong v-if="data.lock_reason">as {{data.lock_reason}}</strong> and limited conversation to collaborators
+               {{data.actor.login === owner || data.actor.login === 'ghost' ? "Repository owner" : ''}} locked <span v-if="data.lock_reason">as <strong>{{data.lock_reason}}</strong></span> and limited conversation to collaborators
             </template>
         </Other>
         <!-- unlocked  -->
@@ -210,7 +210,7 @@
             </template>
         </Other>
          <!-- transferred  -->
-        <TransferredEvent v-else-if="data.event == 'tranferred'" :data="data"></TransferredEvent>
+        <TransferredEvent v-else-if="data.event == 'transferred'" :data="data"></TransferredEvent>
         <!-- marked_as_duplicate  -->
         <Other v-else-if="data.event === 'marked_as_duplicate'" :data="data">
             <template v-slot:icon>

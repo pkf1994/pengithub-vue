@@ -10,6 +10,7 @@ export const GRAPHQL_ISSUE = `
             viewerCanUpdate
             viewerCanSubscribe
             viewerCanReact
+            viewerCannotUpdateReasons
             userContentEdits {
               totalCount
             }
@@ -19,7 +20,7 @@ export const GRAPHQL_ISSUE = `
                 avatarUrl
                 id
                 login
-              }
+              }   
             }
           }
         }
@@ -50,6 +51,39 @@ export const GRAPHQL_ISSUE = `
               login
             }
           } 
+          ... on PullRequestReview {
+            id
+            viewerCanDelete
+            viewerCanReact
+            viewerCanUpdate
+            viewerCannotUpdateReasons
+            viewerDidAuthor
+            userContentEdits(first:1) {
+              totalCount
+              nodes {
+                editedAt
+              }
+            }
+            authorAssociation
+          }
+          ... on CommitComment {
+            id
+            isMinimized
+            minimizedReason
+            viewerCanDelete
+            viewerCanMinimize
+            viewerCanReact
+            viewerCanUpdate
+            viewerCannotUpdateReasons
+            viewerDidAuthor
+            userContentEdits(first:1) {
+              totalCount
+              nodes {
+                editedAt
+              }
+            }
+            authorAssociation
+          }
         }
       }
   `

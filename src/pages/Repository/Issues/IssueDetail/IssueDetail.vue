@@ -23,7 +23,6 @@
         <transition-group tag="div" appear name="fade">
             <TimelineItem v-for="(item,index) in handledTimelines" 
                     :data="item" :key="(item.id || '') + index"
-                    @comment-deleted.native="commentDeletedHook"
                     @quote="quoteReply" 
                     @unminimize-comment="unminimizeCommentPostHook"
                     @update-comment="updateCommentPostHook"
@@ -43,26 +42,26 @@
 
         <CommentCreatePane class="mb-5 comment-create-edit-pane" 
                         ref="commentEditor"
-                        @comment-created.native="createCommentPostHook"
-                        @issue-closed="closeIssuePostHook"
+                        @new-timeline-item-created.native="newTimelineItemCreatedHook"
+                        @issue-updated.native="issueUpdatedHook"
                         v-if="data.id"
                         :locked="this.data.locked"
-                        :viewerDidAuthor="extraData.data.viewerDidAuthor" 
-                        :lockedReason="extraData.data.activeLockReason" 
-                        :viewerIsCollaborator="viewerIsCollaborator().data"></CommentCreatePane>
+                        :lockedReason="extraData.data.activeLockReason"></CommentCreatePane>
 
         <BottomInfoRows :data="Object.assign(data,extraData.data)" 
-                        @subscription-updated.native="subscriptionUpdatedHook" 
-                        @labels-updated.native="labelsUpdatedHook"
-                        @assignees-changed.native="assigneesChangedHook"
-                        @milestone-updated.native="milestoneUpdatedHook"></BottomInfoRows>
+                        @issue-extra-updated.native="issueExtraUpdatedHook" 
+                        @issue-updated.native="issueUpdatedHook" 
+                        @new-timeline-item-created.native="newTimelineItemCreatedHook"   
+                        ></BottomInfoRows>
 
-        <IssueHandle class="my-4 border-top" v-if="data.id && viewerIsCollaborator().data">
+        <IssueHandle class="my-4 border-top" v-if="data.id && viewerCanManageIssue()">
             <LockIssueButton class="mt-3" 
-            v-if="extraData.data.viewerCanUpdate" 
-            @lock-status-changed.native="lockStatusChangedHook"
-            :disabled="loading || extraData.loading" 
-            :issue="data"></LockIssueButton>
+                            v-if="extraData.data.viewerCanUpdate" 
+                            @issue-updated.native="issueUpdatedHook"
+                            @issue-extra-updated.native="issueExtraUpdatedHook"
+                            @new-timeline-item-created.native="newTimelineItemCreatedHook"
+                            :disabled="loading || extraData.loading" 
+                            :issue="data"></LockIssueButton>
             <div v-if="!data.locked" class="text-bold link-gray-dark pt-3" @click="() => showModal('transferIssueModal')">
                 <svg class="octicon octicon-arrow-right" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.22 2.97a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06l2.97-2.97H3.75a.75.75 0 010-1.5h7.44L8.22 4.03a.75.75 0 010-1.06z"></path></svg>
                 <strong>Transfer issue</strong>
@@ -71,10 +70,6 @@
                 <svg class="octicon octicon-trashcan" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.5 1.75a.25.25 0 01.25-.25h2.5a.25.25 0 01.25.25V3h-3V1.75zm4.5 0V3h2.25a.75.75 0 010 1.5H2.75a.75.75 0 010-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75zM4.496 6.675a.75.75 0 10-1.492.15l.66 6.6A1.75 1.75 0 005.405 15h5.19c.9 0 1.652-.681 1.741-1.576l.66-6.6a.75.75 0 00-1.492-.149l-.66 6.6a.25.25 0 01-.249.225h-5.19a.25.25 0 01-.249-.225l-.66-6.6z"></path></svg>
                 <strong>Delete issue</strong>
             </div> 
-           <!--  <div class="text-bold link-gray-dark pt-3" @click="() => showModal('deleteIssueModal')" >
-                <svg class="octicon octicon-pin" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4.456.734a1.75 1.75 0 012.826.504l.613 1.327a3.081 3.081 0 002.084 1.707l2.454.584c1.332.317 1.8 1.972.832 2.94L11.06 10l3.72 3.72a.75.75 0 11-1.061 1.06L10 11.06l-2.204 2.205c-.968.968-2.623.5-2.94-.832l-.584-2.454a3.081 3.081 0 00-1.707-2.084l-1.327-.613a1.75 1.75 0 01-.504-2.826L4.456.734zM5.92 1.866a.25.25 0 00-.404-.072L1.794 5.516a.25.25 0 00.072.404l1.328.613A4.582 4.582 0 015.73 9.63l.584 2.454a.25.25 0 00.42.12l5.47-5.47a.25.25 0 00-.12-.42L9.63 5.73a4.581 4.581 0 01-3.098-2.537L5.92 1.866z"></path></svg>
-                <strong>Pin issue</strong>
-            </div>  -->
         </IssueHandle>
 
         <StickyTop :data="data"></StickyTop>    
@@ -89,6 +84,7 @@
             <div style="overflowY: auto">
                 <transition-group name="fade-group" appear>
                     <SelectMenuItem v-for="item in filteredTransferTargetRepositories" 
+                                    class="border-bottom"
                                     :key="item.id" 
                                     :iconStyle="{alignSelf:'flex-start'}" 
                                     :selected="transferIssueModal.selectedRepository == item.id" 
@@ -160,9 +156,10 @@
             IssueHeader,
             BottomInfoRows,
             TopInfoRows,
+            IssueNotificationSettingPane,
+            LockIssueButton,
             StickyTop} from './components'
     import {Comment} from './components/TimelineItem/components'
-    import {IssueNotificationSettingPane,LockIssueButton} from '../../components'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
     import {
@@ -172,6 +169,7 @@
     export default {
         name: 'issueDetail',
         mixins: [IssueDetailProtoMixin],
+        inject: ['viewerCanManageIssue'],
         provide() {
             return {
                 deletedCommentsProvided: () => this.deletedComments,
@@ -353,7 +351,7 @@
                     )
                     this.closeModal()
                     this.$router.push(res.data.data.transferIssue.issue.resourcePath)
-                    this.topNoticeShow('repository','This issue was transferred here.')
+                    this.topNoticeShow('repository','This issue was transferred here.',true)
                 }catch(e){
                     this.handleError(e)
                 }finally{
@@ -376,30 +374,28 @@
                     )
                     this.handleGraphqlError(res)
                     this.$router.replace(`/${this.owner}/${this.repo}/issues?delete=${this.data.id}`)
-                    this.topNoticeShow('repository','The issue was successfully deleted.')
+                    this.topNoticeShow('repository','The issue was successfully deleted.', true)
                 }catch(e) { 
                     this.handleError(e)
                 }finally{
                     this.deleteIssueModal.loading = false
                 }
             },
-            lockStatusChangedHook(event) {
-                if(event.detail.event == 'locked') this.data.locked = true
-                if(event.detail.event == 'unlocked') this.data.locked = false
-                this.timeline.newestTimelines.data.push(event.detail)
+            selectTransferTargetRepository(payload) {
+                this.transferIssueModal.selectedRepository = payload
             },
-            subscriptionUpdatedHook(event) {
-                this.extraData.data.viewerSubscription = event.detail
+            issueUpdatedHook(event) {
+                this.data = {
+                    ...this.data,
+                    ...event.detail,
+                }
             },
-            labelsUpdatedHook(event) {
-                this.data.labels = event.detail
+            issueExtraUpdatedHook(event) {
+                this.extraData.data = {
+                    ...this.extraData.data,
+                    ...event.detail,
+                }
             },
-            milestoneUpdatedHook(event) {
-                this.data.milestone = event.detail
-            },
-            assigneesChangedHook(event) {
-                this.data.assignees = event.detail.assignees
-            }
         },
         watch: {
             repoFullName() {

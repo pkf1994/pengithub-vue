@@ -14,13 +14,14 @@
     import * as graphql from './graphql'
     var parse = require('parse-link-header');
     export default {
-        inject: ['repoBasicInfo','viewerIsCollaborator','repoSubscription'],
+        inject: ['repoBasicInfo','repoSubscription','viewerPermission','viewerBlocked'],
         mixins: [RouteUpdateAwareMixin],
         provide() {
             return {
                 commentExtraDataProvided: () => this.timeline.extraData.data,
                 timelineExtraDataProvided: () => this.timeline.extraData.data,
                 timelineItemDeletedHook: () => this.timelineItemDeletedHook,
+                viewerCanComment: () => this.viewerCanComment
             }
         },
         data() {
@@ -152,6 +153,7 @@
                     loading: false
                 },
                 isDynamicDocumentTitle: true,
+                resetBeforeUpdate: true
             }
         },
        
@@ -164,9 +166,6 @@
             },
             number() {
                 return this.$route.params.number
-            },
-            viewerCannotComment() {
-                return this.data.locked && !this.extraData.data.viewerCanUpdate
             },
             documentTitle() {
                 if(!this.data.title) return location.href
@@ -213,7 +212,7 @@
                     ...this.timeline.newestTimelines.data,
                 ]
                 magicArray.forEach(i => {
-                    if(!deDuplicatedAllNewCreatedTimelines.some(i_ => i_.created_at == i.created_at)) {
+                    if(!deDuplicatedAllNewCreatedTimelines.some(i_ => i_.id == i.id && i_.node_id == i.node_id && i_.created_at == i.created_at)) {
                         deDuplicatedAllNewCreatedTimelines.push(i)
                     }
                 })
@@ -223,12 +222,18 @@
                 if(!this.timeline.pageInfo.next) return true
                 return this.timeline.restCount.data <= (this.timeline.data.length + this.timeline.newestTimelines.data.length)
             },
+            viewerCanComment() {
+                if(this.viewerBlocked()) return false
+                if(this.viewerPermission() == 'ADMIN' || this.viewerPermission() == 'TRIAGE'  || this.viewerPermission() == 'WRITE') return true
+                if(!this.data.locked) return true
+                return false
+            },
         },
         methods: {
              async network_getTimeline() {
+                if(this.timeline.loading) return
                 try{
                     this.timeline.loading = true
-
                     let url_timeline
                     if(this.timeline.pageInfo.next && this.timeline.pageInfo.next.url) {
                         url_timeline = this.timeline.pageInfo.next.url
@@ -261,13 +266,15 @@
 
                     this.timeline.data = this.timeline.data.concat(res_timeline.data)
 
-                    if(this.accessToken) this.network_getTimelineExtraData(res_timeline.data)
+                    this.timeline.loading = false
+
+                    if(this.accessToken && res_timeline.data.length > 0) this.network_getTimelineExtraData(res_timeline.data)
 
                     if(this.timeline.pageInfo.next && this.timeline.pageInfo.next.page == 2) {
                         await this.network_getNewestTimelines()
                     }
 
-                    //if(this.newCreatedTimelineItem) this.scrollToNewestTimelineItem()
+                    if(this.newCreatedTimelineItem) this.scrollToNewestTimelineItem()
 
                 }catch(e){
                     console.log(e)
@@ -280,12 +287,7 @@
                     this.timeline.extraData.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_timeline_extra_data')
 
-                    let timelineIds = []
-                    timeline.forEach(item => {
-                        if(item.event === 'commented' || item.event == 'comment_deleted') {
-                            timelineIds.push(item.node_id)
-                        }
-                    })
+                    let timelineIds = timeline.map(i => i.node_id).filter(i => i)
 
                     let res = await authRequiredGitHubGraphqlApiQuery(
                         graphql.GRAPHQL_ISSUE_TIMELINE,
@@ -500,7 +502,12 @@
             },
             changeLockStatusSuccessPostHandler(payload) {
                 this.data.locked = payload
-            }
+            },
+           
+            newTimelineItemCreatedHook(e) {
+                this.timeline.newestTimelines.data.push(e.detail)
+                this.network_getTimelineExtraData([e.detail])
+            } 
         },
     }
 </script>

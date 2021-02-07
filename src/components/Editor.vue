@@ -1,11 +1,11 @@
 <template>
     <Container v-if="accessToken">
         <Tab class="mx-0 mt-0 no-wrap d-flex flex-auto">
-            <TabItem class="btn-link tabnav-tab px-3 flex-1" :disabled="locked && !viewerIsCollaborator" @click="() => switchTab('Write')" :class="{'tab-selected':selectedTab === 'Write'}">Write</TabItem>
-            <TabItem class="btn-link tabnav-tab px-3 flex-1" :disabled="locked && !viewerIsCollaborator" @click="() => switchTab('Preview')" :class="{'tab-selected':selectedTab === 'Preview'}">Preview</TabItem>
+            <TabItem class="btn-link tabnav-tab px-3 flex-1" :disabled="!viewerCanComment" @click="() => switchTab('Write')" :class="{'tab-selected':selectedTab === 'Write'}">Write</TabItem>
+            <TabItem class="btn-link tabnav-tab px-3 flex-1" :disabled="!viewerCanComment" @click="() => switchTab('Preview')" :class="{'tab-selected':selectedTab === 'Preview'}">Preview</TabItem>
         </Tab>
 
-        <div v-if="!locked" :style="{overflow:textareaIsFocused ? 'visible' : 'hidden' }">
+        <div v-if="viewerCanComment" :style="{overflow:textareaIsFocused ? 'visible' : 'hidden' }">
             <EditPane v-if="selectedTab === 'Write'">
                 <markdown-toolbar :for="uniqueId" class="bg-white d-flex no-wrap flex-items-start flex-wrap px-2 pt-2" :class="{disabled:disabled}">
                     <MDGroup class="d-block flex-auto">
@@ -91,13 +91,13 @@
 
         </div>
 
-        <LockedNotice v-else-if="!viewerIsCollaborator" class="locked-notice">
+        <LockedNotice v-else class="locked-notice">
             <svg height="32" class="octicon octicon-lock" viewBox="0 0 12 16" version="1.1" width="24" aria-hidden="true"><path fill-rule="evenodd" d="M4 13H3v-1h1v1zm8-6v7c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h1V4c0-2.2 1.8-4 4-4s4 1.8 4 4v2h1c.55 0 1 .45 1 1zM3.8 6h4.41V4c0-1.22-.98-2.2-2.2-2.2-1.22 0-2.2.98-2.2 2.2v2H3.8zM11 7H2v7h9V7zM4 8H3v1h1V8zm0 2H3v1h1v-1z"></path></svg>
             <p v-if="lockedReason">This conversation has been locked <span>as</span> <strong>{{lockedReason}}</strong> and limited to collaborators.</p>
-            <p v-else>You can't perform this action at this time.</p>
+            <p v-if="viewerBlocked">You are blocked.</p>
         </LockedNotice>
        
-        <Action v-if="!locked || viewerIsCollaborator">
+        <Action v-if="viewerCanComment">
             <slot>
                 <div class="py-2">
                      <button class="btn" :disabled="markdownRaw === ''">
@@ -111,7 +111,7 @@
             </slot>
         </Action>
 
-        <Gidelines class="text-small text-gray my-2" v-if="(!locked || viewerIsCollaborator) && withGidelines">
+        <Gidelines class="text-small text-gray my-2" v-if="viewerCanComment && withGidelines">
             <svg class="octicon octicon-info mr-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg>
             Remember, contributions to this repository should follow our
             <HyperlinkWrapper>
@@ -138,6 +138,7 @@
             prop: 'markdownRaw',
             event: 'change'
         },
+        inject: ['viewerPermission','viewerBlocked'],
         props: {
             markdownRaw: String,
             disabled: Boolean,
@@ -157,10 +158,6 @@
                 type: Object,
                 required: false
             },
-            viewerIsCollaborator: {
-                type: Boolean,
-                default: false
-            },
             uniqueId: {
                 type: String,
                 required: true
@@ -177,6 +174,15 @@
             commentPreviewHTML() {
                 const DOMPurify = createDOMPurify(window);
                 return DOMPurify.sanitize((marked(this.markdownRaw,{breaks:true})))
+            },
+            viewerCanComment() {
+                if(this.viewerBlocked()) return false
+                if(this.viewerPermission() == 'ADMIN' || this.viewerPermission() == 'TRIAGE'  || this.viewerPermission() == 'WRITE') return true
+                if(!this.locked) return true
+                return false
+            },
+            viewerBlockedd() {
+                return this.viewerBlocked()
             }
         },
         methods: {
