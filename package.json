@@ -11,7 +11,7 @@
     "@github/file-attachment-element": "^1.0.3",
     "@github/markdown-toolbar-element": "^1.1.1",
     "@primer/css": "^15.2.0",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "better-scroll": "^2.0.0-beta.2",
     "core-js": "^3.4.3",
     "dompurify": "^2.0.8",
