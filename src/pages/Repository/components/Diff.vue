@@ -73,7 +73,7 @@
                         
                     </TypeMark>
                     <BlobCode   class="blob-code"
-                                :class="{'white-space-pre':!isProseFileType,'blob-code-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context','blob-code-hunk':item.type == 'hunk'}">{{item.code.replace(/^\+/," ").replace(/^-/," ")}}</BlobCode>
+                                :class="{'blob-code-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context','blob-code-hunk':item.type == 'hunk'}">{{item.code.replace(/^\+/," ").replace(/^-/," ")}}</BlobCode>
                 </CodeLine>
             </div>
                 
@@ -360,10 +360,10 @@
             viewFileRouterLink() {
                 return this.file.blob_url.replace('https://github.com','')
             },
-            isProseFileType() {
-                if(!this.file.filename) return 
-                return util_analyseFileType.isProse(this.file.filename)
-            }
+            // isProseFileType() {
+            //     if(!this.file.filename) return 
+            //     return util_analyseFileType.isProse(this.file.filename)
+            // }
         },
         created() {
             this.patch.unified = this.file.patch

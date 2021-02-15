@@ -1,9 +1,8 @@
 <template>
     <Container>
-        <HeaderDetachTopTab :tabs="tabs"></HeaderDetachTopTab>
+        <HeaderDetachTopTab :tabs="tabs" class="mb-4"></HeaderDetachTopTab>
         <PaddingPageTopTab :tabs="topTabData"></PaddingPageTopTab>
-         <IssuesPageTemplate :data="data" 
-                        :extraData="extraData"
+        <IssuesPageTemplate :data="data" 
                         v-on:click-label.native="clickLabelHandler"
                         :type="type"
                         v-model="searchQuery"
@@ -82,6 +81,11 @@
     import {util_parseQuery,util_queryParse} from '@/util' 
     export default {
         mixins: [RouteUpdateAwareMixin],
+        provide(){
+            return {
+                extraData: () => this.extraData.data
+            }
+        },
         props: {
             type: {
                 type: String,

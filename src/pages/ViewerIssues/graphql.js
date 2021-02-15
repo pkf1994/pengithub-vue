@@ -25,6 +25,7 @@ export const GRAPHQL_GET_ISSUES = (payload) => {
                 createdAt
                 closedAt
                 merged
+                isDraft
                 id
                 timelineItems(last: 1, itemTypes: CLOSED_EVENT) {
                     nodes {

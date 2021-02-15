@@ -13,7 +13,7 @@
             </HideAndShowPane>
             <div v-show="showMinimized || !extraData.isMinimized">
                 <Header class="header " :style="headerStyle">
-                    <Action v-if="(extraData.viewerCanUpdate || extraData.viewerCanDelete) && repoOwnerType() == 'User'" class="float-right mt-2 ml-2" @click="() => showModal('modal')">
+                    <Action v-if="(extraData.viewerCanUpdate || extraData.viewerCanDelete) && repoOwnerType() == 'User'" class="float-right mt-2 ml-2" @click="() => showModal('action-popover')">
                         <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
                     </Action>
 
@@ -32,6 +32,26 @@
                         commented 
                         {{propsData.created_at | getDateDiff}}
                     </Meta>
+
+                    <Popover ref="action-popover" :popoverStyle="{right: '5px',width:'185px'}">
+                        <div class="py-2">
+                            <div v-if="extraData.viewerCanUpdate" class="dropdown-item py-3 btn-link border-bottom">
+                                Edit
+                            </div>
+                            <div v-if="extraData.viewerCanMinimize" class="dropdown-item py-3 btn-link border-bottom" @click="triggerShowMinimizePane">
+                                Hide
+                            </div>
+                            <UnminimizeButton   :comment="propsData" 
+                                                v-if="extraData.viewerCanMinimize && extraData.isMinimized" 
+                                                @unminimize-comment="unminimizePostHandler"
+                                                class="dropdown-item py-3 btn-link border-bottom"></UnminimizeButton>
+                            <button v-if="extraData.viewerCanDelete" class="text-red btn-link dropdown-item py-3 danger" @click="network_deleteThisComment">
+                                Delete
+                            </button>  
+                        </div>
+                        
+                    </Popover>
+
 
                 </Header>
 
@@ -59,24 +79,6 @@
 
         <DeletingCovor v-if="loadingDeleteThis" class="position-absolute bg-white" style="top:0;left:0;right:0;bottom:0;opacity:.4" ></DeletingCovor>
 
-        <Modal :noHeader="true" ref="modal">
-            <div class="py-2">
-                <div v-if="extraData.viewerCanUpdate" class="dropdown-item py-2 btn-link border-bottom">
-                    Edit
-                </div>
-                <div v-if="extraData.viewerCanMinimize" class="dropdown-item py-2 btn-link border-bottom" @click="triggerShowMinimizePane">
-                    Hide
-                </div>
-                <UnminimizeButton   :comment="propsData" 
-                                    v-if="extraData.viewerCanMinimize && extraData.isMinimized" 
-                                    @unminimize-comment="unminimizePostHandler"
-                                    class="dropdown-item py-2 btn-link border-bottom"></UnminimizeButton>
-                <button v-if="extraData.viewerCanDelete" class="text-red btn-link dropdown-item py-2 danger" @click="network_deleteThisComment">
-                    Delete
-                </button>  
-            </div>
-            
-        </Modal>
     </Container>
 </template>
 

@@ -106,7 +106,7 @@
     import {ComplexBubble,CommonLoading,AnimatedHeightWrapper,ImgWrapper} from '@/components'
     import {RepoListItem,DeveloperListItem} from './components'
     import {commonGet,authRequiredGet} from '@/network'
-    import {mapState} from 'vuex'
+    import * as api from '@/network/api'
     export default {
         name: 'explore_page',
         data() {
@@ -137,7 +137,7 @@
             async network_getTrendingRepoToday() {
                 try{
                     this.trendingRepoToday.loading = true
-                    let url = "https://github-trending-api.now.sh/repositories"
+                    let url = api.API_TRENDING('repositories',{})
 
                     let res = await commonGet(url)
 
@@ -153,7 +153,7 @@
             async network_getTrendingDevelopers() {
                  try{
                     this.trendingDevelopers.loading = true
-                    let url = "https://github-trending-api.now.sh/developers"
+                    let url = api.API_TRENDING('developers',{})
 
                     let res = await commonGet(url)
 

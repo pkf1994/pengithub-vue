@@ -2,7 +2,7 @@
     <Container v-if="!issueIsEmpty" class="d-flex relative container p-0">
         <Icon class="flex-shrink-0 pt-2 pl-3">
             <span class="relative">
-                <IssueIcon :issue="{...issue,merged}"></IssueIcon>
+                <IssueIcon :issue="{...issue,merged}" :class="{'text-gray-light':extraDataHolder && extraDataHolder.isDraft}"></IssueIcon>
             </span>
         </Icon>
         

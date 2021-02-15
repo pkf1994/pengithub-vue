@@ -5,7 +5,7 @@
                 <strong style="font-size:13px;" class="mr-1">Jump to...</strong>
             </button>
 
-            <button class="btn btn-sm btn-primary">
+            <button class="btn btn-sm btn-primary" @click="() => showModal('submitReviewModal')">
                 Review
                 <span class="dropdown-caret"></span>
             </button>  
@@ -18,10 +18,10 @@
             <ChangedFileItem :id="`diff-${item.sha}`" v-for="item in changedFiles.data" :key="item.sha" :file="item"></ChangedFileItem>
         </transition-group>
 
-        <EditorHeader class="editor-header" v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'">
+        <!-- <EditorHeader class="editor-header" v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'">
             Submit your review
         </EditorHeader>
-        <ReviewSubmitter v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'"></ReviewSubmitter>
+        <ReviewSubmitter v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'"></ReviewSubmitter> -->
 
         <!-- <Editor v-if="changedFiles.data.length > 0" 
                 class="m-3"
@@ -34,13 +34,18 @@
             </button>
         </Editor> -->
 
+        <Modal ref="submitReviewModal" title="Finish your review">
+            <ReviewSubmitter></ReviewSubmitter>
+        </Modal>
+
+
     </CommonLoadingWrapper>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoadingWrapper,AnimatedHeightWrapper} from '@/components'
+    import {CommonLoadingWrapper,AnimatedHeightWrapper, Modal} from '@/components'
     import {HiddenItemLoading} from '../components'
     import {ChangedFileItem,ReviewSubmitter} from './components'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
@@ -466,6 +471,7 @@
             AnimatedHeightWrapper,
             ChangedFileItem,
             ReviewSubmitter,
+            Modal,
             Container: styled.div``,
             EditorHeader: styled.div``,
             Switcher: styled.div``,

@@ -11,14 +11,17 @@ export const API_GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
 
 export const HOST = process.env.VUE_APP_HOST
 
+export const GITHUB_TRENDING_API = 'http://192.168.99.100:8000'
+
 export const API_TRENDING = (type,params) => {
     let query = util_queryParse.querify(params)
-    return  `https://github-trending-api.now.sh/${type}?${query}`
+    return  `${GITHUB_TRENDING_API}/${type}?${query}`
 }
 
-export const API_ALL_SPOKEN_LANGUAGE = "https://github-trending-api.now.sh/spoken_languages"
 
-export const API_ALL_LANGUAGE = "https://github-trending-api.now.sh/languages"
+export const API_ALL_SPOKEN_LANGUAGE = `${GITHUB_TRENDING_API}/spoken_languages`
+
+export const API_ALL_LANGUAGE = `${GITHUB_TRENDING_API}/languages`
 
 export const API_OAUTH2 = payload => {
     return `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=${SCOPE}&state=${payload.state}`

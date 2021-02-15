@@ -59,8 +59,6 @@
 
                     <ReviewCommentGroup class="review-comment-wrapper" v-for="rootReviewCommentItem in getRootReviewComments(index)" :key="rootReviewCommentItem.id" :rootReviewComment="rootReviewCommentItem"></ReviewCommentGroup>
 
-                    <!--  <ReviewCommentGroup class="review-comment-wrapper" v-for="pendingRootReviewCommentItem in getPendingRootReviewComments(index)" :key="pendingRootReviewCommentItem.id" :rootReviewComment="pendingRootReviewCommentItem" :pending="true"></ReviewCommentGroup> -->
-
                     <SingleCommentCreator style="width:100vw" :path="file.filename" :position="index" v-if="showSingleCommentCreatorAt.some(i => i == index)" @cancel="() => triggerShowSingleCommentCreator(index,false)"></SingleCommentCreator>
                 </CodeLine>
             </div>

@@ -23,7 +23,14 @@
 
             <Actions class="actions pt-0 mb-2 flex-shrink-0 text-right position-relative" @click="openPopover">
                 <svg aria-label="Show options" class="octicon octicon-kebab-horizontal mx-2" viewBox="0 0 13 16" version="1.1" width="13" height="16" role="img"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
-                <Popover ref="popover" class="f5" :popoverStyle="{right:0}">
+                <Popover ref="popover" class="f5 py-2" :popoverStyle="{right:'-4px',top: '25px'}" style="width:185px">
+                    <button @click.stop="triggerShowComments" class="pl-5 btn-link py-2 dropdown-item">
+                        <span v-if="showComments" class="position-absolute" style="margin-left:-20px">
+                            <svg class="octicon octicon-check" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
+                        </span>
+                        <span>Show comments</span>
+                    </button>
+                    <div class="dropdown-divider"></div>
                     <router-link :to="viewFileRouterLink" class="pl-5 btn-link py-2 dropdown-item">
                         View file
                     </router-link>
@@ -31,119 +38,68 @@
             </Actions>
         </Header>
 
-        <DiffView v-if="viewStyle == 'unified' && stretch"  class="diff-view" style="overflow-x:auto">
+        <DiffView v-if="stretch"  class="diff-view" style="overflow-x:auto">
             <div class="d-inline-block" style="min-width:100%">
-                <CodeLine v-for="(item,index) in diffHunkEntries" :key="`${index}_${item.type}_${item.code}`" class="d-flex width-full" :data-type="lazyLoadedLines.indexOf(item.additionLineIndex) > -1 ? 'lazyLoaded' :item.type">
-                    <BlobNum    v-if="item.type !== 'hunk' || item.additionLineIndex == 0"
-                                class="blob-num" 
-                                :data-line-number="item.deletionLineIndex <= 0 ? '...' : item.deletionLineIndex" 
-                                :class="{'blob-num-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context','blob-num-hunk':item.type == 'hunk'}"></BlobNum>
-                    <BlobNum    class="blob-num" 
-                                v-if="item.type !== 'hunk'  || item.additionLineIndex == 0"
-                                :data-line-number="item.additionLineIndex <= 0 ? '...' : item.additionLineIndex" 
-                                :class="{'blob-num-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context','blob-num-hunk':item.type == 'hunk'}"></BlobNum>
-                    
-                    <div class="stretch-btn" v-else-if="item.type === 'hunk' && item.additionLineIndex != 0 && index > 0 && index < diffHunkEntries.length - 1 && (diffHunkEntries[index + 1].additionLineIndex - diffHunkEntries[index - 1].additionLineIndex > 21)">
-                        <button @click="() => showHiddenCode(item,false,item.additionLineIndex === item.additionStartLineIndex && item.additionLineIndex !== 0)"  
-                                :disabled="fileContent === ''"
-                                v-if="item.type === 'hunk'" 
-                                class="d-flex width-full flex-items-center flex-justify-center">
-                            <svg class="octicon octicon-fold-down" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 11l3 3 3-3H8V5H6v6H4zm-4 0c0 .55.45 1 1 1h2.5l-1-1h-1l2-2H5V8H3.5l-2-2H5V5H1c-.55 0-1 .45-1 1l2.5 2.5L0 11zm10.5-2H9V8h1.5l2-2H9V5h4c.55 0 1 .45 1 1l-2.5 2.5L14 11c0 .55-.45 1-1 1h-2.5l1-1h1l-2-2z"></path></svg>
-                        </button>
-                        <button @click="() => showHiddenCode(item,true,item.additionLineIndex === item.additionStartLineIndex && item.additionLineIndex !== 0)"  
-                                :disabled="fileContent === ''"
-                                v-if="item.type === 'hunk'" 
-                                class="d-flex width-full flex-items-center flex-justify-center">
-                            <svg class="octicon octicon-fold-up" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 6L7 3 4 6h2v6h2V6h2zm4 0c0-.55-.45-1-1-1h-2.5l1 1h1l-2 2H9v1h1.5l2 2H9v1h4c.55 0 1-.45 1-1l-2.5-2.5L14 6zM3.5 8H5v1H3.5l-2 2H5v1H1c-.55 0-1-.45-1-1l2.5-2.5L0 6c0-.55.45-1 1-1h2.5l-1 1h-1l2 2z"></path></svg>
-                        </button>
-                    </div>
-                    <button @click="() => showHiddenCode(item,index !== diffHunkEntries.length - 1,item.additionLineIndex === item.additionStartLineIndex && item.additionLineIndex !== 0)"  
-                            :disabled="fileContent === ''"
-                            class="stretch-btn d-inline-flex flex-items-center flex-justify-center"
-                            v-else>
-                        <svg v-if="index === 0" class="octicon octicon-fold-up" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 6L7 3 4 6h2v6h2V6h2zm4 0c0-.55-.45-1-1-1h-2.5l1 1h1l-2 2H9v1h1.5l2 2H9v1h4c.55 0 1-.45 1-1l-2.5-2.5L14 6zM3.5 8H5v1H3.5l-2 2H5v1H1c-.55 0-1-.45-1-1l2.5-2.5L0 6c0-.55.45-1 1-1h2.5l-1 1h-1l2 2z"></path></svg>
-                        <svg v-else-if="index === diffHunkEntries.length - 1" class="octicon octicon-fold-down" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 11l3 3 3-3H8V5H6v6H4zm-4 0c0 .55.45 1 1 1h2.5l-1-1h-1l2-2H5V8H3.5l-2-2H5V5H1c-.55 0-1 .45-1 1l2.5 2.5L0 11zm10.5-2H9V8h1.5l2-2H9V5h4c.55 0 1 .45 1 1l-2.5 2.5L14 11c0 .55-.45 1-1 1h-2.5l1-1h1l-2-2z"></path></svg>
-                        <svg v-else class="octicon octicon-unfold" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.5 7.5L14 10c0 .55-.45 1-1 1H9v-1h3.5l-2-2h-7l-2 2H5v1H1c-.55 0-1-.45-1-1l2.5-2.5L0 5c0-.55.45-1 1-1h4v1H1.5l2 2h7l2-2H9V4h4c.55 0 1 .45 1 1l-2.5 2.5zM6 6h2V3h2L7 0 4 3h2v3zm2 3H6v3H4l3 3 3-3H8V9z"></path></svg>
-                    </button>
-
-                    <TypeMark   :data-type="item.type" 
-                                v-if="item.type == 'addition' || item.type == 'deletion' || item.type == 'context' || item.type == 'lazyLoaded'"
-                                class="type-mark text-center"
-                                :class="{'blob-code-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context','blob-code-hunk':item.type == 'hunk'}">
+                <CodeLine v-for="(item,index) in diffHunkEntries" :key="`${index}_${item.type}_${item.code}`" class="width-full" :data-type="lazyLoadedLines.indexOf(item.additionLineIndex) > -1 ? 'lazyLoaded' :item.type">
+                    <div class="d-flex">
+                        <BlobNum    v-if="item.type !== 'hunk' || item.additionLineIndex == 0"
+                                    class="blob-num" 
+                                    :data-line-number="item.deletionLineIndex <= 0 ? '...' : item.deletionLineIndex" 
+                                    :class="{'blob-num-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context','blob-num-hunk':item.type == 'hunk'}"></BlobNum>
+                        <BlobNum    class="blob-num" 
+                                    v-if="item.type !== 'hunk'  || item.additionLineIndex == 0"
+                                    :data-line-number="item.additionLineIndex <= 0 ? '...' : item.additionLineIndex" 
+                                    :class="{'blob-num-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context','blob-num-hunk':item.type == 'hunk'}"></BlobNum>
                         
-                    </TypeMark>
-                    <BlobCode   class="blob-code"
-                                :class="{'white-space-pre':!isProseFileType,'blob-code-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context','blob-code-hunk':item.type == 'hunk'}">{{item.code.replace(/^\+/," ").replace(/^-/," ")}}</BlobCode>
+                        <div class="stretch-btn" 
+                            v-else-if="item.type === 'hunk' && item.additionLineIndex != 0 && index > 0 && index < diffHunkEntries.length - 1 && (diffHunkEntries[index + 1].additionLineIndex - diffHunkEntries[index - 1].additionLineIndex > 21)" 
+                            >
+                            <button @click="() => showHiddenCode(item,false,item.additionLineIndex === item.additionStartLineIndex && item.additionLineIndex !== 0)"  
+                                    :disabled="fileContent === ''"
+                                    v-if="item.type === 'hunk'" 
+                                    class="d-flex width-full flex-items-center flex-justify-center">
+                                <svg class="octicon octicon-fold-down" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 11l3 3 3-3H8V5H6v6H4zm-4 0c0 .55.45 1 1 1h2.5l-1-1h-1l2-2H5V8H3.5l-2-2H5V5H1c-.55 0-1 .45-1 1l2.5 2.5L0 11zm10.5-2H9V8h1.5l2-2H9V5h4c.55 0 1 .45 1 1l-2.5 2.5L14 11c0 .55-.45 1-1 1h-2.5l1-1h1l-2-2z"></path></svg>
+                            </button>
+                            <button @click="() => showHiddenCode(item,true,item.additionLineIndex === item.additionStartLineIndex && item.additionLineIndex !== 0)"  
+                                    :disabled="fileContent === ''"
+                                    v-if="item.type === 'hunk'" 
+                                    class="d-flex width-full flex-items-center flex-justify-center">
+                                <svg class="octicon octicon-fold-up" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 6L7 3 4 6h2v6h2V6h2zm4 0c0-.55-.45-1-1-1h-2.5l1 1h1l-2 2H9v1h1.5l2 2H9v1h4c.55 0 1-.45 1-1l-2.5-2.5L14 6zM3.5 8H5v1H3.5l-2 2H5v1H1c-.55 0-1-.45-1-1l2.5-2.5L0 6c0-.55.45-1 1-1h2.5l-1 1h-1l2 2z"></path></svg>
+                            </button>
+                        </div>
+                        <button @click="() => showHiddenCode(item,index !== diffHunkEntries.length - 1,item.additionLineIndex === item.additionStartLineIndex && item.additionLineIndex !== 0)"  
+                                :disabled="fileContent === ''"
+                                class="stretch-btn d-inline-flex flex-items-center flex-justify-center"
+                                v-else>
+                            <svg v-if="index === 0" class="octicon octicon-fold-up" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 6L7 3 4 6h2v6h2V6h2zm4 0c0-.55-.45-1-1-1h-2.5l1 1h1l-2 2H9v1h1.5l2 2H9v1h4c.55 0 1-.45 1-1l-2.5-2.5L14 6zM3.5 8H5v1H3.5l-2 2H5v1H1c-.55 0-1-.45-1-1l2.5-2.5L0 6c0-.55.45-1 1-1h2.5l-1 1h-1l2 2z"></path></svg>
+                            <svg v-else-if="index === diffHunkEntries.length - 1" class="octicon octicon-fold-down" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 11l3 3 3-3H8V5H6v6H4zm-4 0c0 .55.45 1 1 1h2.5l-1-1h-1l2-2H5V8H3.5l-2-2H5V5H1c-.55 0-1 .45-1 1l2.5 2.5L0 11zm10.5-2H9V8h1.5l2-2H9V5h4c.55 0 1 .45 1 1l-2.5 2.5L14 11c0 .55-.45 1-1 1h-2.5l1-1h1l-2-2z"></path></svg>
+                            <svg v-else class="octicon octicon-unfold" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.5 7.5L14 10c0 .55-.45 1-1 1H9v-1h3.5l-2-2h-7l-2 2H5v1H1c-.55 0-1-.45-1-1l2.5-2.5L0 5c0-.55.45-1 1-1h4v1H1.5l2 2h7l2-2H9V4h4c.55 0 1 .45 1 1l-2.5 2.5zM6 6h2V3h2L7 0 4 3h2v3zm2 3H6v3H4l3 3 3-3H8V9z"></path></svg>
+                        </button>
+
+                        <TypeMark   :data-type="item.type" 
+                                    v-if="item.type == 'addition' || item.type == 'deletion' || item.type == 'context' || item.type == 'lazyLoaded'"
+                                    class="type-mark text-center"
+                                    :class="{'blob-code-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context','blob-code-hunk':item.type == 'hunk'}">
+                            
+                        </TypeMark>
+                        <BlobCode   class="blob-code"
+                                    @click.stop="triggerShowSingleCommentCreator(index)"
+                                    :class="{'blob-code-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context','blob-code-hunk':item.type == 'hunk'}">{{item.code.replace(/^\+/," ").replace(/^-/," ")}}</BlobCode>
+                    </div>
+                    
+
+                    <div v-if="showComments">
+                        <ReviewCommentGroup class="review-comment-wrapper" v-for="rootReviewCommentItem in getRootReviewComments(index)" :key="rootReviewCommentItem.id" :rootReviewComment="rootReviewCommentItem"></ReviewCommentGroup>
+                    </div>
+
+                    <SingleCommentCreator :path="file.filename" :position="index" v-if="showSingleCommentCreatorAt.some(i => i == index)" @cancel="() => triggerShowSingleCommentCreator(index,false)"></SingleCommentCreator>
+                    
+                    
                 </CodeLine>
             </div>
                 
         </DiffView>
 
-        <DiffView v-else-if="stretch"  class="diff-view-split">
-            <div>
-                <CodeLine class="d-flex" style="background-color: #fafbfc;" v-for="(item,index) in diffHunkEntries" :key="`${index}_${item.type}_${item.code}`" :data-type="lazyLoadedLines.indexOf(item.additionLineIndex) > -1 ? 'lazyLoaded' :item.type">
-                    
-
-                    <!-- hunk -->
-                    <BlobNum    v-if="item.additionLineIndex == 0" 
-                                class="blob-num text-center" 
-                                data-line-number="..." 
-                                :class="{'blob-num-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context','blob-num-hunk':item.type == 'hunk'}"
-                                style="min-width:40px"></BlobNum>
-
-                    <div class="stretch-btn" style="min-width:40px" v-else-if="item.type === 'hunk' && item.additionLineIndex != 0 && index > 0 && index < diffHunkEntries.length - 1 && (diffHunkEntries[index + 1].additionLineIndex - diffHunkEntries[index - 1].additionLineIndex > 21)">
-                        <button @click="() => showHiddenCode(item,false,item.additionLineIndex === item.additionStartLineIndex && item.additionLineIndex !== 0)"  
-                                :disabled="fileContent === ''"
-                                v-if="item.type === 'hunk'" 
-                                class="d-flex width-full flex-items-center flex-justify-center">
-                            <svg class="octicon octicon-fold-down" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 11l3 3 3-3H8V5H6v6H4zm-4 0c0 .55.45 1 1 1h2.5l-1-1h-1l2-2H5V8H3.5l-2-2H5V5H1c-.55 0-1 .45-1 1l2.5 2.5L0 11zm10.5-2H9V8h1.5l2-2H9V5h4c.55 0 1 .45 1 1l-2.5 2.5L14 11c0 .55-.45 1-1 1h-2.5l1-1h1l-2-2z"></path></svg>
-                        </button>
-                        <button @click="() => showHiddenCode(item,true,item.additionLineIndex === item.additionStartLineIndex && item.additionLineIndex !== 0)"  
-                                :disabled="fileContent === ''"
-                                v-if="item.type === 'hunk'" 
-                                class="d-flex width-full flex-items-center flex-justify-center">
-                            <svg class="octicon octicon-fold-up" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 6L7 3 4 6h2v6h2V6h2zm4 0c0-.55-.45-1-1-1h-2.5l1 1h1l-2 2H9v1h1.5l2 2H9v1h4c.55 0 1-.45 1-1l-2.5-2.5L14 6zM3.5 8H5v1H3.5l-2 2H5v1H1c-.55 0-1-.45-1-1l2.5-2.5L0 6c0-.55.45-1 1-1h2.5l-1 1h-1l2 2z"></path></svg>
-                        </button>
-                    </div>
-                    <button @click="() => showHiddenCode(item,index !== diffHunkEntries.length - 1,item.additionLineIndex === item.additionStartLineIndex && item.additionLineIndex !== 0)"  
-                            :disabled="fileContent === ''"
-                            style="min-width:40px"
-                            class="stretch-btn d-inline-flex flex-items-center flex-justify-center"
-                            v-else-if="item.type === 'hunk'">
-                        <svg v-if="index === 0" class="octicon octicon-fold-up" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 6L7 3 4 6h2v6h2V6h2zm4 0c0-.55-.45-1-1-1h-2.5l1 1h1l-2 2H9v1h1.5l2 2H9v1h4c.55 0 1-.45 1-1l-2.5-2.5L14 6zM3.5 8H5v1H3.5l-2 2H5v1H1c-.55 0-1-.45-1-1l2.5-2.5L0 6c0-.55.45-1 1-1h2.5l-1 1h-1l2 2z"></path></svg>
-                        <svg v-else-if="index === diffHunkEntries.length - 1" class="octicon octicon-fold-down" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 11l3 3 3-3H8V5H6v6H4zm-4 0c0 .55.45 1 1 1h2.5l-1-1h-1l2-2H5V8H3.5l-2-2H5V5H1c-.55 0-1 .45-1 1l2.5 2.5L0 11zm10.5-2H9V8h1.5l2-2H9V5h4c.55 0 1 .45 1 1l-2.5 2.5L14 11c0 .55-.45 1-1 1h-2.5l1-1h1l-2-2z"></path></svg>
-                        <svg v-else class="octicon octicon-unfold" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M11.5 7.5L14 10c0 .55-.45 1-1 1H9v-1h3.5l-2-2h-7l-2 2H5v1H1c-.55 0-1-.45-1-1l2.5-2.5L0 5c0-.55.45-1 1-1h4v1H1.5l2 2h7l2-2H9V4h4c.55 0 1 .45 1 1l-2.5 2.5zM6 6h2V3h2L7 0 4 3h2v3zm2 3H6v3H4l3 3 3-3H8V9z"></path></svg>
-                    </button>
-
-                    <BlobCode   v-if="item.type == 'hunk'"
-                                :class="{'blob-code-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context','blob-code-hunk':item.type === 'hunk'}"
-                                class="blob-code-split">{{item.code}}</BlobCode>
-
-                    <!-- context -->
-                    <Column v-if="item.type !== 'hunk'" class="d-flex" style="width:50%">
-                        <BlobNum    v-if="item.type !== 'addition'" 
-                                    class="blob-num text-center" 
-                                    :class="{'blob-num-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context'}"
-                                    style="min-width:40px">{{item.deletionLineIndex}}</BlobNum>
-                        <BlobCode   v-if="item.type !== 'addition'"
-                                    style="min-width:0"
-                                    :class="{'blob-code-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context'}"
-                                    class="blob-code-split"><span class="type-mark-split d-inline-block">{{item.type == 'deletion' ? '-':' '}}</span>{{item.code.replace(/^\+/," ").replace(/^-/," ")}}</BlobCode>
-                    </Column>
-                    <Column v-if="item.type !== 'hunk'" class="d-flex" style="width:50%;border-left: 1px solid #f6f8fa;">
-                        <BlobNum    v-if="item.type !== 'deletion'" 
-                                    class="blob-num"
-                                    :class="{'blob-num-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-num-addition':item.type === 'addition','blob-num-deletion':item.type === 'deletion','blob-num-context':item.type === 'context'}"
-                                    style="min-width:40px">{{item.additionLineIndex}}</BlobNum>
-                        <BlobCode   v-if="item.type !== 'deletion'" 
-                                    class="blob-code-split"
-                                    style="min-width:0"
-                                    :class="{'blob-code-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context'}"
-                        ><span class="type-mark-split d-inline-block">{{item.type == 'addition' ? '+':' '}}</span>{{item.code.replace(/^\+/," ").replace(/^-/," ")}}</BlobCode>
-                    </Column>
-                </CodeLine>
-            </div>
-        </DiffView>
     </Container>
 </template>
 
@@ -160,7 +116,8 @@
         mixins: [Diff],
         data() {
             return {
-                showSingleCommentCreatorAt: []
+                showSingleCommentCreatorAt: [],
+                showComments: true
             }
         },
         computed: {
@@ -201,6 +158,10 @@
                 } else {
                     if(idx !== undefined) this.showSingleCommentCreatorAt.splice(idx,1)
                 }
+            },
+            triggerShowComments() {
+                this.showComments = !this.showComments
+                this.closeModal()
             }
         },
         components: {
@@ -228,6 +189,9 @@
 }
 
 .header{
+    position: sticky;
+    top: 60px;
+    z-index: 9;
     padding: 5px 10px;
     background-color: #fafbfc;
     border-bottom: 1px solid #e1e4e8;
@@ -255,6 +219,7 @@
         font-size: 13px;
     }
 }
+
 
 .added {
     background-color: #2cbe4e;

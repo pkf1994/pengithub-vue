@@ -1,11 +1,11 @@
 <template>
     <Container>
         
-        <ReviewComment class="border-top" v-for="commentItem in reviewCommentGroup" style="max-width: 100vw;border-right: 1px solid #d1d5da;" :propsData="commentItem" :key="commentItem.id"></ReviewComment>
+        <ReviewComment class="border-top" v-for="commentItem in reviewCommentGroup" :propsData="commentItem" :key="commentItem.id"></ReviewComment>
 
-        <div class="comment-btn-wrapper" v-if="repoOwnerType() == 'User'" style="border-right: 1px solid #d1d5da;">
-            <div class="px-3 pb-3" v-if="!showReviewCommentCreator && reviewCommentGroup.length > 0">
-                <button :disabled="replyButtonDisabled" type="button" class="btn btn-block" @click="triggerShowReviewCommentCreator">
+        <div class="comment-btn-wrapper border-bottom" v-if="repoOwnerType() == 'User'">
+            <div class="px-3 pb-3 bg-white" v-if="!showReviewCommentCreator && reviewCommentGroup.length > 0">
+                <button :disabled="replyButtonDisabled" type="button" class="btn btn-block " @click="triggerShowReviewCommentCreator">
                     Add an additional review comment
                 </button>
             </div>
@@ -81,7 +81,6 @@
 </script>
 <style scoped>
 .comment-btn-wrapper{
-    width: 100vw;
     padding-top: 0px;
     background-color: #fafbfc;
 }

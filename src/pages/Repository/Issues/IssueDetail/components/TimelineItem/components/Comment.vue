@@ -62,6 +62,13 @@
                         </router-link>
                         
                         commented
+                        <span v-if="commentType == 'commitComment'">on
+                            <code>
+                                <router-link :to="`/${owner}/${repo}/commit/${data.commit_id}`" class="text-gray">
+                                    {{data.commit_id.substring(0,7)}}
+                                </router-link>
+                            </code>
+                        </span>
                         <span class="no-wrap">{{(data.created_at || data.submitted_at) | getDateDiff}}</span>
 
                         <span v-if="!accessToken || (commentExtraDataHolder.userContentEdits && commentExtraDataHolder.userContentEdits.totalCount > 0)" class="d-inline-block text-gray btn-link" @click="() => showModal('editHistoriesModal')">

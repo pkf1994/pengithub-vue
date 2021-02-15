@@ -1,12 +1,12 @@
 <template>
     <Container class="the-container">
         <textarea :disabled="loadingStartReview || loadingAddComment" ref="textarea" v-model="content" class="form-control" placeholder="Leave a comment" rows="5" style="width: 100%"></textarea>
-        <div class="text-right position-relative no-wrap d-flex flex-justify-end">
-            <button class="btn mt-2 flex-shrink-0 d-block" @click.stop="() => $emit('cancel')" :disabled="loadingStartReview || loadingAddComment">Cancel</button>
-            <button class="btn mt-2 ml-1 btn-primary flex-shrink-1 truncate d-block" @click.stop="network_addSingleComment" :disabled="loadingStartReview || loadingAddComment || !content || pendingReview().loading">
+        <div class="text-right position-relative no-wrap">
+            <button class="btn mt-2 d-block width-full" @click.stop="() => $emit('cancel')" :disabled="loadingStartReview || loadingAddComment">Cancel</button>
+            <button class="btn mt-2 ml-1 btn-primary truncate d-block width-full" @click.stop="network_addSingleComment" :disabled="loadingStartReview || loadingAddComment || !content || pendingReview().loading">
                 {{loadingAddComment ? 'Trying...' : 'Add comment'}}
             </button>
-            <button class="btn mt-2 ml-1 btn-primary flex-shrink-0 d-block" v-if="!(pendingReview().data && pendingReview().data.databaseId)" @click.stop="network_startAReview" :disabled="loadingStartReview || loadingAddComment || !content">
+            <button class="btn mt-2 ml-1 btn-primary d-block width-full" v-if="!(pendingReview().data && pendingReview().data.databaseId)" @click.stop="network_startAReview" :disabled="loadingStartReview || loadingAddComment || !content">
                 {{loadingStartReview ? 'Trying...' : 'Start a review'}}
             </button>
         </div>
@@ -22,7 +22,7 @@
     import {mapMutations} from 'vuex'
     export default {
         mixins: [ReviewCommentReplyCreator],
-        inject: ['pendingReview'],
+        inject: ['pendingReview','commentReviewCreatedHook'],
         data() {
             return {
                 loadingAddComment: false

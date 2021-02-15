@@ -4,7 +4,7 @@
                             :position="loading ? 'center' : 'corner'">
         <SearchInput class="p-3">
             <slot name="searchInput">
-              
+                
             </slot>    
         </SearchInput>
 

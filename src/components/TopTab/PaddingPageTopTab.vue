@@ -1,6 +1,6 @@
 <template>
     <nav class="px-3 d-flex">
-        <router-link v-for="item in tabs" :key="item.to" :to='item.to' class="subnav-item text-center no-wrap" :class="{'active':item.activeFlag}" :style="tabStyle">{{item.label}}</router-link>
+        <router-link v-for="item in tabs" :key="item.to" :to='item.to' class="subnav-item text-center no-wrap flex-1" :class="{'active':item.activeFlag}" :style="tabStyle">{{item.label}}</router-link>
     </nav>
 </template>
 

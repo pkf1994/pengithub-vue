@@ -85,7 +85,7 @@
                             @blur="() => triggerTextareaIsFocused(false)"></textarea>
             </EditPane>
 
-            <Preview  v-else class="preview-body markdown-body" v-html="commentPreviewHTML">
+            <Preview  v-else class="preview-body" v-html="commentPreviewHTML">
 
             </Preview>
 
