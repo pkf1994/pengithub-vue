@@ -1,5 +1,5 @@
 <template>
-  <WithNotFoundNoticeWrapper ref="notFoundWrapper" v-on:not-found.native="go404" id="app-container"  class="d-flex flex-column flex-grow-1">
+  <WithNotFoundNoticeWrapper ref="notFoundWrapper" v-on:not-found.native="go404" id="app-container"  class="d-flex flex-column flex-grow-1" data-theme="light">
     <router-view class="router-view header" name="header"/>
     <keep-alive>
       <router-view class="router-view flex-grow-1"/>

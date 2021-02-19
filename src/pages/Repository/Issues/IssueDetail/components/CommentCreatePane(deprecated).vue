@@ -1,6 +1,14 @@
 <template>
-    <div v-if="accessToken">
-        <ComplexEditorProto v-if="viewerCanComment" v-model="markdownRaw" :disabled="loadingCreateComment || loadingChangeIssueState"  uniqueId="issue-comment-creator">
+    <Container>
+        <Editor class="pt-3 mb-5" 
+                v-model="markdownRaw"
+                style="border-top: 2px solid #e1e4e8;" 
+                ref="editor"
+                uniqueId="issue-comment-create-pane"
+                :disabled="loadingChangeIssueState || loadingCreateComment"
+                :textareaStyle="{height: '180px',maxHeight:'300px'}"
+                :locked="locked" 
+                :lockedReason="lockedReason">
             <div class="py-2 d-flex flex-justify-end">
                 <button class="btn" :disabled="loadingCreateComment || loadingChangeIssueState" v-if="issue().state == 'open' && viewerCanManageIssue()" @click="network_changeIssueState">
                     <svg class="octicon octicon-issue-closed text-red v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 10h2v2H7v-2zm2-6H7v5h2V4zm1.5 1.5l-1 1L12 9l4-4.5-1-1L12 7l-1.5-1.5zM8 13.7A5.71 5.71 0 012.3 8c0-3.14 2.56-5.7 5.7-5.7 1.83 0 3.45.88 4.5 2.2l.92-.92A6.947 6.947 0 008 1C4.14 1 1 4.14 1 8s3.14 7 7 7 7-3.14 7-7l-1.52 1.52c-.66 2.41-2.86 4.19-5.48 4.19v-.01z"></path></svg>
@@ -14,28 +22,21 @@
                     <span class="">{{loadingCreateComment ? 'Trying...' : 'Comment'}}</span>
                 </button>
             </div>
-        </ComplexEditorProto>
-
-        <LockedNotice v-else-if="issue().locked" class="locked-notice">
-            <svg height="32" class="octicon octicon-lock" viewBox="0 0 12 16" version="1.1" width="24" aria-hidden="true"><path fill-rule="evenodd" d="M4 13H3v-1h1v1zm8-6v7c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h1V4c0-2.2 1.8-4 4-4s4 1.8 4 4v2h1c.55 0 1 .45 1 1zM3.8 6h4.41V4c0-1.22-.98-2.2-2.2-2.2-1.22 0-2.2.98-2.2 2.2v2H3.8zM11 7H2v7h9V7zM4 8H3v1h1V8zm0 2H3v1h1v-1z"></path></svg>
-            <p v-if="issue().activeLockReason">This conversation has been locked <span>as</span> <strong>{{issue().activeLockReason}}</strong> and limited to collaborators.</p>
-            <p v-if="viewerBlocked">You are blocked.</p>
-        </LockedNotice>
-    </div>
-
-    <SignInNotice v-else class="flash flash-warn">
-        <button class="btn btn-primary" @click="signIn">Sign in</button>
-        <strong>to join this conversation on GitHub.</strong>
-    </SignInNotice>
+        </Editor>
+    </Container>
 </template>
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexEditorProto} from '../../../components'
-    import {authRequiredPost,authRequiredPatch} from '@/network'
+    import {Editor} from '@/components'
+    import {authRequiredPost,authRequiredPatch,cancelAndUpdateAxiosCancelTokenSource} from '@/network'
     import * as api from '@/network/api'
     export default {
         name: 'repository_issue_create_comment_pane',
-        inject: ['issue','viewerCanManageIssue','viewerBlocked','viewerPermission'],
+        inject: ['issue','graphqlWritePermission','viewerCanManageIssue'],
+        props: {
+            locked: Boolean,
+            lockedReason: String,
+        },
         data() {
             return {
                 markdownRaw: '',
@@ -46,15 +47,12 @@
         computed: {
             issueState() {
                 return this.issue().state
-            },
-            viewerCanComment() {
-                if(this.viewerBlocked()) return false
-                if(this.viewerPermission() == 'ADMIN' || this.viewerPermission() == 'TRIAGE'  || this.viewerPermission() == 'WRITE') return true
-                if(!this.issue().locked) return true
-                return false
-            },
+            }
         },
         methods: {
+            append(payload) {
+                this.markdownRaw = this.markdownRaw + payload
+            },
             async network_createIssueComment() {
                 if(this.loadingCreateComment) return
                 try{
@@ -105,23 +103,16 @@
 
                 }catch(e) {
                     this.handleError(e)
-                    if(e.response && e.response.status == 422) {
-                        this.$toast(`${this.$t("pullRequestDetailConversation.error.reopenFailed") + this.$t("common.error.actionResultValidationFailed")}`,'error')
-                    }
                 }finally{
                     this.loadingChangeIssueState = false
                 }
             }   
         },
         components: {
-            ComplexEditorProto,
-            Container: styled.div``,
-            lockedNotice: styled.div``,
-            SignInNotice: styled.div``
+            Editor,
+            Container: styled.div``
         }
     }
 </script>
-<style scoped lang="scss">
-@import 'node_modules/@primer/css/forms/index.scss';
-@import 'node_modules/@primer/css/alerts/index.scss';
+<style scoped>
 </style>

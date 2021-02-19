@@ -9,7 +9,8 @@ export default {
             data() {
                 return {
                     loginNotice: 'GitHub api对匿名用户进行请求速率限制，请登录以正常访问',
-                    oauthLink: api.API_OAUTH2
+                    oauthLink: api.API_OAUTH2,
+                    isDynamicDocumentTitle: true
                 }
             },
             computed: {
@@ -45,7 +46,7 @@ export default {
                     if(e.response && e.response.data) {
                         if(e.response.data.message) this.$toast(e.response.data.message,'error')
                         if(e.response.data.detailMessage) this.$toast(e.response.data.detailMessage,'error')
-                        if(e.response.data.errors) {
+                        if(e.response.data.errors && e.response.data.errors[0]) {
                             if(e.response.data.errors[0].message) {
                                 e.response.data.errors.forEach(i => {
                                     this.$toast(i.message,'error')

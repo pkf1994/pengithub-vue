@@ -17,8 +17,6 @@
                         <svg class="octicon octicon-kebab-horizontal" viewBox="0 0 13 16" version="1.1" width="13" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
                     </Action>
 
-                    <span v-if="extraData.state && extraData.state.toLowerCase() == 'pending'" class="Label--outline bg-yellow-light float-right mt-1 ml-2" style="border-radius:2em;padding: 2px 7px">Pending</span>
-                    
                     <Avatar class="float-left relative">
                         <ImgWrapper>
                             <img class="avatar" height="32" width="32" :alt="`@${propsData.user.login}`" :src="propsData.user.avatar_url">
@@ -62,7 +60,7 @@
 
                     </BodyHTML>
 
-                    <Reactions   :data="propsData.reactions" 
+                    <Reactions  :data="propsData.reactions" 
                                 :commentId="propsData.id"
                                 commentType="reviewComment"
                                 :disabled="!extraData.viewerCanReact"></Reactions>
@@ -88,9 +86,7 @@
     import {Reactions} from '../../components'
     import {ReviewCommentEditor} from '../../Conversation/components/TimelineItem/components/Review/components'
     import {MinimizePane,UnminimizeButton} from '../../../../components'
-    import { mapMutations } from 'vuex'
     import * as api from '@/network/api'
-    import { MUTATION_PULL_REQUEST_DETAIL_PUSH_DELETED_REVIEW_COMMENT } from '@/store/modules/pullRequestDetail/mutationTypes'
     export default {
         inject: ['pendingReview','reviewCommentsExtraData','repoOwnerType','triggerReplyButtonDisabled'],
         data() {

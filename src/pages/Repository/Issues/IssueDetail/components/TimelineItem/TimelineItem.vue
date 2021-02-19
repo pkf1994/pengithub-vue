@@ -3,7 +3,6 @@
         <Comment v-if="data.event === 'commented'" 
                 :data="data" 
                 @quote="(payload) => $emit('quote',payload)"
-                @update-comment="payload => $emit('update-comment',payload)"
                 @minimize-comment="(payload) => $emit('minimize-comment',payload)"
                 @unminimize-comment="(payload) => $emit('unminimize-comment',payload)"
          ></Comment>
@@ -253,6 +252,7 @@
                 return this.$route.params.repo
             },
         },
+       
         components: {
             Comment,
             Other,

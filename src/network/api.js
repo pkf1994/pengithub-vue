@@ -4,7 +4,7 @@ const CLIENT_ID = "125cb651f63615c6d362"
 const SCOPE = "user public_repo repo repo_deployment repo:status read:repo_hook read:org read:public_key read:gpg_key repo:invite admin:repo_hook home admin:org admin:public_key admin:org_hook gist notifications delete_repo write:discussion read:discussion write:packages read:packages delete:packages admin:gpg_key workflow"
 const GITHUB_REST_API_BASE = "https://api.github.com"
 const BACK_END_API_BASE = "http://127.0.0.1:8088"
-const PROXY_API_BASE = "http://127.0.0.1:8888"
+export const PROXY_API_BASE = "http://127.0.0.1:8888"
 const FILE_UPLOAD_PROXY_API_BASE = "http://127.0.0.1:8889"
 
 export const API_GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
@@ -449,4 +449,9 @@ export const API_COMMITS_OF_PULL_REQUEST = payload => {
 export const API_PROXY_TAGS = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/tags?q=${payload.query}`
 
 export const API_ISSUE_ASSIGNEES_ACTION = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/issues/${payload.number}/assignees`
+
+export const API_COMMIT_COMMENTS = payload => {
+    let query = util_queryParse.querify(payload.params)
+    return  `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/commits/${payload.sha}/comments?${query}`
+}
 

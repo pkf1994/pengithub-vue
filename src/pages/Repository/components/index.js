@@ -8,6 +8,8 @@ import CommitAuthorAvatar from './CommitAuthorAvatar.vue'
 import MinimizePane from './MinimizePane.vue'
 import UnminimizeButton from './UnminimizeButton.vue'
 import CommentDeleteButton from './CommentDeleteButton.vue'
+import ComplexEditorProto from './ComplexEditorProto.vue'
+import SimpleEditorProto from './SimpleEditorProto.vue'
 
 export {RepositoryTabViewMixin,
         IssueItemRest,
@@ -18,4 +20,6 @@ export {RepositoryTabViewMixin,
         CommitAuthorAvatar,
         MinimizePane,
         UnminimizeButton,
+        ComplexEditorProto,
+        SimpleEditorProto,
         CommentDeleteButton}

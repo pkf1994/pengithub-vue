@@ -86,12 +86,12 @@
             </MinimizePane>
 
             <CommentEditPane class="comment-create-edit-pane" 
-                            @update-comment="updateCommentPostHook"
+                            @comment-updated.native="commentUpdatedHook"
                             :commentType="commentType"
                             v-if="editing" 
                             ref="commentEditPane" 
                             :comment="data"
-                            @cancel="confirmCancel">
+                            @cancel.native="confirmCancel">
             </CommentEditPane>
 
             <div v-else>
@@ -170,11 +170,11 @@
             </Header>  
 
             <CommentEditPane class="comment-create-edit-pane" 
-                            @update-comment="updateCommentPostHook"
+                            @comment-updated.native="commentUpdatedHook"
                             v-if="editing" 
                             ref="commentEditPane" 
                             :comment="data"
-                            @cancel="confirmCancel">
+                            @cancel.native="confirmCancel">
             </CommentEditPane>
 
             <Main class="p-3" v-else-if="showMinimized ">
@@ -219,7 +219,7 @@
                         <LoadingIconEx></LoadingIconEx>
                     </div>
                     <div key="1" v-else>
-                        <div class="d-block p-2 border-bottom" v-for="item in editHistories.data" :key="item.editedAt">
+                        <div class="d-block p-2 border-bottom css-truncate" v-for="item in editHistories.data" :key="item.editedAt">
                             <img :src="item.avatarUrl" width="20" height="20" class="avatar avatar-user avatar-small v-align-middle mr-1" :alt="`@${item.login}`">
                             <span class="css-truncate-target v-align-middle text-bold">{{item.login}}</span>
                             <span class="v-align-middle">edited <span class="no-wrap">{{item.editedAt | getDateDiff}}</span></span>
@@ -231,6 +231,18 @@
                 </transition-group>
                
             </div> 
+        </Modal>
+
+        <Modal ref="editHistoryDetailModal">
+            <template v-slot:header>
+                <div>
+                    <ImgWrapper>
+                        <img :src="editHistoryDetail.data.avatarUrl" width="20" height="20" class="avatar avatar-user v-align-middle"> 
+                        <span>{{editHistoryDetail.data.login}}</span>
+                        <span></span>
+                    </ImgWrapper>
+                </div>    
+            </template>    
         </Modal>
     </Container>
 </template>
@@ -264,6 +276,10 @@
                 editing: false,
                 editHistories: {
                     data: [],
+                    loading: false
+                },
+                editHistoryDetail: {
+                    data: {},
                     loading: false
                 },
             }
@@ -444,12 +460,12 @@
                 if(payload) this.closeModal()
                 this.editing = payload
             },
-            updateCommentPostHook(payload) {
+            commentUpdatedHook() {
+                //this.$el.dispatchEvent(new CustomEvent('comment-updated',{bubbles:true,detail:event.detail}))
                 this.editing = false
-                this.$emit('update-comment',payload)
             },
-            confirmCancel(payload) {
-                if(payload == this.data.body) {
+            confirmCancel(event) {
+                if(event.detail == this.data.body) {
                     this.triggerEdit(false)
                 }else{
                     if(confirm("Are you sure you want to discard your unsaved changes?")) {
@@ -459,13 +475,14 @@
             },
             parseEditHistories(HTML) {
                 let editHistories = []
-                let pattern = /<li[^>]*>(?:[\S\s]*?)<img src="(.*?)".*alt="@(.*?)">(?:[\S\s]*?)<relative-time datetime="(.*?)"[^>]*?>(?:[\S\s]*?)<\/li>/g
+                let pattern = /<li[^>]*>(?:[\S\s]*?)<button.*data-edit-history-url="(.*?)"[^>]*>(?:[\S\s]*?)<img src="(.*?)".*alt="@(.*?)">(?:[\S\s]*?)<relative-time datetime="(.*?)"[^>]*?>(?:[\S\s]*?)<\/li>/g
                 let execResult
                 while((execResult = pattern.exec(HTML)) != null) {
                     editHistories.push({
-                        avatarUrl: execResult[1],
-                        login: execResult[2],
-                        editedAt    : execResult[3]
+                        editHistoryDetailUrl: `${api.PROXY_API_BASE}${execResult[1]}`,
+                        avatarUrl: execResult[2],
+                        login: execResult[3],
+                        editedAt: execResult[4]
                     })
                 }
                 
@@ -556,6 +573,7 @@
 @import 'node_modules/@primer/css/alerts/index.scss';
 @import 'node_modules/@primer/css/forms/index.scss';
 @import 'node_modules/@primer/css/layout/index.scss';
+@import 'node_modules/@primer/css/truncate  /index.scss';
 .inner{
     position: relative;
     color: #24292e;

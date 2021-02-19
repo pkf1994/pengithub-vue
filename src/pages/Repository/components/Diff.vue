@@ -32,7 +32,7 @@
         </Header>
 
         <DiffView v-if="viewStyle == 'unified' && stretch"  class="diff-view" style="overflow-x:auto">
-            <div class="d-inline-block" style="min-width:100%">
+            <div style="min-width:100%">
                 <CodeLine v-for="(item,index) in diffHunkEntries" :key="`${index}_${item.type}_${item.code}`" class="d-flex width-full" :data-type="lazyLoadedLines.indexOf(item.additionLineIndex) > -1 ? 'lazyLoaded' :item.type">
                     <BlobNum    v-if="item.type !== 'hunk' || item.additionLineIndex == 0"
                                 class="blob-num" 
@@ -141,6 +141,8 @@
                                     :class="{'blob-code-lazy-loaded':lazyLoadedLines.indexOf(item.additionLineIndex) > -1,'blob-code-addition':item.type === 'addition','blob-code-deletion':item.type === 'deletion','blob-code-context':item.type === 'context'}"
                         ><span class="type-mark-split d-inline-block">{{item.type == 'addition' ? '+':' '}}</span>{{item.code.replace(/^\+/," ").replace(/^-/," ")}}</BlobCode>
                     </Column>
+
+                    <slot :line="item"></slot>    
                 </CodeLine>
             </div>
         </DiffView>
@@ -161,6 +163,9 @@
             viewStyle: {
                 type: String,
                 default: 'unified'
+            },
+            codeLineCommentGroup: {
+
             }
         },
         data() {
@@ -573,8 +578,6 @@
 
 .diff-view{
     position: relative;
-    border-top: 1px solid #d1d5da;
-    border-bottom: 1px solid #d1d5da;
 }
 .diff-view-split{
     position: relative;

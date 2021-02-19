@@ -472,32 +472,28 @@
                 commentCreateOrEditPaneTextarea.value = commentCreateOrEditPaneTextarea.value + e
                 commentCreateOrEditPaneTextarea.dispatchEvent(new Event('input'))
             },
-            createCommentPostHook(e) {
-                this.timeline.newestTimelines.data.push(e.detail)
-                this.network_getTimelineExtraData([e.detail])
-            },
-            closeIssuePostHook(payload) {
+            closeIssueHook(payload) {
                 this.data = payload
                 this.network_getIssueExtraData()
                 this.timeline.extraData = []
                 this.network_getTimelineExtraData(this.timeline.data)
             },
-            minimizeCommentPostHook(payload) {
+            minimizeCommentHook(payload) {
                 let theComment = this.timeline.extraData.data.filter(i => i.id == payload.comment.node_id)[0]
                 if(theComment) {
                     Object.assign(theComment,payload.info)
                 }
             },
-            unminimizeCommentPostHook(payload) {
+            unminimizeCommentHook(payload) {
                 let theComment = this.timeline.extraData.data.filter(i => i.id == payload.comment.node_id)[0]
                 if(theComment) {
                     Object.assign(theComment,payload.info)
                 }
             },
-            updateCommentPostHook(payload) {
-                let theComment = this.timeline.data.filter(i => i.id == payload.id)[0]
+            commentUpdatedHook(event) {
+                let theComment = this.timeline.data.filter(i => i.id == event.detail.id)[0]
                 if(theComment) {
-                    Object.assign(theComment,payload)
+                    Object.assign(theComment,event.detail)
                 }
             },
             changeLockStatusSuccessPostHandler(payload) {

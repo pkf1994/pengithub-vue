@@ -24,9 +24,9 @@
             <TimelineItem v-for="(item,index) in handledTimelines" 
                     :data="item" :key="(item.id || '') + index"
                     @quote="quoteReply" 
-                    @unminimize-comment="unminimizeCommentPostHook"
-                    @update-comment="updateCommentPostHook"
-                    @minimize-comment="minimizeCommentPostHook"/>
+                    @unminimize-comment="unminimizeCommentHook"
+                    @comment-updated.native="commentUpdatedHook"
+                    @minimize-comment="minimizeCommentHook"/>
         </transition-group>
 
         <LoadMore v-if="timeline.pageInfo.next" :loading="timeline.loading" :dataGetter="network_getTimeline" :hiddenItemCount="timelineRemainedCount"></LoadMore>
@@ -35,18 +35,17 @@
             <TimelineItem v-for="(item,index) in newestTimelines" 
                         :data="item" :key="(item.id || '') + index"
                         @quote="quoteReply" 
-                        @unminimize-comment="unminimizeCommentPostHook"
-                        @update-comment="updateCommentPostHook"
-                        @minimize-comment="minimizeCommentPostHook"/>
+                        @unminimize-comment="unminimizeCommentHook"
+                        @comment-updated.native="commentUpdatedHook"
+                        @minimize-comment="minimizeCommentHook"/>
         </transition-group>
 
-        <CommentCreatePane class="mb-5 comment-create-edit-pane" 
+        <CommentCreatePane class="pt-3 mb-5 comment-create-edit-pane" 
+                        style="border-top: solid 2px rgb(225, 228, 232)"
                         ref="commentEditor"
                         @new-timeline-item-created.native="newTimelineItemCreatedHook"
                         @issue-updated.native="issueUpdatedHook"
-                        v-if="data.id"
-                        :locked="this.data.locked"
-                        :lockedReason="extraData.data.activeLockReason"></CommentCreatePane>
+                        v-if="data.id"></CommentCreatePane>
 
         <BottomInfoRows :data="Object.assign(data,extraData.data)" 
                         @issue-extra-updated.native="issueExtraUpdatedHook" 

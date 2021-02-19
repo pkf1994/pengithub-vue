@@ -1,25 +1,28 @@
 <template>
-    <ComplexEditorProto 
-        class="px-2 pt-2" 
-        :uniqueId="comment.id"
-        v-model="markdownRaw" 
-        :disabled="loading" 
-        ref="editor" 
-        :textareaStyle="{maxHeight:'327px',height:'142px'}">
-        <div class="py-2 d-flex flex-justify-end">
-            <button class="btn" :disabled="loading" @click="cancel">
-                Cancel
-            </button>
-            <button class="btn btn-primary ml-1" @click="network_updateComment" :disabled="loading">
-                {{loading ? 'Updating...' : 'Update comment'}}
-            </button>
-        </div>
-    </ComplexEditorProto>
+    <Container>
+        <Editor class="pt-2 px-2 pb-1" 
+                v-model="markdownRaw"
+                ref="editor"
+                :disabled="editCommentLoading"
+                :uniqueId="comment.id.toString()"
+                :withGidelines="false"
+                :textareaStyle="{height: '240px',maxHeight:'300px'}"
+                >
+            <div class="py-2 d-flex flex-justify-end">
+                <button class="btn" :disabled="editCommentLoading" @click="() => $emit('cancel',markdownRaw)">
+                    Cancel
+                </button>
+                <button class="btn btn-primary ml-1" @click="network_updateComment" :disabled="editCommentLoading">
+                    {{editCommentLoading ? 'Updating...' : 'Update comment'}}
+                </button>
+            </div>
+        </Editor>
+    </Container>
 </template>
 <script>
     import styled from 'vue-styled-components'
-    import {ComplexEditorProto} from '../../../../../components'
-    import {authRequiredPatch} from '@/network'
+    import {Editor} from '@/components'
+    import {authRequiredPatch,cancelAndUpdateAxiosCancelTokenSource} from '@/network'
     import * as api from '@/network/api'
     export default {
         name: 'repository_issue_comment_edit_pane',
@@ -37,18 +40,20 @@
         data() {
             return {
                 markdownRaw: '',
-                loading: false,
+                editCommentLoading: false,
             }
         },
         mounted() {
-            this.markdownRaw = this.comment.content
             this.$refs.editor.focus()
         },
         methods: {
+            append(payload) {
+                this.markdownRaw = this.markdownRaw + payload
+            },
             async network_updateComment() {
-                if(this.loading) return
+                if(this.editCommentLoading) return
                 try{
-                    this.loading = true
+                    this.editCommentLoading = true
                     if(this.updateHook) {
                         await this.updateHook(this.markdownRaw)
                     } else {
@@ -64,21 +69,18 @@
                             },
                         )
 
-                        this.$el.dispatchEvent(new CustomEvent('comment-updated',{bubbles:true,detail:res.data}))
+                        this.$emit('update-comment',res.data)
                     }
                    
                 }catch(e) {
                     this.handleError(e)
                 }finally{
-                    this.loading = false
+                    this.editCommentLoading = false
                 }
             },
-            cancel() {
-                this.$el.dispatchEvent(new CustomEvent('cancel',{bubbles:true,detail: this.markdownRaw}))
-            }
         },
         components: {
-            ComplexEditorProto,
+            Editor,
             Container: styled.div``
         }
     }

@@ -40,7 +40,7 @@
         
         <PageTopTab :tabs="tabs" style="margin-top: -32px;"></PageTopTab>
         <keep-alive>
-            <router-view @pull-request-updated.native="pullRequestUpdatedHook" @lock-status-changed.native="pullRequestUpdatedHook"></router-view>
+            <router-view @issue-updated.native="pullRequestUpdatedHook" @pull-request-updated.native="pullRequestUpdatedHook" @lock-status-changed.native="pullRequestUpdatedHook"></router-view>
         </keep-alive>
 
     </Container>

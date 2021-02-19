@@ -1,14 +1,14 @@
 <template>
-    <Container class="bg-white">
+    <Container :class="{disabled:disabled}">
         <Tab class="mx-0 mt-0 no-wrap d-flex flex-auto">
-            <TabItem class="btn-link tabnav-tab px-3 flex-1"  @click="() => switchTab('Write')" :class="{'tab-selected':selectedTab === 'Write'}">Write</TabItem>
-            <TabItem class="btn-link tabnav-tab px-3 flex-1" @click="() => switchTab('Preview')" :class="{'tab-selected':selectedTab === 'Preview'}">Preview</TabItem>
+            <TabItem class="btn-link tabnav-tab px-3 flex-1" @click="() => switchTab('Write')" :class="{'tab-selected':selectedTab === 'Write'}">Write</TabItem>
+            <TabItem class="btn-link tabnav-tab px-3 flex-1" @click="() => switchTab('Preview')" :class="{'tab-selected':selectedTab === 'Preview',disabled:!markdownRaw || !markdownRaw.trim()}">Preview</TabItem>
         </Tab>
-        <div class="px-3 pt-2 pb-0">
-            <div v-if="selectedTab === 'Write'">
-                 <markdown-toolbar for="review-submitter-textarea" class="bg-white d-flex no-wrap flex-items-start flex-wrap px-2">
 
-                    <MDGroup class="d-flex flex-wrap mr-0 mb-2 text-gray">
+        <div>
+            <EditPane v-if="selectedTab === 'Write'">
+                <markdown-toolbar :for="uniqueId" class="bg-white d-flex no-wrap flex-items-start flex-wrap px-2 pt-2">
+                   <MDGroup class="d-flex flex-wrap mr-0 mb-2 text-gray">
                         <md-header class="toolbar-item tooltipped p-2 mr-1">
                             <svg class="octicon octicon-heading" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.75 2a.75.75 0 01.75.75V7h7V2.75a.75.75 0 011.5 0v10.5a.75.75 0 01-1.5 0V8.5h-7v4.75a.75.75 0 01-1.5 0V2.75A.75.75 0 013.75 2z"></path></svg>
                         </md-header>
@@ -51,168 +51,90 @@
                             <svg class="octicon octicon-cross-reference" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M16 1.25v4.146a.25.25 0 01-.427.177L14.03 4.03l-3.75 3.75a.75.75 0 11-1.06-1.06l3.75-3.75-1.543-1.543A.25.25 0 0111.604 1h4.146a.25.25 0 01.25.25zM2.75 3.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h2a.75.75 0 01.75.75v2.19l2.72-2.72a.75.75 0 01.53-.22h4.5a.25.25 0 00.25-.25v-2.5a.75.75 0 111.5 0v2.5A1.75 1.75 0 0113.25 13H9.06l-2.573 2.573A1.457 1.457 0 014 14.543V13H2.75A1.75 1.75 0 011 11.25v-7.5C1 2.784 1.784 2 2.75 2h5.5a.75.75 0 010 1.5h-5.5z"></path></svg>
                         </md-ref>
 
-                        <Reply class="toolbar-item tooltipped py-2 px-1 ml-1">
-                            <svg class="octicon octicon-reply" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.78 1.97a.75.75 0 010 1.06L3.81 6h6.44A4.75 4.75 0 0115 10.75v2.5a.75.75 0 01-1.5 0v-2.5a3.25 3.25 0 00-3.25-3.25H3.81l2.97 2.97a.75.75 0 11-1.06 1.06L1.47 7.28a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z"></path></svg>
-                        </Reply>
                     </MDGroup>
                 </markdown-toolbar>
 
-                <textarea id="review-submitter-textarea" :disabled="loading" ref="textarea" v-model="markdownRaw" class="form-control input-contrast" placeholder="Leave a comment" rows="5" style="width: 100%"></textarea>
-            </div>
+                <textarea   rows="6" 
+                            placeholder="Leave a comment"
+                            class="d-block width-full form-control input-contrast" 
+                            :style="textareaStyle"
+                            :value="markdownRaw"
+                            :id="uniqueId"
+                            ref="textarea"
+                            v-on:input="$emit('change',$event.target.value)"
+                            v-on:change="$emit('change',$event.target.value)"></textarea>
+            </EditPane>
 
-            <Preview  v-else class="preview-body markdown-body" v-html="commentPreviewHTML">
+            <Preview  v-else class="preview-body" v-html="previewHTML">
 
             </Preview>
 
-            <EventSelectPane class="bubble mt-3" v-if="!viewerIsPullRequestOwner">
-                <label for="review-comment" class="list-item">
-                    <input v-model="event" type="radio" id="review-comment" class="merge-option-radio" value="COMMENT">
-                    Comment
-                    <small class="byline">Submit general feedback without explicit approval.</small>
-                </label>
-                <label for="review-approve" class="list-item">
-                    <input v-model="event" type="radio" id="review-approve" class="merge-option-radio" value="APPROVE">
-                    Approve
-                    <small class="byline">
-                        Submit feedback and approve merging these changes.
-                    </small>
-                </label>
-                <label for="review-reject" class="list-item">
-                    <input v-model="event" type="radio" id="review-reject" class="merge-option-radio" value="REQUEST_CHANGES">
-                    Request changes
-                    <small class="byline">
-                        Submit feedback that must be addressed before merging.
-                    </small>
-                </label>
-            </EventSelectPane>
         </div>
-        
-        <div class="border-top px-3 py-2" >
-            <button class="btn btn-primary btn-block" @click.stop="network_submitReview" :disabled="loading || pendingReview().loading || ( !markdownRaw && !pendingReview().data.databaseId ) ">
-                {{loading ? 'Trying...' : 'Submit review'}}
-            </button>
-        </div>
-       
+
+        <slot></slot>    
     </Container>
+
 </template>
 
 <script>
     import styled from 'vue-styled-components'
-    import {authRequiredPost,authRequiredGitHubGraphqlApiQuery} from '@/network'
-    import * as api from '@/network/api'
-    import * as graphql  from '../../graphql.js'
-    import {mapMutations} from 'vuex'
-    import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW} from '@/store/modules/pullRequestDetail/mutationTypes'
+    import '@github/markdown-toolbar-element'
     import marked from 'marked'
     const createDOMPurify = require('dompurify');
     export default {
-        inject: ['pendingReview','pullRequestProvided'],
+        model: {
+            prop: 'markdownRaw',
+            event: 'change'
+        },
         props: {
-            commentId: [String,Number],
-            path: String,
+            markdownRaw: String,
+            uniqueId: {
+                type: [String,Number],
+                required: true
+            },
+            textareaStyle: Object,
+            disabled: Boolean
         },
         data() {
             return {
-                event: 'COMMENT',
-                loading: false,
                 selectedTab: 'Write',
-                stretch: false,
-                markdownRaw: ''
             }
         },
         computed: {
-            repo() {
-                return this.$route.params.repo
-            },
-            owner() {
-                return this.$route.params.owner
-            },
-            number() {
-                return this.$route.params.number
-            },
-            viewerIsPullRequestOwner() {
-                return this.viewer.login == (this.pullRequestProvided().data
-                && this.pullRequestProvided().data.user && this.pullRequestProvided().data.user.login)
-            },
-            commentPreviewHTML() {
+            previewHTML() {
                 const DOMPurify = createDOMPurify(window);
                 return DOMPurify.sanitize((marked(this.markdownRaw,{breaks:true})))
             },
         },
         methods: {
-            ...mapMutations({
-                mutation_pushNewSubmittedReview: MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW
-            }),
-            async network_submitReview() {
-                try {
-                    this.loading = true
-
-                    let url 
-                    if(this.pendingReview().data.databaseId) {
-                        url = api.API_SUBMIT_REVIEW({
-                            repo: this.repo,
-                            owner: this.owner,
-                            number: this.number,
-                            reviewId: this.pendingReview().data.databaseId
-                        })
-                    }else {
-                        url = api.API_CREATE_REVIEW({
-                            repo: this.repo,
-                            owner: this.owner,
-                            number: this.number,
-                        })
-                    }
-               
-                    let res = await authRequiredPost(
-                        url,
-                        {
-                            body: this.markdownRaw,
-                            event: this.viewerIsPullRequestOwner ? 'COMMENT' : this.event
-                        },
-                        {
-                            headers: {
-                                "accept": "application/vnd.github.squirrel-girl-preview"
-                            }
-                        }
-                    )
-
-                    this.mutation_pushNewSubmittedReview({
-                        ...res.data,
-                        event: "reviewed"
-                    })
-
-                    //this.reviewSubmittedHook()(res.data)
-
-                    this.$router.push(`/${this.owner}/${this.repo}/pull/${this.number}?new_created_timeline_item=${res.data.id}`)
-                    
-                } catch (e) {
-                    this.handleError(e)
-                } finally {
-                    this.loading = false
-                }
-            },
-            switchTab(payload) {
-                this.selectedTab = payload
-            },
             triggerStretch() {
                 this.stretch = !this.stretch
-            }, 
+            },
+            switchTab(tab) {
+                if(this.locked) return 
+                this.selectedTab = tab
+            },
+            focus() {
+                this.$refs.textarea && this.$refs.textarea.focus()
+            }
         },
         components: {
             Container: styled.div``,
-            EventSelectPane: styled.div``,
+            EditPane: styled.div``,
             Tab: styled.div``,
             TabItem: styled.button``,
             MDGroup: styled.div``,
             Reply: styled.div``,
+            Preview: styled.div``,
         }
     }
 </script>
 
-<style scoped lang="scss">
-@import 'node_modules/@primer/css/forms/index.scss';
+<style scoped lang='scss'>
 @import 'node_modules/@primer/css/navigation/index.scss';
-.tabnav-tab{
+@import 'node_modules/@primer/css/forms/index.scss';
+@import 'node_modules/@primer/css/alerts/index.scss';
+ .tabnav-tab{
     display: inline-block;
     padding: 8px 12px;
     font-size: 14px;
@@ -221,7 +143,6 @@
     background-color: #fafbfc;
     border: 1px solid #e1e4e8;
     border-left: 0;
-    border-top: 0;
     border-radius: 0;
 }
 .tabnav-tab:first-child{
@@ -231,45 +152,42 @@
     border-bottom: 0;
     background-color: #fff;
 }
-.bubble {
-    padding: 0;
-    margin: 0 15px 15px;
-    margin-right: 0;
-    margin-left: 0;
-    color: #24292e;
-    overflow: hidden;
-    word-break: break-word;
-    word-wrap: break-word;
-    white-space: normal;
-    background: #fff;
-    border: 1px solid #d1d5da;
-    border-radius: 6px;
+.toolbar-item {
+    display: block;
+    float: left;
+    padding: 4px;
+    color: #586069;
+    cursor: pointer;
+    background: none;
+    border: 0;
+}
+.toolbar-item:hover{
+    color: rgb(3, 102, 214);
+}
+.clearfix::after {
+    content: '';
+    display: table;
+    clear: both;
+}
+.tooltipped {
+    position: relative;
 }
 
-.list-item{
-    position: relative;
+textarea{
+    max-height: 451.2px;
+    border-bottom: 1px solid #e1e4e8;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
     display: block;
     width: 100%;
-    padding: 14px 15px 14px 35px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    overflow-wrap: break-word;
-    line-height: inherit;
-    text-align: left;
-    .byline {
-        display: block;
-        margin: 0;
-        font-size: 12px;
-        color: #586069;
-        font-weight: 400;
-    }
-}
-
-.merge-option-radio {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    margin-right: 3px;
+    min-height: 100px;
+    padding: 8px;
+    resize: vertical;
+    max-width: 100%;
+    margin: 0;
+    line-height: 1.6;
+    overflow: auto;
+    height: 100px;
 }
 
 .preview-body {
@@ -280,5 +198,9 @@
     min-height: 150px;
     padding: 4px 4px 16px;
     border-bottom: 1px solid #e1e4e8;
+}
+
+.disabled{
+    pointer-events: none;
 }
 </style>

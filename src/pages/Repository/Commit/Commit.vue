@@ -7,8 +7,8 @@
                 <SkeletonRectangle :height="16" class="mt-3" style="width:55%"></SkeletonRectangle>
                 <SkeletonRectangle :height="14" class="mt-3 mb-2" style="width:40%"></SkeletonRectangle>
             </Skeleton>
-            <div v-else>
-                <router-link v-if="browseFilesRouterLink" :to="browseFilesRouterLink" class="float-right btn-outline btn" >
+            <div v-else style="min-height:40px">
+                <router-link v-if="browseFilesRouterLink" :to="browseFilesRouterLink" class="float-right btn-outline btn bg-white" >
                     Browse files
                 </router-link>
                     
@@ -22,10 +22,12 @@
                     {{messageBody}}
                 </p>
 
+                <div v-if="messageBody && (associatedRefs.branch.name || associatedRefs.tags.length > 0)" class="divider width-full my-2 border-top"></div>
+
                 <Branches class="branches">
                     <!-- associated pulls -->
-                    <svg v-if="associatedRefs.branch.name" class="octicon octicon-git-branch" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 5c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v.3c-.02.52-.23.98-.63 1.38-.4.4-.86.61-1.38.63-.83.02-1.48.16-2 .45V4.72a1.993 1.993 0 00-1-3.72C.88 1 0 1.89 0 3a2 2 0 001 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-.53-.2-1-.53-1.36.09-.06.48-.41.59-.47.25-.11.56-.17.94-.17 1.05-.05 1.95-.45 2.75-1.25S8.95 7.77 9 6.73h-.02C9.59 6.37 10 5.73 10 5zM2 1.8c.66 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2C1.35 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2zm0 12.41c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm6-8c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
-                    <span v-if="associatedRefs.branch.name" class="associated-pulls">
+                    <svg v-if="associatedRefs.branch.name" class="octicon octicon-git-branch v-align-middle" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M10 5c0-1.11-.89-2-2-2a1.993 1.993 0 00-1 3.72v.3c-.02.52-.23.98-.63 1.38-.4.4-.86.61-1.38.63-.83.02-1.48.16-2 .45V4.72a1.993 1.993 0 00-1-3.72C.88 1 0 1.89 0 3a2 2 0 001 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-.53-.2-1-.53-1.36.09-.06.48-.41.59-.47.25-.11.56-.17.94-.17 1.05-.05 1.95-.45 2.75-1.25S8.95 7.77 9 6.73h-.02C9.59 6.37 10 5.73 10 5zM2 1.8c.66 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2C1.35 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2zm0 12.41c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm6-8c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
+                    <span v-if="associatedRefs.branch.name" class="associated-pulls  v-align-middle">
                         <span class="text-bold">{{associatedRefs.branch.name}}</span>
                         <span v-if="associatedRefs.pullRequest.number">
                             (<router-link :to="`/${owner}/${repo}/pulls/${associatedRefs.pullRequest.number}`" class="text-gray">#{{associatedRefs.pullRequest.number}}</router-link>)
@@ -109,7 +111,9 @@
 
         <div>
             <transition-group appear name="fade">
-                <Diff v-for="item in data.files || []" :key="item.raw_url" :file="item" :viewStyle="viewStyle"></Diff>
+                <Diff v-for="item in data.files || []" :key="item.raw_url" :file="item" :viewStyle="viewStyle" v-slot="slotProps">
+                    
+                </Diff>
             </transition-group>
         </div>     
 
@@ -124,7 +128,7 @@
             </div> 
         </AnimatedHeightWrapper>   
 
-        <CommentWrapper v-for="item in comments.data" :key="item.id" class="comment-wrapper py-3 position-relative">
+    <!--     <CommentWrapper v-for="item in comments.data" :key="item.id" class="comment-wrapper py-3 position-relative">
             <Comment :data="item">
 
             </Comment>
@@ -140,7 +144,7 @@
             <Comment :data="item">
 
             </Comment>
-        </CommentWrapper>
+        </CommentWrapper> -->
 
         <Editor v-if="accessToken && firstLoadFlag" 
                 ref="editor"
@@ -172,10 +176,11 @@
     import {CommonLoading,AnimatedHeightWrapper,LoadingIconEx,HiddenItemLoading,Editor,Subscription,ImgWrapper,CommonLoadingWrapper,SkeletonCircle,SkeletonRectangle} from '@/components'
     import Comment from './Comment'
     import {Diff,CommitStatusIcon} from '../components'
-    import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet } from '@/network'
+    import { authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet } from '@/network'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
     import {util_dateFormat} from '@/util'
+    const parse = require('parse-link-header')
     export default {
         name: 'commit_page',
         mixins: [RouteUpdateAwareMixin],
@@ -207,16 +212,8 @@
                 comments: {
                     data: [],
                     loading: false,
-                    latestData: {
-                        data: [],
-                        loading: false
-                    },
-                    perPage: 1,
-                    reactionStatistic: {},
-                    pageInfo: {},
-                    totalCount: 0
                 },
-                firstLoadFlag: false
+                firstLoadFlag: false,
             }
         },
         computed: {
@@ -284,6 +281,9 @@
                 if(!this.data.author.login) return 
                 if(!this.data.committer.login) return 
                 return this.data.author.login == this.data.committer.login
+            },
+            documentTitle() {
+                return this.messageHeadline
             }
         },
         created() {
@@ -373,52 +373,27 @@
                     this.comments.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.name + ' get_comments')
 
-                    let graphql_comments = graphql.GRAPHQL_COMMIT_COMMENTS(
-                        {
-                            nodeId: this.data.node_id,
-                            after: this.comments.pageInfo.endCursor,
-                            perPage: this.comments.perPage
-                        }
-                    )
+                    let pageInfo
 
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_comments,{cancelToken})
+                    let comments = []
 
-                    //尝试获取末端数据
-                    if(this.comments.data.length == 0) {
-                        let commentsCountHolder
-                        try{
-                            commentsCountHolder = res.data.data.node.comments.totalCount
-                        }catch(e) {
-                            this.handleGraphqlError(res)
-                        }
-                        if(commentsCountHolder > this.comments.perPage) {
-                            let itemCountRemained = commentsCountHolder - this.comments.perPage
-                            let lastPageScale = itemCountRemained > this.comments.perPage ? this.comments.perPage : itemCountRemained
-
-                            let graphql_commentsLatest = graphql.GRAPHQL_COMMIT_COMMENTS(
-                                {
-                                    nodeId: this.data.node_id,
-                                    perPage: lastPageScale,
-                                    forward: false
-                                }
-                            )
-
-                            let res_commentsLatest = await authRequiredGitHubGraphqlApiQuery(graphql_commentsLatest,{cancelToken:sourceAndCancelToken.cancelToken})
-                            try{
-                                this.comments.latestData.data = res_commentsLatest.data.data.node.comments.nodes
-                            }catch(e) {
-                                this.handleGraphqlError(res_commentsLatest)
-                            }
-                        }
+                    while((!pageInfo || pageInfo.next) && comments.length <= 300) {
+                        let url
+                        if(pageInfo && pageInfo.next) url = pageInfo.next.url
+                        if(!url) url = api.API_COMMIT_COMMENTS({
+                            params: {
+                                per_page: 100
+                            },
+                            repo: this.repo,
+                            owner: this.owner,
+                            sha: this.sha
+                        })
+                        let res = await authRequiredGet(url,{cancelToken})
+                        pageInfo = parse(res.headers.link) || {}
+                        comments = comments.concat(res.data)
                     }
 
-                    try{
-                        this.comments.data = this.comments.data.concat(res.data.data.node.comments.nodes)
-                        this.comments.pageInfo = res.data.data.node.comments.pageInfo
-                        this.comments.totalCount = res.data.data.node.comments.totalCount
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
+                    this.comments.data = comments
                     
                 }catch(e) {
                     console.log(e)
@@ -496,9 +471,9 @@
     padding: 8px 8px 0;
     margin: 10px 0;
     font-size: 14px;
-    background: #eaf5ff;
+    background: rgb(241, 248, 255);
     border: 1px solid rgba(27,31,35,.15);
-    border-radius: 3px;
+    border-radius: 6px;
     a{
         background-color: initial;
         border-color: rgba(27,31,35,.15);
@@ -510,7 +485,6 @@
         color: #05264c;
     }
     .desc{
-        padding-bottom: 10px;
         max-width: 100%;
         overflow: visible;
         font-size: 13px;
@@ -518,7 +492,6 @@
         line-height: 1.45;
         color: #444d56;
         font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
-        border-bottom: 1px solid rgba(27,31,35,.15);
     }
     .branches{
         margin-bottom: 8px;
@@ -537,8 +510,8 @@
         margin-left: -8px;
         background: #fff;
         border-top: 1px solid rgba(27,31,35,.15);
-        border-bottom-right-radius: 3px;
-        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 6px;
+        border-bottom-left-radius: 6px;
         .user-mention {
             font-weight: 600;
             color: #24292e;

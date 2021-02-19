@@ -14,7 +14,8 @@
                 <InfoBottomItemTitle class="info-bottom-item-title">
                     Assignees
                 </InfoBottomItemTitle>
-                <div style="margin-bottom:10px" v-for="item in data.assignees.slice(0,21)" :key="item.id">
+                <span v-if="!(data.assignees && data.assignees.length > 0)">No one assigneed</span>   
+                <div v-else style="margin-bottom:10px" v-for="item in data.assignees.slice(0,21)" :key="item.id">
                     <router-link to="/">
                         <ImgWrapper class="avatar avatar-user">
                             <img class="avatar avatar-user" :src="item.avatar_url" width="20" height="20" :alt="`@${item.login}`"> 
@@ -22,8 +23,7 @@
                         <span class="assignee-login">{{item.login}}</span>    
                     </router-link> 
                 </div>
-                <span v-if="!(data.assignees && data.assignees.length > 0)">No one assigneed</span>    
-                <span v-if="data.assignees.length > 21">and others</span>    
+                <span v-if="data.assignees && data.assignees.length > 21">and others</span>    
             </InfoBottomItem>
 
              <!-- labels -->
@@ -34,11 +34,11 @@
                 <InfoBottomItemTitle class="info-bottom-item-title">
                     Labels
                 </InfoBottomItemTitle>
-                <router-link class="mt-1 mr-1" to="/" v-for="item in data.labels.slice(0,21)" :key="item.id">
+                <span v-if="!(data.labels && data.labels.length > 0)">None yet</span>  
+                <router-link v-else class="mt-1 mr-1" to="/" v-for="item in data.labels.slice(0,21)" :key="item.id">
                     <Label :name="item.name" :color="`#${item.color}`" style="margin-bottom:2px"></Label>      
                 </router-link> 
-                <span v-if="!(data.labels && data.labels.length > 0)">None yet</span>    
-                <span v-if="data.labels.length > 21">and others</span> 
+                <span v-if="data.labels && data.labels.length > 21">and others</span> 
             </InfoBottomItem>
 
              <!-- milestones -->
