@@ -1,21 +1,20 @@
 <template>
-    <Container class="the-container">
-        <textarea :disabled="loadingStartReview || loadingAddComment" ref="textarea" v-model="content" class="form-control" placeholder="Leave a comment" rows="5" style="width: 100%"></textarea>
+    <ComplexEditorProto ref="textarea" :uniqueId="path + position" class="px-3 pt-2 pb-3" :toolbarArray="['mention','image','ref']" v-model="content" :disabled="loadingStartReview || loadingAddComment">
         <div class="text-right position-relative no-wrap">
             <button class="btn mt-2 d-block width-full" @click.stop="() => $emit('cancel')" :disabled="loadingStartReview || loadingAddComment">Cancel</button>
-            <button class="btn mt-2 ml-1 btn-primary truncate d-block width-full" @click.stop="network_addSingleComment" :disabled="loadingStartReview || loadingAddComment || !content || pendingReview().loading">
+            <button class="btn mt-2 btn-primary truncate d-block width-full" @click.stop="network_addSingleComment" :disabled="loadingStartReview || loadingAddComment || !content || pendingReview().loading">
                 {{loadingAddComment ? 'Trying...' : 'Add comment'}}
             </button>
-            <button class="btn mt-2 ml-1 btn-primary d-block width-full" v-if="!(pendingReview().data && pendingReview().data.databaseId)" @click.stop="network_startAReview" :disabled="loadingStartReview || loadingAddComment || !content">
+            <button class="btn mt-2 btn-primary d-block width-full" v-if="!(pendingReview().data && pendingReview().data.databaseId)" @click.stop="network_startAReview" :disabled="loadingStartReview || loadingAddComment || !content">
                 {{loadingStartReview ? 'Trying...' : 'Start a review'}}
             </button>
         </div>
-    </Container>
+    </ComplexEditorProto>
 </template>
 
 <script>
     import ReviewCommentReplyCreator from './ReviewCommentReplyCreator'
-    import {Popover} from '@/components'
+    import {ComplexEditorProto} from '../../../../components'
     import {authRequiredGitHubGraphqlApiQuery} from '@/network'
     import * as graphql  from '../../graphql.js'
     import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW,MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT} from '@/store/modules/pullRequestDetail/mutationTypes'
@@ -24,7 +23,7 @@
         mixins: [ReviewCommentReplyCreator],
         inject: ['pendingReview','commentReviewCreatedHook'],
         data() {
-            return {
+            return { 
                 loadingAddComment: false
             }
         },
@@ -123,7 +122,7 @@
             }
         },
         components: {
-            Popover
+            ComplexEditorProto
         }
     }
 </script>

@@ -156,9 +156,8 @@
                     let pageInfo
                     while(!pageInfo || (pageInfo && pageInfo.next)) {
                         let url 
-                        if(pageInfo) {
-                            url = pageInfo.next.url
-                        }else {
+                        if(pageInfo) url = pageInfo.next.url
+                        if(!url) {
                             url = api.API_REVIEW_COMMENTS_OF_PULL_REQUEST({
                                 repo: this.repo,
                                 owner: this.owner,
@@ -439,30 +438,43 @@
             } */
         },
         watch: {
-            state_deletedReviewComments(newOne,oldOne) {
-                if(this.pendingReview.reviewComments.data.length > 0) {
-                    if(newOne.some(i => this.pendingReview.reviewComments.data.some(i_ => i_.id == i.id))) {
-                        if(this.pendingReview.reviewComments.data.length == 1) {
-                            this.network_getPendingReview()
-                        }else{
-                            this.network_getPendingReviewComments()
+            state_deletedReviewComments: {
+                handler: function(newOne,oldOne) {
+                    if(this.pendingReview.reviewComments.data.length > 0) {
+                        if(newOne.some(i => this.pendingReview.reviewComments.data.some(i_ => i_.id == i.id))) {
+                            if(this.pendingReview.reviewComments.data.length == 1) {
+                                this.network_getPendingReview()
+                            }else{
+                                this.network_getPendingReviewComments()
+                            }
+                            return 
                         }
-                        return 
                     }
-                }
-                this.network_getReviewComments()
+                    console.log('state_deletedReviewComments')
+                    console.log(newOne)
+                    console.log(oldOne)
+                    console.log(oldOne == newOne)
+                    this.network_getReviewComments()
+                },
+                deep: true
             },
-            state_newCreatedReviewComments(newOne) {
-                if(newOne.length == 0) return
-                this.network_getReviewCommentsExtraData([newOne[newOne.length - 1]])
+            state_newCreatedReviewComments: {
+                handler: function(newOne) {
+                    if(newOne.length == 0) return
+                    this.network_getReviewCommentsExtraData([newOne[newOne.length - 1]])
+                },
+                deep: true
             },
-            state_newSubmittedReviews(newOne) {
-                if(newOne.length == 0) return
-                if(this.pendingReview.data.id) {
-                    this.reviewComments.data = this.reviewComments.data.concat(this.pendingReview.reviewComments.data)
-                    this.pendingReview.data = {}
-                    this.pendingReview.reviewComments.data = []
-                } 
+            state_newSubmittedReviews: {
+                handler: function(newOne) {
+                    if(newOne.length == 0) return
+                    if(this.pendingReview.data.id) {
+                        this.reviewComments.data = this.reviewComments.data.concat(this.pendingReview.reviewComments.data)
+                        this.pendingReview.data = {}
+                        this.pendingReview.reviewComments.data = []
+                    } 
+                },
+                deep: true
             },
         },
        

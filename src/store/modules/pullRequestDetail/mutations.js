@@ -31,9 +31,9 @@ export default {
         state.updatedReviewComments.push(payload)
     },
     [MUTATION_PULL_REQUEST_DETAIL_RESET_STATE] (state) {
-        state.newStartedReviews = []
-        state.newCreatedReviewComments = []
-        state.deletedReviewComments = []
-        state.updatedReviewComments = []
+        if(state.newStartedReviews.length > 0) state.newStartedReviews = state.newStartedReviews.splice(0,state.newStartedReviews.length)
+        if(state.newCreatedReviewComments.length > 0) state.newCreatedReviewComments = state.newCreatedReviewComments.splice(0,state.newCreatedReviewComments.length)
+        if(state.deletedReviewComments.length > 0) state.deletedReviewComments = state.deletedReviewComments.splice(0,state.deletedReviewComments.length)
+        if(state.updatedReviewComments.length > 0) state.updatedReviewComments = state.updatedReviewComments.splice(0,state.updatedReviewComments.length)
     },
 }

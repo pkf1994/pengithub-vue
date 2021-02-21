@@ -276,6 +276,7 @@
     align-items: center;
     padding-top: 2px;
     padding-bottom: 2px;
+    white-space: pre-wrap;
 }
 
 .blob-code-split{

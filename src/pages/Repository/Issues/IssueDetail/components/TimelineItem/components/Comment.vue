@@ -543,7 +543,7 @@
     }
 </script>
 
-<style lang="scss">
+<style lang="scss" >
 @import 'node_modules/@primer/css/markdown/index.scss';
 @import './user_edit_contents.scss';
 .team-mention, .user-mention {
@@ -573,7 +573,7 @@
 @import 'node_modules/@primer/css/alerts/index.scss';
 @import 'node_modules/@primer/css/forms/index.scss';
 @import 'node_modules/@primer/css/layout/index.scss';
-@import 'node_modules/@primer/css/truncate  /index.scss';
+@import 'node_modules/@primer/css/truncate/index.scss';
 .inner{
     position: relative;
     color: #24292e;

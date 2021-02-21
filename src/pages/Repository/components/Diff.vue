@@ -348,7 +348,7 @@
                 if(!this.fileContent) return []
                 let lines
                 if(typeof this.fileContent == 'object') {
-                    lines = JSON.stringify(this.fileContent).split('\n')
+                    lines = JSON.stringify(this.fileContent,null,2).split('\n')
                 }else{
                     lines = this.fileContent.split('\n')
                 }
@@ -361,6 +361,9 @@
                     })
                 })
                 return entries
+            },
+            t() {
+                return JSON.stringify(this.fileContent,null,4)
             },
             viewFileRouterLink() {
                 return this.file.blob_url.replace('https://github.com','')
@@ -619,6 +622,7 @@
     align-items: center;
     padding-top: 2px;
     padding-bottom: 2px;
+    white-space: pre-wrap;
 }
 
 .blob-code-split{
