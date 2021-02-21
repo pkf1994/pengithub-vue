@@ -1,17 +1,17 @@
 <template>
-    <Container class="container">
-        <textarea :disabled="loadingCreateReply || loadingStartReview" ref="textarea" v-model="content" class="form-control" placeholder="Leave a comment" rows="5" style="width: 100%"></textarea>
+    <ComplexEditorProto ref="textarea" :uniqueId="comment.id" :toolbarArray="['mention','image','ref']" v-model="content" :disabled="loadingCreateReply || loadingStartReview">
         <div class="text-right">
             <button class="btn mt-2" @click.stop="() => $emit('cancel')" :disabled="loadingCreateReply || loadingStartReview">Cancel</button>
             <button class="btn mt-2 ml-1" @click.stop="network_addReply" :disabled="loadingCreateReply || loadingStartReview">{{loadingCreateReply ? 'Trying...' : 'Add reply'}}</button>
             <button class="btn mt-2 ml-1 btn-primary" v-if="(!pendingReview().data && !pendingReview.loading) || loadingStartReview" @click.stop="network_createReview" :disabled="loadingCreateReply || loadingStartReview">{{loadingStartReview ? 'Trying...' : 'Start a review'}}</button>
         </div>
-    </Container>
+    </ComplexEditorProto>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
     import {authRequiredPost,authRequiredGet,authRequiredGitHubGraphqlApiQuery} from '@/network'
+    import {ComplexEditorProto} from '../../../../components'
     import * as api from '@/network/api'
     import * as graphql  from '../../graphql.js'
     import {mapMutations} from 'vuex'
@@ -206,6 +206,7 @@
             }
         },
         components: {
+            ComplexEditorProto,
             Container: styled.div``
         }
     }
