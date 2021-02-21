@@ -1,22 +1,22 @@
 <template>
-    <Container class="container">
-        <textarea ref="textarea" v-model="content" class="form-control" placeholder="Leave a comment" rows="5" style="width: 100%"></textarea>
+    <ComplexEditorProto ref="editor" :uniqueId="comment.url" class="container" v-model="content" :disabled="loading">
         <div class="text-right">
-            <button class="btn mt-2" @click="() => $emit('cancel')" :disabled="loading">Cancel</button>
-            <button class="btn mt-2 ml-1 btn-primary" @click="network_updateComment" :disabled="loading">{{loading ? 'Updating...' : 'Update Comment'}}</button>
+            <button class="btn mt-2 d-block width-full" @click="() => $emit('cancel')" :disabled="loading">Cancel</button>
+            <button class="btn mt-2 btn-primary d-block width-full" @click="network_updateComment" :disabled="loading">{{loading ? 'Updating...' : 'Update Comment'}}</button>
         </div>
-    </Container>
+    </ComplexEditorProto>
 </template>
 
 <script>
     import styled from 'vue-styled-components'
+    import {ComplexEditorProto} from '../../../../../../../../components'
     import {authRequiredPost,authRequiredGitHubGraphqlApiQuery} from '@/network'
     import  * as api from '@/network/api'
     import * as graphql from './graphql.js'
     import { mapMutations } from 'vuex'
     import { MUTATION_PULL_REQUEST_DETAIL_PUSH_UPDATED_REVIEW_COMMENT } from '@/store/modules/pullRequestDetail/mutationTypes.js'
     export default {
-        inject: ['reviewProvided'],
+        inject: ['reviewCommentsExtraData'],
         props: {
             comment: Object
         },
@@ -36,20 +36,23 @@
             number() {
                 return this.$route.params.number
             },
+            commentExtraData() {
+                return this.reviewCommentsExtraData().filter(i => i.id == this.comment.node_id)[0]
+            }
         },
         mounted() {
-            this.$refs.textarea.focus()
+            this.$refs.editor.focus()
             this.content = this.comment.body
         },
         activated() {
-            this.$refs.textarea.focus()
+            this.$refs.editor.focus()
         },
         methods: {
             ...mapMutations({
                 mutation_pushUpdatedReviewComments: MUTATION_PULL_REQUEST_DETAIL_PUSH_UPDATED_REVIEW_COMMENT
             }),
             network_updateComment() {
-                if(this.reviewProvided().state && this.reviewProvided().state.toLowerCase() == 'pending') {
+                if(this.commentExtraData.state.toLowerCase() == 'pending') {
                     this.network_updateCommentByGraphql()
                     return
                 }
@@ -58,12 +61,7 @@
             async network_updateCommentByRest() {
                 try {
                     this.loading = true
-                    let url = api.API_REVIEW_COMMENT_OF_PULL_REQUEST({
-                        repo: this.repo,
-                        owner: this.owner,
-                        number: this.number,
-                        commentId: this.comment.id
-                    })
+                    let url = this.comment.url
                     let res = await authRequiredPost(
                         url,
                         {
@@ -76,9 +74,9 @@
                         }
                     )
 
-                     this.mutation_pushUpdatedReviewComments(res.data)
+                    this.mutation_pushUpdatedReviewComments(res.data)
 
-                      this.$emit('cancel')
+                    this.$el.dispatchEvent(new CustomEvent('cancel',{bubbles: true}))
                 } catch (e) {
                     this.handleError(e)
                 } finally {
@@ -136,7 +134,7 @@
                         
                         this.mutation_pushUpdatedReviewComments(updatedComment)
 
-                        this.$emit('cancel')
+                        this.$el.dispatchEvent(new CustomEvent('cancel',{bubbles: true}))
                         
                     }catch(e) {
                         console.log(e)
@@ -151,6 +149,7 @@
             }
         },
         components: {
+            ComplexEditorProto,
             Container: styled.div``
         }
     }

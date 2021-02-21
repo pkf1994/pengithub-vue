@@ -56,6 +56,9 @@ export default {
         }
     },
     computed: {
+        number() {
+            return this.$route.params.number
+        },
         relativeReviewers() {
             let relativeReviewers = []
             this.reviews.forEach(i => {

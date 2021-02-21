@@ -1,5 +1,5 @@
 <template> 
-    <Container class="p-3 position-relative">
+    <Container v-if="!showEditPane"  class="p-3 position-relative">
         <div class="bubble m-0 bg-white">
             <HideAndShowPane v-if="extraData.isMinimized" class="p-3 d-flex flex-justify-between p-3 text-gray text-small border-bottom">
                 <span class="text-italic">
@@ -77,7 +77,10 @@
 
         <DeletingCovor v-if="loadingDeleteThis" class="position-absolute bg-white" style="top:0;left:0;right:0;bottom:0;opacity:.4" ></DeletingCovor>
 
+
     </Container>
+
+    <ReviewCommentEditor v-else :comment="comment"></ReviewCommentEditor>
 </template>
 
 <script>
@@ -99,6 +102,7 @@
                 showMinimizePane: false,
                 loadingDeleteThis: false,
                 loadingUnminimizeComment: false,
+                showEditPane: false
             }
         },
         props: {

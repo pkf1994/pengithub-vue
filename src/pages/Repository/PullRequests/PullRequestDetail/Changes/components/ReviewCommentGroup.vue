@@ -1,31 +1,28 @@
 <template>
-    <Container>
+    <Container class="border-top">
         
-        <ReviewComment class="border-top" v-for="commentItem in reviewCommentGroup" :propsData="commentItem" :key="commentItem.id"></ReviewComment>
+        <ReviewComment style="border-radius: 6px;" v-for="commentItem in reviewCommentGroup" :reviewComment="commentItem" :key="commentItem.id"></ReviewComment>
+
+        <button @click="triggerShowReviewCommentCreator" v-if="!(pullRequestProvided().locked && !viewerIsCollaborator().data) && !showReviewCommentCreator && repoOwnerType() == 'User'" class="border-top reply btn-link text-bold text-left muted-link btn-block">
+            Reply...
+        </button>
 
         <div class="comment-btn-wrapper border-bottom" v-if="repoOwnerType() == 'User'">
-            <div class="px-3 pb-3 bg-white" v-if="!showReviewCommentCreator && reviewCommentGroup.length > 0">
-                <button :disabled="replyButtonDisabled" type="button" class="btn btn-block " @click="triggerShowReviewCommentCreator">
-                    Add an additional review comment
-                </button>
-            </div>
-
-            <ReviewCommentReplyCreator :position="rootReviewComment.position" 
+            <ReviewCommentReplyCreator  class="p-2"
                                         :comment="rootReviewComment"
                                         :path="rootReviewComment.path" 
                                         @cancel="() => triggerShowReviewCommentCreator(false)" 
-                                        v-if="showReviewCommentCreator" 
-                                        :commentId="rootReviewComment.id"></ReviewCommentReplyCreator>
+                                        v-if="showReviewCommentCreator"></ReviewCommentReplyCreator>
         </div>
     </Container>
 </template>
 <script>
     import styled from 'vue-styled-components'
-    import ReviewComment from './ReviewComment'
+    import {ReviewComment,} from '../../Conversation/components/TimelineItem/components/Review/components'
     import ReviewCommentReplyCreator from './ReviewCommentReplyCreator'
     import {mapState} from 'vuex'
     export default {
-        inject: ['reviewCommentsProvided','repoOwnerType'],
+        inject: ['reviewCommentsProvided','repoOwnerType','pullRequestProvided','viewerIsCollaborator'],
         provide() {
             return {
                 triggerReplyButtonDisabled:() => this.triggerReplyButtonDisabled
@@ -83,5 +80,9 @@
 .comment-btn-wrapper{
     padding-top: 0px;
     background-color: #fafbfc;
+}
+
+.reply{
+    padding: 10px 15px;
 }
 </style>

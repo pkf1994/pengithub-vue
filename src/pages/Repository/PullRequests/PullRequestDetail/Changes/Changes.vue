@@ -1,11 +1,11 @@
 <template>
     <CommonLoadingWrapper class="px-3" :loading="reviewComments.loading || reviewCommentsExtraData.loading || changedFiles.loading || pendingReview.loading || pendingReview.reviewComments.loading" :position="changedFiles.loading ? 'center' : 'corner'">
-        <div ref="actionRow" class="d-flex flex-justify-between py-3 action-row" @scroll="scrollEventListener">
+        <div ref="actionRow" class="d-flex flex-justify-between pt-3 action-row" @scroll="scrollEventListener">
             <button class="btn-link muted-link select-menu-button" @click="triggerSwitcherStretch" >
                 <strong style="font-size:13px;" class="mr-1">Jump to...</strong>
             </button>
 
-            <button class="btn btn-sm btn-primary" @click="() => showModal('submitReviewModal')">
+            <button class="btn btn-sm btn-primary" :disabled="!viewerIsCollaborator().data && (viewerBlocked() || pullRequestProvided().locked)" @click="() => showModal('submitReviewModal')">
                 Review
                 <span class="dropdown-caret"></span>
             </button>  
@@ -58,7 +58,7 @@
     export default {
         mixins: [RouteUpdateAwareMixin],
         name: 'repository_pull_request_detail_changes_page',
-        inject: ['pullRequestProvided','repoOwnerType'],
+        inject: ['pullRequestProvided','repoOwnerType','viewerBlocked','viewerIsCollaborator'],
         provide() {
             return {
                 reviewCommentsProvided: () => [...this.reviewComments.data,...this.pendingReview.reviewComments.data],

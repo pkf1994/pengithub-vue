@@ -73,7 +73,6 @@
     import styled from 'vue-styled-components'
     import {
             LoadingIconEx,
-            Progress,
             Modal,
             SelectMenuItem,
             HyperlinkWrapper
@@ -91,7 +90,7 @@
         data() {
             return {
                 lockConversationModal: {
-                    lockReason: '',
+                    lockReason: 'off-topic',
                     loading: false
                 },
                 unlockConversationModal: {

@@ -1,5 +1,5 @@
 <template>
-    <Container :class="{disabled:disabled}">
+    <Container class="complex-editor" :class="{disabled:disabled}">
         <Tab class="mx-0 mt-0 no-wrap d-flex flex-auto">
             <TabItem class="btn-link tabnav-tab px-3 flex-1" @click="() => switchTab('Write')" :class="{'tab-selected':selectedTab === 'Write'}">Write</TabItem>
             <TabItem class="btn-link tabnav-tab px-3 flex-1" @click="() => switchTab('Preview')" :class="{'tab-selected':selectedTab === 'Preview',disabled:!markdownRaw || !markdownRaw.trim()}">Preview</TabItem>
@@ -152,6 +152,11 @@
 @import 'node_modules/@primer/css/navigation/index.scss';
 @import 'node_modules/@primer/css/forms/index.scss';
 @import 'node_modules/@primer/css/alerts/index.scss';
+.complex-editor{
+    background-color: var(--color-bg-primary);
+}
+
+
  .tabnav-tab{
     display: inline-block;
     padding: 8px 12px;

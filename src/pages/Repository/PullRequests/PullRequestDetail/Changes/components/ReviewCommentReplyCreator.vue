@@ -1,9 +1,9 @@
 <template>
-    <ComplexEditorProto ref="textarea" :uniqueId="comment.id" :toolbarArray="['mention','image','ref']" v-model="content" :disabled="loadingCreateReply || loadingStartReview">
+    <ComplexEditorProto ref="textarea" :uniqueId="comment.id"  v-model="content" :disabled="loadingCreateReply || loadingStartReview">
         <div class="text-right">
-            <button class="btn mt-2" @click.stop="() => $emit('cancel')" :disabled="loadingCreateReply || loadingStartReview">Cancel</button>
-            <button class="btn mt-2 ml-1" @click.stop="network_addReply" :disabled="loadingCreateReply || loadingStartReview">{{loadingCreateReply ? 'Trying...' : 'Add reply'}}</button>
-            <button class="btn mt-2 ml-1 btn-primary" v-if="(!pendingReview().data && !pendingReview.loading) || loadingStartReview" @click.stop="network_createReview" :disabled="loadingCreateReply || loadingStartReview">{{loadingStartReview ? 'Trying...' : 'Start a review'}}</button>
+            <button class="btn mt-2 d-block width-full" @click.stop="() => $emit('cancel')" :disabled="loadingCreateReply || loadingStartReview">Cancel</button>
+            <button class="btn mt-2 d-block width-full" @click.stop="network_addReply" :disabled="loadingCreateReply || loadingStartReview">{{loadingCreateReply ? 'Trying...' : 'Add reply'}}</button>
+            <button class="btn mt-2 d-block width-full btn-primary" v-if="(!pendingReview().data.id && !pendingReview.loading) || loadingStartReview" @click.stop="network_createReview" :disabled="loadingCreateReply || loadingStartReview">{{loadingStartReview ? 'Trying...' : 'Start a review'}}</button>
         </div>
     </ComplexEditorProto>
 </template>
@@ -21,7 +21,6 @@
         props: {
             comment: Object,
             path: String,
-            position: [String,Number],
         },
         data() {
             return {
@@ -196,10 +195,14 @@
                         comments: [
                             {
                                 path: this.path,
-                                position: this.position,
+                                line: this.comment.line,
+                                side: this.comment.side,
                                 body: this.content
                             }
-                        ]
+                        ],
+                        headers: {
+                            "Accept": "application/vnd.github.comfort-fade-preview+json"
+                        }
                     }
                 )
                 return res

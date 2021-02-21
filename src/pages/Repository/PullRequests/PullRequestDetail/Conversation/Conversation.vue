@@ -7,8 +7,7 @@
                     style="padding-top:0px!important;margin-top:16px;"
                     :extraData="pullRequestProvided()" 
                     :issueUpdateFunc="updatePullRequestFunc()"
-                    @quote="quoteReply"
-                    :loading="extraData.loading"></IssueBody>
+                    @quote="quoteReply"></IssueBody>
 
             <transition-group tag="div" appear name="fade-group">
                 <div v-for="(item,index) in handledTimelines" :key="(item.id || '') + index">
@@ -50,6 +49,16 @@
 
             <BottomInfoRows :data="pullRequest"></BottomInfoRows>
 
+            <IssueHandle class="my-4 border-top" v-if="pullRequestProvided().id && viewerCanManageIssue()">
+                <LockIssueButton class="mt-3" 
+                                v-if="pullRequestProvided().viewerCanUpdate" 
+                                
+                                @issue-extra-updated.native="issueExtraUpdatedHook"
+                                @new-timeline-item-created.native="newTimelineItemCreatedHook"
+                                :disabled="loading" 
+                                :issue="pullRequestProvided()"></LockIssueButton>
+            </IssueHandle>
+
 
         <StickyTop :data="pullRequestProvided()"></StickyTop>     
         
@@ -63,9 +72,9 @@
     import {
             BottomInfoRows,
             PullMerger
-                } from './components'
+        } from './components'
     import TimelineItem from './components/TimelineItem/TimelineItem.vue'
-    import {IssueBody,LoadMore,CommentCreatePane,StickyTop} from '../../../Issues/IssueDetail/components'
+    import {IssueBody,LoadMore,CommentCreatePane,StickyTop,LockIssueButton} from '../../../Issues/IssueDetail/components'
     import IssueDetailProtoMixin from '../../../Issues/IssueDetail/IssueDetailProtoMixin.vue'
     import {
         authRequiredGet,
@@ -76,7 +85,7 @@
     var parse = require('parse-link-header');
     export default {
         name: 'pullRequest_detail_conversation',
-        inject: ['pullRequestProvided','repoOwnerType','updatePullRequestFunc'],
+        inject: ['pullRequestProvided','repoOwnerType','updatePullRequestFunc','viewerCanManageIssue'],
         mixins: [ScrollTopListenerMixin,RouteUpdateAwareMixin,IssueDetailProtoMixin],
         provide() {
             return {
@@ -90,10 +99,7 @@
                     data: {},
                     loading: false
                 },
-                extraData: {
-                    data: {},
-                    loading: false
-                },
+                
                 loading: false,
                 reviewComments: {
                     data: [],
@@ -422,7 +428,9 @@
             PullMerger,
             StickyTop,
             BottomInfoRows,
+            LockIssueButton,
             Container: styled.div``,
+            IssueHandle: styled.div``,
         }
     }
 </script>
