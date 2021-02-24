@@ -4,13 +4,14 @@
 <script>
     import {cancelAndUpdateAxiosCancelTokenSource} from '@/network'
     import ComponentActiveAwareMixin from './ComponentActiveAwareMixin' 
+    import {util_throttle} from '@/util'
     export default {
         mixins: [ComponentActiveAwareMixin],
         data() {
             return {
                 cacheRouterMeta: undefined,
                 cancelSources: [],
-                resetBeforeUpdate: false,
+                resetBeforeUpdate: true,
                 watchRouterMeta: true
             }
         },
@@ -19,24 +20,23 @@
                 return this.generateRouterMeta()
             }
         },
-        beforeRouteLeave(to, from, next) {
-            this.cacheRouterMeta = this.routerMeta
-            next()
+        created() {
+            this.cacheRouterMeta = this.generateRouterMeta()
         },
         beforeRouteEnter (to, from, next) {
             next(async vm => {
-                if(vm.debug) {
+               /*  if(vm.debug) {
                     console.log('==============================beforeRouteEnter===============================')
-                    console.log(vm.cacheRouterMeta)
-                    console.log(vm.routerMeta)
-                    console.log(vm.componentActive)
-                    console.log(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta && vm.componentActive)
+                    console.log("vm.cacheRouterMeta:" + vm.cacheRouterMeta)
+                    console.log("vm.routerMeta:" + vm.routerMeta)
+                    console.log("vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta && vm.componentActive:" + vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta)
                     console.log('==============================beforeRouteEnter===============================')
                 }
                 if(!vm.cacheRouterMeta) {
                     window && window.scrollTo && window.scrollTo(0,0)
                 }
-                if(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta && vm.componentActive) {
+                if(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta) {
+                    if(vm.debug) console.log("get data ===== beforeRouteEnter")
                     window && window.scrollTo && window.scrollTo(0,0)
                     vm.$el.style.display = 'none'
                     if(!vm.resetBeforeUpdate) vm.routeResetHook(to,from)
@@ -45,24 +45,45 @@
                     setTimeout(() => {
                         vm.$el.style.display = 'block'
                     },500)
+                } */
+                 if(vm.debug) {
+                    console.log('==============================beforeRouteEnter===============================')
+                    console.log("vm.cacheRouterMeta:" + vm.cacheRouterMeta)
+                    console.log("vm.routerMeta:" + vm.routerMeta)
+                    console.log(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta)
+                    console.log('==============================beforeRouteEnter===============================')
+                }
+                if(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta) {
+                    vm.$el.style.display = 'none'
                 }
             })
         },
-        /* beforeRouteUpdate (to, from, next) {
-            if(this.routerMeta != this.generateRouterMeta() && this.componentActive) {
+       
+        activated() {
+            /* if(this.debug) {
+                console.log('==============================activated===============================')
+                console.log("this.cacheRouterMeta:" + this.cacheRouterMeta)
+                console.log("this.routerMeta:" + this.routerMeta)
+                console.log(this.cacheRouterMeta && this.cacheRouterMeta != this.routerMeta)
+                console.log('==============================activated===============================')
+            }   
+            if(this.cacheRouterMeta && this.cacheRouterMeta != this.routerMeta) {
                 if(this.debug) {
-                    console.log(this.routerMeta)
-                    console.log(this.generateRouterMeta())
+                    console.log("get data ===== activated")
                 }
+                window && window.scrollTo && window.scrollTo(0,0)
+                this.$el.style.display = 'none'
+                if(!this.resetBeforeUpdate) this.routeResetHook()
                 this.cancelUntimelyAxios()
-                this.routeUpdateHook(to,from)
-                this.routerMeta = this.generateRouterMeta()
-            }
-            next()
-        }, */
+                this.routeUpdateHook()
+                setTimeout(() => {
+                    this.$el.style.display = 'block'
+                },500)
+            } */
+        },
         methods: {
             generateRouterMeta() {
-                if(!this.componentActive) return undefined
+                //if(!this.componentActive) return undefined
                 return JSON.stringify(this.$route.params) + JSON.stringify(this.$route.query) 
             },
             routeUpdateHook(){
@@ -71,8 +92,9 @@
                 this.network_getData()
             },
             routeResetHook(){
-               // console.log('routeResetHook')
+                if(this.debug) console.log('routeResetHook')
                 Object.assign(this.$data,this.$options.data())
+               
             },
             cancelUntimelyAxios() {
                 this.cancelSources.forEach(item => {
@@ -95,10 +117,22 @@
                     console.log(this.componentActive)
                     console.log('========================watch routerMeta========================')
                 }
-                if(newOne && oldOne && this.componentActive && this.watchRouterMeta) {
-                    this.cancelUntimelyAxios()
-                    this.routeUpdateHook()
-                }
+                util_throttle.throttleByDelay(() => {
+                    if(newOne && this.componentActive && this.watchRouterMeta && this.routerMeta != this.cacheRouterMeta) {
+                        if(this.debug) console.log("get data ===== watch-routerMeta")
+                            //window && window.scrollTo && window.scrollTo(0,0)
+                            //this.$el.style.display = 'none'
+                            this.cancelUntimelyAxios()
+                            this.routeUpdateHook()
+                            setTimeout(() => {
+                                this.$el.style.display = 'block'
+                            },0)
+                            this.cacheRouterMeta = this.routerMeta  
+                           /*  setTimeout(() => {
+                                this.$el.style.display = 'block'
+                            },3000) */
+                        }
+                    },50,this)
             }
         }
     }

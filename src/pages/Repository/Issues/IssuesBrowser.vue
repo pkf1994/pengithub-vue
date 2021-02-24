@@ -318,6 +318,7 @@
                     data: [],
                     loading: false
                 },
+                resetBeforeUpdate: true
             }
         },
         computed: {
@@ -739,7 +740,10 @@
                     })
                 }
                 this.availableLabels.data = availableLabels
-            }
+            },
+            generateRouterMeta() {
+                return `${this.owner}-${this.repo}` + JSON.stringify(this.$route.query) 
+            },
         },
         components: {
             SelectMenuItem,

@@ -1,6 +1,6 @@
 <template>
     <CommonLoadingWrapper class="px-3" :loading="reviewComments.loading || reviewCommentsExtraData.loading || changedFiles.loading || pendingReview.loading || pendingReview.reviewComments.loading" :position="changedFiles.loading ? 'center' : 'corner'">
-        <div ref="actionRow" class="d-flex flex-justify-between pt-3 action-row" @scroll="scrollEventListener">
+        <div ref="actionRow" class="d-flex flex-justify-between py-3 action-row" @scroll="scrollEventListener">
             <button class="btn-link muted-link select-menu-button" @click="triggerSwitcherStretch" >
                 <strong style="font-size:13px;" class="mr-1">Jump to...</strong>
             </button>
@@ -15,7 +15,7 @@
         
 
         <transition-group name="fade-group" appear>
-            <ChangedFileItem :id="`diff-${item.sha}`" v-for="item in changedFiles.data" :key="item.sha" :file="item"></ChangedFileItem>
+            <ChangedFileItem class="change-file-item" :id="`diff-${item.sha}`" v-for="item in changedFiles.data" :key="item.sha" :file="item"></ChangedFileItem>
         </transition-group>
 
         <!-- <EditorHeader class="editor-header" v-if="changedFiles.data.length > 0 && repoOwnerType() == 'User'">
@@ -405,7 +405,7 @@
                     reviewId: review.id,
                 })
 
-                let res = await authRequiredGet(url)
+                let res = await authRequiredGet(url,{headers:{"accept":"application/vnd.github.squirrel-girl-preview"}})
 
                 res.data[0] && this.reviewComments.data.push(res.data[0])
                 this.network_getReviewCommentsExtraData(res.data)
@@ -450,10 +450,6 @@
                             return 
                         }
                     }
-                    console.log('state_deletedReviewComments')
-                    console.log(newOne)
-                    console.log(oldOne)
-                    console.log(oldOne == newOne)
                     this.network_getReviewComments()
                 },
                 deep: true
@@ -614,5 +610,9 @@
     height: 5px;
     background: linear-gradient(rgba(0,0,0,.075),rgba(0,0,0,.001)) repeat-x 0 0;
     border-top: 1px solid rgba(0,0,0,.15);
+}
+
+.change-file-item:first-child {
+    margin-top: 0;
 }
 </style>

@@ -48,6 +48,7 @@
             IssuesBrowser
         },
         methods: {
+           
             routeUpdateHook() {
                 this.$refs.issueBrowser.network_getData()
             },

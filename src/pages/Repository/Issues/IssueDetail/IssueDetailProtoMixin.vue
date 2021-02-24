@@ -14,7 +14,7 @@
     import * as graphql from './graphql'
     var parse = require('parse-link-header');
     export default {
-        inject: ['repoBasicInfo','repoSubscription','viewerPermission','viewerBlocked'],
+        inject: ['repoBasicInfo','repoSubscription','viewerPermission','viewerBlocked','viewerCanManageIssue'],
         mixins: [RouteUpdateAwareMixin],
         provide() {
             return {
@@ -224,7 +224,7 @@
             },
             viewerCanComment() {
                 if(this.viewerBlocked()) return false
-                if(this.viewerPermission() == 'ADMIN' || this.viewerPermission() == 'TRIAGE'  || this.viewerPermission() == 'WRITE') return true
+                if(this.viewerCanManageIssue()) return true
                 if(!this.data.locked) return true
                 return false
             },

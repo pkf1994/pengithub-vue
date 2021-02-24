@@ -7,7 +7,7 @@
                     :style="popoverStyle">
             <Cover class="cover" v-show="show"  @click.stop="close"></Cover>
 
-            <Main class="main bg-white">
+            <Main class="main bg-white" @click.stop="closeByClick && close()">
                 <slot></slot>
             </Main>
         </Container>
@@ -25,6 +25,10 @@
                 required: false
             },
             smooth: Boolean,
+            closeByClick: {
+                type: Boolean,
+                default: false
+            }
         },
         data() {
             return {

@@ -167,7 +167,7 @@
                 repoBasicInfo: () => this.data,
                 repoOwnerType: () => this.data.owner && this.data.owner.type,
                 viewerIsCollaborator: () => this.viewerIsCollaborator,
-                viewerPermission: () => this.viewerPermission,
+                viewerPermission: () => this.viewerPermission.data,
                 viewerCanManageIssue: () => this.viewerCanManageIssue,
                 viewerIsCollaboratorGetter: () => this.network_ifViewerACollaborator,
                 topNoticeShow: () => this.topNoticeShow,
@@ -318,7 +318,11 @@
                     this.data = res.data
                     if(res.data.owner.type == 'Organization') this.showOrganizationDataAccessRestrictNotice = true
                 }).catch(e => {
-                    this.handleError(e,{handle404:true})
+                    this.handleError(e,{
+                        httpErrorHandler: {
+                            404: () => this.$router.replace('/404')
+                        }
+                    })
                 }).finally(() =>  this.loading = false)
 
                 //获取open issues count

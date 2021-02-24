@@ -98,7 +98,9 @@
                     this.rawContent = window.atob(res.data.content)
                     this.network_getRepositories()
                 }).catch(e => {
-                    this.handleError(e,{handle404:true})
+                    this.handleError(e,{
+                       
+                    })
                 }).finally(() =>{
                     this.loading = false
                 })

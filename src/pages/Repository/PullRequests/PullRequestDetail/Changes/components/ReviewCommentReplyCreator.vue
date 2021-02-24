@@ -17,7 +17,7 @@
     import {mapMutations} from 'vuex'
     import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_STARTED_REVIEW,MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT} from '@/store/modules/pullRequestDetail/mutationTypes'
     export default {
-        inject: ['pendingReview','reviewStartedHook','pullRequestProvided'],
+        inject: ['pendingReview','reviewStartedHook','pullRequestProvided','reviewCommentsExtraData'],
         props: {
             comment: Object,
             path: String,
@@ -40,6 +40,12 @@
             number() {
                 return this.$route.params.number
             },
+            commentState() {
+                let commentStateHolder = this.reviewCommentsExtraData().filter(i => i.id == this.comment.node_id)[0]
+                if(commentStateHolder) {
+                    return commentStateHolder.state
+                }
+            }
         },
         mounted() {
             this.$refs.textarea.focus()
@@ -52,33 +58,44 @@
                 mutation_pushNewCreatedReviewComments: MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_CREATED_REVIEW_COMMENT,
                 mutation_pushNewStartedReview: MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_STARTED_REVIEW,
             }),
-            async network_addReply() {
-                try {
+            network_addReply() {
+                if(this.commentState == 'SUBMITTED') {
+                    this.network_addReplyWithRestAPI()
+                }else{
+                    this.$toast(this.$t("pullRequestDetailFileChangesPage.pendingReviewExistNotice"),'error')
+                    //this.network_addReplyWithGraphQLAPI()
+                }
+            },
+            async network_addReplyWithRestAPI() {
+                try{
                     this.loadingCreateReply = true
-                    /* let url = api.API_CREATE_REVIEW_REPLY({
-                        repo: this.repo,
+                    let url = api.API_CREATE_REVIEW_REPLY({
                         owner: this.owner,
+                        repo: this.repo,
                         number: this.number,
-                        commentId: this.commentId
+                        commentId: this.comment.id
                     })
+
                     let res = await authRequiredPost(
                         url,
                         {
                             body: this.content
-                        },
-                        {
-                            headers: {
-                                "accept": "application/vnd.github.squirrel-girl-preview"
-                            }
                         }
                     )
 
-                    let event = new CustomEvent('reply-created',{detail: res.data,bubbles:true})
-                    this.$el.dispatchEvent(event)
-                    this.content = ''
-                    this.$emit('cancel') */
+                    this.mutation_pushNewCreatedReviewComments(res.data)
+                    this.$emit("cancel")
+                }catch(e){
+                    this.handleError(e)
+                }finally{
+                    this.loadingCreateReply = false
+                }
+            },
+            async network_addReplyWithGraphQLAPI() {
+                try {
+                    this.loadingCreateReply = true
 
-                    await this.network_getReviewTheCommentBelongTo()
+                    //await this.network_getReviewTheCommentBelongTo()
 
                     //使用graphql进行该操作是因为rest api会在review为pending状态时报错，原因未知
                     let res = await authRequiredGitHubGraphqlApiQuery(
@@ -88,7 +105,7 @@
                                 input: {
                                     body: this.content,
                                     inReplyTo: this.comment.node_id,
-                                    pullRequestReviewId: this.review.node_id,
+                                    //pullRequestReviewId: this.review.node_id,
                                 }
                             }
                         }
@@ -195,8 +212,7 @@
                         comments: [
                             {
                                 path: this.path,
-                                line: this.comment.line,
-                                side: this.comment.side,
+                                position: this.position,
                                 body: this.content
                             }
                         ],

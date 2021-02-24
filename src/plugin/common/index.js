@@ -26,14 +26,13 @@ export default {
                 }),
                 handleError(e,config) {
                     config = {
-                        handle404: false, 
-                        handle401: false,
-                        ...config
+                        ...config,
                     }
                     if(!e) return
                     if(axios.isCancel(e)) return
                     console.log(e)
-                    if(config.handle404) {
+
+                  /*   if(config.handle404) {
                         if(e.response && e.response.status == 404) {
                             this.$router.replace('/404')
                         }
@@ -42,24 +41,29 @@ export default {
                         if(e.response && e.response.status == 401) {
                             window.location.href = API_OAUTH2
                         }
-                    }
-                    if(e.response && e.response.data) {
-                        if(e.response.data.message) this.$toast(e.response.data.message,'error')
-                        if(e.response.data.detailMessage) this.$toast(e.response.data.detailMessage,'error')
-                        if(e.response.data.errors && e.response.data.errors[0]) {
-                            if(e.response.data.errors[0].message) {
-                                e.response.data.errors.forEach(i => {
-                                    this.$toast(i.message,'error')
-                                })
+                    } */
+
+                    if(e.response && e.response.status && config.httpErrorHandler && config.httpErrorHandler[e.response.status]) {
+                        config.httpErrorHandler[e.response.status](e)
+                    } else {
+                        if(e.response && e.response.data) {
+                            if(e.response.data.message) this.$toast(e.response.data.message,'error')
+                            if(e.response.data.detailMessage) this.$toast(e.response.data.detailMessage,'error')
+                            if(e.response.data.errors && e.response.data.errors[0]) {
+                                if(e.response.data.errors[0].message) {
+                                    e.response.data.errors.forEach(i => {
+                                        this.$toast(i.message,'error')
+                                    })
+                                }
+                                if(typeof(e.response.data.errors[0]) == 'string') {
+                                    e.response.data.errors.forEach(i => {
+                                        this.$toast(i,'error')
+                                    })
+                                }
                             }
-                            if(typeof(e.response.data.errors[0]) == 'string') {
-                                e.response.data.errors.forEach(i => {
-                                    this.$toast(i,'error')
-                                })
-                            }
+                        }else{
+                            this.$toast(e,'error')
                         }
-                    }else{
-                        this.$toast(e,'error')
                     }
                 },
                 handleRateExceed(e) {
@@ -132,9 +136,9 @@ export default {
                 })
             },
             deactivated() {
-                if(this.debug)console.log('===================deactivated=======================')
+                //if(this.debug)console.log('===================deactivated=======================')
                 this.closeModal()
-                if(this.debug)console.log('===================deactivated=======================')
+                //if(this.debug)console.log('===================deactivated=======================')
             },
             watch: {
                 documentTitle() {

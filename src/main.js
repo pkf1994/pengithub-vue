@@ -17,6 +17,7 @@ import plugin_common from './plugin/common'
 import plugin_githubBusiness from './plugin/githubBusiness'
 import plugin_topNotice from './plugin/topNotice'
 import VueClipboard from 'vue-clipboard2'
+import '@github/details-menu-element'
 Vue.use(Router)
 Vue.use(VueClipboard)
 Vue.use(plugin_themeColor)

@@ -1,7 +1,12 @@
 <template>
-    <Container class="border-top">
+    <Container v-if="!deleted" class="border-top" :class="{deleting:loadingDeleteRootReviewComment}">
         
-        <ReviewComment style="border-radius: 6px;" v-for="commentItem in reviewCommentGroup" :reviewComment="commentItem" :key="commentItem.id"></ReviewComment>
+        <ReviewComment :showDiff="false" 
+                        @root-review-comment-deleting.native="() => loadingDeleteRootReviewComment = true" 
+                        @review-comment-deleted.native.stop="reviewCommentDeletedHook"
+                        :isRoot="index == 0" v-for="(commentItem,index) in reviewCommentGroup" 
+                        :reviewComment="commentItem" 
+                        :key="commentItem.id"></ReviewComment>
 
         <button @click="triggerShowReviewCommentCreator" v-if="!(pullRequestProvided().locked && !viewerIsCollaborator().data) && !showReviewCommentCreator && repoOwnerType() == 'User'" class="border-top reply btn-link text-bold text-left muted-link btn-block">
             Reply...
@@ -18,7 +23,7 @@
 </template>
 <script>
     import styled from 'vue-styled-components'
-    import {ReviewComment,} from '../../Conversation/components/TimelineItem/components/Review/components'
+    import {ReviewComment} from '../../Conversation/components/TimelineItem/components/Review/components'
     import ReviewCommentReplyCreator from './ReviewCommentReplyCreator'
     import {mapState} from 'vuex'
     export default {
@@ -35,6 +40,8 @@
             return {
                 showReviewCommentCreator: false,
                 replyButtonDisabled: false,
+                loadingDeleteRootReviewComment: false,
+                deleted: false
             }
         },
         computed: {
@@ -67,6 +74,11 @@
             },
             triggerReplyButtonDisabled(flag = true) {
                 this.replyButtonDisabled = flag
+            },
+            reviewCommentDeletedHook(event) {
+                if(event.detail.id == this.rootReviewComment.id) {
+                    this.deleted = true
+                }
             }
         },
         components: {
@@ -84,5 +96,10 @@
 
 .reply{
     padding: 10px 15px;
+}
+
+.deleting{
+    pointer-events: none;
+    opacity: .4;
 }
 </style>

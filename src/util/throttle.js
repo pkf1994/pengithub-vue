@@ -1,7 +1,7 @@
 let timerStore = {}
 
 export default {
-    throttleByDelay: (method, delay, context) => {
+    throttleByDelay: (method, delay = 500, context) => {
         let methodDelayTimer = method.toString()
         clearTimeout(context[methodDelayTimer])
         context[methodDelayTimer] = setTimeout(() => {

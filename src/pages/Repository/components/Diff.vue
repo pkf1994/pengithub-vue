@@ -1,6 +1,19 @@
 <template>
     <Container class="the-container">
-        <Header class="header d-flex flex-column">
+        <Header class="header" :style="headerStyle">
+            <Actions class="actions pt-0 my-2 text-right position-relative float-right" @click="openPopover">
+                <svg aria-label="Show options" class="octicon octicon-kebab-horizontal mx-2" viewBox="0 0 13 16" version="1.1" width="13" height="16" role="img"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
+                    <Popover ref="popover" class="f5" :popoverStyle="{right:'-4px',top:'25px',width:'185px'}" :closeByClick="true">
+                        <div class="py-2">
+                             <slot name="menu" :viewFileRouterLink="viewFileRouterLink">
+                                <router-link :to="viewFileRouterLink" class="pl-5 btn-link dropdown-item">
+                                    View file
+                                </router-link>
+                            </slot>    
+                        </div>
+                    </Popover>
+            </Actions>
+
             <Info class="info flex-auto min-width-0 mb-md-0 mb-2">
                 <button class="btn-octicon" style="width: 22px;" @click="triggerStretch">
                     <svg v-if="stretch" class="octicon octicon-chevron-down Details-content--hidden" viewBox="0 0 10 16" version="1.1" width="10" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 11L0 6l1.5-1.5L5 8.25 8.5 4.5 10 6l-5 5z"></path></svg>
@@ -17,18 +30,9 @@
                     {{file.filename}}
                 </span>
 
-                <svg v-if="clippyFlag" class="octicon octicon-clippy d-inline-block mx-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></svg>
-                <svg v-else class="octicon octicon-check js-clipboard-check-icon mx-1 d-inline-block text-green d-none" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg>
+               <!--  <svg v-if="clippyFlag" class="octicon octicon-clippy d-inline-block mx-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M2 13h4v1H2v-1zm5-6H2v1h5V7zm2 3V8l-3 3 3 3v-2h5v-2H9zM4.5 9H2v1h2.5V9zM2 12h2.5v-1H2v1zm9 1h1v2c-.02.28-.11.52-.3.7-.19.18-.42.28-.7.3H1c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1h3c0-1.11.89-2 2-2 1.11 0 2 .89 2 2h3c.55 0 1 .45 1 1v5h-1V6H1v9h10v-2zM2 5h8c0-.55-.45-1-1-1H8c-.55 0-1-.45-1-1s-.45-1-1-1-1 .45-1 1-.45 1-1 1H3c-.55 0-1 .45-1 1z"></path></svg>
+                <svg v-else class="octicon octicon-check js-clipboard-check-icon mx-1 d-inline-block text-green d-none" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5L12 5z"></path></svg> -->
             </Info>    
-
-            <Actions class="actions pt-0 mb-2 flex-shrink-0 text-right position-relative" @click="openPopover">
-                <svg aria-label="Show options" class="octicon octicon-kebab-horizontal mx-2" viewBox="0 0 13 16" version="1.1" width="13" height="16" role="img"><path fill-rule="evenodd" d="M1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM13 7.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path></svg>
-                <Popover ref="popover" class="f5" :popoverStyle="{right:0}">
-                    <router-link :to="viewFileRouterLink" class="pl-5 btn-link py-2 dropdown-item">
-                        View file
-                    </router-link>
-                </Popover>
-            </Actions>
         </Header>
 
         <DiffView v-if="viewStyle == 'unified' && stretch"  class="diff-view" style="overflow-x:auto">
@@ -74,7 +78,7 @@
                         
                     </div>
 
-                    <slot name="line-addition" v-bind:line="item"></slot>   
+                    <slot name="line-addition" v-bind:line="item" v-bind:orginalLines="orginalLines"></slot>   
                 </CodeLine>
 
                     
@@ -170,6 +174,7 @@
                 type: String,
                 default: 'unified'
             },
+            headerStyle: Object
         },
         data() {
             return {
@@ -181,7 +186,8 @@
                     unified: '',  
                     split: '',  
                 },
-                lazyLoadedLines:[]
+                lazyLoadedLines:[],
+                orginalLines: []
             }
         },
         computed: {
@@ -279,6 +285,8 @@
                     if(diffHunkEntries[diffHunkEntries.length - 1].code.trim() == '') diffHunkEntries.pop()
                 }
 
+                if(this.orginalLines.length == 0) this.orginalLines = diffHunkEntries
+
                 return diffHunkEntries
             },
             diffstat() {
@@ -364,9 +372,6 @@
                     })
                 })
                 return entries
-            },
-            t() {
-                return JSON.stringify(this.fileContent,null,4)
             },
             viewFileRouterLink() {
                 return this.file.blob_url.replace('https://github.com','')
@@ -461,7 +466,7 @@
                         lazyLoadedLines.push(item.additionLineIndex)
                     })
 
-                    console.log(entiesToShow.slice(0,20))
+                    //console.log(entiesToShow.slice(0,20))
 
                     this.lazyLoadedLines = this.lazyLoadedLines.concat(lazyLoadedLines)
 
@@ -514,7 +519,7 @@
                 this.$refs.popover.show = true
             },
             emitClickBlobCodeEvent(line) {
-                console.log(line)
+                //console.log(line)
                 this.$el.dispatchEvent(new CustomEvent('blob-code-clicked',{bubbles:true,detail:line}))
             }
         },
@@ -597,7 +602,7 @@
 }
 
 .blob-num{
-    min-width: 45px;
+    min-width: 40px;
     padding-left: 5px;
     padding-right: 5px;
     font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
@@ -621,7 +626,7 @@
     color: #24292e;
     
     padding-right: 10px;
-    padding-left: 4px;
+    padding-left: 8px;
     word-wrap: normal;
     font-size: 12px;
     flex: auto;
@@ -724,7 +729,7 @@
 }
 
 .stretch-btn{
-    min-width: 90px;
+    min-width: 80px;
     padding-top: 4px;
     padding-bottom: 4px;
     display: block;

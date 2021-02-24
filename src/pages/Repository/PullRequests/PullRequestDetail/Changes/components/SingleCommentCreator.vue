@@ -1,5 +1,5 @@
 <template>
-    <ComplexEditorProto ref="textarea" :uniqueId="path + line + side" class="px-3 pt-2 pb-3" v-model="content" :disabled="loadingStartReview || loadingAddComment">
+    <ComplexEditorProto ref="textarea" :uniqueId="path + position" class="px-3 pt-2 pb-3" v-model="content" :disabled="loadingStartReview || loadingAddComment">
         <div class="text-right position-relative no-wrap">
             <button class="btn mt-2 d-block width-full" @click.stop="() => $emit('cancel')" :disabled="loadingStartReview || loadingAddComment">Cancel</button>
             <button class="btn mt-2 btn-primary truncate d-block width-full" @click.stop="network_addSingleComment" :disabled="loadingStartReview || loadingAddComment || !content || pendingReview().loading">
@@ -22,6 +22,9 @@
     export default {
         mixins: [ReviewCommentReplyCreator],
         inject: ['pendingReview','commentReviewCreatedHook'],
+        props: {
+            position: [String,Number]
+        },
         data() {
             return { 
                 loadingAddComment: false
@@ -71,8 +74,7 @@
                                     body: this.content,
                                     pullRequestReviewId: this.pendingReview().data.id,
                                     path: this.path,
-                                    line: this.line,
-                                    side: this.side
+                                    position: this.position,
                                 }
                             }
                         }

@@ -63,12 +63,14 @@
     export default {
         name: 'pr_detail',
         mixins: [RouteUpdateAwareMixin],
+        inject: ['viewerBlocked','viewerCanManageIssue'],
         provide() {
             return {
                 number:() => this.number,
                 pullRequestProvided: () => Object.assign({},this.extraData.data,this.data),
                 issue: () => Object.assign({},this.extraData.data,this.data),
                 updatePullRequestFunc: () => this.network_updatePullRequest,
+                viewerCanComment: () => this.viewerCanComment
             }
         },
         data() {
@@ -82,6 +84,7 @@
                 isDynamicDocumentTitle: true,
                 newSubmittedReviews: [],
                 newStartedReviews: [],
+                debug: true
             }
         },
         computed: {
@@ -115,7 +118,13 @@
             documentTitle() {
                 if(!this.data.title) return location.href
                 return `${this.data.title} by ${this.data.user.login} · Pull Request #${this.data.number} · ${this.owner}/${this.repo}`
-            }
+            },
+            viewerCanComment() {
+                if(this.viewerBlocked()) return false
+                if(this.viewerCanManageIssue()) return true
+                if(!this.data.locked) return true
+                return false
+            },
         },
         mounted() {
             this.checkRouterParam()

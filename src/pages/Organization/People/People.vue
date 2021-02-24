@@ -91,7 +91,11 @@
                     if(this.accessToken) this.network_getExtraData()
 
                 }catch(e) {
-                    this.handleError(e,{handle404:true})
+                    this.handleError(e,{
+                         httpErrorHandler: {
+                            404: () => this.$router.replace('/404')
+                        }
+                    })
                 }finally{
                     this.loading = false
                 }

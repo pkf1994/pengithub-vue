@@ -1,7 +1,7 @@
 <template> 
     <Container class="bg-white" :class="{deleting:loadingDeleteThis}">
 
-        <FileHeader v-if="isRoot" class="file-header" :class="{pending: extraData && extraData.state && extraData.state.toLowerCase() == 'pending'}">
+        <FileHeader v-if="isRoot && showDiff" class="file-header" :class="{pending: extraData && extraData.state && extraData.state.toLowerCase() == 'pending'}">
             <button class="btn-link text-gray float-right f6 d-block" v-if="reviewComment.outdated" @click="triggerShowOutdated">
                 <svg class="octicon octicon-fold position-relative mr-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 9l3 3H8v3H6v-3H4l3-3zm3-6H8V0H6v3H4l3 3 3-3zm4 2c0-.55-.45-1-1-1h-2.5l-1 1h3l-2 2h-7l-2-2h3l-1-1H1c-.55 0-1 .45-1 1l2.5 2.5L0 10c0 .55.45 1 1 1h2.5l1-1h-3l2-2h7l2 2h-3l1 1H13c.55 0 1-.45 1-1l-2.5-2.5L14 5z"></path></svg>
                 {{showOutdated ? 'Hide outdated' : 'Show outdated'}}
@@ -16,7 +16,7 @@
         </FileHeader>
 
         <div>
-            <DiffView v-if="isRoot" class="diff-view" style="font-size: 0px;">
+            <DiffView v-if="isRoot && showDiff" class="diff-view" style="font-size: 0px;">
                 <div :class="{'d-inline-block':!isProseFileType}" style="min-width: 100%;">
                     <LinesNotShown class="text-shadow-light d-flex width-full" v-if="diffHunkEntries.hidden.length > 0 && !showHiddenDiffHunk" @click="triggerShowHiddenDiffHunk">
                         <BlobNum class="blob-num position-sticky bg-white"  style="left:0px" data-line-number="..."></BlobNum>
@@ -80,7 +80,7 @@
             </DiffView>
 
              <CommentContent>
-                <div class="px-3 pt-3 pb-2" v-show="!showReviewCommentEditor">
+                <div class="px-3 py-2" v-show="!showReviewCommentEditor">
                     <WhoDidWhatAt class="d-flex flex-row position-relative">
                         <div class="flex-auto">
                             <router-link :to="`/${reviewComment.user.login}`" class="d-inline-block">
@@ -95,6 +95,10 @@
                             </span>
                             <span v-if="reviewComment.author_association" style="font-weight: 500" class="ml-1 timeline-comment-label">
                                 {{reviewComment.author_association | capitalize}}
+                            </span>
+
+                            <span v-if="extraData.state && extraData.state.toLowerCase() == 'pending'" style="font-weight: 500" class="ml-1 timeline-comment-label label-pending">
+                                Pending
                             </span>
                         </div>
 
@@ -169,6 +173,10 @@
             isRoot: {
                 type: Boolean,
                 default: false
+            },
+            showDiff: {
+                type: Boolean,
+                default: true
             }
         },
         computed: {
@@ -286,7 +294,12 @@
                 this.closeModal()
                 if(!confirm("Are you sure you want to delete this comment?")) return
                 try {
-                    this.loadingDeleteThis = true
+                    
+                    if(this.isRoot) {
+                        this.$el.dispatchEvent(new CustomEvent('root-review-comment-deleting',{bubbles:true}))
+                    }else{
+                        this.loadingDeleteThis = true
+                    }
                     let url = api.API_REVIEW_COMMENT_OF_PULL_REQUEST({
                         repo: this.repo,
                         owner: this.owner,
@@ -302,6 +315,8 @@
                     )
 
                     this.mutation_pushDeletedReviewComment(this.reviewComment)
+
+                    this.$el.dispatchEvent(new CustomEvent('review-comment-deleted',{bubbles:true,detail:this.reviewComment}))
 
                     /* if(this.reviewProvided().state.toLowerCase() == 'pending') {
                         await this.pendingReviewCommentRepliesDeletedHook()()
@@ -466,5 +481,11 @@
     border-radius: 2em;
     border: 1px solid transparent;
     border-color: rgb(225, 228, 232);
+}
+
+.label-pending{
+    color: var(--color-auto-yellow-9);
+    border-color: var(--color-auto-yellow-6);
+    background-color: var(--color-bg-warning)!important;
 }
 </style>
