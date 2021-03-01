@@ -9,10 +9,9 @@
         mixins: [ComponentActiveAwareMixin],
         data() {
             return {
-                cacheRouterMeta: undefined,
-                cancelSources: [],
-                resetBeforeUpdate: true,
-                watchRouterMeta: true
+                //dirty: false,
+                cacheRouterMeta: '',
+                cancelSources: []
             }
         },
         computed: {
@@ -20,75 +19,36 @@
                 return this.generateRouterMeta()
             }
         },
-        created() {
-            this.cacheRouterMeta = this.generateRouterMeta()
-        },
         beforeRouteEnter (to, from, next) {
             next(async vm => {
-               /*  if(vm.debug) {
-                    console.log('==============================beforeRouteEnter===============================')
-                    console.log("vm.cacheRouterMeta:" + vm.cacheRouterMeta)
-                    console.log("vm.routerMeta:" + vm.routerMeta)
-                    console.log("vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta && vm.componentActive:" + vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta)
-                    console.log('==============================beforeRouteEnter===============================')
-                }
-                if(!vm.cacheRouterMeta) {
+                if(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta){
                     window && window.scrollTo && window.scrollTo(0,0)
-                }
-                if(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta) {
-                    if(vm.debug) console.log("get data ===== beforeRouteEnter")
-                    window && window.scrollTo && window.scrollTo(0,0)
-                    vm.$el.style.display = 'none'
-                    if(!vm.resetBeforeUpdate) vm.routeResetHook(to,from)
-                    vm.cancelUntimelyAxios()
-                    vm.routeUpdateHook(to,from)
-                    setTimeout(() => {
-                        vm.$el.style.display = 'block'
-                    },500)
-                } */
-                 if(vm.debug) {
-                    console.log('==============================beforeRouteEnter===============================')
-                    console.log("vm.cacheRouterMeta:" + vm.cacheRouterMeta)
-                    console.log("vm.routerMeta:" + vm.routerMeta)
-                    console.log(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta)
-                    console.log('==============================beforeRouteEnter===============================')
-                }
-                if(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta) {
-                    vm.$el.style.display = 'none'
+                    vm.routeResetHook()
+                    vm.routeUpdateHook()             
                 }
             })
         },
-       
-        activated() {
-            /* if(this.debug) {
-                console.log('==============================activated===============================')
-                console.log("this.cacheRouterMeta:" + this.cacheRouterMeta)
-                console.log("this.routerMeta:" + this.routerMeta)
-                console.log(this.cacheRouterMeta && this.cacheRouterMeta != this.routerMeta)
-                console.log('==============================activated===============================')
-            }   
-            if(this.cacheRouterMeta && this.cacheRouterMeta != this.routerMeta) {
-                if(this.debug) {
-                    console.log("get data ===== activated")
-                }
+        beforeRouteUpdate (to, from, next) {
+            let cacheRouterMeta = this.routerMeta
+            next()
+            if(this.routerMeta != cacheRouterMeta) {
                 window && window.scrollTo && window.scrollTo(0,0)
-                this.$el.style.display = 'none'
-                if(!this.resetBeforeUpdate) this.routeResetHook()
-                this.cancelUntimelyAxios()
-                this.routeUpdateHook()
-                setTimeout(() => {
-                    this.$el.style.display = 'block'
-                },500)
-            } */
+                if(this.resetBeforeUpdate) this.routeResetHook()
+                this.routeUpdateHook() 
+            }
+        },
+        beforeRouteLeave (to, from, next) {
+            this.cacheRouterMeta = this.routerMeta
+            next()
         },
         methods: {
             generateRouterMeta() {
                 //if(!this.componentActive) return undefined
-                return JSON.stringify(this.$route.params) + JSON.stringify(this.$route.query) 
+                return this.$route.fullPath
             },
             routeUpdateHook(){
                 if(this.debug) console.log('routeUpdateHook')
-                if(this.resetBeforeUpdate) this.routeResetHook()
+                //if(this.resetBeforeUpdate) this.routeResetHook()
                 this.network_getData()
             },
             routeResetHook(){
@@ -109,31 +69,17 @@
             }
         },
         watch: {
-            routerMeta(newOne,oldOne) {
-                if(this.debug) {
-                    console.log('========================watch routerMeta========================')
-                    console.log(newOne)
-                    console.log(oldOne)
-                    console.log(this.componentActive)
-                    console.log('========================watch routerMeta========================')
-                }
+        /*     routerMeta(newOne,oldOne) {
                 util_throttle.throttleByDelay(() => {
-                    if(newOne && this.componentActive && this.watchRouterMeta && this.routerMeta != this.cacheRouterMeta) {
+                    if(newOne && !this.componentActive) {
                         if(this.debug) console.log("get data ===== watch-routerMeta")
-                            //window && window.scrollTo && window.scrollTo(0,0)
-                            //this.$el.style.display = 'none'
-                            this.cancelUntimelyAxios()
-                            this.routeUpdateHook()
-                            setTimeout(() => {
-                                this.$el.style.display = 'block'
-                            },0)
-                            this.cacheRouterMeta = this.routerMeta  
-                           /*  setTimeout(() => {
-                                this.$el.style.display = 'block'
-                            },3000) */
+                        this.dirty = true
                         }
                     },50,this)
-            }
+            },
+            dirty(newOne,oldOne) {
+
+            } */
         }
     }
 </script>

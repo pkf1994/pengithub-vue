@@ -1,6 +1,6 @@
 <template>
     <Container class="bg-white">
-        <Tab class="mx-0 mt-0 no-wrap d-flex flex-auto">
+        <Tab class="mx-0 mt-0 no-wrap d-flex flex-auto p-2">
             <TabItem class="btn-link tabnav-tab px-3 flex-1"  @click="() => switchTab('Write')" :class="{'tab-selected':selectedTab === 'Write'}">Write</TabItem>
             <TabItem class="btn-link tabnav-tab px-3 flex-1" @click="() => switchTab('Preview')" :class="{'tab-selected':selectedTab === 'Preview'}">Preview</TabItem>
         </Tab>
@@ -98,19 +98,14 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {authRequiredPost,authRequiredGitHubGraphqlApiQuery} from '@/network'
+    import {authRequiredPost} from '@/network'
     import * as api from '@/network/api'
-    import * as graphql  from '../../graphql.js'
     import {mapMutations} from 'vuex'
     import {MUTATION_PULL_REQUEST_DETAIL_PUSH_NEW_SUBMITTED_REVIEW} from '@/store/modules/pullRequestDetail/mutationTypes'
     import marked from 'marked'
     const createDOMPurify = require('dompurify');
     export default {
         inject: ['pendingReview','pullRequestProvided'],
-        props: {
-            commentId: [String,Number],
-            path: String,
-        },
         data() {
             return {
                 event: 'COMMENT',
@@ -221,7 +216,6 @@
     background-color: #fafbfc;
     border: 1px solid #e1e4e8;
     border-left: 0;
-    border-top: 0;
     border-radius: 0;
 }
 .tabnav-tab:first-child{

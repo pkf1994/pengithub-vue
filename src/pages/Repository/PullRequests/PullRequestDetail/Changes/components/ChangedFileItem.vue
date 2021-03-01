@@ -6,7 +6,7 @@
         
         <template v-slot:menu="{viewFileRouterLink}">
             <label :for="`showCommentsCheckbox-${file.filename}`" class="dropdown-item btn-link text-normal d-block pl-5 py-2" >
-                <span v-if="showComments" class="position-absolute" style="margin-left:-20px">
+                <span v-show="showComments" class="position-absolute" style="margin-left:-20px">
                     <svg class="octicon octicon-check" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
                 </span>
                 Show comments
@@ -17,7 +17,7 @@
             </router-link>
         </template>
 
-        <template v-if="showComments" v-slot:line-addition="{line,orginalLines}">
+        <template v-show="showComments" v-slot:line-addition="{line,orginalLines}">
             <ReviewCommentGroup class="review-comment-wrapper" v-for="rootReviewCommentItem in getRootReviewComments(line,orginalLines)" :key="rootReviewCommentItem.id" :rootReviewComment="rootReviewCommentItem"></ReviewCommentGroup>
             <SingleCommentCreator 
                 v-if="showSingleCommentCreatorAt.some(i => i.additionLineIndex == line.additionLineIndex && i.deletionLineIndex == line.deletionLineIndex)" 

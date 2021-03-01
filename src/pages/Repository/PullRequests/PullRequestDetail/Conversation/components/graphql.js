@@ -36,5 +36,20 @@ query($id:ID!,$after:String){
     }
   }
 }
+`
 
+export const GRAPHQL_SUGGESTTED_REVIEWERS = `
+query($id:ID!){
+  node(id: $id) {
+    ... on PullRequest {
+      id
+      suggestedReviewers {
+        reviewer {
+          avatarUrl
+          login
+        }
+      }
+    }
+  }
+}
 `

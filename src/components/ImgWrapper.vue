@@ -1,12 +1,11 @@
 <template>
     <Container style="overflow: hidden">
-        <transition-group name="fade-group">
-            <span key="1" v-if="showImgFlag">
-                <slot></slot>
-            </span>
-            <UnloadCover key="2" v-else class="unload-cover avatar d-inline-block" :style="{height:height + 'px',width:width + 'px'}">
-            </UnloadCover>
-        </transition-group>
+        <span key="1" v-if="showImgFlag" class="fade-in" :class="{'d-inline-block':height > 0}" :style="{height:height > 0 && height + 'px',width:width > 0 && width + 'px'}">
+            <slot></slot>
+        </span>
+
+        <UnloadCover key="2" v-else class="unload-cover avatar d-inline-block" :style="{height:height + 'px',width:width + 'px'}">
+        </UnloadCover>
     </Container>
 </template>
 
@@ -21,6 +20,7 @@
                 height: 0,
                 width: 0,
                 showImgFlag: true,
+                unsizeHeight: "",
             }
         },
         mounted() {
@@ -32,6 +32,9 @@
                 if(!this.$slots.default) return 
                 this.width = this.$slots.default[0].elm.width
                 this.height = this.$slots.default[0].elm.height
+                if(this.height == 0) {
+                    this.height = this.width
+                }
                 if(this.$slots.default[0].elm.complete) return
                 this.showImgFlag = false
             },
@@ -54,12 +57,17 @@
 .unload-cover{
     background: #d1d5da;
 }
-@keyframes loading {
-    0%,100%{
+.fade-in{
+    animation: fade-in-animation 3s;
+}
+
+@keyframes fade-in-animation {
+    0%{
         opacity: 0;
     }
-    50%{
+    100%{
         opacity: 1;
     }
 }
+
 </style>

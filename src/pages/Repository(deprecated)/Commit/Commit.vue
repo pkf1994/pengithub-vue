@@ -136,7 +136,7 @@
 
         <SignInToComment class="my-3" v-else-if="firstLoadFlag">
             Please 
-            <span @click="signIn" style="color: #0366d6;">sign in</span>
+            <span @click="() => signIn()" style="color: #0366d6;">sign in</span>
             to view or add comment.
         </SignInToComment>
 

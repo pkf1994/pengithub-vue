@@ -87,10 +87,8 @@ export default {
                         })
                     }
                 },
-                emitNotFoundEvent(el) {
-                    let event = document.createEvent('HTMLEvents')
-                    event.initEvent("not-found",true,false)
-                    el.dispatchEvent(event)
+                emitNotFoundEvent(el,detail) {
+                    el.dispatchEvent(new CustomEvent('not-found',{bubbles:true,detail}))
                 },
                 showModal(modalRef) {
                     if(this.$refs[modalRef]) this.$refs[modalRef].show = true

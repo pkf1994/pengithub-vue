@@ -41,7 +41,7 @@
             <AnimatedHeightWrapper>
                 <div v-show="showRepoMeta">
                     <Description v-if="data.description" class="f4 px-3 mb-3">
-                        {{data.description}}
+                        {{data.description | parseEmoji}}
                     </Description>
 
                     <RepoMeta class="px-3 pb-3" v-if="data.id">
@@ -111,7 +111,7 @@
             <SelectMenuItem v-for="item in availableSettings" :key="item.title" :iconStyle="{top:'16px'}" :selected="item.selected" @click.native="() => network_setSubscription(item.subscribed,item.ignored)">
                 <div>
                     <span class="notification-item-heading">{{item.title}}</span>
-                    <span>{{item.description}}</span>
+                    <span>{{item.description | parseEmoji }}</span>
                 </div>
             </SelectMenuItem>
         </Modal>
@@ -127,7 +127,7 @@
     import { cancelAndUpdateAxiosCancelTokenSource,authRequiredGet,authRequiredPut,authRequiredDelete,authRequiredGitHubGraphqlApiQuery } from '@/network'
     let parse = require('parse-link-header')
     import * as graphql from './graphql'
-    import {fileSize} from '@/util'
+    import {util_markdownParse} from '@/util'
     export default {
         name: 'repository_page',
         mixins: [RouteUpdateAwareMixin],
@@ -176,10 +176,17 @@
                 viewerBlocked: () => this.viewerBlocked,
             }
         },
+       /*  beforeRouteUpdate(to, from, next) {
+            console.log('beforeRouteUpdate++++++++++++++++ repositories')
+            next()
+        }, */
         computed: {
             ...mapState({
                 viewerLogin: state => state.oauth.viewerInfo.login
             }),
+            params() {
+                return this.$route.params
+            },
             owner: function() {
                 return this.$route.params.owner
             },
@@ -286,6 +293,9 @@
             },
             viewerCanManageIssue() {
                 return this.viewerPermission.data == 'ADMIN' || this.viewerPermission.data == 'TRIAGE'  || this.viewerPermission.data == 'WRITE'
+            },
+            repoDescHTML() {
+                return util_markdownParse.markdownToHTML(this.data.description)
             }
         },
         created() {

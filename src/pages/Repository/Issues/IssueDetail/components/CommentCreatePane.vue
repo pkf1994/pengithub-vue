@@ -25,7 +25,7 @@
     </div>
 
     <SignInNotice v-else class="flash flash-warn">
-        <button class="btn btn-primary" @click="signIn">Sign in</button>
+        <button class="btn btn-primary" @click="() => signIn()">Sign in</button>
         <strong>to join this conversation on GitHub.</strong>
     </SignInNotice>
 </template>
@@ -56,6 +56,7 @@
             },
         },
         methods: {
+          
             async network_createIssueComment() {
                 if(this.loadingCreateComment) return
                 try{

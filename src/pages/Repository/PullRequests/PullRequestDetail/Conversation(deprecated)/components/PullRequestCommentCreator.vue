@@ -19,7 +19,7 @@
         </div>
         
         <div v-else>
-            <button class="btn btn-block" @click="signIn">Sign in to comment</button>
+            <button class="btn btn-block" @click="() => signIn()">Sign in to comment</button>
         </div>
     </Container>
 

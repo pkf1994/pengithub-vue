@@ -1,7 +1,7 @@
 <template> 
     <Container class="bg-white" :class="{deleting:loadingDeleteThis}">
 
-        <FileHeader v-if="isRoot && showDiff" class="file-header" :class="{pending: extraData && extraData.state && extraData.state.toLowerCase() == 'pending'}">
+        <FileHeader v-if="isRoot && showDiff" class="file-header" :class="{pending: isPending}">
             <button class="btn-link text-gray float-right f6 d-block" v-if="reviewComment.outdated" @click="triggerShowOutdated">
                 <svg class="octicon octicon-fold position-relative mr-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 9l3 3H8v3H6v-3H4l3-3zm3-6H8V0H6v3H4l3 3 3-3zm4 2c0-.55-.45-1-1-1h-2.5l-1 1h3l-2 2h-7l-2-2h3l-1-1H1c-.55 0-1 .45-1 1l2.5 2.5L0 10c0 .55.45 1 1 1h2.5l1-1h-3l2-2h7l2 2h-3l1 1H13c.55 0 1-.45 1-1l-2.5-2.5L14 5z"></path></svg>
                 {{showOutdated ? 'Hide outdated' : 'Show outdated'}}
@@ -97,7 +97,7 @@
                                 {{reviewComment.author_association | capitalize}}
                             </span>
 
-                            <span v-if="extraData.state && extraData.state.toLowerCase() == 'pending'" style="font-weight: 500" class="ml-1 timeline-comment-label label-pending">
+                            <span v-if="isPending" style="font-weight: 500" class="ml-1 timeline-comment-label label-pending">
                                 Pending
                             </span>
                         </div>
@@ -181,7 +181,8 @@
         },
         computed: {
             ...mapState({
-                updatedReviewComments: state => state.pullRequestDetail.updatedReviewComments
+                updatedReviewComments: state => state.pullRequestDetail.updatedReviewComments,
+                newSubmittedReviews: state => state.pullRequestDetail.newSubmittedReviews
             }),
             repo() {
                 return this.$route.params.repo
@@ -253,6 +254,9 @@
             markdownToHTML() {
                 let updatedReviewComment = this.updatedReviewComments.filter(i => i.id == this.reviewComment.id)[0]
                 return util_markdownParse.markdownToHTML(updatedReviewComment ? updatedReviewComment.body : this.reviewComment.body)
+            },
+            isPending() {
+                return !this.newSubmittedReviews.some(i => i.id == this.reviewComment.pull_request_review_id) && this.extraData && this.extraData.state && this.extraData.state.toLowerCase() == 'pending' 
             }
         },
         created() {

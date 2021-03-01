@@ -60,8 +60,10 @@
         methods: {
             async _signOut() {
                 try{
-                    await this.signOut()
-                    this.$router.replace(this.returnTo)
+                    await this.signOut({
+                        returnTo: this.returnTo
+                    })
+                    //this.$router.replace(this.returnTo)
                 }catch(e) {
                     this.handleError(e)
                 }

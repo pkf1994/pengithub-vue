@@ -45,7 +45,7 @@
 <script>
     import styled from 'vue-styled-components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {CommonLoadingWrapper,AnimatedHeightWrapper, Modal} from '@/components'
+    import {CommonLoadingWrapper,AnimatedHeightWrapper,Modal,Popover} from '@/components'
     import {HiddenItemLoading} from '../components'
     import {ChangedFileItem,ReviewSubmitter} from './components'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet } from '@/network'
@@ -118,6 +118,9 @@
             number() {
                 return this.$route.params.number
             },
+            sha() {
+                return this.$route.params.sha
+            }
         },
         created() {
             this.initScrollEventListener()
@@ -480,6 +483,7 @@
             ChangedFileItem,
             ReviewSubmitter,
             Modal,
+            Popover,
             Container: styled.div``,
             EditorHeader: styled.div``,
             Switcher: styled.div``,

@@ -34,7 +34,8 @@ export default {
       }
       this.action_getNotificationsCount()
     },
-    go404() {
+    go404(e) {
+      console.log(e.detail)
       this.$refs.notFoundWrapper.notFoundFlag = true
     }
   },

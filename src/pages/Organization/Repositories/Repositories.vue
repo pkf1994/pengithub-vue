@@ -40,7 +40,7 @@
         <h2 class="f4 text-normal d-md-none my-3" v-if="pinnedRepositories.data.length > 0 || !accessToken">Pinned repositories</h2>
 
         <LoginNecessaryNotice v-if="!accessToken" class="px-3 py-4 text-gray-light text-center">
-            <a href="javascript:void(0)" class="btn-link" @click="signIn">Sign up with Oauth&nbsp;</a> 
+            <a href="javascript:void(0)" class="btn-link" @click="() => signIn()">Sign up with Oauth&nbsp;</a> 
             to show pinned repositories.
         </LoginNecessaryNotice>
 

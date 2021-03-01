@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import {util_numberFormat,util_dateFormat,util_fileSize,util_markdownParse} from '@/util'
+import {util_numberFormat,util_dateFormat,util_fileSize,util_markdownParse,util_emoji} from '@/util'
 Vue.filter('capitalize', function (value) {
     if (!value) return ''
     value = value.toString()
@@ -28,4 +28,8 @@ Vue.filter('fileSize', function(size) {
 
 Vue.filter('markdownToHTML', function(markdown) {
     return util_markdownParse.markdownToHTML(markdown)
+})
+
+Vue.filter('parseEmoji', function(text) {
+    return util_emoji.parse(text)
 })

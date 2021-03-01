@@ -322,7 +322,8 @@
             },
             loadingModalData() {
                 return (this.selectRefModal.tab == 'branches' && this.selectRefModal.branches.loading) || (this.selectRefModal.tab == 'tags' && this.selectRefModal.tags.loading)
-            }
+            },
+         
         },
         created() {
             this.network_getData()

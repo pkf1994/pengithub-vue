@@ -56,6 +56,23 @@
                 <span v-else>No milestone</span>    
             </InfoBottomItem>
 
+             <!-- linked-pulls -->
+            <InfoBottomItem class="info-bottom-item">
+                <span v-if="viewerCanManageIssue()" @click="() => showModal('setLinkedPullsModal')" class="float-right">
+                    <svg class="octicon octicon-gear" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.429 1.525a6.593 6.593 0 011.142 0c.036.003.108.036.137.146l.289 1.105c.147.56.55.967.997 1.189.174.086.341.183.501.29.417.278.97.423 1.53.27l1.102-.303c.11-.03.175.016.195.046.219.31.41.641.573.989.014.031.022.11-.059.19l-.815.806c-.411.406-.562.957-.53 1.456a4.588 4.588 0 010 .582c-.032.499.119 1.05.53 1.456l.815.806c.08.08.073.159.059.19a6.494 6.494 0 01-.573.99c-.02.029-.086.074-.195.045l-1.103-.303c-.559-.153-1.112-.008-1.529.27-.16.107-.327.204-.5.29-.449.222-.851.628-.998 1.189l-.289 1.105c-.029.11-.101.143-.137.146a6.613 6.613 0 01-1.142 0c-.036-.003-.108-.037-.137-.146l-.289-1.105c-.147-.56-.55-.967-.997-1.189a4.502 4.502 0 01-.501-.29c-.417-.278-.97-.423-1.53-.27l-1.102.303c-.11.03-.175-.016-.195-.046a6.492 6.492 0 01-.573-.989c-.014-.031-.022-.11.059-.19l.815-.806c.411-.406.562-.957.53-1.456a4.587 4.587 0 010-.582c.032-.499-.119-1.05-.53-1.456l-.815-.806c-.08-.08-.073-.159-.059-.19a6.44 6.44 0 01.573-.99c.02-.029.086-.075.195-.045l1.103.303c.559.153 1.112.008 1.529-.27.16-.107.327-.204.5-.29.449-.222.851-.628.998-1.189l.289-1.105c.029-.11.101-.143.137-.146zM8 0c-.236 0-.47.01-.701.03-.743.065-1.29.615-1.458 1.261l-.29 1.106c-.017.066-.078.158-.211.224a5.994 5.994 0 00-.668.386c-.123.082-.233.09-.3.071L3.27 2.776c-.644-.177-1.392.02-1.82.63a7.977 7.977 0 00-.704 1.217c-.315.675-.111 1.422.363 1.891l.815.806c.05.048.098.147.088.294a6.084 6.084 0 000 .772c.01.147-.038.246-.088.294l-.815.806c-.474.469-.678 1.216-.363 1.891.2.428.436.835.704 1.218.428.609 1.176.806 1.82.63l1.103-.303c.066-.019.176-.011.299.071.213.143.436.272.668.386.133.066.194.158.212.224l.289 1.106c.169.646.715 1.196 1.458 1.26a8.094 8.094 0 001.402 0c.743-.064 1.29-.614 1.458-1.26l.29-1.106c.017-.066.078-.158.211-.224a5.98 5.98 0 00.668-.386c.123-.082.233-.09.3-.071l1.102.302c.644.177 1.392-.02 1.82-.63.268-.382.505-.789.704-1.217.315-.675.111-1.422-.364-1.891l-.814-.806c-.05-.048-.098-.147-.088-.294a6.1 6.1 0 000-.772c-.01-.147.039-.246.088-.294l.814-.806c.475-.469.679-1.216.364-1.891a7.992 7.992 0 00-.704-1.218c-.428-.609-1.176-.806-1.82-.63l-1.103.303c-.066.019-.176.011-.299-.071a5.991 5.991 0 00-.668-.386c-.133-.066-.194-.158-.212-.224L10.16 1.29C9.99.645 9.444.095 8.701.031A8.094 8.094 0 008 0zm1.5 8a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM11 8a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </span>
+                <InfoBottomItemTitle class="info-bottom-item-title">
+                    Linked pull requests
+                </InfoBottomItemTitle>
+                <p>Successfully merging a pull request may close this issue.</p>
+                <div v-for="item in linkedPulls.data" :key="item.routerLink" class="css-truncate my-1">
+                    <router-link :to="item.routerLink" class="linked-pull text-bold css-truncate-target width-fit">
+                        <svg class="octicon octicon-git-pull-request" :class="{open:item.state.toLowerCase() == 'open',closed:item.state.toLowerCase() == 'closed'}" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.177 3.073L9.573.677A.25.25 0 0110 .854v4.792a.25.25 0 01-.427.177L7.177 3.427a.25.25 0 010-.354zM3.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122v5.256a2.251 2.251 0 11-1.5 0V5.372A2.25 2.25 0 011.5 3.25zM11 2.5h-1V4h1a1 1 0 011 1v5.628a2.251 2.251 0 101.5 0V5A2.5 2.5 0 0011 2.5zm1 10.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0zM3.75 12a.75.75 0 100 1.5.75.75 0 000-1.5z"></path></svg>
+                        {{item.title}}
+                    </router-link>
+                </div>
+            </InfoBottomItem>
+
              <!-- notifications -->
             <InfoBottomItem class="info-bottom-item" v-if="accessToken">
                 <IssueNotificationSettingPane :viewerSubscriptionInfo="data"></IssueNotificationSettingPane>
@@ -64,16 +81,16 @@
             <!-- participants -->
             <InfoBottomItem class="info-bottom-item">
                 <InfoBottomItemTitle class="info-bottom-item-title">
-                    {{data.participants && data.participants.totalCount}} participants
+                    {{participants.data.length}} participants
                 </InfoBottomItemTitle>
                 <div style="margin-bottom:10px" class="d-flex flex-wrap">
-                    <router-link :to="`/${item.login}`" v-for="item in data.participants ? data.participants.nodes : []" :key="item.id" class="mt-1 ml-1">
+                    <router-link :to="`/${item.login}`" v-for="item in participants.data.slice(0,21)" :key="item.login" class="mt-1 ml-1">
                         <ImgWrapper class="avatar avatar-user" style="border-radius: 2em" >
                             <img class="avatar avatar-user" style="border-radius: 2em" :src="item.avatarUrl" width="26" height="26" :alt="`@${item.login}`"> 
                         </ImgWrapper>
                     </router-link> 
                 </div>
-                <span v-if="data.participants && (data.participants.totalCount > 21)">and others</span>    
+                <span v-if="participants.data.length > 21">and others</span>    
             </InfoBottomItem>
         </InfoBottom>
 
@@ -220,6 +237,7 @@
 
 <script>
     import styled from 'vue-styled-components'
+    import {RouteUpdateAwareMixin} from '@/mixins'
     import {
             Label,
             LoadingIconEx,
@@ -246,6 +264,8 @@
     import * as graphql from './graphql'
     var parse = require('parse-link-header');
     export default {
+        name: 'issue_detail_sidebar',
+        mixins: [RouteUpdateAwareMixin],
         inject: ['repoBasicInfo','viewerCanManageIssue'],
         props: {
             data: {
@@ -257,8 +277,12 @@
         data() {
             return {
                 //bodyHTML reactions viewerAssociation
-                extraData: {
-                    data: {},
+                participants: {
+                    data: [],
+                    loading: false
+                },
+                linkedPulls: {
+                    data: [],
                     loading: false
                 },
                 chooseAssigneesModal: {
@@ -360,8 +384,57 @@
                 return true
             },
         },
-       
+        created() {
+            this.network_getData()
+        },
         methods: {
+            async network_getData() {
+                try {
+                    let url = api.API_PROXY_ISSUE_SIDEBAR({
+                        repo: this.repo,
+                        owner: this.owner,
+                        number: this.number
+                    })  
+                    let res_HTMLRaw = await commonGet(
+                        url,
+                        {   
+                            headers: {
+                                'accept': 'text/html,application/xhtml+xml,application/xml'
+                            },
+                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
+                        }
+                    )
+                    this.participants.data = this.parseParticipants(res_HTMLRaw.data)
+                    this.linkedPulls.data = this.parsePulls(res_HTMLRaw.data)
+                } catch (e) {
+                    console.log(e)
+                } 
+            },
+            parseParticipants(raw) {
+                let participants = []
+                let parttern = /<a(?:.*)class="participant-avatar"[^>]*>[\S\s]*?<img(?:.*)src="(.*)"(?:.*)alt="@(.*)"(?:.*)[^>]*>/g
+                let execResult
+                while((execResult = parttern.exec(raw)) != null) {
+                    participants.push({
+                        avatarUrl: execResult[1],
+                        login: execResult[2]
+                    })
+                }
+                return participants
+            },
+            parsePulls(raw) {
+                let pulls = []
+                let parttern = /<a.*?data-hovercard-type="pull_request".*?data-hovercard-url="(.*)?"[^>]*?>[\S\s]*?<svg.*?title="(.*?)"[^>]*>.*?<\/svg>[\n|\r|\s]*(.*)/g
+                let execResult
+                while((execResult = parttern.exec(raw)) != null) {
+                    pulls.push({
+                        routerLink: execResult[1],
+                        state: execResult[2],
+                        title: execResult[3]
+                    })
+                }
+                return pulls
+            },
             async network_getAssignableUsers() {
                 if(this.chooseAssigneesModal.assignableUsers.data.length > 0 || this.chooseAssigneesModal.assignableUsers.loading) return
                 try{
@@ -761,6 +834,9 @@
             showCreateLabelModal() {
                 this.applyLabelsModal.createLabelData.name = this.applyLabelsModal.searchQuery
                 this.showModal('createLabelModal')
+            },
+            generateRouterMeta() {
+                return `${this.owner}-${this.repo}-${this.number}`
             }
         },
         watch: {
@@ -940,4 +1016,15 @@
     border-radius: 3px 3px 0 0;
 }
 
+.open{
+    color: var(--color-icon-success);
+}
+
+.closed{
+    color: var(--color-text-danger);;
+}
+
+.linked-pull{
+    color: var(--color-text-primary)!important;
+}
 </style>

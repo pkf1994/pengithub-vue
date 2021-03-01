@@ -59,8 +59,10 @@ export default {
                 throw new Error(res.data.message)
             }
 
-            if(payload.meta.authRequired) {
+            if(payload.fromRoute.meta.authRequired) {
                 router.replace('/')
+            } else {
+                router.replace(payload.fromRoute.fullPath)
             }
 
             context.commit({

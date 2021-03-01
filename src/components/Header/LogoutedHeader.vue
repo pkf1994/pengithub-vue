@@ -24,7 +24,7 @@
       <PanelRight>
         <button
           class="d-inline-block f5 text-white no-underline border border-gray-dark rounded-2 px-2 py-1 mr-3 no-wrap"
-          @click="signIn"
+          @click="() => signIn()"
           :style="signUpBtnStyle.buttonContainerStyle"
         >
         Sign in

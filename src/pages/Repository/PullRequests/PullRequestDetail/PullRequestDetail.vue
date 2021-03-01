@@ -84,7 +84,6 @@
                 isDynamicDocumentTitle: true,
                 newSubmittedReviews: [],
                 newStartedReviews: [],
-                debug: true
             }
         },
         computed: {
@@ -219,6 +218,9 @@
             pullRequestUpdatedHook(payload) {
                 this.data = payload.detail
             },
+            generateRouterMeta() {
+                return `${this.owner}-${this.repo}-${this.number}`
+            }
         },
         watch: {
             'data.mergeable_state': function(newOne,oldOne) {

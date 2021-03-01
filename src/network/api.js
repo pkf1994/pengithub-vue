@@ -5,13 +5,12 @@ const SCOPE = "user public_repo repo repo_deployment repo:status read:repo_hook 
 const GITHUB_REST_API_BASE = "https://api.github.com"
 const BACK_END_API_BASE = "http://127.0.0.1:8088"
 export const PROXY_API_BASE = "http://127.0.0.1:8888"
-const FILE_UPLOAD_PROXY_API_BASE = "http://127.0.0.1:8889"
 
 export const API_GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
 
 export const HOST = process.env.VUE_APP_HOST
 
-export const GITHUB_TRENDING_API = 'http://192.168.99.100:8000'
+export const GITHUB_TRENDING_API = 'http://127.0.0.1:8887'
 
 export const API_TRENDING = (type,params) => {
     let query = util_queryParse.querify(params)
@@ -260,6 +259,8 @@ export const API_PR_CHANGED_FILES = payload => {
 export const API_TREE_LIST = payload => {
     return `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/git/trees/${payload.sha}?recursive=1`
 }
+
+export const API_PROXY_ISSUE_SIDEBAR = payload => `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/issues/${payload.number}/show_partial?partial=issues/sidebar`
 
 export const API_REPOSITORY_ISSUES_AVAILABLE_AUTHORS = payload => {
     return `${PROXY_API_BASE}/${payload.owner}/${payload.repo}/issues/show_menu_content?partial=issues/filters/authors_content&q=${payload.query}`

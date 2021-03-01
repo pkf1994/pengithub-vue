@@ -503,7 +503,11 @@
             newTimelineItemCreatedHook(e) {
                 this.timeline.newestTimelines.data.push(e.detail)
                 this.network_getTimelineExtraData([e.detail])
-            } 
+            },
+
+            generateRouterMeta() {
+                return `${this.owner}-${this.repo}-${this.number}`
+            }
         },
     }
 </script>

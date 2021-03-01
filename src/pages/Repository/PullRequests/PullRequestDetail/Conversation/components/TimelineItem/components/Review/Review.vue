@@ -16,6 +16,9 @@
                 </router-link>
             </div>
             <Comment v-if="reviewTimeline.body" :data="reviewTimeline" style="margin-left:-40px"></Comment>
+            <ReviewSubmitter class="position-relative review-submitter is-pending ml-n6 mt-3" v-if="reviewTimeline.state.toLowerCase() == 'pending' && pendingReview.data.databaseId">
+
+            </ReviewSubmitter>
             <ReviewCommentGroup v-for="item in rootReviewComments" :key="item.id" :rootReviewComment="item"/>
         </template>
     </Other>
@@ -24,9 +27,11 @@
 <script>
     import styled from 'vue-styled-components'
     import {Other,Comment} from '../../../../../../../Issues/IssueDetail/components/TimelineItem/components'
+    import {ReviewSubmitter} from '../../../../../Changes/components'
     import * as api from '@/network/api'
+    import * as graphql from './graphql.js'
     import {ReviewCommentGroup,ReviewBodyEditor} from './components'
-    import {authRequiredGet} from '@/network'
+    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery } from '@/network'
     import {mapMutations, mapState} from 'vuex'
     import { MUTATION_PULL_REQUEST_DETAIL_UPDATED_NEW_CREATED_REVIEW_COMMENT } from '@/store/modules/pullRequestDetail/mutationTypes'
     let parse = require('parse-link-header')
@@ -36,6 +41,7 @@
             return {
                 reviewProvided: () => this.reviewTimeline,
                 reviewCommentsOfPendingReview: () => this.reviewComments.data,
+                pendingReview: () => this.pendingReview,
             }
         },
         props: {
@@ -58,7 +64,11 @@
                 },
                 updatedReview: undefined,
                 showReviewBodyEditor: false,
-                deleted: false
+                deleted: false,
+                pendingReview: {
+                    data: {},
+                    loading: false
+                }
             }
         },
         computed: {
@@ -106,7 +116,35 @@
                 mutation_updateNewCreatedReviewComment: MUTATION_PULL_REQUEST_DETAIL_UPDATED_NEW_CREATED_REVIEW_COMMENT
             }),
             network_getData() {
-                if(this.reviewTimeline.state && this.reviewTimeline.state.toLowerCase() == 'pending') this.network_getReviewComments()
+                if(this.reviewTimeline.state && this.reviewTimeline.state.toLowerCase() == 'pending') {
+                    this.network_getPendingReview()
+                    this.network_getReviewComments()
+                }
+            },
+            async network_getPendingReview() {
+                try {
+                    this.pendingReview.loading = true
+                    let res = await authRequiredGitHubGraphqlApiQuery(
+                        graphql.GRAPHQL_PR_PENDING_REVIEWS,
+                        {
+                            variables: {
+                                name: this.repo,
+                                owner: this.owner,
+                                number: parseInt(this.number)
+                            }
+                        }
+                    )
+
+                    try{
+                        this.pendingReview.data = res.data.data.repository.pullRequest.reviews.nodes[0] || {}
+                    }catch(e) {
+                        this.handleGraphqlError(e)
+                    }
+                } catch (e) {
+                    console.log(e)
+                } finally {
+                    this.pendingReview.loading = false
+                }
             },
             async network_getReviewComments() {
                 try{
@@ -236,6 +274,7 @@
             ReviewBodyEditor,
             Other,
             Comment,
+            ReviewSubmitter,
             Container: styled.div``,
             Header: styled.div``,
             WhoDidWhat: styled.div``,
@@ -247,5 +286,12 @@
 </script>
 
 <style scoped lang="scss">
-
+.is-pending{
+    border-color: var(--color-border-warning);
+}
+.review-submitter{
+    background-color: var(--color-bg-primary);
+    border: 1px solid var(--color-border-warning);
+    border-radius: 6px;
+}
 </style>

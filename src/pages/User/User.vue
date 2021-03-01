@@ -35,13 +35,15 @@
                             <AvatarAndName class="d-flex flex-items-center mb-4">
                                 <Avatar class="col-2 mr-3 flex-self-stretch">
                                     <router-link :to="`/${data.login}`" class="d-block position-relative height-full">
-                                        <img v-if="showAvatar" :src="data.avatar_url" :alt="`@${data.login}`" class="avatar-user avatar border width-full" style="height: auto"/>
+                                        <ImgWrapper v-if="showAvatar" class="avatar-user avatar border width-full">
+                                            <img :src="data.avatar_url" class="avatar-user avatar width-full" style="height: auto"/>
+                                        </ImgWrapper>
                                     </router-link>
                                 </Avatar>
 
                                 <Names class="col-9 pt-1 pb-1">
                                     <h1 class="pl-2" style="line-height:1">
-                                        <span class="name d-block overflow-hidden">{{data.name}}</span>
+                                        <span class="name d-block">{{data.name}}</span>
                                         <span class="login d-block">{{data.login}}</span>
                                     </h1>  
                                 </Names>
@@ -197,7 +199,7 @@
                 
                 
 
-                <ComplexTopTab :tabs="tabs" class="ml-n3 mr-n3 border-bottom user-tab bg-white" :tabStyle="{marginRight: `0px!important`}"></ComplexTopTab>
+                <ComplexTopTab :tabs="tabs" @currLabel="tabsLabelChange" class="ml-n3 mr-n3 border-bottom user-tab bg-white" :tabStyle="{marginRight: `0px!important`}"></ComplexTopTab>
 
                 <keep-alive>
                     <router-view style="min-height: 100vh"></router-view>
@@ -439,7 +441,8 @@
                     stars: undefined
                 },
                 resetBeforeUpdate: true,
-                showUserProfileEditor: false
+                showUserProfileEditor: false,
+                activedTabs: [0]
             }   
         },
         computed: {
@@ -473,15 +476,21 @@
             },
         },
         async created() {
-            this.network_getData()
+            await this.network_getData()
         },
+        
         methods: {
-            network_getData() {
-                this.network_getBasicData()
-                this.network_getStarredReposCount()
-                this.network_getTabCount()
-                if(this.accessToken) this.network_getExtraData()
-                if(this.accessToken) this.network_getUserIsBlockedByViewer()
+            async network_getData() {
+                try{
+                    await this.network_getBasicData()
+                    this.network_getStarredReposCount()
+                    this.network_getTabCount()
+                    if(this.accessToken) this.network_getExtraData()
+                    if(this.accessToken) this.network_getUserIsBlockedByViewer()
+                }catch(e) {
+                    if(e == 'Organization') this.$router.replace(`/orgs/${this.login}`)
+                    if(e != 'Organization') throw e
+                }
             },
             async network_getBasicData() {
                 try{
@@ -492,12 +501,12 @@
 
                     let res = await authRequiredGet(url,{cancelToken})
                     if(res.data.type == 'Organization') {
-                        this.$router.replace(`/orgs/${this.login}`)
-                        return
+                        throw 'Organization'
                     }
                     this.data = res.data 
 
                 }catch(e) {
+                    if(e == 'Organization') throw e
                     this.handleError(e)
                 }finally{
                     this.loading = false
@@ -704,6 +713,11 @@
             userUpdatedHandler(payload) {
                 this.showUserProfileEditor = false
                 this.data = payload
+            },
+            tabsLabelChange(tabIndex){
+                if(!this.activedTabs.includes(tabIndex)){
+                    this.activedTabs.push(tabIndex)
+                }
             }
         },
         watch: {

@@ -2,9 +2,11 @@
     <Container v-if="!deleted" class="border-top" :class="{deleting:loadingDeleteRootReviewComment}">
         
         <ReviewComment :showDiff="false" 
+                        :class="{'border-top':index > 0}"
                         @root-review-comment-deleting.native="() => loadingDeleteRootReviewComment = true" 
                         @review-comment-deleted.native.stop="reviewCommentDeletedHook"
-                        :isRoot="index == 0" v-for="(commentItem,index) in reviewCommentGroup" 
+                        :isRoot="index == 0" 
+                        v-for="(commentItem,index) in reviewCommentGroup" 
                         :reviewComment="commentItem" 
                         :key="commentItem.id"></ReviewComment>
 

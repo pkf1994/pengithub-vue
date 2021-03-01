@@ -114,7 +114,7 @@
         </transition-group>
 
         <LoginNecessaryNotice v-if="!accessToken" class="d-flex flex-justify-center px-3 py-4 text-gray-light">
-            <a href="javascript:void(0)" class="btn-link" @click="signIn">Sign up with Oauth&nbsp;</a>
+            <a href="javascript:void(0)" class="btn-link" @click="() => signIn()">Sign up with Oauth&nbsp;</a>
             to show contribution activities.
         </LoginNecessaryNotice>
 
@@ -267,7 +267,7 @@
                     this.contributionIllustration.loading = false
                 }catch(e) {
                     console.log(e)
-                    if(e.response && e.response.status == 502) this.network_getContributionIllustration() 
+                    //if(e.response && e.response.status == 502) this.network_getContributionIllustration() 
                 }
             },
             async network_getContributionActivities() {

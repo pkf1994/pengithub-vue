@@ -25,11 +25,14 @@ export default {
                 routeToSignOut(return_to) {
                     this.$router.push(`/sign_out${return_to ? '?return_to=' + return_to : ''}`)
                 },
-                async signOut() {
+                async signOut(payload) {
                     let fromRoute = {
                         ...this.$route
                     }
-                    await this.action_signOut(fromRoute)
+                    await this.action_signOut({
+                        fromRoute,
+                        ...payload
+                    })
                 },
                 async github_changeStarStatus(owner,repo,viewerHasStarred = false) {
                     if(!this.accessToken) {

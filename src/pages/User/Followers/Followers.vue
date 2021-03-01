@@ -66,7 +66,7 @@
                 return `${this.userBasicInfoProvided().data.login}(${this.userBasicInfoProvided().data.name}) / Followers`
             }
         },
-        async created() {
+        created() {
             this.network_getData()
         },
         methods: {
@@ -125,6 +125,7 @@
                 //console.log(`/${this.login}/stars?${queryStr}`)
                 this.$router.push(`${this.$route.path}?${queryStr}`)
             },
+           
         },
         components: {
             FollowerListItem,

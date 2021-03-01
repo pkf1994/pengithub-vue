@@ -32,7 +32,7 @@
                     
 
                     <LoginNecessaryNotice v-if="!accessToken" class="px-3 py-4 text-gray-light text-center">
-                        <a href="javascript:void(0)" class="btn-link" @click="signIn">Sign up with Oauth&nbsp;</a> 
+                        <a href="javascript:void(0)" class="btn-link" @click="() => signIn()">Sign up with Oauth&nbsp;</a> 
                         to show pinned repositories.
                     </LoginNecessaryNotice>
                 </Pinned>
