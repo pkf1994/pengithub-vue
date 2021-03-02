@@ -391,7 +391,7 @@ export default [
                         component: RepositoryPullRequestCommits
                     },
                     {
-                        path: 'files/:sha',
+                        path: 'files(/:sha)?',
                         name: 'repositoryPullRequestChanges',
                         component: RepositoryPullRequestChanges
                     },

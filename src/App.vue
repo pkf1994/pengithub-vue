@@ -36,6 +36,7 @@ export default {
     },
     go404(e) {
       console.log(e.detail)
+      console.log('go404')
       this.$refs.notFoundWrapper.notFoundFlag = true
     }
   },

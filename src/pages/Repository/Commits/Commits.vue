@@ -61,7 +61,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading,SelectMenuItem,LoadingIconEx,Modal,WithNotFoundNoticeWrapper,CommonLoadingWrapper,Breadcrumb} from '@/components'
+    import {CommonLoading,SelectMenuItem,LoadingIconEx,Modal,CommonLoadingWrapper,Breadcrumb} from '@/components'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet} from '@/network'
     import {util_queryParse} from '@/util'
     import {CommitGroup} from './components'
@@ -254,7 +254,6 @@
             Modal,
             SelectMenuItem,
             LoadingIconEx,
-            WithNotFoundNoticeWrapper,
             CommonLoadingWrapper,
             Breadcrumb,
             Container: styled.div``,

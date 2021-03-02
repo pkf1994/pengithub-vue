@@ -1,5 +1,11 @@
 <template>
-  <BottomInfoRows v-if="data" :data="data">
+  <BottomInfoRows
+    v-if="data"
+    :data="data"
+    @issue-sidebar-data-get.native.stop="
+      (e) => (pullSidebarDataHTML = e.detail)
+    "
+  >
     <div class="info-bottom-item">
       <span
         v-if="viewerCanManageIssue()"
@@ -20,78 +26,33 @@
           ></path>
         </svg>
       </span>
+
       <div class="info-bottom-item-title">Reviewers</div>
-      <!--    <div style="margin-bottom:10px" v-for="item in data.requested_reviewers.slice(0,21)" :key="item.id">
-                <router-link to="/">
-                    <ImgWrapper class="avatar avatar-user">
-                        <img class="avatar avatar-user" :src="item.avatar_url" width="20" height="20" :alt="`@${item.login}`"> 
-                    </ImgWrapper>
-                    <span class="assignee-login">{{item.login}}</span>    
-                </router-link> 
-            </div> -->
       <div
         style="margin-bottom: 10px"
         v-for="item in relativeReviewers.slice(0, 21)"
         :key="item.id"
       >
-        <router-link :to="`/${item.author.login}`">
+        <router-link :to="item.reviewerRouterLink">
           <ImgWrapper class="avatar avatar-user">
             <img
               class="avatar avatar-user"
-              :src="item.author.avatarUrl"
+              :src="item.avatarUrl"
               width="20"
               height="20"
               :alt="`@${item.login}`"
             />
           </ImgWrapper>
-          <span class="assignee-login">{{ item.author.login }}</span>
+          <span class="assignee-login">{{ item.login }}</span>
         </router-link>
         <router-link
+          v-if="item.changedFilesRouterLink"
           class="float-right"
-          :to="`/${owner}/${repo}/pulls/${number}/files/${item.commit.oid}`"
+          :to="item.changedFilesRouterLink"
+          v-html="item.reviewTypeSvg"
         >
-          <svg
-            v-if="item.state.toLowerCase() == 'commented'"
-            class="octicon octicon-comment text-gray"
-            viewBox="0 0 16 16"
-            version="1.1"
-            width="16"
-            height="16"
-            aria-hidden="true"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M2.75 2.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h2a.75.75 0 01.75.75v2.19l2.72-2.72a.75.75 0 01.53-.22h4.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25H2.75zM1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0113.25 12H9.06l-2.573 2.573A1.457 1.457 0 014 13.543V12H2.75A1.75 1.75 0 011 10.25v-7.5z"
-            ></path>
-          </svg>
-          <svg
-            v-if="item.state.toLowerCase() == 'changes_requested'"
-            viewBox="0 0 16 16"
-            version="1.1"
-            width="16"
-            height="16"
-            aria-hidden="true"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M2.75 1.5a.25.25 0 00-.25.25v12.5c0 .138.112.25.25.25h10.5a.25.25 0 00.25-.25V4.664a.25.25 0 00-.073-.177l-2.914-2.914a.25.25 0 00-.177-.073H2.75zM1 1.75C1 .784 1.784 0 2.75 0h7.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0113.25 16H2.75A1.75 1.75 0 011 14.25V1.75zm7 1.5a.75.75 0 01.75.75v1.5h1.5a.75.75 0 010 1.5h-1.5v1.5a.75.75 0 01-1.5 0V7h-1.5a.75.75 0 010-1.5h1.5V4A.75.75 0 018 3.25zm-3 8a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z"
-            ></path>
-          </svg>
-          <svg
-            v-if="item.state.toLowerCase() == 'approved'"
-            class="octicon octicon-check text-green"
-            viewBox="0 0 16 16"
-            version="1.1"
-            width="16"
-            height="16"
-            aria-hidden="true"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"
-            ></path>
-          </svg>
         </router-link>
+        <span v-else class="float-right" v-html="item.reviewTypeSvg"></span>
       </div>
       <span v-if="!(relativeReviewers.length > 0)">No reviews</span>
       <span v-if="relativeReviewers.length > 21">and others</span>
@@ -99,155 +60,196 @@
   </BottomInfoRows>
 </template>
 <script>
-import styled from 'vue-styled-components'
-import {ImgWrapper} from '@/components'
-import {BottomInfoRows} from '../../../../Issues/IssueDetail/components'
-import * as api from '@/network/api'
-import * as graphql from './graphql'
-import parse from 'parse-link-header'
-import { authRequiredGet, authRequiredGitHubGraphqlApiQuery,cancelAndUpdateAxiosCancelTokenSource } from '@/network'
+import styled from "vue-styled-components";
+import { ImgWrapper } from "@/components";
+import { BottomInfoRows } from "../../../../Issues/IssueDetail/components";
+import * as api from "@/network/api";
+import * as graphql from "./graphql";
+import parse from "parse-link-header";
+import {
+  authRequiredGet,
+  authRequiredGitHubGraphqlApiQuery,
+  cancelAndUpdateAxiosCancelTokenSource,
+} from "@/network";
 export default {
-    inject: ['viewerCanManageIssue'],
-    props: {
-        data: {
-            type: Object
-        },
+  inject: ["viewerCanManageIssue"],
+  props: {
+    data: {
+      type: Object,
     },
-    data() {
-        return {
-            reviews: [],
-            suggestedReviewers: {
-                data: [],
-                loading: false
+  },
+  data() {
+    return {
+      pullSidebarDataHTML: "",
+      reviews: [],
+      suggestedReviewers: {
+        data: [],
+        loading: false,
+      },
+      loading: false,
+    };
+  },
+  computed: {
+    number() {
+      return this.$route.params.number;
+    },
+    relativeReviewers() {
+      let reviewersParagraph;
+      let pattern_reviewersParagraph = /<form.*?aria-label="Select reviewers"[^>]*>[\S\s]*?<\/form>/;
+      let matchResult;
+      if (
+        (matchResult = this.pullSidebarDataHTML.match(
+          pattern_reviewersParagraph
+        )) != null
+      ) {
+        reviewersParagraph = matchResult[0];
+      }
+      if (!reviewersParagraph) return [];
+
+      let relativeReviewers = [];
+      let pattern_relativeReviewers = /<p>[\S\s]*?<img.*src="(.*?)"[^>]*>[\S\s]*?<a class="assignee.*?href="(.*?)"[^>]*>[\S\s]*?<span[^>]*>(.*?)<\/span>[\S\s]*?[<a href="(.*?)">[\S\s]*?]?(<svg.*?>.*?<\/svg>)/g;
+      let execResult;
+      while (
+        (execResult = pattern_relativeReviewers.exec(
+          this.pullSidebarDataHTML
+        )) != null
+      ) {
+        if (execResult.length == 6) {
+          relativeReviewers.push({
+            avatarUrl: execResult[1],
+            reviewerRouterLink: execResult[2],
+            login: execResult[3],
+            changedFilesRouterLink: execResult[4],
+            reviewTypeSvg: execResult[5],
+          });
+        }
+        if (execResult.length == 5) {
+          relativeReviewers.push({
+            avatarUrl: execResult[1],
+            reviewerRouterLink: execResult[2],
+            login: execResult[3],
+            reviewTypeSvg: execResult[4],
+          });
+        }
+      }
+      return relativeReviewers || [];
+    },
+  },
+  created() {
+    //this.network_getData()
+  },
+  methods: {
+    async network_getData() {
+      if (!this.accessToken) return;
+      try {
+        this.suggestedReviewers.loading = true;
+        let res = await authRequiredGitHubGraphqlApiQuery(
+          graphql.GRAPHQL_SUGGESTTED_REVIEWERS,
+          {
+            variables: {
+              id: this.data.node_id,
             },
-            loading: false,
+            cancelToken: cancelAndUpdateAxiosCancelTokenSource(
+              "pulls-suggested-reviewers"
+            ).cancelToken,
+          }
+        );
+
+        try {
+          this.suggestedReviewers.data = res.data.data.node.suggestedReviewers;
+        } catch (e) {
+          this.handleGraphqlError(res);
         }
+      } catch (e) {
+        this.handleError(e);
+      } finally {
+        this.suggestedReviewers.loading = false;
+      }
     },
-    computed: {
-        number() {
-            return this.$route.params.number
-        },
-        relativeReviewers() {
-            let relativeReviewers = []
-            this.reviews.forEach(i => {
-                if(!relativeReviewers.some(i_ => i_.author.login == i.author.login)) {
-                    relativeReviewers.push(i)
-                }else{
-                    relativeReviewers.filter(i__ => i__.author.login == i.author.login)[0].state = i.state
-                }
-            })
-            if(this.data.requested_reviewers) relativeReviewers.forEach((i, index) => {
-                if(this.data.requested_reviewers.some(i_ => i_.author.login == i.author.login)) {
-                    relativeReviewers.splice(index,1)
-                }
-            })
-            return relativeReviewers
+    async network_getDataFromRest() {
+      try {
+        this.loading = true;
+        let reviews = [];
+        let pageInfo;
+        while (!pageInfo || pageInfo.next) {
+          let url;
+          if (!pageInfo) {
+            url = api.API_REVIEWS({
+              repo: this.repo,
+              owner: this.owner,
+              number: this.$route.params.number,
+              params: {
+                per_page: 100,
+              },
+            });
+          } else {
+            url = pageInfo.next.url;
+          }
+
+          let res = await authRequiredGet(url);
+          pageInfo = parse(res.headers.link) || {};
+          reviews = reviews.concat(res.data);
         }
+
+        this.reviews = reviews;
+      } catch (e) {
+        console.log(e);
+      } finally {
+        this.loading = false;
+      }
     },
-    created() {
-        this.network_getData()
-    },
-    methods: {
-        async network_getData() {
-            if(!this.accessToken) return 
-            try {
-                this.suggestedReviewers.loading = true
-                let res = await authRequiredGitHubGraphqlApiQuery(
-                    graphql.GRAPHQL_SUGGESTTED_REVIEWERS,
-                    {
-                        variables: {
-                            id: this.data.node_id
-                        },
-                        cancelToken: cancelAndUpdateAxiosCancelTokenSource('pulls-suggested-reviewers').cancelToken
-                    }
-                )
-
-                try {
-                    this.suggestedReviewers.data = res.data.data.node.suggestedReviewers
-                } catch (e) {
-                    this.handleGraphqlError(res)
-                }
-
-            } catch (e) {
-                this.handleError(e)
-            } finally {
-                this.suggestedReviewers.loading = false
+    async network_getDataFromGraphql() {
+      if (!this.data.node_id) return;
+      try {
+        this.loading = true;
+        let pageInfo;
+        let reviews = [];
+        while (!pageInfo || pageInfo.hasNextPage) {
+          let res = await authRequiredGitHubGraphqlApiQuery(
+            graphql.GRAPHQL_PULL_REVIEWS,
+            {
+              variables: {
+                id: this.data.node_id,
+                after: pageInfo && pageInfo.endCursor,
+              },
             }
-        },
-        async network_getDataFromRest() {
-            try {
-                this.loading = true
-                let reviews = []
-                let pageInfo
-                while(!pageInfo || pageInfo.next) {
-                    let url 
-                    if(!pageInfo) {
-                        url = api.API_REVIEWS({
-                            repo: this.repo,
-                            owner: this.owner,
-                            number: this.$route.params.number,
-                            params: {
-                                per_page: 100
-                            }
-                        })
-                    } else {
-                        url = pageInfo.next.url
-                    }
-
-                    let res = await authRequiredGet(url)
-                    pageInfo = parse(res.headers.link) || {}
-                    reviews = reviews.concat(res.data)
-                }
-
-                this.reviews = reviews
-            } catch (e) {
-                console.log(e)
-            } finally {
-                this.loading = false
-            }
-        },
-        async network_getDataFromGraphql() {
-            if(!this.data.node_id) return
-            try {
-                this.loading = true
-                let pageInfo
-                let reviews = []
-                console.log(this.data.node_id)
-                while(!pageInfo || pageInfo.hasNextPage) {
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.GRAPHQL_PULL_REVIEWS,
-                        {
-                            variables: {
-                                id: this.data.node_id,
-                                after: pageInfo && pageInfo.endCursor
-                            }
-                        }
-                    )
-                    reviews = reviews.concat(res.data.data.node.reviews.nodes)
-                    pageInfo = res.data.data.node.reviews.pageInfo || {}
-                }
-
-                this.reviews = reviews
-            } catch (e) {
-                console.log(e)
-            } finally {
-                this.loading = false
-            }
+          );
+          reviews = reviews.concat(res.data.data.node.reviews.nodes);
+          pageInfo = res.data.data.node.reviews.pageInfo || {};
         }
+
+        this.reviews = reviews;
+      } catch (e) {
+        console.log(e);
+      } finally {
+        this.loading = false;
+      }
     },
-    watch: {
-        'data.node_id':function(newOne) {
-            if(newOne) {
-                this.network_getData()
-            }
-        }
+  },
+  watch: {
+    "data.node_id": function (newOne) {
+      if (newOne) {
+        this.network_getData();
+      }
     },
-    components: {
-        BottomInfoRows, 
-        ImgWrapper,
-    }
-}
+  },
+  components: {
+    BottomInfoRows,
+    ImgWrapper,
+  },
+};
 </script>
+
+<style>
+.color-text-danger {
+  color: var(--color-text-danger) !important;
+}
+
+.color-text-secondary {
+  color: var(--color-text-secondary) !important;
+}
+</style>
+
 <style scoped lang="scss">
 @import "node_modules/@primer/css/avatars/index.scss";
 .info-bottom-item {

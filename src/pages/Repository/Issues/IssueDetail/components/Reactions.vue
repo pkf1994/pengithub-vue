@@ -273,15 +273,31 @@
             },
             async network_getViewHasReactedInfo() {
                 if(!this.reactionsHost.node_id) return 
+                let nodeType
+                 switch(this.reactionsHostType) {
+                    case 'issue':
+                        nodeType = 'Issue'
+                        break;
+                    case 'reviewComment':
+                        nodeType = 'PullRequestReviewComment'
+                        break;
+                    case 'commitComment':
+                        nodeType = 'CommitComment'
+                        break;
+                    default:
+                        nodeType = 'IssueComment'
+                }
                 try {
                     let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.GRAPHQL_VIEWER_HAS_REACTED_INFO,
+                        graphql.GRAPHQL_VIEWER_HAS_REACTED_INFO(nodeType),
                         {
                             variables: {
                                 id: this.reactionsHost.node_id
                             }
                         }
                     )
+
+                    if(!res.data.data.node.id) return
 
                     try {
                         if(res.data.data.node.THUMBS_UP.viewerHasReacted) this.reactionsViewerHasReacted.push('+1')

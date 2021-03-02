@@ -4,7 +4,7 @@
 <template>
     <div>
         <InfoBottom v-if="data.id">
-            <slot></slot> 
+            <slot :issueSidebarDataHTML="issueSidebarDataHTML.data"></slot> 
 
             <!-- assignee -->
             <InfoBottomItem class="info-bottom-item">
@@ -71,6 +71,7 @@
                         {{item.title}}
                     </router-link>
                 </div>
+                <span v-if="linkedPulls.data.length == 0">None yet</span>    
             </InfoBottomItem>
 
              <!-- notifications -->
@@ -277,6 +278,10 @@
         data() {
             return {
                 //bodyHTML reactions viewerAssociation
+                issueSidebarDataHTML: {
+                    data: '',
+                    loading: false
+                },
                 participants: {
                     data: [],
                     loading: false
@@ -383,6 +388,33 @@
                 if(colorNumber > 16777215 || colorNumber < 0) return
                 return true
             },
+            parseParticipants() {
+                if(!this.issueSidebarDataHTML.data) return
+                let participants = []
+                let parttern = /<a(?:.*)class="participant-avatar"[^>]*>[\S\s]*?<img(?:.*)src="(.*)"(?:.*)alt="@(.*)"(?:.*)[^>]*>/g
+                let execResult
+                while((execResult = parttern.exec(this.issueSidebarDataHTML.data)) != null) {
+                    participants.push({
+                        avatarUrl: execResult[1],
+                        login: execResult[2]
+                    })
+                }
+                return participants
+            },
+            parsePulls() {
+                if(!this.issueSidebarDataHTML.data) return
+                let pulls = []
+                let parttern = /<a.*?data-hovercard-type="pull_request".*?data-hovercard-url="(.*)?"[^>]*?>[\S\s]*?<svg.*?title="(.*?)"[^>]*>.*?<\/svg>[\n|\r|\s]*(.*)/g
+                let execResult
+                while((execResult = parttern.exec(this.issueSidebarDataHTML.data)) != null) {
+                    pulls.push({
+                        routerLink: execResult[1],
+                        state: execResult[2],
+                        title: execResult[3]
+                    })
+                }
+                return pulls
+            }
         },
         created() {
             this.network_getData()
@@ -404,36 +436,11 @@
                             cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
                         }
                     )
-                    this.participants.data = this.parseParticipants(res_HTMLRaw.data)
-                    this.linkedPulls.data = this.parsePulls(res_HTMLRaw.data)
+                    this.issueSidebarDataHTML.data = res_HTMLRaw.data
+                    this.$el.dispatchEvent(new CustomEvent('issue-sidebar-data-get',{bubbles:true,detail: res_HTMLRaw.data}))
                 } catch (e) {
                     console.log(e)
                 } 
-            },
-            parseParticipants(raw) {
-                let participants = []
-                let parttern = /<a(?:.*)class="participant-avatar"[^>]*>[\S\s]*?<img(?:.*)src="(.*)"(?:.*)alt="@(.*)"(?:.*)[^>]*>/g
-                let execResult
-                while((execResult = parttern.exec(raw)) != null) {
-                    participants.push({
-                        avatarUrl: execResult[1],
-                        login: execResult[2]
-                    })
-                }
-                return participants
-            },
-            parsePulls(raw) {
-                let pulls = []
-                let parttern = /<a.*?data-hovercard-type="pull_request".*?data-hovercard-url="(.*)?"[^>]*?>[\S\s]*?<svg.*?title="(.*?)"[^>]*>.*?<\/svg>[\n|\r|\s]*(.*)/g
-                let execResult
-                while((execResult = parttern.exec(raw)) != null) {
-                    pulls.push({
-                        routerLink: execResult[1],
-                        state: execResult[2],
-                        title: execResult[3]
-                    })
-                }
-                return pulls
             },
             async network_getAssignableUsers() {
                 if(this.chooseAssigneesModal.assignableUsers.data.length > 0 || this.chooseAssigneesModal.assignableUsers.loading) return
