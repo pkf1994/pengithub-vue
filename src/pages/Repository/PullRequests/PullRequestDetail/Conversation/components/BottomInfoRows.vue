@@ -282,4 +282,8 @@ export default {
     font-size: 12px;
   }
 }
+
+.octicon-gear {
+    color: #959da5;
+}
 </style>
