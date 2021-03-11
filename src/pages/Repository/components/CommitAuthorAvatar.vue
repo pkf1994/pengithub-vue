@@ -1,62 +1,37 @@
 <template>
-    <div class="AvatarStack flex-self-start" :style="{marginRight: !committedByAuthor ? '8px' : 'auto'}">
+    <div v-if="commitAuthors" class="AvatarStack flex-self-start" :style="{marginRight: (commitAuthors.length - 1) * 8 + 'px'}">
        <div class="AvatarStack-body">
-            <router-link v-if="commit.author && commit.author.avatar_url" :to="`/${commit.author.login}`">
-                <img height="20" width="20" class="avatar avatar-url" :src="commit.author.avatar_url" :alt="`${commit.author.login}`">
-            </router-link>
-            <router-link v-if="!committedByAuthor" :to="`/${commit.committer.login}`">
-                <img height="20" width="20" class="avatar avatar-url" :src="commit.committer.avatar_url" :alt="`${commit.committer.login}`">
-            </router-link>
+           <template v-for="item in commitAuthors">
+                <router-link class="avatar" v-if="item.user && item.user.login" :to="`/${item.user.login}`"  :key="item.name">
+                    <ImgWrapper class="avatar-url" >
+                        <img height="20" width="20" class="avatar-url" :src="item.user.avatarUrl">
+                    </ImgWrapper>
+                </router-link>
+           </template>
         </div> 
     </div> 
 </template>
 <script>
 import styled from 'vue-styled-components'
-import * as api from '@/network/api'
-import { authRequiredGet } from '@/network'
+import {ImgWrapper} from '@/components'
+import {mapState} from 'vuex'
 export default {
-    inject: ['repo','owner'],
     props: {
-        url: {
-            type: String,
-            required: false
-        },
-        sha: {
-            Type: String,
-            required: false
-        }
-    },
-    data() {
-        return {
-            commit: {},
+        commit: {
+            type: Object,
+            required: true
         }
     },
     computed: {
-        committedByAuthor() {
-            return ! (this.commit.committer && this.commit.committer.avatar_url && this.commit.author && this.commit.author.avatar_url && (this.commit.author.avatar_url != this.commit.committer.avatar_url))
-        }
-    },
-    created() {
-        this.network_getData()
-    },
-    methods: {
-        async network_getData() {
-            if(!(this.sha || this.url)) return
-            try {
-                let url = this.url || api.API_COMMIT({
-                    repo: this.repo(),
-                    owner: this.owner(),
-                    sha: this.sha
-                })
-
-                let res = await authRequiredGet(url)
-                this.commit = res.data
-            } catch (e) {
-                console.log(e)
-            }
-        }
+        ...mapState({
+            commitAuthors(state){
+                let authorsHolder = state.graphqlListData.commits.filter(i => i.id == this.commit.node_id)[0]
+                if(authorsHolder) return authorsHolder.authors.nodes
+            } 
+        }),
     },
     components: {
+        ImgWrapper,
         Container: styled.div``
     }
 }

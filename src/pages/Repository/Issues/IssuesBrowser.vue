@@ -318,7 +318,7 @@
                     data: [],
                     loading: false
                 },
-                resetBeforeUpdate: true
+                resetBeforeUpdate: false
             }
         },
         computed: {
@@ -511,7 +511,9 @@
                     }
                     let res = await authRequiredGet(url,{cancelToken:sourceAndCancelToken.cancelToken})
                     
+                    if(this.data.length > 0) this.scrollToTop()
                     this.data = res.data.items
+                    
                     this.totalCount = res.data.total_count
                     this.pageInfo = parse(res.headers.link) || {}
                     this.noResultMatchedFlag = false

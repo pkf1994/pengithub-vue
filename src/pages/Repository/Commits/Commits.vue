@@ -19,12 +19,16 @@
             <CommitGroup v-for="item in commitGroups" class="the-commit-group" :key="item[0].node_id" :commitGroup="item"></CommitGroup>
         </transition-group>
 
-        <Pagination class="paginate-container" v-if="data.length > 0 && (pageInfo.prev || pageInfo.next)">
+        <!-- <Pagination class="paginate-container" v-if="data.length > 0 && (pageInfo.prev || pageInfo.next)">
             <div class="BtnGroup">
                 <button class="btn btn-outline BtnGroup-item" :disabled="!pageInfo.prev || loading" @click="() => changePage(true)">Newer</button>
                 <button class="btn btn-outline BtnGroup-item" :disabled="!pageInfo.next || loading"  @click="() => changePage(false)">Older</button>
             </div> 
-        </Pagination>
+        </Pagination> -->
+
+        <SimplePaginationRest  v-if="data.length > 0 && (pageInfo.prev || pageInfo.next)" :pageInfo="pageInfo">
+
+        </SimplePaginationRest>
 
         <Modal ref="switchBranchOrTagModal" title="Switch branches/tags" :modalStyle="{height:'80vh'}" @show="network_getAvailableRef">
             <div class="select-menu-text-filter">
@@ -61,7 +65,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoading,SelectMenuItem,LoadingIconEx,Modal,CommonLoadingWrapper,Breadcrumb} from '@/components'
+    import {CommonLoading,SelectMenuItem,LoadingIconEx,Modal,CommonLoadingWrapper,Breadcrumb,SimplePaginationRest} from '@/components'
     import {authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet} from '@/network'
     import {util_queryParse} from '@/util'
     import {CommitGroup} from './components'
@@ -157,7 +161,7 @@
 
                     if(!this.pageInfo.prev && res.data.length == 0) this.emitNotFoundEvent(this.$el)
 
-                    window.scrollTo(0,0)
+                    this.scrollToTop()
                     this.data = res.data
                     this.pageInfo = parse(res.headers.link) || {}
 
@@ -231,13 +235,13 @@
                 }
                 return tags
             },
-            changePage(goPrevPageFlag) {
+       /*      changePage(goPrevPageFlag) {
                 let queryStr = util_queryParse.querify({
                     ...this.$route.query,
                     page: goPrevPageFlag ? this.page - 1 : (this.page ? parseInt(this.page) + 1 : 2)
                 })
                 this.$router.push(`${this.$route.path}?${queryStr}`)
-            },
+            }, */
             routerWithRef(ref) {
                 this.closeModal()
                 this.$router.push(`/${this.owner()}/${this.repo()}/commits/${ref}/${this.path}`)
@@ -256,6 +260,7 @@
             LoadingIconEx,
             CommonLoadingWrapper,
             Breadcrumb,
+            SimplePaginationRest,
             Container: styled.div``,
             Pagination: styled.div``,
             ModalTab: styled.div``,

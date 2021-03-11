@@ -21,18 +21,20 @@
         },
         beforeRouteEnter (to, from, next) {
             next(async vm => {
+                //console.log('beforeRouteEnter')
                 if(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta){
-                    window && window.scrollTo && window.scrollTo(0,0)
+                    //window && window.scrollTo && window.scrollTo(0,0)
                     vm.routeResetHook()
                     vm.routeUpdateHook()             
                 }
             })
         },
         beforeRouteUpdate (to, from, next) {
+            //console.log('beforeRouteUpdate')
             let cacheRouterMeta = this.routerMeta
             next()
             if(this.routerMeta != cacheRouterMeta) {
-                window && window.scrollTo && window.scrollTo(0,0)
+                //window && window.scrollTo && window.scrollTo(0,0)
                 if(this.resetBeforeUpdate) this.routeResetHook()
                 this.routeUpdateHook() 
             }

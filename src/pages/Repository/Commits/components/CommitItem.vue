@@ -7,18 +7,10 @@
         </CommitTitle>
         
         <CommitMeta class="commit-meta mt-1 d-flex" style="color: #24292e;">
+            <CommitAuthorAvatar :commit="commit"></CommitAuthorAvatar>
 
             <div class="flex-grow-1">
-                <AvatarStack v-if="commit.author && commit.committer && commit.author.login != commit.committer.login" class="AvatarStack flex-self-start AvatarStack-body" :class="{'AvatarStack--two':committedNotByAuthor}">
-                    <div class="AvatarStack-body">
-                        <img class="avatar avatar-user" height="20" width="20" :src="commit.author.avatar_url" :alt="`@${commit.author && commit.author.name}`">
-                        <img class="avatar avatar-user" height="20" width="20" :src="commit.committer.avatar_url" :alt="`@${commit.author.name}`">
-                    </div>
-                </AvatarStack>
-
-                <ImgWrapper class="mr-1 avatar avatar-user" v-else-if="commit.author">
-                    <img class="avatar avatar-user" height="20" width="20" :src="commit.author.avatar_url" :alt="`@${commit.author && commit.author.name || 'Unknow'}`">
-                </ImgWrapper>
+                
 
                 <span class="f6 text-gray min-width-0 mr-1" v-if="commit.author || commit.committer">
                     <router-link v-if="commit.author && committedNotByAuthor" class="commit-author tooltipped tooltipped-s user-mention" :to="`/${commit.author.login}`">{{commit.author.login}}</router-link>
@@ -39,7 +31,7 @@
             </div>
             
             <div class="mx-1 d-flex flex-items-center"> 
-                <CommitStatusIcon :sha="commit.sha"></CommitStatusIcon>
+                <CommitStatusIcon :commit="commit"></CommitStatusIcon>
             </div>
 
         </CommitMeta>
@@ -50,6 +42,9 @@
     import styled from 'vue-styled-components'
     import {AnimatedHeightWrapper,ImgWrapper} from '@/components'
     import {CommitStatusIcon} from '../../components'
+    import {CommitAuthorAvatar} from '@/pages/Repository/components'
+    import {mapState,mapActions} from 'vuex'
+    import * as actionTypes from '@/store/modules/graphqlListData/actionTypes'
     export default {
         props: {
             commit: {
@@ -58,6 +53,11 @@
             }
         },
         computed: {
+            ...mapState({
+                commitGraphqlData(state){
+                    return state.graphqlListData.commits.filter(i => i.id == this.commit.node_id)[0]
+                } 
+            }),
             committedNotByAuthor() {
                 if(!this.commit.author) return
                 if(!this.commit.committer) return
@@ -67,13 +67,19 @@
                 return this.commit.commit.message.split('\n')[0]
             }
         },
+        created() {
+            if(!this.commitGraphqlData) this.action_getCommitGraphqlData({id:this.commit.node_id})
+        },
         methods: {
-           
+           ...mapActions({
+               action_getCommitGraphqlData: actionTypes.GET_COMMITS 
+           })
         },
         components: {
             AnimatedHeightWrapper,
             ImgWrapper,
             CommitStatusIcon,
+            CommitAuthorAvatar,
             Container: styled.div``,
             Time: styled.div``,
             CommitTitle: styled.p``,

@@ -257,6 +257,8 @@
     import CommentEditPane from './CommentEditPane'
     import Reactions from '../../Reactions'
     import {MinimizePane} from '../../../../../components'
+    import {mapActions} from 'vuex'
+    import * as actionTypes from '@/store/modules/graphqlListData/actionTypes'
     export default {
         inject: ['commentExtraDataProvided','issue','viewerIsCollaborator','graphqlWritePermission','timelineItemDeletedHook'],
         data() {
@@ -345,7 +347,13 @@
                 return util_markdownParse.markdownToHTML(this.data.body)
             },
         },
+        created() {
+            if(this.commentType == 'issueComment') this.action_getIssueComment({id: this.data.node_id})
+        },
         methods: {
+            ...mapActions({
+                action_getIssueComment: actionTypes.GET_ISSUE_COMMENTS
+            }),
             triggerShowMinimized() {
                 this.showMinimized = !this.showMinimized
             },

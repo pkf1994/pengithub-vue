@@ -6,7 +6,7 @@
         <template v-slot:action>
             <div class="d-flex flex-auto">
                 <!-- commit user avatars -->
-                <CommitAuthorAvatar :url="data.url.replace('/git','')"></CommitAuthorAvatar>
+                <CommitAuthorAvatar :commit="data"></CommitAuthorAvatar>
 
                 <!-- commit message -->
                 <div class="pr-1 flex-auto min-width-0">
@@ -43,8 +43,8 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {Other} from '../../../../../../Issues/IssueDetail/components/TimelineItem/components'
-    import {CommitStatusIcon,CommitAuthorAvatar} from '../../../../../../components'
+    import {Other} from '@/pages/Repository/Issues/IssueDetail/components/TimelineItem/components'
+    import {CommitStatusIcon,CommitAuthorAvatar} from '@/pages/Repository/components'
     export default {
         props: { 
             data: {

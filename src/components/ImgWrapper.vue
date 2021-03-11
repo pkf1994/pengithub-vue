@@ -1,10 +1,10 @@
 <template>
-    <Container style="overflow: hidden">
+    <Container style="overflow: hidden" :style="{height:height > 0 && height + 'px',width:width > 0 && width + 'px'}">
         <span key="1" v-if="showImgFlag" class="fade-in" :class="{'d-inline-block':height > 0}" :style="{height:height > 0 && height + 'px',width:width > 0 && width + 'px'}">
             <slot></slot>
         </span>
 
-        <UnloadCover key="2" v-else class="unload-cover avatar d-inline-block" :style="{height:height + 'px',width:width + 'px'}">
+        <UnloadCover key="2" v-else class="unload-cover d-inline-block" :style="{height:height + 'px',width:width + 'px'}">
         </UnloadCover>
     </Container>
 </template>
@@ -58,7 +58,7 @@
     background: #d1d5da;
 }
 .fade-in{
-    animation: fade-in-animation 3s;
+    animation: fade-in-animation .5s;
 }
 
 @keyframes fade-in-animation {
