@@ -9,7 +9,11 @@ export default {
         Vue.mixin({
             computed: {
                 ...mapState({
-                    accessToken: state => state.oauth.accessToken.accessToken
+                    accessToken: state => state.oauth.accessToken.accessToken,
+                    graphqlData(state) {
+                        if(!this.nodeId) return 
+                        return state.graphqlData.nodes.filter(i => i.id == this.nodeId)[0] || {}
+                    }
                 }),
                 repo() {
                     return this.$route.params.repo

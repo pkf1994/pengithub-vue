@@ -1,3 +1,0 @@
-export const GET_NODES = 'GET_NODES'
-export const GET_COMMITS = 'GET_COMMITS'
-export const GET_ISSUE_COMMENTS = 'GET_ISSUE_COMMENTS'

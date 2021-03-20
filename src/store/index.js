@@ -13,7 +13,7 @@ import {
     topNoticeStore,
     dirtyStore,
     pullRequestDetailStore,
-    graphqlListDataStore
+    graphqlDataStore
 } from "./modules"
 
 export default new Vuex.Store ({
@@ -28,7 +28,7 @@ export default new Vuex.Store ({
         topNotice: topNoticeStore,
         dirty: dirtyStore,
         pullRequestDetail: pullRequestDetailStore,
-        graphqlListData: graphqlListDataStore
+        graphqlData: graphqlDataStore
     },
     plugins: [
         createPersistedState({

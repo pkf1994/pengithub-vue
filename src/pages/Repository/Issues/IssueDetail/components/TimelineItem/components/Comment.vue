@@ -1,6 +1,6 @@
 <template>
     <Container class="position-relative timeline-item transition-all" style="padding-top:16px;padding-bottom:16px">
-        <Inner v-if="!commentExtraDataHolder.isMinimized" class="inner bg-white">
+        <Inner v-if="!graphqlData.isMinimized" class="inner bg-white">
             <Header class="px-3 header text-normal f5" :class="{'current-user':viewer.login == data.user.login}" :style="headerStyle">
                 <Action class="action py-2 px-1 ml-2 position-relative" style="align-self:start" @click="showActionPopover">
                     <svg aria-label="Show options" class="octicon octicon-kebab-horizontal v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" height="16" role="img"><path d="M8 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM1.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg>
@@ -16,14 +16,14 @@
                                 <button class="popover-item btn-link dropdown-item">
                                     Reference in new issue
                                 </button>
-                                <div class="dropdown-divider" v-if="commentExtraDataHolder.viewerCanUpdate || commentExtraDataHolder.viewerCanMinimize || commentExtraDataHolder.viewerCanDelete"></div> 
-                                <button v-if="commentExtraDataHolder.viewerCanUpdate"  @click.stop="() => triggerEdit(true)" class="popover-item btn-link dropdown-item">
+                                <div class="dropdown-divider" v-if="graphqlData.viewerCanUpdate || graphqlData.viewerCanMinimize || graphqlData.viewerCanDelete"></div> 
+                                <button v-if="graphqlData.viewerCanUpdate"  @click.stop="() => triggerEdit(true)" class="popover-item btn-link dropdown-item">
                                     Edit
                                 </button>
-                                <button v-if="graphqlWritePermission && commentExtraDataHolder.viewerCanMinimize" @click.stop="() => triggerMinimizePane(true)" class="popover-item btn-link dropdown-item">
+                                <button v-if="graphqlWritePermission && graphqlData.viewerCanMinimize" @click.stop="() => triggerMinimizePane(true)" class="popover-item btn-link dropdown-item">
                                     Hide
                                 </button>
-                                <button v-if="commentExtraDataHolder.viewerCanDelete" @click.stop="network_deleteThisComment" class="popover-item btn-link hover-red dropdown-item" style="color:#d73a49">
+                                <button v-if="graphqlData.viewerCanDelete" @click.stop="network_deleteThisComment" class="popover-item btn-link hover-red dropdown-item" style="color:#d73a49">
                                     Delete
                                 </button>
                                 <div class="dropdown-divider" v-if="viewerIsCollaborator().data"></div> 
@@ -71,7 +71,7 @@
                         </span>
                         <span class="no-wrap">{{(data.created_at || data.submitted_at) | getDateDiff}}</span>
 
-                        <span v-if="!accessToken || (commentExtraDataHolder.userContentEdits && commentExtraDataHolder.userContentEdits.totalCount > 0)" class="d-inline-block text-gray btn-link" @click="() => showModal('editHistoriesModal')">
+                        <span v-if="graphqlData.userContentEdits && graphqlData.userContentEdits.totalCount > 0" class="d-inline-block text-gray btn-link" @click="() => showModal('editHistoriesModal')">
                             <span class="d-inline-block text-gray-light">•</span> 
                             edited
                             <svg height="11" class="octicon octicon-triangle-down v-align-middle" viewBox="0 0 12 16" version="1.1" width="8" aria-hidden="true"><path fill-rule="evenodd" d="M0 5l6 6 6-6H0z"></path></svg>
@@ -118,7 +118,7 @@
                     <LoadingIconEx/>
                 </LoadingWrapper> -->
 
-                <Reactions :reactionsHost="data" :viewerCanReact="commentExtraDataHolder.viewerCanReact" :reactionsHostType="commentType"></Reactions>
+                <Reactions :reactionsHost="data" :viewerCanReact="graphqlData.viewerCanReact" :reactionsHostType="commentType"></Reactions>
 
             </div>
         </Inner>
@@ -132,7 +132,7 @@
                 </button>
 
                 <h3 class="header-minimized-title f5 text-gray text-normal text-italic">
-                    This comment was marked as {{commentExtraDataHolder.minimizedReason}}
+                    This comment was marked as {{graphqlData.minimizedReason}}
                 </h3>
 
                 <Action v-if="showMinimized && !editing" class="px-1 position-absolute minimized-comment-action" @click="showActionPopover">
@@ -149,14 +149,14 @@
                                     <button class="popover-item btn-link dropdown-item">
                                         Reference in new issue
                                     </button>
-                                    <div class="dropdown-divider" v-if="commentExtraDataHolder.viewerCanUpdate || commentExtraDataHolder.viewerCanMinimize || commentExtraDataHolder.viewerCanDelete"></div> 
-                                    <button v-if="commentExtraDataHolder.viewerCanUpdate" @click.stop="() => triggerEdit(true)" class="popover-item btn-link dropdown-item">
+                                    <div class="dropdown-divider" v-if="graphqlData.viewerCanUpdate || graphqlData.viewerCanMinimize || graphqlData.viewerCanDelete"></div> 
+                                    <button v-if="graphqlData.viewerCanUpdate" @click.stop="() => triggerEdit(true)" class="popover-item btn-link dropdown-item">
                                         Edit
                                     </button>
-                                    <button v-if="commentExtraDataHolder.viewerCanMinimize" :disabled="unminimizeLoading" class="popover-item btn-link dropdown-item" @click.stop="network_unminimizeThisComment">
+                                    <button v-if="graphqlData.viewerCanMinimize" :disabled="unminimizeLoading" class="popover-item btn-link dropdown-item" @click.stop="network_unminimizeThisComment">
                                         {{unminimizeLoading ? 'Trying...' : 'Unhide'}}
                                     </button>
-                                    <button v-if="commentExtraDataHolder.viewerCanDelete" class="popover-item btn-link text-red hover-red">
+                                    <button v-if="graphqlData.viewerCanDelete" class="popover-item btn-link text-red hover-red">
                                         Delete
                                     </button>
                                     <div class="dropdown-divider" v-if="viewerIsCollaborator().data"></div> 
@@ -257,8 +257,8 @@
     import CommentEditPane from './CommentEditPane'
     import Reactions from '../../Reactions'
     import {MinimizePane} from '../../../../../components'
-    import {mapActions} from 'vuex'
-    import * as actionTypes from '@/store/modules/graphqlListData/actionTypes'
+    import {mapActions,mapState} from 'vuex'
+    import * as actionTypes from '@/store/modules/graphqlData/actionTypes'
     export default {
         inject: ['commentExtraDataProvided','issue','viewerIsCollaborator','graphqlWritePermission','timelineItemDeletedHook'],
         data() {
@@ -309,29 +309,18 @@
             }
         },
         computed: {
+            nodeId() {
+                return this.data.node_id
+            },
             repo() {
                 return this.$route.params.repo
             },
             owner() {
                 return this.$route.params.owner
             },
-            commentExtraDataHolder() {
-                if(this.extraData) return this.extraData
-                let commentExtraDataHolder = this.commentExtraDataProvided().filter(item => {
-                    return item.id === this.data.node_id
-                })[0] || {}
-                if(commentExtraDataHolder.bodyHTML) {
-                    let pattern = /href="https:\/\/github\.com\/(\S+)"/g
-                    let execResult
-                    while((execResult = pattern.exec(commentExtraDataHolder.bodyHTML)) !== null) {
-                        commentExtraDataHolder.bodyHTML = commentExtraDataHolder.bodyHTML.replace(execResult[0],`href="/${execResult[1]}"`)
-                    }
-                }
-                return commentExtraDataHolder
-            },
             authorAssociation() {
-                if(this.commentExtraDataHolder.authorAssociation && this.commentExtraDataHolder.authorAssociation !== "NONE"){
-                    return this.commentExtraDataHolder.authorAssociation.toLowerCase()
+                if(this.graphqlData.authorAssociation && this.graphqlData.authorAssociation !== "NONE"){
+                    return this.graphqlData.authorAssociation.toLowerCase()
                 }
                 if((this.issue().user && this.issue().user.login) == (this.data.user && this.data.user.login)) return 'author'
                 return undefined
@@ -348,11 +337,14 @@
             },
         },
         created() {
-            if(this.commentType == 'issueComment') this.action_getIssueComment({id: this.data.node_id})
+            if(this.commentType == 'issueComment') this.action_getIssueCommentGraphqlData({
+                id: this.data.node_id,
+                graphql: graphql.NODES_ISSUE_COMMENT
+            })
         },
         methods: {
             ...mapActions({
-                action_getIssueComment: actionTypes.GET_ISSUE_COMMENTS
+                action_getIssueCommentGraphqlData: actionTypes.GET_NODES
             }),
             triggerShowMinimized() {
                 this.showMinimized = !this.showMinimized

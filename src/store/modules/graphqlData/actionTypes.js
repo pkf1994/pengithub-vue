@@ -1,0 +1,2 @@
+export const GET_NODES = 'GET_NODES'
+export const GET_NODES_EXECUTOR = 'GET_NODES_EXECUTOR'

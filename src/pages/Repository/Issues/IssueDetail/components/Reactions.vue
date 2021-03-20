@@ -1,14 +1,14 @@
 <template>
-    <div  v-if="viewerCanReact || (reactions.data && reactions.data.total_count > 0)" class="border-top">
+    <div v-if="viewerCanReact || (reactionsData && reactionsData.some(i => i.totalCount > 0))" class="border-top">
         <div class="reactions">
             <button class="reaction-item btn-link" 
                 :style="reactionItemStyle"
-                :class="{'user-has-reacted':reactionsViewerHasReacted.some(i => i == item.content)}" 
-                v-for="item in availableReaction.filter(i => reactions.data[i.content] || reactions.data[i.content] > 0)" 
+                :class="{'user-has-reacted':item.viewerHasReacted}" 
+                v-for="item in reactionsData.filter(i => i.totalCount > 0)" 
                 :key="item.content" 
-                :disabled="!viewerCanReact" @click="() => network_createReaction(item.content)">
+                :disabled="!viewerCanReact || loadingCreateReaction" @click="() => network_createReaction(item)">
                 {{item.label}}    
-                {{reactions.data[item.content] || reactions.data[item.content]}}  
+                {{item.totalCount}}  
             </button>
             <button v-if="viewerCanReact" :disabled="loadingCreateReaction" class="reaction-item muted-link d-inline-block position-relative" style="border-color:transparent;padding-right:4px;padding-left:4px" @click="() => showModal('pickReactionModal')">
                 <span style="color:transparent">👍1</span>    
@@ -24,11 +24,11 @@
 
         <Modal ref="pickReactionModal" title="Pick your reaction">
             <div class="d-flex flex-wrap mx-2 py-1">
-                <button :class="{'border-gray-dark bg-blue-light':reactionsViewerHasReacted.some(i => i == item.content)}" 
+                <button :class="{'border-gray-dark bg-blue-light':item.viewerHasReacted}" 
                         :disabled="loadingCreateReaction" 
                         :value="item.content" 
-                        v-for="item in availableReaction" 
-                        @click="() => network_createReaction(item.content)" 
+                        v-for="item in reactionsData" 
+                        @click="() => network_createReaction(item)" 
                         :key="item.label" 
                         class="btn-link col-3 d-flex flex-justify-center flex-items-center no-underline add-reactions-options-item">
                     {{item.label}}
@@ -43,7 +43,9 @@
     import {Modal,LoadingIcon} from '@/components'
     import * as api from '@/network/api'
     import {authRequiredGet,authRequiredPost,authRequiredDelete,authRequiredGitHubGraphqlApiQuery} from '@/network'
-    import * as graphql from './graphql.js'
+    import * as graphql from './TimelineItem/components/graphql'
+    import * as actionTypes from '@/store/modules/graphqlData/actionTypes'
+    import {mapState,mapActions} from 'vuex'
     export default {
         data() {
             return {
@@ -94,10 +96,6 @@
                 type: Object,
                 default: true
             },
-            viewerCanReact: {
-                type: Boolean,
-                default: false
-            },
             reactionsHostType: {
                 type: String,
                 default: 'issueComment'
@@ -108,54 +106,70 @@
             }
         },
         computed: {
+            nodeId() {
+                return this.reactionsHost.node_id
+            },
             repo() {
                 return this.$route.params.repo
             },
             owner() {
                 return this.$route.params.owner
             },
-        },
-        created() {
-            if(this.reactionsHost.reactions) {
-                this.reactions.data = this.reactionsHost.reactions
-            }else {
-                this.network_getReactions()
-            }
-            if(this.viewerCanReact) {
-                this.network_getViewHasReactedInfo()
+            viewerCanReact() {
+                if(this.graphqlData) return this.graphqlData.viewerCanReact
+            },
+            reactionsData() {
+                if(this.graphqlData) return [
+                    {
+                    label: "👍",
+                    content: "+1",
+                    ...this.graphqlData.THUMBS_UP
+                },
+                {
+                    label: "👎",
+                    content: "-1",
+                    ...this.graphqlData.THUMBS_DOWN
+                },
+                {
+                    label: "😄",
+                    content: "laugh",
+                    ...this.graphqlData.LAUGH
+                },
+                {
+                    label: "🎉",
+                    content: "hooray",
+                    ...this.graphqlData.HOORAY
+                },
+                {
+                    label: "😕",
+                    content: "confused",
+                    ...this.graphqlData.CONFUSED
+                },
+                {
+                    label: "❤️",
+                    content: "heart",
+                    ...this.graphqlData.HEART
+                },
+                {
+                    label: "🚀",
+                    content: "rocket",
+                    ...this.graphqlData.ROCKET
+                },
+                {
+                    label: "👀",
+                    content: "eyes",
+                    ...this.graphqlData.EYES
+                },
+                ]
             }
         },
         methods: {
-            async network_getReactions() {
-                try{
-                    this.reactions.loading = true
-                    let url = this.reactionsHost.url
-                    if(this.reactionsHostType == 'issue') {
-                        url = api.API_ISSUE({
-                            repo: this.repo,
-                            owner: this.owner,
-                            number: this.$route.params.number
-                        })
-                    }
-                    if(!url) return 
-                    let res = await authRequiredGet(
-                        url,
-                        {
-                            headers: {
-                                "Accept":"application/vnd.github.squirrel-girl-preview"
-                            }
-                        },
-                    )
-
-                    this.reactions.data = res.data.reactions
-                }catch(e) {
-                    console.log(e)
-                }finally{
-                    this.reactions.loading = false
-                }
-            },
-            async network_createReaction(content) {
+            ...mapActions({
+                action_GetIssueCommentGraphqlData: actionTypes.GET_NODES
+            }),
+            async network_createReaction({viewerHasReacted,content}) {
                 this.closeModal()
+                
                 try{
                     this.loadingCreateReaction = true
                     let url
@@ -204,14 +218,16 @@
                         }
                     )
 
-                    if(this.reactionsViewerHasReacted.some(i => i == content)) {
+                    if(viewerHasReacted) {
                         await this.network_deleteReaction(res.data)
-                        this.reactions.data[content] -= 1
                         return 
                     }
 
-                    this.reactions.data[content] += 1
-                    this.reactionsViewerHasReacted.push(content)
+                    await this.action_GetIssueCommentGraphqlData({
+                        id: this.reactionsHost.node_id,
+                        graphql: graphql.NODES_ISSUE_COMMENT,
+                        sync: true
+                    })
 
                 }catch(e) {
                     this.handleError(e)
@@ -220,7 +236,7 @@
                 }
             },
             async network_deleteReaction(reaction) {
-                 let url
+                let url
                 switch(this.reactionsHostType) {
                     case 'issueComment':
                         url = api.API_ISSUE_COMMENT_REACTION({
@@ -267,62 +283,12 @@
                     }
                 )
 
-                this.reactionsViewerHasReacted.forEach((i,index) => {
-                    if(i == reaction.content) this.reactionsViewerHasReacted.splice(index,1) 
+                await this.action_GetIssueCommentGraphqlData({
+                    id: this.reactionsHost.node_id,
+                    graphql: graphql.NODES_ISSUE_COMMENT,
+                    sync: true
                 })
             },
-            async network_getViewHasReactedInfo() {
-                if(!this.reactionsHost.node_id) return 
-                let nodeType
-                 switch(this.reactionsHostType) {
-                    case 'issue':
-                        nodeType = 'Issue'
-                        break;
-                    case 'reviewComment':
-                        nodeType = 'PullRequestReviewComment'
-                        break;
-                    case 'commitComment':
-                        nodeType = 'CommitComment'
-                        break;
-                    default:
-                        nodeType = 'IssueComment'
-                }
-                try {
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.GRAPHQL_VIEWER_HAS_REACTED_INFO(nodeType),
-                        {
-                            variables: {
-                                id: this.reactionsHost.node_id
-                            }
-                        }
-                    )
-
-                    if(!res.data.data.node.id) return
-
-                    try {
-                        if(res.data.data.node.THUMBS_UP.viewerHasReacted) this.reactionsViewerHasReacted.push('+1')
-                        if(res.data.data.node.THUMBS_DOWN.viewerHasReacted) this.reactionsViewerHasReacted.push('-1')
-                        if(res.data.data.node.LAUGH.viewerHasReacted) this.reactionsViewerHasReacted.push('laugh')
-                        if(res.data.data.node.HOORAY.viewerHasReacted) this.reactionsViewerHasReacted.push('hooray')
-                        if(res.data.data.node.CONFUSED.viewerHasReacted) this.reactionsViewerHasReacted.push('confused')
-                        if(res.data.data.node.HEART.viewerHasReacted) this.reactionsViewerHasReacted.push('heart')
-                        if(res.data.data.node.ROCKET.viewerHasReacted) this.reactionsViewerHasReacted.push('rocket')
-                        if(res.data.data.node.EYES.viewerHasReacted) this.reactionsViewerHasReacted.push('eyes')
-                    } catch (e) {
-                        console.log(e)
-                    }
-                } catch (e) {
-                    console.log(e)
-                }
-
-            },
-        },
-        watch: {
-            viewerCanReact(newOne,oldOne) {
-                if(newOne && !oldOne) {
-                    this.network_getViewHasReactedInfo()
-                }
-            }
         },
         components: {
             Modal,

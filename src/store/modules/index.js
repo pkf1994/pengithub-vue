@@ -7,6 +7,6 @@ import notificationsStore from './notifications'
 import topNoticeStore from './topNotice'
 import dirtyStore from './dirty'
 import pullRequestDetailStore from './pullRequestDetail'
-import graphqlListDataStore from './graphqlListData'
+import graphqlDataStore from './graphqlData'
 
-export { oauthStore, homeStore, searchStore, repositoryStore, issuesStore, notificationsStore, topNoticeStore, dirtyStore, pullRequestDetailStore, graphqlListDataStore }
+export { oauthStore, homeStore, searchStore, repositoryStore, issuesStore, notificationsStore, topNoticeStore, dirtyStore, pullRequestDetailStore, graphqlDataStore }

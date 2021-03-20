@@ -344,6 +344,9 @@
                     }
 
                     let data = []
+                    Object.entries(dataHolder).forEach(key=>{
+
+                    })
                     for(let key in dataHolder) {
                         data.push(dataHolder[key])
                     }

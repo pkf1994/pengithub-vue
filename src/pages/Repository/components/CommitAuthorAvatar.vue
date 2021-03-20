@@ -14,21 +14,19 @@
 <script>
 import styled from 'vue-styled-components'
 import {ImgWrapper} from '@/components'
-import {mapState} from 'vuex'
 export default {
     props: {
-        commit: {
-            type: Object,
-            required: true
-        }
+        commit: Object
     },
     computed: {
-        ...mapState({
-            commitAuthors(state){
-                let authorsHolder = state.graphqlListData.commits.filter(i => i.id == this.commit.node_id)[0]
-                if(authorsHolder) return authorsHolder.authors.nodes
-            } 
-        }),
+        nodeId() {
+            return this.commit.node_id
+        },
+        commitAuthors() {
+            if(this.graphqlData) {
+                return this.graphqlData.authors.nodes
+            }
+        }
     },
     components: {
         ImgWrapper,

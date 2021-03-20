@@ -43,8 +43,8 @@
     import {AnimatedHeightWrapper,ImgWrapper} from '@/components'
     import {CommitStatusIcon} from '../../components'
     import {CommitAuthorAvatar} from '@/pages/Repository/components'
-    import {mapState,mapActions} from 'vuex'
-    import * as actionTypes from '@/store/modules/graphqlListData/actionTypes'
+    import {mapActions} from 'vuex'
+    import * as actionTypes from '@/store/modules/graphqlData/actionTypes'
     export default {
         props: {
             commit: {
@@ -53,11 +53,6 @@
             }
         },
         computed: {
-            ...mapState({
-                commitGraphqlData(state){
-                    return state.graphqlListData.commits.filter(i => i.id == this.commit.node_id)[0]
-                } 
-            }),
             committedNotByAuthor() {
                 if(!this.commit.author) return
                 if(!this.commit.committer) return
@@ -68,11 +63,35 @@
             }
         },
         created() {
-            if(!this.commitGraphqlData) this.action_getCommitGraphqlData({id:this.commit.node_id})
+            if(!this.commitGraphqlData) this.action_getCommitGraphqlData({
+                id: this.commit.node_id,
+                graphql: `
+                    query($ids:[ID!]!){
+                        nodes(ids: $ids) {
+                        ... on Commit {
+                            id
+                            authors (first: 4) {
+                                nodes {
+                                    name
+                                    user {
+                                    avatarUrl
+                                    login
+                                    name
+                                    }
+                                }
+                            }
+                            status {
+                                state
+                            }
+                        }
+                        }
+                    }
+                    `
+            })
         },
         methods: {
            ...mapActions({
-               action_getCommitGraphqlData: actionTypes.GET_COMMITS 
+               action_getCommitGraphqlData: actionTypes.GET_NODES 
            })
         },
         components: {

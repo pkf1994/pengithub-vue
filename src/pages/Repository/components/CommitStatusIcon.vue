@@ -13,12 +13,12 @@
             commit: Object
         },
         computed:{
-            ...mapState({
-               commitState(state) {
-                   let dataHolder = state.graphqlListData.commits.filter(i => i.id == this.commit.node_id) [0]
-                   if(dataHolder) return dataHolder.status && dataHolder.status.state
-               } 
-            }),
+            nodeId() {
+                return this.commit.node_id
+            },
+            commitState() {
+                if(this.graphqlData) return this.graphqlData.status.state
+            },
             repo() {
                 return this.$route.params.repo
             },
