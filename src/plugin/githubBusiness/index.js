@@ -4,6 +4,7 @@ import {util_ramdonString} from '@/util'
 import {authRequiredGitHubGraphqlApiQuery,authRequiredDelete,authRequiredPut,authRequiredPost} from '@/network'
 import * as api from '@/network/api'
 import * as graphql from './graphql'
+import * as actionTypes from '@/store/modules/graphqlData/actionTypes'
 export default {
     install: Vue => {
         Vue.mixin({
@@ -11,7 +12,7 @@ export default {
                 ...mapState({
                     accessToken: state => state.oauth.accessToken.accessToken,
                     graphqlData(state) {
-                        if(!this.nodeId) return 
+                        if(!this.nodeId) return {}
                         return state.graphqlData.nodes.filter(i => i.id == this.nodeId)[0] || {}
                     }
                 }),
@@ -24,7 +25,8 @@ export default {
             }, 
             methods: {
                 ...mapActions({
-                    action_signOut: ACTION_SIGN_OUT
+                    action_signOut: ACTION_SIGN_OUT,
+                    action_getGraphqlData: actionTypes.GET_NODES
                 }),
                 routeToSignOut(return_to) {
                     this.$router.push(`/sign_out${return_to ? '?return_to=' + return_to : ''}`)

@@ -1,6 +1,6 @@
-export const GRAPHQL_COMMIT = `
-query($id:ID!){
-    node(id: $id) {
+export const COMMIT = `
+query($ids:[ID!]!){
+    nodes(ids: $ids) {
       ... on Commit {
         id
         status {

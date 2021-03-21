@@ -10,7 +10,7 @@ Vue.filter('thousands', function (number) {
     return util_numberFormat.thousands(number)
 })
 
-Vue.filter('thousands2K2M', function(number,reservedDecimal = 2) {
+Vue.filter('thousands2K2M', function(number,reservedDecimal = 1) {
     return util_numberFormat.thousands2K2M(number,reservedDecimal)
 })
 

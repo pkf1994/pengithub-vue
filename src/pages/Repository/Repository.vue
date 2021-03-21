@@ -44,20 +44,20 @@
                         {{data.description | parseEmoji}}
                     </Description>
 
-                    <RepoMeta class="px-3 pb-3" v-if="data.id">
+                    <RepoMeta class="px-3 pb-3 repo-meta" v-if="data.id">
                         <!-- homePage -->
                         <div v-if="data.homepage" class="mb-2 d-flex flex-items-center">
                             <svg height="16" class="flex-shrink-0 mr-2" mr="2" class_names="flex-shrink-0" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg>
                             <span class="flex-auto min-width-0 css-truncate css-truncate-target width-fit">
                                 <HyperlinkWrapper>
-                                    <a :title="data.homepage" class="text-bold" :href="data.homepage">{{data.homepage.replace(/https:\/\/|http:\/\//g,'')}}</a>
+                                    <a :title="data.homepage" class="text-bold" style="color:var(--color-text-link)" :href="data.homepage">{{data.homepage.replace(/https:\/\/|http:\/\//g,'')}}</a>
                                 </HyperlinkWrapper>
                             </span>
                         </div>
 
                         <!-- license -->
                         <div v-if="data.license" class="mb-2 d-flex flex-items-center">
-                            <router-link :to="`/${data.full_name}/blob/${data.default_branch}/LICENSE`" class="muted-link">
+                            <router-link :to="`/${data.full_name}/blob/${data.default_branch}/LICENSE`">
                                 <svg height="16" class="octicon-law mr-2 v-align-text-bottom" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.75.75a.75.75 0 00-1.5 0V2h-.984c-.305 0-.604.08-.869.23l-1.288.737A.25.25 0 013.984 3H1.75a.75.75 0 000 1.5h.428L.066 9.192a.75.75 0 00.154.838l.53-.53-.53.53v.001l.002.002.002.002.006.006.016.015.045.04a3.514 3.514 0 00.686.45A4.492 4.492 0 003 11c.88 0 1.556-.22 2.023-.454a3.515 3.515 0 00.686-.45l.045-.04.016-.015.006-.006.002-.002.001-.002L5.25 9.5l.53.53a.75.75 0 00.154-.838L3.822 4.5h.162c.305 0 .604-.08.869-.23l1.289-.737a.25.25 0 01.124-.033h.984V13h-2.5a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-2.5V3.5h.984a.25.25 0 01.124.033l1.29.736c.264.152.563.231.868.231h.162l-2.112 4.692a.75.75 0 00.154.838l.53-.53-.53.53v.001l.002.002.002.002.006.006.016.015.045.04a3.517 3.517 0 00.686.45A4.492 4.492 0 0013 11c.88 0 1.556-.22 2.023-.454a3.512 3.512 0 00.686-.45l.045-.04.01-.01.006-.005.006-.006.002-.002.001-.002-.529-.531.53.53a.75.75 0 00.154-.838L13.823 4.5h.427a.75.75 0 000-1.5h-2.234a.25.25 0 01-.124-.033l-1.29-.736A1.75 1.75 0 009.735 2H8.75V.75zM1.695 9.227c.285.135.718.273 1.305.273s1.02-.138 1.305-.273L3 6.327l-1.305 2.9zm10 0c.285.135.718.273 1.305.273s1.02-.138 1.305-.273L13 6.327l-1.305 2.9z"></path></svg>
                                 {{data.license.name}}
                             </router-link>
@@ -85,7 +85,7 @@
                     </RepoMeta>
 
                     <StarOrWatch class="d-flex px-3 pb-1" v-if="data.id">
-                        <StarBtn  class="btn btn-sm btn-block flex-1 mr-2" :repoProp="repo" :ownerProp="owner" :viewerHasStarred="viewerHasStarred.data"></StarBtn>
+                        <StarBtn  class="btn btn-sm btn-block flex-1 mr-2" :repoProp="repo" :ownerProp="owner" :viewerHasStarred="viewerHasStarred"></StarBtn>
                         <button class="btn btn-sm btn-block flex-1" :disabled="subscription.loading" @click="() => showModal('notificationsModal')">        
                             <span v-if="!subscription.loading">
                                 <svg v-if="subscription.data.ignored && !subscription.data.subscribed" height="16" class="octicon octicon-mute mr-1" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 2.75a.75.75 0 00-1.238-.57L3.472 5H1.75A1.75 1.75 0 000 6.75v2.5C0 10.216.784 11 1.75 11h1.723l3.289 2.82A.75.75 0 008 13.25V2.75zM4.238 6.32L6.5 4.38v7.24L4.238 9.68a.75.75 0 00-.488-.18h-2a.25.25 0 01-.25-.25v-2.5a.25.25 0 01.25-.25h2a.75.75 0 00.488-.18zm7.042-1.1a.75.75 0 10-1.06 1.06L11.94 8l-1.72 1.72a.75.75 0 101.06 1.06L13 9.06l1.72 1.72a.75.75 0 101.06-1.06L14.06 8l1.72-1.72a.75.75 0 00-1.06-1.06L13 6.94l-1.72-1.72z"></path></svg>
@@ -136,19 +136,8 @@
                 data: {},
                 loading: false,
                 activeTab: "Code",
-                openIssuesCount: 0,
-                openPullRequestsCount: 0,
-                openProjectsCount: 0,
-                viewerIsCollaborator: {
-                    data: false,
-                    loading: false
-                },
                 viewerPermission: {
                     data: 'READ',
-                    loading: false
-                },
-                viewerHasStarred: {
-                    data: undefined,
                     loading: false
                 },
                 subscription: {
@@ -166,10 +155,8 @@
                 repo: () => this.repo,
                 repoBasicInfo: () => this.data,
                 repoOwnerType: () => this.data.owner && this.data.owner.type,
-                viewerIsCollaborator: () => this.viewerIsCollaborator,
                 viewerPermission: () => this.viewerPermission.data,
                 viewerCanManageIssue: () => this.viewerCanManageIssue,
-                viewerIsCollaboratorGetter: () => this.network_ifViewerACollaborator,
                 topNoticeShow: () => this.topNoticeShow,
                 repoSubscription: () => this.subscription.data,
                 graphqlWritePermission: () => this.graphqlWritePermission,
@@ -184,6 +171,9 @@
             ...mapState({
                 viewerLogin: state => state.oauth.viewerInfo.login
             }),
+            nodeId() {
+                return this.data.node_id
+            },
             params() {
                 return this.$route.params
             },
@@ -195,6 +185,15 @@
             },
             graphqlWritePermission() {
                 return this.data.owner && this.data.owner.type == 'User'
+            },
+            openIssuesCount() {
+                return this.graphqlData.issues && this.graphqlData.issues.totalCount
+            },
+            openPullRequestsCount() {
+                return this.graphqlData.pullRequests && this.graphqlData.pullRequests.totalCount
+            },
+            viewerHasStarred() {
+                 return this.graphqlData.viewerHasStarred
             },
             tabs: function() {
                 let path = `/${this.owner}/${this.repo}`
@@ -305,82 +304,39 @@
             next()
         },
         methods: {
-            network_getData() {
-                this.network_getRepoBasicInfo()
-                if(this.accessToken) this.network_ifViewerACollaborator()
-                if(this.accessToken) this.network_getExtraData()
-                if(this.accessToken) this.network_getSubscription()
+            async network_getData() {
+                await this.network_getRepoBasicInfo()
+                if(this.data.node_id) this.action_getGraphqlData({
+                    id: this.data.node_id,
+                    graphql: graphql.REPOSITORY
+                })
             },
             //获取仓库基本信息
-            network_getRepoBasicInfo() {
-                this.loading = true
-                let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
-                let url_repo = api.API_REPO(`${this.owner}/${this.repo}`)
-                authRequiredGet(
-                    url_repo,
-                    {
-                        cancelToken,
-                        headers: {
-                            "Accept":  "application/vnd.github.mercy-preview+json"
+            async network_getRepoBasicInfo() {
+
+                try{
+                    this.loading = true
+                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
+                    let url_repo = api.API_REPO(`${this.owner}/${this.repo}`)
+                    let res = await authRequiredGet(
+                        url_repo,
+                        {
+                            cancelToken,
+                            headers: {
+                                "Accept":  "application/vnd.github.mercy-preview+json"
+                            }
                         }
-                    }
-                ).then(res => {
+                    )
                     this.data = res.data
-                    if(res.data.owner.type == 'Organization') this.showOrganizationDataAccessRestrictNotice = true
-                }).catch(e => {
+                }catch(e) {
                     this.handleError(e,{
                         httpErrorHandler: {
                             404: () => this.$router.replace('/404')
                         }
                     })
-                }).finally(() =>  this.loading = false)
-
-                //获取open issues count
-                let url_openIssuesCount = api.API_SEARCH({
-                    type: 'issues',
-                    params: {
-                        q:`repo:${this.owner}/${this.repo} state:open is:issue`,
-                        per_page: 1
-                    }
-                })
-                authRequiredGet(url_openIssuesCount).then(res => {
-                    this.openIssuesCount = res.data.total_count
-                }).catch(e => {
-                    console.log(e)
-                })
-
-                 //获取open pull requests count
-                let url_openPullRequestsCount = api.API_SEARCH(
-                    {
-                        type: 'issues',
-                        params: {
-                            q:`repo:${this.owner}/${this.repo} state:open is:pr`,
-                            per_page: 1
-                        }
-                    })
-                authRequiredGet(url_openPullRequestsCount).then(res => {
-                    this.openPullRequestsCount = res.data.total_count
-                }).catch(e => {
-                    console.log(e)
-                })
-
-                 //获取project count
-                /* let url_projectsCount = api.API_REPO_PROJECTS(`${this.owner}/${this.repo}`,{
-                    per_page: 1
-                })
-                authRequiredGet(
-                    url_projectsCount,
-                    {
-                        headers: {
-                            'Accept': "application/vnd.github.inertia-preview+json"
-                        }
-                    }
-                ).then(res => {
-                    let openProjectsCountHolder = parse(res.headers.link) || {}
-                    this.openProjectsCount = openProjectsCountHolder.last ? openProjectsCountHolder.last.page : res.data.length
-                }).catch(e => {
-                    console.log(e)
-                }) */
+                }finally{
+                    this.loading = false
+                }
 
             },
             async network_ifViewerACollaborator() {
@@ -408,34 +364,7 @@
             generateRouterMeta() {
                 return `${this.$route.params.owner}/${this.$route.params.repo}`
             },
-            async network_getExtraData() {
-                try {
-                    this.viewerHasStarred.loading = true
-                    this.viewerPermission.loading = true
-                    let res = await authRequiredGitHubGraphqlApiQuery(
-                        graphql.EXTRA_DATA,
-                        {
-                            variables: {
-                                name: this.repo,
-                                owner: this.owner
-                            },
-                            cancelToken: this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data')
-                        }
-                    )
-                    try{
-                        this.viewerHasStarred.data = res.data.data.repository.viewerHasStarred
-                        this.viewerPermission.data = res.data.data.repository.viewerPermission
-                    }catch(e) {
-                        console.log(e)
-                        this.handleGraphqlError(res)
-                    }
-                } catch (e) {
-                    console.log(e)
-                }finally{
-                    this.viewerHasStarred.loading = false
-                    this.viewerPermission.loading = false
-                }
-            },
+            
             async network_changeStarStatus() {
                 if(this.viewerHasStarred.data === undefined) return
                 try{
@@ -552,5 +481,12 @@
     margin-bottom: 0;
     font-size: 14px;
     font-weight: 600;
+}
+
+.repo-meta, .repo-meta a{
+    color: var(--color-text-secondary);
+    svg{
+        fill: currentColor
+    }
 }
 </style>

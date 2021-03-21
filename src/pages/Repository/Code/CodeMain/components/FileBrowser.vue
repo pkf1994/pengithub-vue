@@ -52,7 +52,7 @@
                         </button>
                         <svg v-if="latestCommit.status == 'SUCCESS'" class="octicon text-green octicon-check v-align-middle flex-shrink-0 ml-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg>
                         <svg v-else-if="latestCommit.status == 'FAILURE'" viewBox="0 0 12 16" version="1.1" width="12" height="16" aria-hidden="true" class="octicon octicon-x v-align-middle text-red flex-shrink-0 ml-2"><path data-v-74bab622="" fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"></path></svg>
-                        <CommitStatusIcon :sha="latestCommit.data.sha"></CommitStatusIcon>
+                        <CommitStatusIcon :commit="latestCommit.data"></CommitStatusIcon>
                         <span class="no-wrap ml-2" v-if="latestCommit.data.commit">{{latestCommit.data.commit.committer.date | getDateDiff}}</span>
                     </div>
 
@@ -198,6 +198,11 @@
                     )
 
                     this.latestCommit.data = res.data[0]
+                    if(this.latestCommit.data.node_id) this.action_getGraphqlData({
+                        id: this.latestCommit.data.node_id,
+                        graphql: graphql.COMMIT
+                    })
+
                 }catch(e) {
                     console.log(e)
                 }finally{

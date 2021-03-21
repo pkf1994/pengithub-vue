@@ -1,8 +1,23 @@
-export const EXTRA_DATA =  `
-query($name:String!,$owner:String!){
-  repository(name: $name, owner: $owner) {
-    viewerHasStarred
-    viewerPermission
+export const REPOSITORY =  `
+query($ids:[ID!]!){
+  nodes(ids: $ids) {
+    ... on Repository {
+      id
+      name
+      owner {
+        login
+      }
+      issues(states: OPEN) {
+        totalCount
+      }
+      pullRequests(states: OPEN) {
+        totalCount
+      }
+      viewerHasStarred
+      viewerPermission
+      viewerCanSubscribe
+      viewerSubscription
+    } 
   }
 }
 `

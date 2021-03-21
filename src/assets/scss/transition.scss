@@ -1,7 +1,6 @@
-@import "./variables";
 .fade-enter-active,
 .fade-leave-active{
-  transition: opacity $transition-duration;
+  transition: opacity .5s;
 }
 
 .fade-enter,
@@ -10,7 +9,7 @@
 }
 
 .fade-group-enter-active{
-  transition: opacity $transition-duration;
+  transition: opacity .5s;
 }
 
 
@@ -25,7 +24,7 @@
 }
 
 .slide-up-enter-active{
-  transition: all $transition-duration
+  transition: all .5s
 }
 
 .slide-up-enter,
@@ -35,7 +34,7 @@
 }
 
 .transition-all {
-  transition: all $transition-duration
+  transition: all .5s
 }
 
 .zoom-enter-active {
@@ -85,3 +84,5 @@
     transform: translateY(0%);
   }
 }
+
+

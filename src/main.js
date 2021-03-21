@@ -7,8 +7,7 @@ import i18n from './i18n'
 import './assets/iconfont/iconfont.css'
 import './directives'
 import './filter'
-import './scss'
-import './css'
+import './assets/scss'
 import plugin_toast from './plugin/toast'
 import plugin_themeColor from './plugin/themeColors'
 import plugin_modal from './plugin/modal'
@@ -17,7 +16,6 @@ import plugin_common from './plugin/common'
 import plugin_githubBusiness from './plugin/githubBusiness'
 import plugin_topNotice from './plugin/topNotice'
 import VueClipboard from 'vue-clipboard2'
-import '@github/details-menu-element'
 Vue.use(Router)
 Vue.use(VueClipboard)
 Vue.use(plugin_themeColor)

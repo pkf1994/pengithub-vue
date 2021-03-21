@@ -30,8 +30,10 @@ article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
     display: block;
 }
-body {
-    color: #24292e;
+
+#app-container {
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-canvas);
     line-height: 1.5;
     font-size: 14px;
     word-break:break-word;
@@ -57,10 +59,6 @@ button{
     background: none;
     border: 0;
 }
-a{
-    color: #0366d6;
-    text-decoration: none;
-}
 
 sup{
     top: -.5em;
@@ -77,4 +75,7 @@ input{
 
 strong {
     font-weight: 600;
+}
+a{
+    color: var(--color-text-link);
 }

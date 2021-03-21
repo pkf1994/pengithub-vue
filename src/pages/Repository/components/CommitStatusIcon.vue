@@ -17,7 +17,7 @@
                 return this.commit.node_id
             },
             commitState() {
-                if(this.graphqlData) return this.graphqlData.status.state
+                return this.graphqlData.state && this.graphqlData.status.state
             },
             repo() {
                 return this.$route.params.repo
