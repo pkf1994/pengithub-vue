@@ -1,10 +1,11 @@
-import {mapState,mapActions} from 'vuex'
+import {mapState,mapActions,mapMutations} from 'vuex'
 import {ACTION_SIGN_OUT} from "@/store/modules/oauth/actionTypes"
 import {util_ramdonString} from '@/util'
 import {authRequiredGitHubGraphqlApiQuery,authRequiredDelete,authRequiredPut,authRequiredPost} from '@/network'
 import * as api from '@/network/api'
 import * as graphql from './graphql'
 import * as actionTypes from '@/store/modules/graphqlData/actionTypes'
+import * as mutationTypes from '@/store/modules/graphqlData/mutationTypes'
 export default {
     install: Vue => {
         Vue.mixin({
@@ -26,7 +27,10 @@ export default {
             methods: {
                 ...mapActions({
                     action_signOut: ACTION_SIGN_OUT,
-                    action_getGraphqlData: actionTypes.GET_NODES
+                    action_getGraphqlData: actionTypes.GET_NODES,
+                }),
+                ...mapMutations({
+                   mutation_resolveGraphqlData: mutationTypes.RESOLVE_DATA
                 }),
                 routeToSignOut(return_to) {
                     this.$router.push(`/sign_out${return_to ? '?return_to=' + return_to : ''}`)
@@ -39,27 +43,6 @@ export default {
                         fromRoute,
                         ...payload
                     })
-                },
-                async github_changeStarStatus(owner,repo,viewerHasStarred = false) {
-                    if(!this.accessToken) {
-                        this.signIn()
-                        return 
-                    }
-                    let url  = api.API_STAR_OR_NOT_REPOSITORY({
-                        owner,
-                        repo
-                    })
-                    if(viewerHasStarred) {
-                        await authRequiredDelete(
-                            url,
-                            {},
-                        )
-                    }else{
-                        await authRequiredPut(
-                            url
-                        )
-                    }
-                    
                 },
                 async github_blockUserOrNot(blockedUserLogin,userHasBeenBlock = false) {
                     if(!this.accessToken) {

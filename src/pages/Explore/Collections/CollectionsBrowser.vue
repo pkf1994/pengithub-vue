@@ -1,7 +1,7 @@
 <template>
     <Container>
         <Jumbotron title="Collections" paragraph="Curated lists and insight into burgeoning industries, topics, and communities.">
-            <router-link to="/github/explore/blob/master/CONTRIBUTING.md#curating-a-new-topic-or-collection" class="btn btn-outline">
+            <router-link to="/github/explore/blob/main/CONTRIBUTING.md#curating-a-new-topic-or-collection" class="btn btn-outline">
                 Create a collection
             </router-link>
         </Jumbotron>
@@ -51,8 +51,6 @@
             }
         },
         created() {
-            let fromRouteMatched = this.$route.matched
-            console.log(this.$route)
             this.network_getCollectionsSketchRosterData()
         },
         methods: {
@@ -83,15 +81,15 @@
                         try{
                             collectionSketchRosterArrHolder = res_collectionsSketch.data.data.repository
                         }catch(e) {
-                             this.handleGraphqlError(res_collectionsSketches)
+                            this.handleGraphqlError(res_collectionsSketches)
                         }
 
                         for(let key in collectionSketchRosterArrHolder) {
                             let collectionAvatarObject = collectionSketchRosterArrHolder[key].entries.filter(i => i.name.match(/.png$/) != null) [0] 
                             let collectionSketchItem = {
                                 name: collectionsSketchRoster[parseInt(key.replace('object',''))].name,
-                                expression: `master:collections/${collectionsSketchRoster[parseInt(key.replace('object',''))].name}/index.md`,
-                                avatar: collectionAvatarObject ? `https://raw.githubusercontent.com/github/explore/master/collections/${collectionsSketchRoster[parseInt(key.replace('object',''))].name}/${collectionAvatarObject.name}` : undefined 
+                                expression: `main:collections/${collectionsSketchRoster[parseInt(key.replace('object',''))].name}/index.md`,
+                                avatar: collectionAvatarObject ? `https://raw.githubusercontent.com/github/explore/main/collections/${collectionsSketchRoster[parseInt(key.replace('object',''))].name}/${collectionAvatarObject.name}` : undefined 
                             }
                             collectionSketchRosterArr.push(collectionSketchItem)
                         }   
@@ -99,13 +97,13 @@
                         this.data = collectionSketchRosterArr
                         
 
-                    //未登录，通过rest api git trees 接口获取数据
+                    //未登录，通过rest api git trees获取数据
                     }else {
 
                         let url = api.API_TREE_LIST({
                             repo: 'explore',
                             owner: 'github',
-                            sha: 'master'
+                            sha: 'main'
                         })
 
                         let res = await authRequiredGet(url)
@@ -119,7 +117,7 @@
                                 let withAvatarExist = res.data.tree.filter(i => {
                                     return i.path == avatarPath
                                 }).length != 0
-                                let avatar =  withAvatarExist ? `https://raw.githubusercontent.com/github/explore/master/collections/${name}/${name}.png` : undefined
+                                let avatar =  withAvatarExist ? `https://raw.githubusercontent.com/github/explore/main/collections/${name}/${name}.png` : undefined
                                 collectionArr.push({
                                     name,
                                     avatar,
@@ -131,9 +129,7 @@
                     }
 
                     this.network_getData()
-
                     this.network_getHighlightCollections()
-                    this.network_getData()
 
                     this.loadingRoster = false
                 }catch(e) {

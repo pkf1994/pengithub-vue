@@ -421,7 +421,7 @@ export const API_PROXY_PULSE_DIFF_STATUS_SUMMARY = payload => {
 }
 
 
-export const API_STAR_OR_NOT_REPOSITORY = payload => `${GITHUB_REST_API_BASE}/user/starred/${payload.owner}   ${payload.repo}`
+export const API_STAR_OR_NOT_REPOSITORY = payload => `${GITHUB_REST_API_BASE}/user/starred/${payload.owner}/${payload.repo}`
 
 export const API_BLOCK_USER_OR_NOT = payload => `${GITHUB_REST_API_BASE}/user/blocks/${payload}`
 

@@ -1,7 +1,7 @@
 export const GRAPHQL_COLLECTIONS_ROSTER = `
   {
     repository(name: "explore", owner: "github") {
-      object(expression: "master:collections") {
+      object(expression: "main:collections") {
         ... on Tree {
           entries {
             type
@@ -20,7 +20,7 @@ export const GRAPHQL_COLLECTIONS_SKETCH = payload => {
   payload.forEach((item,index) => {
     graphql = `
       ${graphql}
-      object${index}: object(expression: "master:collections/${item.name}") {
+      object${index}: object(expression: "main:collections/${item.name}") {
         ... on Tree {
           entries {
             type
@@ -66,7 +66,7 @@ export const GRAPHQL_COLLECTIONS = payload => {
 export const GRAPHQL_COLLECTION_SKETCH_AND_RAW = payload => `
 {
   repository(name: "explore", owner: "github") {
-    sketch:object(expression: "master:collections/${payload}") {
+    sketch:object(expression: "main:collections/${payload}") {
       ... on Tree {
         entries {
           type
@@ -74,7 +74,7 @@ export const GRAPHQL_COLLECTION_SKETCH_AND_RAW = payload => `
         }
       }
     }
-    raw: object(expression: "master:collections/${payload}/index.md") {
+    raw: object(expression: "main:collections/${payload}/index.md") {
       ... on Blob {
         text
       }

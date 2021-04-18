@@ -54,15 +54,21 @@
 
         <transition name="fade" appear>
             <FilterRow v-if="firstLoadedFlag" class="border-bottom pb-3">
-                <button class="btn mr-1" @click="() => openModal('selectTypeModal')">
+                <button class="btn mr-1 mb-1" @click="() => openModal('selectTypeModal')">
                     <i>Type:</i>
                     <span>{{type || 'All' | capitalize}}</span>
                     <span class="dropdown-caret"></span>
                 </button>  
 
-                <button class="btn" @click="() => openModal('selectLanguageModal')">
+                <button class="btn mr-1 mb-1" @click="() => openModal('selectLanguageModal')">
                     <i>Language:</i>
                     <span>{{language || 'All'}}</span>
+                    <span class="dropdown-caret"></span>
+                </button>  
+
+                <button class="btn mb-1" @click="() => openModal('selectSortOrderModal')">
+                    <i>Sort:</i>
+                    <span>{{sort || 'Last updated'}}</span>
                     <span class="dropdown-caret"></span>
                 </button>  
             </FilterRow>
@@ -129,8 +135,16 @@
         </transition>
 
         <Modal title="Select type" ref="selectTypeModal">
-            <router-link v-for="item in sortModalRouterLink" :key="item.label" :to='item.routerLink'>
+            <router-link v-for="item in sortTypeModalRouterLink" :key="item.label" :to='item.routerLink'>
                 <SelectMenuItem :selected="type == item.meta" @click.native="closeModal">
+                    <span>{{item.label}}</span>    
+                </SelectMenuItem>
+            </router-link> 
+        </Modal>
+
+        <Modal title="Select order" ref="selectSortOrderModal">
+            <router-link v-for="item in sortOrderModalRouterLink" :key="item.label" :to='item.routerLink'>
+                <SelectMenuItem :selected="sort == item.meta" @click.native="closeModal">
                     <span>{{item.label}}</span>    
                 </SelectMenuItem>
             </router-link> 
@@ -188,18 +202,13 @@
     import {RepoListItem,PinnedRepoListItem} from './components'
     import * as graphql from './graphql'
     import * as api from '@/network/api'
-    import {authRequiredGitHubGraphqlApiQuery,authRequiredGet,commonGet} from '@/network' 
+    import {authRequiredGet,commonGet,authRequiredGitHubGraphqlApiQuery} from '@/network' 
     import {util_queryParse,util_analyseFileType} from '@/util'
     var parse = require('parse-link-header');
     export default {
         name: 'organization_repositories_page',
         mixins: [RouteUpdateAwareMixin],
         inject: ['loadingOrganizationBasicInfo','organizationBasicInfo'],
-        provide() {
-            return {
-                extraDataProvided: () => this.extraData
-            }
-        },
         data() {
             return {
                 searchQuery: '',
@@ -209,7 +218,6 @@
                 totalCount: 0,
                 pageInfo: {
                 },
-                extraData: [],
                 firstLoadedFlag: false,
                 availableLanguage: {
                     searchQuery: '',
@@ -246,11 +254,47 @@
                 if(type == 'mirrors') return 'mirrors:true'
                 return 'fork:true'
             },
+            sort() {
+                return this.$route.query.sort || 'updated'
+            },
             language() {
                 return this.$route.query.language
             },
-           
-            sortModalRouterLink() {
+            sortOrderModalRouterLink() {
+                return [
+                    {
+                        routerLink: `/orgs/${this.organization}?${
+                            util_queryParse.querify({
+                                ...this.$route.query,
+                                sort: 'updated'
+                            })
+                        }`,
+                        label: 'Last updated',
+                        meta: 'updated'
+                    },
+                   /*  {
+                        routerLink: `/orgs/${this.organization}?${
+                            util_queryParse.querify({
+                                ...this.$route.query,
+                                sort: 'name'
+                            })
+                        }`,
+                        label: 'Name',
+                        meta: 'name',
+                    }, */
+                    {
+                        routerLink: `/orgs/${this.organization}?${
+                            util_queryParse.querify({
+                                ...this.$route.query,
+                                sort: 'stars'
+                            })
+                        }`,
+                        label: 'Stars',
+                        meta: 'stars',
+                    },
+                ]
+            },
+            sortTypeModalRouterLink() {
                 return [
                     {
                         routerLink: `/orgs/${this.organization}?${
@@ -337,7 +381,7 @@
                             q: this.query,
                             per_page: this.perPage,
                             page: this.page,
-                            sort: 'updated'
+                            sort: this.sort
                         }
                     })
                     let res_rest = await authRequiredGet(url,{
@@ -351,24 +395,6 @@
                     this.totalCount = res_rest.data.total_count
                     this.pageInfo = parse(res_rest.headers.link) || {}
                     this.firstLoadedFlag = true
-
-                    if(this.accessToken) {
-                        let graphql_extraData = graphql.GRAPHQL_ORG_REPOSITORY_EXTRA(this.data)
-                        let res_graphql = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
-
-                        let dataHolder
-                        try{
-                            dataHolder = res_graphql.data.data
-                        }catch(e) {
-                            this.handleGraphqlError(res_graphql)
-                        }
-                        let extraData = []
-                        for(let key in dataHolder) {
-                            extraData.push(dataHolder[key])
-                        }
-
-                        this.extraData = extraData
-                    }
                     
                 }catch(e) {
                     this.handleError(e,{
@@ -385,14 +411,14 @@
                     this.pinnedRepositories.loading = true
                     let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_pinned_repos')
 
-                    let graphql_pinnedRepos = graphql.GRAPHQL_ORG_PINNED_REPOS
 
                     let res = await authRequiredGitHubGraphqlApiQuery(
                             graphql.GRAPHQL_ORG_PINNED_REPOS,
                             {
                                 variables: {
                                     login: this.organization
-                                }
+                                },
+                                cancelToken
                             }
                         )
                     
@@ -730,5 +756,18 @@
 }
 .css-truncate-target{
     max-width: 280px!important;
+}
+
+.dropdown-caret {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    vertical-align: middle;
+    content: "";
+    border-top-style: solid;
+    border-top-width: 4px;
+    border-right: 4px solid transparent;
+    border-bottom: 0 solid transparent;
+    border-left: 4px solid transparent;
 }
 </style>

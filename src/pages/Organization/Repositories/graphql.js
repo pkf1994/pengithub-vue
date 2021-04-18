@@ -1,35 +1,3 @@
-
-export const GRAPHQL_ORG_REPOSITORY_EXTRA = payload => {
-  let grapqhl = ''
-  payload.forEach((item,index) => {
-    grapqhl = `
-      ${grapqhl}
-      repo${index}:repository(name:"${item.name}", owner:"${item.owner.login}") {
-        id
-        descriptionHTML
-        issues(states: OPEN) {
-          totalCount
-        }
-        pullRequests(states: OPEN) {
-          totalCount
-        }
-        parent {
-          nameWithOwner
-        }
-        primaryLanguage {
-          name
-          color
-        }
-      }
-    `
-  })
-  return `
-  {
-    ${grapqhl.trim()}
-  }
-  `
-}
-
 export const GRAPHQL_ORG_STATISTIC = `
 query($query:String!,$after:String){
   search(query:$query, type:REPOSITORY, first:100, after:$after) {

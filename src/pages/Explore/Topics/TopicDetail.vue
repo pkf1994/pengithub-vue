@@ -5,9 +5,11 @@
                 <DefaultAvatar v-if="!avatar" style="width: 48px; height: 48; line-height: 48px;" class="border border-black-fade bg-blue-light f4 text-gray-light text-bold rounded-1 flex-shrink-0 text-center mr-3">
                     #
                 </DefaultAvatar>
-                <ImgWrapper v-else>
-                    <img :src="avatar" :alt="`@${displayName}`" height="48" width="48" class="mr-3">
-                </ImgWrapper>
+                <div class="mr-3" v-else>
+                    <ImgWrapper>
+                        <img :src="avatar" :alt="`@${displayName}`" height="48" width="48">
+                    </ImgWrapper>
+                </div>
                 <h1 class="topic-name">{{displayName}}</h1>
             </Title>
         </transition>
@@ -38,8 +40,8 @@
         </transition>
 
         <transition name="fade" appear>
-              <Title v-if="rawContent" class="text-gray repositories-title">
-                    Here are {{formatRepositoyCount}} public repositories matching this topic...
+            <Title v-if="rawContent" class="text-gray repositories-title">
+                Here are {{formatRepositoyCount}} public repositories matching this topic...
             </Title>
         </transition>
        
@@ -76,7 +78,7 @@
         </transition>
 
         <transition name="fade" appear>
-            <CommonLoading v-if="loading || repositories.loading || repositories.extraData.loading || loadingAvatar" :position="loading ? 'center' : 'corner'"></CommonLoading>
+            <CommonLoading v-if="loading || repositories.loading || loadingAvatar" :position="loading ? 'center' : 'corner'"></CommonLoading>
         </transition>
 
         <Modal ref="languageModal" title="Select a language" :modalStyle="{height:'80vh'}" @show="network_getFilterData">
@@ -137,11 +139,6 @@
     export default {
         name: 'explore_topic_detail_page',
         mixins: [RouteUpdateAwareMixin],
-        provide() {
-            return {
-                repositoriesExtraDataProvided: () => this.repositories.extraData.data
-            }
-        },
         data() {
             return {
                 rawContent: '',
@@ -160,10 +157,6 @@
                         filterText: '',
                         loading: false
                     },
-                    extraData: {
-                        data: [],
-                        loading: false
-                    }
                 }
             }
         } ,
@@ -291,10 +284,10 @@
         methods: {
              async network_getData() {
                 this.loading = true
-                this.loadingAvatar = true
                 let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name)
 
                 if(!this.accessToken) {
+                    this.loadingAvatar = false
                     let url_rawContent = api.API_CONTENTS({
                         owner: 'github',
                         repo: 'explore',
@@ -320,7 +313,7 @@
                     })
 
                     authRequiredGet(url_avatar).then(res => {
-                        this.avatar = `https://raw.githubusercontent.com/github/explore/master/topics/${this.topic}/${this.topic}.png`
+                        this.avatar = `https://raw.githubusercontent.com/github/explore/main/topics/${this.topic}/${this.topic}.png`
                     }).finally(() => {
                         this.loadingAvatar = false
                     })
@@ -334,8 +327,8 @@
                     }catch(e) {
                         this.handleGraphqlError(res_topicSketchAndRaw)
                     }
-                    dataHolder.forEach(i => {
-                        if(i.name.match(/\.png$/) != null) this.avatar = `https://raw.githubusercontent.com/github/explore/master/topics/${this.topic}/${i.name}`
+                    dataHolder && dataHolder.forEach(i => {
+                        if(i.name.match(/\.png$/) != null) this.avatar = `https://raw.githubusercontent.com/github/explore/main/topics/${this.topic}/${i.name}`
                     })
                     try{
                         this.rawContent = res_topicSketchAndRaw.data.data.repository.raw.text
@@ -347,14 +340,6 @@
                     this.loading = false
                 }
 
-                /*  let graphql_topicSketchAndRaw = graphql.GRAPHQL_TOPIC_SKETCH_AND_RAW(this.topic)
-                let res_topicSketchAndRaw = await authRequiredGitHubGraphqlApiQuery(graphql_topicSketchAndRaw,{cancelToken})
-                res_topicSketchAndRaw.data.data.repository.sketch.entries.forEach(i => {
-                    if(i.name.match(/\.png$/) != null) this.avatar = `https://raw.githubusercontent.com/github/explore/master/topics/${this.topic}/${i.name}`
-                })
-                this.rawContent = res_topicSketchAndRaw.data.data.repository.raw.text
-                this.viewerHasStarred = res_topicSketchAndRaw.data.data.topic.viewerHasStarred */
-                //this.network_getRepositories()
               
             },
             async network_getFilterData() {
@@ -414,33 +399,10 @@
                         this.repositories.data = this.repositories.data.concat(res.data.items)    
                     }
                     this.repositories.totalCount = res.data.total_count
-                    this.network_getRepositoriesExtraData(res.data.items)
                 }catch(e) {
                     this.handleError(e)
                 }finally{
                     this.repositories.loading = false
-                }
-            },
-            async network_getRepositoriesExtraData(payload) {
-                if(!this.accessToken) return
-                try{
-                    this.repositories.extraData.loading = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_repositories_extra_data')
-
-                    let graphql_repositories = graphql.GRAPHQL_TOPIC_REPOS(payload)
-
-                    let res_repositories = await authRequiredGitHubGraphqlApiQuery(graphql_repositories,{cancelToken})
-
-                    try{
-                        this.repositories.extraData.data = this.repositories.extraData.data.concat(res_repositories.data.data.nodes)
-                    }catch(e) {
-                        this.handleGraphqlError(res_repositories)
-                    }
-                    
-                }catch(e) {
-                    this.handleError(e)
-                }finally{
-                    this.repositories.extraData.loading = false
                 }
             },
             triggerModal(ref) {

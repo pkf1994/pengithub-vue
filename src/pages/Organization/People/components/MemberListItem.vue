@@ -10,8 +10,8 @@
 
         <Name class="table-list-cell py-3 v-align-middle css-truncate pl-3 flex-grow-1">
             <AnimatedHeightWrapper>
-                <router-link v-if="extraData && extraData.name" :to="`/${member.login}`" class="css-truncate-target f4">
-                    {{extraData.name}}
+                <router-link v-if="graphqlData && graphqlData.name" :to="`/${member.login}`" class="css-truncate-target f4">
+                    {{graphqlData.name}}
                 </router-link> 
                 <router-link v-else-if="member.name" :to="`/${member.login}`" class="css-truncate-target f4">
                     {{member.name}}
@@ -20,11 +20,8 @@
             <span class="d-block css-truncate-target f5 text-gray-dark">{{member.login}}</span>
         </Name>
 
-        <FollowBtnWrapper class="flex-shrink-0">
-            <button :disabled="!extraData || !extraData.viewerCanFollow" class="btn btn-sm">
-                {{extraData && extraData.viewerIsFollowing ? 'Unfollow' : 'Follow'}}
-            </button>
-        </FollowBtnWrapper>
+        <FollowBtn :userLogin="member.login" class="flex-shrink-0"/>
+          
 
     </Container>
 
@@ -32,9 +29,9 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {ImgWrapper,AnimatedHeightWrapper} from '@/components'
+    import {ImgWrapper,AnimatedHeightWrapper,FollowBtn} from '@/components'
+    import * as graphql from './graphql'
     export default {
-        inject: ['memberExtraDataProvided'],
         props: {
             member: {
                 type: Object,
@@ -42,19 +39,23 @@
             }
         },
         computed: {
-            extraData() {
-                return this.memberExtraDataProvided().filter(i => {
-                    return i.login == this.member.login
-                })[0]
-            }
+            nodeId(){
+                return this.member.node_id
+            },
+        },
+        created() {
+            this.action_getGraphqlData({
+                id: this.member.node_id,
+                graphql: graphql.PEOPLE
+            })
         },
         components: {
             ImgWrapper,
             AnimatedHeightWrapper,
+            FollowBtn,
             Container: styled.div``,
             Avatar: styled.div``,
             Name: styled.div``,
-            FollowBtnWrapper: styled.div``,
         }
     }
 </script>

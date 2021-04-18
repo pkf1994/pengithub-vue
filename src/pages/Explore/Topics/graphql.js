@@ -1,7 +1,7 @@
 export const GRAPHQL_TOPICS_ROSTER = `
   {
     repository(name: "explore", owner: "github") {
-      object(expression: "master:topics") {
+      object(expression: "main:topics") {
         ... on Tree {
           entries {
             type
@@ -20,7 +20,7 @@ export const GRAPHQL_TOPICS_SKETCH = payload => {
   payload.forEach((item,index) => {
     graphql = `
       ${graphql}
-      object${index}: object(expression: "master:topics/${item.name}") {
+      object${index}: object(expression: "main:topics/${item.name}") {
         ... on Tree {
           entries {
             type
@@ -66,7 +66,7 @@ export const GRAPHQL_TOPICS = payload => {
 export const GRAPHQL_TOPIC_SKETCH_AND_RAW = payload => `
 {
   repository(name: "explore", owner: "github") {
-    sketch:object(expression: "master:topics/${payload}") {
+    sketch:object(expression: "main:topics/${payload}") {
       ... on Tree {
         entries {
           type
@@ -74,7 +74,7 @@ export const GRAPHQL_TOPIC_SKETCH_AND_RAW = payload => `
         }
       }
     }
-    raw: object(expression: "master:topics/${payload}/index.md") {
+    raw: object(expression: "main:topics/${payload}/index.md") {
       ... on Blob {
         text
       }
@@ -140,24 +140,3 @@ export const GRAPHQL_TOPICS_VIEWER_HAS_STARRED = payload => {
   `
 }
 
-export const GRAPHQL_TOPIC_REPOS = payload => {
-  let ids = []
-  payload.forEach(item => {
-    ids.push(item.node_id)
-  })
-  return `
-  {
-    nodes(ids: ${JSON.stringify(ids)}){
-      ... on Repository{
-      id
-      openGraphImageUrl
-      viewerHasStarred
-      primaryLanguage {
-        color
-        name
-      }
-    }
-  }
-}
-  `
-}

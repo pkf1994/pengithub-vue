@@ -1,5 +1,5 @@
 <template>
-    <button @click="getData" class="btn mt-4 mb-3 py-2 btn-outline border-gray-dark f6 width-full">{{loading ? 'Loadding more…' : 'Load more…'}}</button>
+    <button @click="getData" class="btn mt-4 mb-3 py-2 btn-outline border-gray-dark f6 width-full">{{loading ? 'Loading more…' : 'Load more…'}}</button>
 </template>
 
 <script>

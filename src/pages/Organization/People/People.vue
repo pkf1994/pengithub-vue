@@ -1,5 +1,5 @@
 <template>
-    <CommonLoadingWrapper :loading="loadingOrganizationBasicInfo() || loading || extraData.loading" :position="loadingOrganizationBasicInfo() || loading ? 'center' : 'corner'" class="p-3">
+    <CommonLoadingWrapper :loading="loadingOrganizationBasicInfo() || loading" :position="loadingOrganizationBasicInfo() || loading ? 'center' : 'corner'" class="p-3">
 
         <IconSearchInput class="mb-3" v-model="searchQuery" :search="routeWithSearchQuery"></IconSearchInput>
 
@@ -18,7 +18,7 @@
     import styled from 'vue-styled-components'
     import {CommonLoadingWrapper,SimplePaginationRest,SimplePagination,IconSearchInput} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
-    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet} from '@/network'
+    import {authRequiredGet,commonGet} from '@/network'
     import {util_queryParse} from '@/util'
     import {MemberListItem,MemberListSkeleton} from './components'
     import * as graphql from './graphql'
@@ -28,11 +28,6 @@
         name: 'organization_people_page',
         mixins: [RouteUpdateAwareMixin],
         inject: ['loadingOrganizationBasicInfo','organizationBasicInfo'],
-        provide() {
-            return {
-                memberExtraDataProvided: () => this.extraData.data
-            }
-        },
         data() {
             return {
                 data: [],
@@ -41,10 +36,6 @@
                 perPage: 10,
                 searchQuery: '',
                 firstLoadedFlag: false,
-                extraData: {
-                    data: [],
-                    loading: false
-                },
                 simplePageInfo: {
                     withNext: false,
                     withPrev: false
@@ -88,8 +79,6 @@
                     this.firstLoadedFlag = true
                     this.pageInfo = parse(res.headers.link) || {}
 
-                    if(this.accessToken) this.network_getExtraData()
-
                 }catch(e) {
                     this.handleError(e,{
                          httpErrorHandler: {
@@ -112,39 +101,10 @@
                     let res = await commonGet(url,{cancelToken})
                     this.parseHTML(res.data)
                     this.firstLoadedFlag = true
-
-                    this.network_getExtraData()
                 }catch(e) {
                     this.handleError(e)
                 }finally{
                     this.loading = false
-                }
-            },
-            async network_getExtraData() {
-                if(this.data.length == 0) return
-                try{
-                    this.extraData.loading = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data')
-                    let graphql_extraData = graphql.GRAPHQL_ORG_MEMBER(this.data)
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_extraData,{cancelToken})
-
-                    let dataHolder 
-                    try{
-                        dataHolder = res.data.data
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-                    let extraData = []
-                    for(let key in dataHolder) {
-                        extraData.push(dataHolder[key])
-                    }
-
-                    this.extraData.data = extraData
-
-                }catch(e) {
-                    console.log(e)
-                }finally{
-                    this.extraData.loading = false
                 }
             },
             routeWithSearchQuery() {

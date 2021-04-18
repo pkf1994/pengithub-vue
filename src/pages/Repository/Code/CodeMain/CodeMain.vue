@@ -163,16 +163,16 @@
             </div>
             <div v-if="!loadingModalData" style="overflow:auto">
                 <transition-group v-if="selectRefModal.tab == 'branches'" name="fade-group" appear>
-                    <SelectMenuItem :key="repoBasicInfo().default_branch" v-if="repoBasicInfo().default_branch" @click.native="() => routerWithRef(repoBasicInfo().default_branch)" :selected="currentRef == repoBasicInfo().default_branch">
+                    <SelectMenuItem class="border-bottom" :key="repoBasicInfo().default_branch" v-if="repoBasicInfo().default_branch" @click.native="() => routerWithRef(repoBasicInfo().default_branch)" :selected="currentRef == repoBasicInfo().default_branch">
                         <span class="flex-1">{{repoBasicInfo().default_branch}}</span>    
                         <span class="Label Label--gray flex-self-start">default</span>
                     </SelectMenuItem>
-                    <SelectMenuItem @click.native="() => routerWithRef(item)" v-for="item in modalFilteredAvailableBranches" :key="item" :selected="currentRef == item">
+                    <SelectMenuItem :class="{'border-bottom':idx < modalFilteredAvailableBranches.length - 1}" @click.native="() => routerWithRef(item)" v-for="(item,idx) in modalFilteredAvailableBranches" :key="item" :selected="currentRef == item">
                         <span>{{item}}</span>    
                     </SelectMenuItem>
                 </transition-group>
                 <transition-group v-if="selectRefModal.tab == 'tags'" name="fade-group" appear>
-                    <SelectMenuItem @click.native="() => routerWithRef(item)" v-for="item in modalFilteredAvailableTags" :key="item" :selected="currentRef == item">
+                    <SelectMenuItem :class="{'border-bottom':idx < modalFilteredAvailableTags.length - 1}" @click.native="() => routerWithRef(item)" v-for="(item,idx) in modalFilteredAvailableTags" :key="item" :selected="currentRef == item">
                         <span>{{item}}</span>    
                     </SelectMenuItem>
                 </transition-group>
@@ -194,7 +194,7 @@
     import{CommonLoadingWrapper,ImgWrapper,AnimatedHeightWrapper,Modal,SelectMenuItem,LoadingIconEx,Breadcrumb,Popover,SkeletonCircle,SkeletonRectangle} from '@/components'
     import * as api from '@/network/api'
     import * as graphql from './graphql'
-    import {authRequiredGet,authRequiredGitHubGraphqlApiQuery,commonGet } from '@/network'
+    import {authRequiredGet,commonGet } from '@/network'
     import {RouteUpdateAwareMixin,ComponentActiveAwareMixin} from '@/mixins'
     import {util_analyseFileType} from '@/util'
     import {WithRefDistinguishMixin} from '../../components'
@@ -690,7 +690,6 @@
 
 .select-menu-text-filter{
     background-color: #f6f8fa;
-    border-bottom: 1px solid #dfe2e5;
     input {
         display: block;
         width: 100%;
@@ -724,5 +723,13 @@
     max-height: 240px;
 }
 
+.active-modal-tab{
+    z-index: 1;
+    color: var(--color-text-primary);
+    cursor: default;
+    background-color: var(--color-bg-overlay);
+    box-shadow: 0 0 0 1px var(--color-select-menu-border-secondary);
+    border-top: 1px solid var(--color-select-menu-border-secondary);
+}
 
 </style>

@@ -64,7 +64,7 @@
                     let url = api.API_TREE_LIST({
                         repo: 'explore',
                         owner: 'github',
-                        sha: 'master'
+                        sha: 'main'
                     })
 
                     let res = await authRequiredGet(url)
@@ -78,7 +78,7 @@
                             let withAvatarExist = res.data.tree.filter(i => {
                                 return i.path == avatarPath
                             }).length != 0
-                            let avatar =  withAvatarExist ? `https://raw.githubusercontent.com/github/explore/master/topics/${name}/${name}.png` : undefined
+                            let avatar =  withAvatarExist ? `https://raw.githubusercontent.com/github/explore/main/topics/${name}/${name}.png` : undefined
                             topicArr.push({
                                 name,
                                 avatar,

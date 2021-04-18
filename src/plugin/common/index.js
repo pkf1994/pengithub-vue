@@ -32,17 +32,6 @@ export default {
                     if(axios.isCancel(e)) return
                     console.log(e)
 
-                  /*   if(config.handle404) {
-                        if(e.response && e.response.status == 404) {
-                            this.$router.replace('/404')
-                        }
-                    }
-                    if(config.handle401) {
-                        if(e.response && e.response.status == 401) {
-                            window.location.href = API_OAUTH2
-                        }
-                    } */
-
                     if(e.response && e.response.status && config.httpErrorHandler && config.httpErrorHandler[e.response.status]) {
                         config.httpErrorHandler[e.response.status](e)
                     } else {

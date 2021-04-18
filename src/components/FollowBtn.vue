@@ -1,47 +1,55 @@
 <template>
-    <button class="btn btn-sm" :disabled="(localViewerIsFollowing === undefined && accessToken) || loading || !viewerCanFollow" @click="network_changeStarStatus">
-        {{loading ? 'Updating...' : (localViewerIsFollowing ? 'Unfollow' : 'Follow')}}
+    <button class="btn btn-sm" :disabled="!viewerFollowInfo.viewerCanFollow || viewerFollowInfo.viewerIsFollowing === undefined" @click="network_changeStarStatus">
+        {{loading ? 'Updating...' : (viewerFollowInfo.viewerIsFollowing ? 'Unfollow' : 'Follow')}}
     </button>
 </template>
 <script>
 import styled from 'vue-styled-components'
+import * as api from '@/network/api'
+import {authRequiredPut, authRequiredDelete} from '@/network'
+import {mapState} from 'vuex'
 export default {
     props: {
         userLogin: String,
-        viewerCanFollow: Boolean,
-        viewerIsFollowing: Boolean
     },
     data() {
         return {
-            loading: false,
-            localViewerIsFollowing: undefined,
+            loading: false
         }
     },
-    creatd() {
-        this.localViewerIsFollowing = this.viewerIsFollowing
+    computed: {
+        ...mapState({
+            viewerFollowInfo(state) {
+                return state.graphqlData.nodes.filter(i => i.login == this.userLogin)[0] || {}
+            }             
+        })
     },
     methods: {
          async network_changeStarStatus() {
-            if(this.viewerIsFollowing === undefined  && this.accessToken) return
             if(!this.accessToken) {
                 this.signIn()
                 return 
             }
             try {
                 this.loading = true
-                await this.github_changeUserFollowShip(this.userLogin, this.localViewerIsFollowing)
-                this.localViewerIsFollowing = !this.localViewerIsFollowing
+                let url = api.API_FOLLOW_USER_OR_NOT(this.userLogin)
+                if(this.viewerFollowInfo.viewerIsFollowing) {
+                    await authRequiredDelete(url)
+                }else{
+                    await authRequiredPut(url)
+                }
+                this.mutation_resolveGraphqlData({
+                    data: [{
+                        ...this.viewerFollowInfo,
+                        viewerIsFollowing: !this.viewerFollowInfo.viewerIsFollowing
+                    }]
+                })
             } catch (e) {
                 this.handleError(e)
             }finally{
                 this.loading = false
             }
         }
-    },
-    watch: {
-        viewerIsFollowing(newOne,oldOne) {
-            this.localViewerIsFollowing = newOne
-        },
     },
     components: {
         Container: styled.div``
