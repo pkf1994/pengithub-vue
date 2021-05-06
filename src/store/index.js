@@ -11,7 +11,6 @@ import {
     issuesStore,
     notificationsStore,
     topNoticeStore,
-    dirtyStore,
     pullRequestDetailStore,
     graphqlDataStore
 } from "./modules"
@@ -26,7 +25,6 @@ export default new Vuex.Store ({
         issues: issuesStore,
         notifications: notificationsStore,
         topNotice: topNoticeStore,
-        dirty: dirtyStore,
         pullRequestDetail: pullRequestDetailStore,
         graphqlData: graphqlDataStore
     },

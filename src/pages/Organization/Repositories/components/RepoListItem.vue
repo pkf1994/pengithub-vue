@@ -1,25 +1,31 @@
 <template>
     <Container class="py-4 border-bottom">
+        
+        <div class="d-flex flex-justify-between">
+            <div class="flex-auto">
+                <Name class="mb-1 wb-break-all">
+                    <router-link :to="`/${repository.owner.login}/${repository.name}`">{{repository.name}}</router-link>
+                </Name>
 
-        <Name class="mb-1 wb-break-all">
-            <router-link :to="`/${repository.owner.login}/${repository.name}`">{{repository.name}}</router-link>
-        </Name>
+                <ForkFromInfo v-if="graphqlData.parent" class="f6 text-gray mb-1">
+                    Forked from {{graphqlData.parent.nameWithOwner}}
+                </ForkFromInfo>
 
-        <ForkFromInfo v-if="graphqlData.parent" class="f6 text-gray mb-1">
-            Forked from {{graphqlData.parent.nameWithOwner}}
-        </ForkFromInfo>
+                 <Description  class="text-gray mb-2 pr-2">
+                    {{repository.description}}
+                </Description>
+            </div>
+            <div class="flex-1 d-flex flex-items-center">
+                <RepoWeeklyCommitPolyline class="v-align-middle" v-if="weeklyCommitCount" :weeklyCommitCount="weeklyCommitCount"></RepoWeeklyCommitPolyline>
+            </div>
+        </div>
+        
 
-        <AnimatedHeightWrapper>
-            <Description v-if="graphqlData.descriptionHTML" class="text-gray mb-2 pr-4" v-html="graphqlData.descriptionHTML">
-            </Description>
-
-            <Description v-if="!accessToken" class="text-gray mb-2 pr-4">
-                {{repository.description}}
-            </Description>
-        </AnimatedHeightWrapper>
 
         <Topics class="flex-wrap flex-items-center f6 my-1">
-            <router-link :to="`/topics/${item}`" v-for="item in repository.topics.slice(0,5)" :key="item" class="topic-tag topic-tag-link f6 my-1">{{item}}</router-link>
+            <router-link :to="`/topics/${item}`" v-for="item in repository.topics.slice(0,5)" :key="item" class="topic-tag topic-tag-link f6 my-1">
+                <Label :name="item"></Label>
+            </router-link>
         </Topics>
 
         <TheMeta class="f6 text-gray mt-2">
@@ -31,19 +37,24 @@
             </PrimaryLanguage>
 
             <License v-if="repository.license" class="mr-3">
-                <svg class="octicon octicon-law mr-1" viewBox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7 4c-.83 0-1.5-.67-1.5-1.5S6.17 1 7 1s1.5.67 1.5 1.5S7.83 4 7 4zm7 6c0 1.11-.89 2-2 2h-1c-1.11 0-2-.89-2-2l2-4h-1c-.55 0-1-.45-1-1H8v8c.42 0 1 .45 1 1h1c.42 0 1 .45 1 1H3c0-.55.58-1 1-1h1c0-.55.58-1 1-1h.03L6 5H5c0 .55-.45 1-1 1H3l2 4c0 1.11-.89 2-2 2H2c-1.11 0-2-.89-2-2l2-4H1V5h3c0-.55.45-1 1-1h4c.55 0 1 .45 1 1h3v1h-1l2 4zM2.5 7L1 10h3L2.5 7zM13 10l-1.5-3-1.5 3h3z"></path></svg>
+                <svg class="octicon octicon-law mr-1" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.75.75a.75.75 0 00-1.5 0V2h-.984c-.305 0-.604.08-.869.23l-1.288.737A.25.25 0 013.984 3H1.75a.75.75 0 000 1.5h.428L.066 9.192a.75.75 0 00.154.838l.53-.53-.53.53v.001l.002.002.002.002.006.006.016.015.045.04a3.514 3.514 0 00.686.45A4.492 4.492 0 003 11c.88 0 1.556-.22 2.023-.454a3.515 3.515 0 00.686-.45l.045-.04.016-.015.006-.006.002-.002.001-.002L5.25 9.5l.53.53a.75.75 0 00.154-.838L3.822 4.5h.162c.305 0 .604-.08.869-.23l1.289-.737a.25.25 0 01.124-.033h.984V13h-2.5a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-2.5V3.5h.984a.25.25 0 01.124.033l1.29.736c.264.152.563.231.868.231h.162l-2.112 4.692a.75.75 0 00.154.838l.53-.53-.53.53v.001l.002.002.002.002.006.006.016.015.045.04a3.517 3.517 0 00.686.45A4.492 4.492 0 0013 11c.88 0 1.556-.22 2.023-.454a3.512 3.512 0 00.686-.45l.045-.04.01-.01.006-.005.006-.006.002-.002.001-.002-.529-.531.53.53a.75.75 0 00.154-.838L13.823 4.5h.427a.75.75 0 000-1.5h-2.234a.25.25 0 01-.124-.033l-1.29-.736A1.75 1.75 0 009.735 2H8.75V.75zM1.695 9.227c.285.135.718.273 1.305.273s1.02-.138 1.305-.273L3 6.327l-1.305 2.9zm10 0c.285.135.718.273 1.305.273s1.02-.138 1.305-.273L13 6.327l-1.305 2.9z"></path></svg>
                 {{repository.license.spdx_id}}
             </License>
 
             <ForkStatistic class="mr-3">
-                <svg aria-label="fork" class="octicon octicon-repo-forked" viewBox="0 0 10 16" version="1.1" width="10" height="16" role="img"><path fill-rule="evenodd" d="M8 1a1.993 1.993 0 00-1 3.72V6L5 8 3 6V4.72A1.993 1.993 0 002 1a1.993 1.993 0 00-1 3.72V6.5l3 3v1.78A1.993 1.993 0 005 15a1.993 1.993 0 001-3.72V9.5l3-3V4.72A1.993 1.993 0 008 1zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3 10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3-10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
+                <svg aria-label="fork" class="octicon octicon-repo-forked" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg>
                 {{repository.forks_count | thousands}}
             </ForkStatistic>
 
             <StarStatistic class="mr-3">
-                <svg aria-label="star" class="octicon octicon-star" viewBox="0 0 14 16" version="1.1" width="14" height="16" role="img"><path fill-rule="evenodd" d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74L14 6z"></path></svg>
+                <svg class="octicon octicon-star" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25zm0 2.445L6.615 5.5a.75.75 0 01-.564.41l-3.097.45 2.24 2.184a.75.75 0 01.216.664l-.528 3.084 2.769-1.456a.75.75 0 01.698 0l2.77 1.456-.53-3.084a.75.75 0 01.216-.664l2.24-2.183-3.096-.45a.75.75 0 01-.564-.41L8 2.694v.001z"></path></svg>
                 {{repository.stargazers_count | thousands}}
             </StarStatistic>
+
+            <OpenIssueCount v-if="repository.open_issues_count > 0" class="mr-3">
+                <svg class="octicon octicon-issue-opened" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm9 3a1 1 0 11-2 0 1 1 0 012 0zm-.25-6.25a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0v-3.5z"></path></svg>
+                {{repository.open_issues_count | thousands}}
+            </OpenIssueCount>
 
             <openIssueCount class="mr-3" v-if="repository.issues && repository.issues.totalCount > 0">
                 <svg height="16" class="octicon octicon-issue-opened" viewBox="0 0 14 16" version="1.1" width="14" aria-hidden="true"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 011.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
@@ -64,8 +75,10 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {AnimatedHeightWrapper} from '@/components'
+    import {AnimatedHeightWrapper,RepoWeeklyCommitPolyline,Label} from '@/components'
     import * as graphql from './graphql'
+    import * as api from '@/network/api'
+    import {authRequiredGet} from '@/network'
     export default {
         props: {
             repository: {
@@ -73,6 +86,11 @@
                 required: true
             }
         },
+        data() {
+            return {
+                weeklyCommitCount: undefined
+            }
+        },  
         computed: {
             nodeId() {
                 return this.repository.node_id
@@ -83,9 +101,29 @@
                 id: this.repository.node_id,
                 graphql: graphql.REPOS
             })
+            this.network_getWeeklyCommitCount()
+        },
+        methods: {
+            async network_getWeeklyCommitCount() {
+                try {
+                    let url = api.API_WEEKLY_COMMIT_COUNT({
+                        owner: this.repository.owner.login,
+                        repo: this.repository.name
+                    })
+
+                    let res = await authRequiredGet(url)
+
+                    this.weeklyCommitCount = res.data.all
+
+                } catch (e) {
+                    console.log(e)
+                }
+            }
         },
         components: {
             AnimatedHeightWrapper,
+            RepoWeeklyCommitPolyline,
+            Label,
             Container: styled.div``,
             Star: styled.div``,
             Name: styled.h3``,
@@ -97,6 +135,7 @@
             StarStatistic: styled.span``,
             openIssueCount: styled.span``,
             ForkStatistic: styled.span``,
+            OpenIssueCount: styled.span``,
             License: styled.span``,
             UpdatedAt: styled.span``,
         }
@@ -110,12 +149,8 @@
 }
 
 .topic-tag {
-    display: inline-block;
-    padding: .3em .9em;
-    margin: 0 .5em .5em 0;
-    white-space: nowrap;
-    background-color: #f1f8ff;
-    border-radius: 3px;
+        display: inline-block;
+    margin: 0 .125em .333em 0;
 }
 
 .repo-language-color {

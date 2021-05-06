@@ -12,7 +12,7 @@
         
         <Content class="col-10">
             <div class="float-right mt-1 ml-1">
-                <FollowBtn 
+                <FollowBtn  class="btn-sm"
                             :userLogin="following.login" 
                             :viewerIsFollowing="comprehensiveFollowing.viewerIsFollowing" 
                             :viewerCanFollow="comprehensiveFollowing.viewerCanFollow"></FollowBtn>

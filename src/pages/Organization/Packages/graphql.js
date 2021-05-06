@@ -1,7 +1,7 @@
-export const GRAPHQL_ORG_PACKAGES = `
-query($login:String!,$perPage:Int = 10,$after:String,$before:String,$packageType:RegistryPackageType){
+export const ORG_PACKAGES = `
+query($login:String!,$after:String,$packageType:PackageType){
     organization(login: $login) {
-      registryPackages(first: $perPage,after:$after,before:$before,publicOnly:true,packageType:$packageType) {
+      packages(first: 100,after:$after,packageType:$packageType) {
         nodes {
             name
             repository {
@@ -14,9 +14,6 @@ query($login:String!,$perPage:Int = 10,$after:String,$before:String,$packageType
             latestVersion {
               version
               summary
-              dependencies {
-                totalCount
-              }
             }
         }
         pageInfo {

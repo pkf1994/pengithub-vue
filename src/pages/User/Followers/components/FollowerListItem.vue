@@ -11,7 +11,7 @@
         
         <Content class="col-10">
             <div class="float-right mt-1 ml-1">
-                    <FollowBtn :userLogin="follower.login" 
+                    <FollowBtn class="btn-sm" :userLogin="follower.login" 
                                 :viewerIsFollowing="comprehensiveFollower.viewerIsFollowing"
                                 :viewerCanFollow="comprehensiveFollower.viewerCanFollow"></FollowBtn>
             </div>

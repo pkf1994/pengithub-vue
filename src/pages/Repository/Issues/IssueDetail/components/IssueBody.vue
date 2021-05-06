@@ -23,10 +23,10 @@
                                 <button v-if="extraData.viewerCanMinimize" @click.stop="() => triggerMinimizePane(true)" class="popover-item btn-link dropdown-item">
                                     Hide
                                 </button>
-                                <div class="dropdown-divider" v-if="viewerIsCollaborator().data"></div> 
+                                <!-- <div class="dropdown-divider" v-if="viewerIsCollaborator().data"></div> 
                                 <button v-if="viewerIsCollaborator().data" class="popover-item btn-link dropdown-item">
                                     Report content
-                                </button>
+                                </button> -->
                             </div>
                         </slot>
                     </Popover>
@@ -127,19 +127,14 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {util_dateFormat} from '@/util'
     import {LoadingIconEx,AnimatedHeightWrapper,Popover,ImgWrapper,HyperlinkWrapper,SkeletonRectangle,SkeletonCircle,Modal} from '@/components'
     import {util_markdownParse} from '@/util'
-    import {mapState} from 'vuex'
-    import ClipboardJS from 'clipboard';
     import * as api from '@/network/api'
-    import {authRequiredAjax,authRequiredGitHubGraphqlApiQuery,commonGet,authRequiredPost,cancelAndUpdateAxiosCancelTokenSource} from '@/network'
-    import * as graphql from '../graphql'
+    import {commonGet} from '@/network'
     import {CommentEditPane} from './TimelineItem/components'
-    import Vue from 'vue'
     import Reactions from './Reactions'
     export default {
-        inject: ['viewerIsCollaborator','issue','viewerCanComment'],
+        inject: ['issue','viewerCanComment'],
         data() {
             return {
                 showMinimized: false,

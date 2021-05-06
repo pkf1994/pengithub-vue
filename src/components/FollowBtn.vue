@@ -1,5 +1,5 @@
 <template>
-    <button class="btn btn-sm" :disabled="!viewerFollowInfo.viewerCanFollow || viewerFollowInfo.viewerIsFollowing === undefined" @click="network_changeStarStatus">
+    <button class="btn" :disabled="!viewerFollowInfo.viewerCanFollow || viewerFollowInfo.viewerIsFollowing === undefined" @click="network_changeStarStatus">
         {{loading ? 'Updating...' : (viewerFollowInfo.viewerIsFollowing ? 'Unfollow' : 'Follow')}}
     </button>
 </template>

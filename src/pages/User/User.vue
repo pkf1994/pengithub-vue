@@ -49,22 +49,22 @@
                                 </Names>
                             </AvatarAndName>
 
-                            <UserStatus v-if="extraData.data.status  && viewer.login != login" class="mb-3 user-status-container">
-                                <div class="d-flex py-2 width-full flex-items-center" :class="{busy:extraData.data.status.indicatesLimitedAvailability}">
-                                    <UserStatusEmoji class="mr-1 ml-1 user-status-emoji" v-html="extraData.data.status.emojiHTML || '💭'">
+                            <UserStatus v-if="graphqlData.status  && viewer.login != login" class="mb-3 user-status-container">
+                                <div class="d-flex py-2 width-full flex-items-center" :class="{busy:graphqlData.status.indicatesLimitedAvailability}">
+                                    <UserStatusEmoji class="mr-1 ml-1 user-status-emoji" v-html="graphqlData.status.emojiHTML || '💭'">
                                     </UserStatusEmoji>
                                     <UserStatusMessage class="f6 mt-1 text-gray-dark ws-normal lh-condensed">
-                                        <div>{{extraData.data.status.message}}</div>
+                                        <div>{{graphqlData.status.message}}</div>
                                     </UserStatusMessage>
                                 </div>
                             </UserStatus>
 
                             <UserStatus v-else-if="accessToken && viewer.login == login" @click="() => showModal('setStatusModal')"  class="mb-3 user-status-container">
-                                <div v-if="extraData.data.status" class="d-flex py-2 width-full flex-items-center border rounded-1 pl-2" :class="{busy:extraData.data.status.indicatesLimitedAvailability}">
-                                    <UserStatusEmoji class="mr-1 ml-1 user-status-emoji" v-html="extraData.data.status.emojiHTML || '💭'">
+                                <div v-if="graphqlData.status" class="d-flex py-2 width-full flex-items-center border rounded-1 pl-2" :class="{busy:graphqlData.status.indicatesLimitedAvailability}">
+                                    <UserStatusEmoji class="mr-1 ml-1 user-status-emoji" v-html="graphqlData.status.emojiHTML || '💭'">
                                     </UserStatusEmoji>
                                     <UserStatusMessage class="f6 mt-1 text-gray-dark ws-normal lh-condensed">
-                                        <div>{{extraData.data.status.message}}</div>
+                                        <div>{{graphqlData.status.message}}</div>
                                     </UserStatusMessage>
                                 </div>
                                 <div v-else class="d-flex py-2 width-full flex-items-center border rounded-1 pl-2">
@@ -85,7 +85,7 @@
 
                             <UserProfileEditor v-if="login == viewer.login && data.login" 
                             v-show="showUserProfileEditor" 
-                            :twitterUserNameHolder="extraData" 
+                            :twitterUserNameHolder="graphqlData" 
                             @cancel="() => triggerShowUserProfileEditor(false)"
                             @user-update-success="userUpdatedHandler"
                             ></UserProfileEditor>
@@ -94,7 +94,7 @@
                                 {{data.bio}}
                             </Bio>
                             <div class="mb-3">
-                                <UserProfileItem v-if="extraData.data.isDeveloperProgramMember" class="vcard-detail pt-1 css-truncate css-truncate-target">
+                                <UserProfileItem v-if="graphqlData.isDeveloperProgramMember" class="vcard-detail pt-1 css-truncate css-truncate-target">
                                     <HyperlinkWrapper>
                                         <a class="link-gray-dark" href="https://developer.github.com/">
                                             <svg class="octicon octicon-cpu mr-2 text-gray-light" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 0.75C6.5 0.335786 6.16421 0 5.75 0C5.33579 0 5 0.335786 5 0.75V2H3.75C2.7835 2 2 2.7835 2 3.75V5H0.75C0.335786 5 0 5.33579 0 5.75C0 6.16421 0.335786 6.5 0.75 6.5H2V9.5H0.75C0.335786 9.5 0 9.83579 0 10.25C0 10.6642 0.335786 11 0.75 11H2V12.25C2 13.2165 2.7835 14 3.75 14H5V15.25C5 15.6642 5.33579 16 5.75 16C6.16421 16 6.5 15.6642 6.5 15.25V14H9.5V15.25C9.5 15.6642 9.83579 16 10.25 16C10.6642 16 11 15.6642 11 15.25V14H12.25C13.2165 14 14 13.2165 14 12.25V11H15.25C15.6642 11 16 10.6642 16 10.25C16 9.83579 15.6642 9.5 15.25 9.5H14V6.5H15.25C15.6642 6.5 16 6.16421 16 5.75C16 5.33579 15.6642 5 15.25 5H14V3.75C14 2.7835 13.2165 2 12.25 2H11V0.75C11 0.335786 10.6642 0 10.25 0C9.83579 0 9.5 0.335786 9.5 0.75V2H6.5V0.75ZM12.25 12.5H10.25H5.75H3.75C3.61193 12.5 3.5 12.3881 3.5 12.25V10.25V5.75V3.75C3.5 3.61193 3.61193 3.5 3.75 3.5H5.75H10.25H12.25C12.3881 3.5 12.5 3.61193 12.5 3.75V5.75V10.25V12.25C12.5 12.3881 12.3881 12.5 12.25 12.5ZM5.75 5C5.33579 5 5 5.33579 5 5.75V10.25C5 10.6642 5.33579 11 5.75 11H10.25C10.6642 11 11 10.6642 11 10.25V5.75C11 5.33579 10.6642 5 10.25 5H5.75ZM6.5 9.5V6.5H9.5V9.5H6.5Z"></path></svg>
@@ -103,7 +103,7 @@
                                     </HyperlinkWrapper>
                                 </UserProfileItem> 
 
-                                <UserProfileItem v-if="extraData.data.isCampusExpert" class="vcard-detail pt-1 css-truncate css-truncate-target">
+                                <UserProfileItem v-if="graphqlData.isCampusExpert" class="vcard-detail pt-1 css-truncate css-truncate-target">
                                     <HyperlinkWrapper>
                                         <a  class="link-gray-dark" href="https://education.github.com/experts">
                                             <svg class="octicon octicon-mortar-board mr-2 text-gray-light" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.69321 1.06562C7.88838 0.978127 8.11162 0.978127 8.30679 1.06562L15.5568 4.31562C15.8265 4.4365 16 4.70448 16 5C16 5.29552 15.8265 5.5635 15.5568 5.68438L13 6.83053V9.625C13 10.6489 12.1894 11.374 11.3406 11.7984C10.4469 12.2453 9.26479 12.5 8 12.5C7.72205 12.5 7.44922 12.4877 7.1835 12.4641C6.77091 12.4273 6.46623 12.0631 6.50295 11.6505C6.53969 11.2379 6.90392 10.9332 7.31651 10.97C7.53769 10.9897 7.76613 11 8 11C9.08242 11 10.0253 10.779 10.6698 10.4568C11.3592 10.1121 11.5 9.77468 11.5 9.625V7.50294L8.30679 8.93438C8.11162 9.02187 7.88838 9.02187 7.69321 8.93438L4 7.27881V8.94167C4.29604 9.04701 4.57477 9.21725 4.81159 9.45407C5.24974 9.89223 5.5 10.5128 5.5 11.25V14.25C5.5 14.449 5.42098 14.6397 5.28032 14.7804C5.13966 14.921 4.94889 15.0001 4.74997 15L1.74997 14.9999C1.33577 14.9999 1 14.6641 1 14.2499V11.2499C1 10.5128 1.25027 9.89215 1.68843 9.45401C1.92524 9.2172 2.20396 9.04698 2.5 8.94165V6.60639L0.443208 5.68438C0.173541 5.5635 0 5.29552 0 5C0 4.70448 0.173541 4.4365 0.443208 4.31562L7.69321 1.06562ZM2.58349 5L8 7.42809L13.4165 5L8 2.57191L2.58349 5ZM2.5 11.2499C2.5 10.8621 2.62473 10.639 2.74907 10.5147C2.88047 10.3833 3.06051 10.3125 3.24999 10.3125C3.43947 10.3125 3.61951 10.3833 3.75091 10.5147C3.87526 10.6391 4 10.8622 4 11.25V13.5L2.5 13.5V11.2499Z"></path></svg>
@@ -160,15 +160,13 @@
                             </div>
                         </UserProfile>
 
-                        <Actions v-if="blockThisUserOrNot.data !== undefined && viewerIsFollowing.data !== undefined && !loading" class="d-flex position-relative">
+                        <Actions v-if="blockThisUserOrNot.data !== undefined && graphqlData.viewerIsFollowing !== undefined && !loading" class="d-flex position-relative">
                             <transition-group name="fade-group" appear tag="div" class="flex-grow-1">
-                                <button key="0" 
-                                        v-if="blockThisUserOrNot.data === false && extraData.data.viewerCanFollow" 
-                                        :disabled="viewerIsFollowing.loading" 
-                                        @click="network_changeUserFollowShip"
+                                <FollowBtn key="0" 
+                                        :userLogin="login"
+                                        v-if="blockThisUserOrNot.data === false && graphqlData.viewerCanFollow" 
                                         class="btn btn-block">
-                                    {{viewerIsFollowing.loading ? 'Updating...' : (viewerIsFollowing.data ? 'Unfollow' : 'Follow')}}
-                                </button>
+                                </FollowBtn>
                                 <div key="1" v-if="blockThisUserOrNot.data" class="border rounded-1 text-red px-3 py-2 text-center">
                                     <svg class="octicon octicon-circle-slash" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.5 8a6.5 6.5 0 0110.535-5.096l-9.131 9.131A6.472 6.472 0 011.5 8zm2.465 5.096a6.5 6.5 0 009.131-9.131l-9.131 9.131zM8 0a8 8 0 100 16A8 8 0 008 0z"></path></svg>
                                     You have blocked this user
@@ -313,7 +311,7 @@
                         <button type="submit" @click="network_changeUserStatus" :disabled="(!changeUserStatusModalData.emoji && !changeUserStatusModalData.message) || changeUserStatusModalData.loading" class="width-full btn btn-primary mr-2 js-user-status-submit">
                             Set status
                         </button>
-                        <button type="button" @click="clearUserStatus" :disabled="!extraData.data.status || changeUserStatusModalData.loading" class="width-full js-clear-user-status-button btn ml-2 ">
+                        <button type="button" @click="clearUserStatus" :disabled="!graphqlData.status || changeUserStatusModalData.loading" class="width-full js-clear-user-status-button btn ml-2 ">
                             Clear status
                         </button>
                     </div>
@@ -361,7 +359,7 @@
 
 <script>
     import styled from 'vue-styled-components'
-    import {CommonLoadingWrapper,ComplexTopTab,ImgWrapper,HyperlinkWrapper,Modal,AnimatedHeightWrapper,Popover,WithTopNoticeWrapper,Img,SkeletonCircle,SkeletonRectangle} from '@/components'
+    import {CommonLoadingWrapper,ComplexTopTab,ImgWrapper,HyperlinkWrapper,Modal,AnimatedHeightWrapper,Popover,WithTopNoticeWrapper,Img,SkeletonCircle,SkeletonRectangle,FollowBtn} from '@/components'
     import {RouteUpdateAwareMixin} from '@/mixins'
     import {authRequiredGitHubGraphqlApiQuery,authRequiredGet,authRequiredAjax,commonGet} from '@/network'
     import {UserProfileEditor} from './components'
@@ -381,10 +379,6 @@
             return {
                 data: {},
                 loading: false,
-                extraData: {
-                    data: {},
-                    loading: false
-                },
                 viewerIsFollowing: {
                     data: undefined,
                     loading: false
@@ -440,14 +434,17 @@
                     following: undefined,
                     stars: undefined
                 },
-                resetBeforeUpdate: true,
+                scrollToTopAfterUpdated: true,
                 showUserProfileEditor: false,
-                activedTabs: [0]
+                activedTabs: [0],
             }   
         },
         computed: {
             login() {
                 return this.$route.params.login
+            },
+            nodeId() {
+                return this.data.node_id
             },
             tabs() {
                 return [
@@ -476,6 +473,7 @@
             },
         },
         async created() {
+            window && window.scrollTo && window.scrollTo(0,0)
             await this.network_getData()
         },
         
@@ -485,7 +483,6 @@
                     await this.network_getBasicData()
                     this.network_getStarredReposCount()
                     this.network_getTabCount()
-                    if(this.accessToken) this.network_getExtraData()
                     if(this.accessToken) this.network_getUserIsBlockedByViewer()
                 }catch(e) {
                     if(e == 'Organization') this.$router.replace(`/orgs/${this.login}`)
@@ -504,7 +501,10 @@
                         throw 'Organization'
                     }
                     this.data = res.data 
-
+                    if(res.data.node_id) this.action_getGraphqlData({
+                        graphql: graphql.NODES_USER,
+                        id: res.data.node_id
+                    })
                 }catch(e) {
                     if(e == 'Organization') throw e
                     this.handleError(e)
@@ -540,24 +540,6 @@
             },
             async network_getTabCount() {
                 
-            },
-            async network_getExtraData() {
-                try{
-                    this.extraData.loading = true
-                    let cancelToken = this.cancelAndUpdateAxiosCancelTokenSource(this.$options.name + ' get_extra_data')
-                    let graphql_extra = graphql.GRAPHQL_USER_INFO(this.login)
-                    let res = await authRequiredGitHubGraphqlApiQuery(graphql_extra,{cancelToken})
-                    try{
-                        this.extraData.data = res.data.data.user || {}
-                        this.viewerIsFollowing.data = res.data.data.user.viewerIsFollowing
-                    }catch(e) {
-                        this.handleGraphqlError(res)
-                    }
-                }catch(e) {
-                    this.handleError(e)
-                }finally{
-                    this.extraData.loading = false
-                }
             },
             async network_getUserIsBlockedByViewer() {
                 if(this.viewer.login == this.login) return 
@@ -602,7 +584,10 @@
                     )
 
                     try{
-                        this.extraData.data.status = res.data.data.changeUserStatus.status
+                        let status = res.data.data.changeUserStatus.status
+                        this.mutation_resolveGraphqlData({
+                            data: [Object.assign({},this.graphqlData,{status})]
+                        })
                     }catch(e) {
                         this.handleGraphqlError(res)
                     }
@@ -739,7 +724,7 @@
                     this.changeUserStatusModalData.showSuggestions = true
                 }
             },
-            extraData: {
+            /* extraData: {
                 deep: true,
                 handler: function() {
                     if(this.login != this.viewer.login) return
@@ -752,7 +737,7 @@
                         this.changeUserStatusModalData.message = this.extraData.data.status.message
                     } 
                 }
-            },
+            }, */
             'data.avatar_url': function(newOne,oldOne) {
                 if(newOne && oldOne) {
                     this.showAvatar = false
@@ -775,6 +760,7 @@
             Img,
             SkeletonRectangle,
             UserProfileEditor,
+            FollowBtn,
             Container: styled.div``,
             Main: styled.div``,
             UserBasicInfo: styled.div``,

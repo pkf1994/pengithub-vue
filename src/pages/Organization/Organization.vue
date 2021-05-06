@@ -69,12 +69,12 @@
                     {
                         routerLink: `/orgs/${this.organization}/packages`,
                         label: 'Packages',
-                        meta: this.tabCounts.data.registryPackages && this.tabCounts.data.registryPackages.totalCount
+                        meta: this.tabCounts.data.packages && this.tabCounts.data.packages.totalCount
                     },
                     {
                         routerLink: `/orgs/${this.organization}/people`,
                         label: 'People',
-                        meta: this.tabCounts.data.repositories && this.tabCounts.data.repositories.totalCount
+                        meta: this.tabCounts.data.members && this.tabCounts.data.members.totalCount
                     },
                     /* {
                         routerLink: `/orgs/${this.organization}/projects`,
@@ -149,6 +149,9 @@
                     this.loading = false
                 }
             },
+            generateRouterMeta() {
+                return this.organization
+            }
         },
         components: {
             BaseHeader,
@@ -162,4 +165,5 @@
 <style scoped lang="scss">
 @import 'node_modules/@primer/css/header/index.scss';
 @import 'node_modules/@primer/css/truncate/index.scss';
+
 </style>

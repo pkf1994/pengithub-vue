@@ -62,7 +62,7 @@
                 this.bio = this.userBasicInfoProvided().data.bio
                 this.website = this.userBasicInfoProvided().data.blog
                 this.company = this.userBasicInfoProvided().data.company
-                this.twitterUsername = this.twitterUserNameHolder.data.twitterUsername
+                this.twitterUsername = this.twitterUserNameHolder.twitterUsername
             },
             async network_updateUser() {
                 try {

@@ -20,7 +20,7 @@
             <span class="d-block css-truncate-target f5 text-gray-dark">{{member.login}}</span>
         </Name>
 
-        <FollowBtn :userLogin="member.login" class="flex-shrink-0"/>
+        <FollowBtn :userLogin="member.login" class="btn-sm flex-shrink-0"/>
           
 
     </Container>

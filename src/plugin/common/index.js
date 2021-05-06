@@ -2,7 +2,6 @@ import {mapState, mapMutations} from 'vuex'
 import axios from 'axios'
 import * as api from '@/network/api'
 import {util_throttle} from '@/util'
-import { MUTATION_UPDATE_DIRTY } from '@/store/modules/dirty/mutationTypes'
 export default {
     install: (Vue) => {
         Vue.mixin({
@@ -21,9 +20,6 @@ export default {
                 }),
             },
             methods: {
-                ...mapMutations({
-                    mutation_updateDirty: MUTATION_UPDATE_DIRTY 
-                }),
                 handleError(e,config) {
                     config = {
                         ...config,
@@ -80,17 +76,13 @@ export default {
                     el.dispatchEvent(new CustomEvent('not-found',{bubbles:true,detail}))
                 },
                 showModal(modalRef) {
+                    console.log('show')
                     if(this.$refs[modalRef]) this.$refs[modalRef].show = true
                 },
                 closeModal(theModalRef) {
                     if(theModalRef) {
-                        if(this.$refs[theModalRef].show) this.$refs[theModalRef].show = false
+                        if(this.$refs[theModalRef] && this.$refs[theModalRef].show) this.$refs[theModalRef].show = false
                         return 
-                    }
-                    for(let modalRef in this.$refs) {
-                        if(this.$refs[modalRef]) {
-                            this.$refs[modalRef].show = false
-                        }
                     }
                 },
                 scrollToTop() {
@@ -103,14 +95,6 @@ export default {
                 getPageScrollTop() {
                     return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
                 },
-                updateDirty(payload) {
-                    payload = {
-                        key: this.$options.name,
-                        value: true,
-                        ...payload
-                    }
-                    this.mutation_updateDirty(payload)
-                }
             },
             created() {
                 if(this.documentTitle) document.title = this.documentTitle

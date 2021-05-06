@@ -27,28 +27,16 @@ query($query:String!,$after:String){
 
 `
 
-export const GRAPHQL_ORG_PINNED_REPOS = `
+export const GRAPHQL_ORG_PINNED_PEOPLE = `
 query($login:String!){
   organization(login: $login) {
-    pinnableItems(types: REPOSITORY, first: 6) {
+    membersWithRole(first: 20) {
       nodes {
-        ... on Repository {
-          id
-          name
-          owner{
-            login
-          }
-          stargazers {
-            totalCount
-          }
-          forkCount
-          primaryLanguage {
-            color
-            name
-          }
-          description
-        }
+        id
+        login
+        avatarUrl
       }
+      totalCount
     }
   }
 }

@@ -9,9 +9,6 @@
                     </Title>
                     
                     <transition-group name="fade-group" appear>
-                        <!-- <div key="loading" v-if="loading && pinnedRepositories.data.length == 0" class="text-center p-3 mb-3">
-                            Loading pinned repositories...
-                        </div> -->
 
                         <RepoListSkeleton v-if="loading && pinnedRepositories.data.length == 0" key="RepoListSkeleton"></RepoListSkeleton>
 
@@ -86,6 +83,7 @@
             }
         },
         created() {
+            
             this.network_getData()
         },
         methods: {

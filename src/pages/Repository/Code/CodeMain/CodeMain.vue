@@ -605,10 +605,10 @@
            /*  generateRouterMeta() {
                 return `${this.owner}/${this.repo}/${this.currentRef}`
             }, */
-            routeResetHook(to,from){
+            /* routeResetHook(to,from){
                 if(to.path.indexOf(from.path) == 0 || from.path.indexOf(to.path) == 0) return
                 Object.assign(this.$data,this.$options.data())
-            },
+            }, */
             showContents() {
                 this.contents.show = true
             },

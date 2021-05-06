@@ -33,6 +33,7 @@ import WithTopNoticeWrapper from './WithTopNoticeWrapper'
 import {SkeletonRectangle,SkeletonCircle} from './ComponentSkeleton'
 import StarBtn from './StarBtn.vue'
 import FollowBtn from './FollowBtn.vue'
+import RepoWeeklyCommitPolyline from './RepoWeeklyCommitPolyline.vue'
 export {
     Button,
     BaseHeader,
@@ -91,4 +92,5 @@ export {
     SkeletonCircle,
     StarBtn,
     FollowBtn,
+    RepoWeeklyCommitPolyline
 }

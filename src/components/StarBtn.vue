@@ -32,7 +32,7 @@ export default {
     computed: {
         ...mapState({
             graphqlData(state) {
-                return state.graphqlData.nodes.filter(i => i.name == this.repoProp && i.owner.login == this.ownerProp)[0] || {}
+                return state.graphqlData.nodes.filter(i => i.name == this.repoProp && i.owner && i.owner.login == this.ownerProp)[0] || {}
             }
         }),
         viewerHasStarred() {

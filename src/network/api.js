@@ -456,3 +456,4 @@ export const API_COMMIT_COMMENTS = payload => {
     return  `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/commits/${payload.sha}/comments?${query}`
 }
 
+export const API_WEEKLY_COMMIT_COUNT = payload => `${GITHUB_REST_API_BASE}/repos/${payload.owner}/${payload.repo}/stats/participation`

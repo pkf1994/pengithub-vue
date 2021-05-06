@@ -11,7 +11,8 @@
             return {
                 //dirty: false,
                 cacheRouterMeta: '',
-                cancelSources: []
+                cancelSources: [],
+                scrollToTopAfterUpdated: false
             }
         },
         computed: {
@@ -23,6 +24,7 @@
             next(async vm => {
                 //console.log('beforeRouteEnter')
                 if(vm.cacheRouterMeta && vm.cacheRouterMeta != vm.routerMeta){
+                    vm.scrollToTopAfterUpdated && window && window.scrollTo && window.scrollTo(0,0)
                     //window && window.scrollTo && window.scrollTo(0,0)
                     vm.routeResetHook()
                     vm.routeUpdateHook()             
@@ -35,6 +37,7 @@
             next()
             if(this.routerMeta != cacheRouterMeta) {
                 //window && window.scrollTo && window.scrollTo(0,0)
+                this.scrollToTopAfterUpdated && window && window.scrollTo && window.scrollTo(0,0)
                 if(this.resetBeforeUpdate) this.routeResetHook()
                 this.routeUpdateHook() 
             }
@@ -51,7 +54,7 @@
             routeUpdateHook(){
                 if(this.debug) console.log('routeUpdateHook')
                 //if(this.resetBeforeUpdate) this.routeResetHook()
-                this.network_getData()
+                this.network_getData &&  this.network_getData()
             },
             routeResetHook(){
                 if(this.debug) console.log('routeResetHook')

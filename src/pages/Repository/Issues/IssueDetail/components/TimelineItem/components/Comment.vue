@@ -10,7 +10,7 @@
                                 Copy link
                             </button>
                             <div  v-if="accessToken">
-                                <button class="popover-item btn-link dropdown-item" @click.stop="quoteReply" v-if="!issue().locked || viewerIsCollaborator().data">
+                                <button class="popover-item btn-link dropdown-item" @click.stop="quoteReply" v-if="!issue().locked || viewerCanManageIssue">
                                     Quote reply
                                 </button>
                                 <button class="popover-item btn-link dropdown-item">
@@ -26,8 +26,8 @@
                                 <button v-if="graphqlData.viewerCanDelete" @click.stop="network_deleteThisComment" class="popover-item btn-link hover-red dropdown-item" style="color:#d73a49">
                                     Delete
                                 </button>
-                                <div class="dropdown-divider" v-if="viewerIsCollaborator().data"></div> 
-                                <button v-if="viewerIsCollaborator().data" class="popover-item btn-link dropdown-item">
+                                <div class="dropdown-divider" v-if="viewerCanManageIssue"></div> 
+                                <button v-if="viewerCanManageIssue" class="popover-item btn-link dropdown-item">
                                     Report content
                                 </button>
                             </div>
@@ -143,7 +143,7 @@
                                     Copy link
                                 </button>
                                 <div  v-if="accessToken">
-                                    <button class="popover-item btn-link dropdown-item" @click.stop="quoteReply" v-if="!issue().locked || viewerIsCollaborator().data">
+                                    <button class="popover-item btn-link dropdown-item" @click.stop="quoteReply" v-if="!issue().locked || viewerCanManageIssue">
                                         Quote reply
                                     </button>
                                     <button class="popover-item btn-link dropdown-item">
@@ -159,8 +159,8 @@
                                     <button v-if="graphqlData.viewerCanDelete" class="popover-item btn-link text-red hover-red">
                                         Delete
                                     </button>
-                                    <div class="dropdown-divider" v-if="viewerIsCollaborator().data"></div> 
-                                    <button v-if="viewerIsCollaborator().data" class="popover-item btn-link dropdown-item">
+                                    <div class="dropdown-divider" v-if="viewerCanManageIssue"></div> 
+                                    <button v-if="viewerCanManageIssue" class="popover-item btn-link dropdown-item">
                                         Report content
                                     </button>
                                 </div>
@@ -252,7 +252,7 @@
     import {util_markdownParse} from '@/util'
     import {LoadingIconEx,AnimatedHeightWrapper,Popover,ImgWrapper,HyperlinkWrapper,SkeletonRectangle,SkeletonCircle,Modal} from '@/components'
     import * as api from '@/network/api'
-    import {authRequiredAjax,authRequiredGitHubGraphqlApiQuery,commonGet,authRequiredPost,cancelAndUpdateAxiosCancelTokenSource  } from '@/network'
+    import {authRequiredAjax,authRequiredGitHubGraphqlApiQuery,commonGet } from '@/network'
     import * as graphql from './graphql'
     import CommentEditPane from './CommentEditPane'
     import Reactions from '../../Reactions'
@@ -260,7 +260,7 @@
     import {mapActions,mapState} from 'vuex'
     import * as actionTypes from '@/store/modules/graphqlData/actionTypes'
     export default {
-        inject: ['commentExtraDataProvided','issue','viewerIsCollaborator','graphqlWritePermission','timelineItemDeletedHook'],
+        inject: ['commentExtraDataProvided','issue','graphqlWritePermission','timelineItemDeletedHook','viewerCanManageIssue'],
         data() {
             return {
                 showMinimized: false,
